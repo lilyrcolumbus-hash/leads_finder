@@ -31,70 +31,88 @@ st.set_page_config(
 )
 
 # ============================================
-# PREMIUM CSS - Clean & Modern Design
+# PREMIUM CSS - Ultra Modern Design System
 # ============================================
 st.markdown("""
 <style>
     /* ========== FONTS ========== */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
     /* ========== CSS VARIABLES ========== */
     :root {
-        --blue-50: #EFF6FF;
-        --blue-100: #DBEAFE;
-        --blue-500: #3B82F6;
-        --blue-600: #2563EB;
-        --blue-700: #1D4ED8;
-        --blue-900: #1E3A8A;
+        --primary-50: #EEF2FF;
+        --primary-100: #E0E7FF;
+        --primary-200: #C7D2FE;
+        --primary-500: #6366F1;
+        --primary-600: #4F46E5;
+        --primary-700: #4338CA;
 
-        --orange-50: #FFF7ED;
-        --orange-100: #FFEDD5;
-        --orange-500: #F97316;
-        --orange-600: #EA580C;
+        --accent-50: #FFF7ED;
+        --accent-100: #FFEDD5;
+        --accent-500: #F97316;
+        --accent-600: #EA580C;
 
-        --slate-50: #F8FAFC;
-        --slate-100: #F1F5F9;
-        --slate-200: #E2E8F0;
-        --slate-300: #CBD5E1;
-        --slate-400: #94A3B8;
-        --slate-500: #64748B;
-        --slate-600: #475569;
-        --slate-700: #334155;
-        --slate-800: #1E293B;
-        --slate-900: #0F172A;
+        --neutral-50: #FAFAFA;
+        --neutral-100: #F5F5F5;
+        --neutral-200: #E5E5E5;
+        --neutral-300: #D4D4D4;
+        --neutral-400: #A3A3A3;
+        --neutral-500: #737373;
+        --neutral-600: #525252;
+        --neutral-700: #404040;
+        --neutral-800: #262626;
+        --neutral-900: #171717;
 
-        --green-50: #F0FDF4;
-        --green-500: #22C55E;
-        --green-600: #16A34A;
+        --success-50: #ECFDF5;
+        --success-500: #10B981;
+        --success-600: #059669;
 
-        --red-50: #FEF2F2;
-        --red-500: #EF4444;
+        --warning-50: #FFFBEB;
+        --warning-500: #F59E0B;
+
+        --error-50: #FEF2F2;
+        --error-500: #EF4444;
 
         --white: #FFFFFF;
-        --radius: 16px;
-        --radius-sm: 12px;
-        --radius-xs: 8px;
+        --radius-xl: 20px;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+        --radius-xs: 6px;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     }
 
     /* ========== GLOBAL ========== */
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    .main {
+        background: linear-gradient(135deg, var(--neutral-50) 0%, #F8FAFC 100%) !important;
     }
 
     .main .block-container {
-        padding: 2rem 3rem 4rem 3rem !important;
-        max-width: 1200px !important;
+        padding: 2.5rem 3.5rem 4rem 3.5rem !important;
+        max-width: 1280px !important;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: 'Inter', sans-serif !important;
         font-weight: 700 !important;
-        letter-spacing: -0.02em !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.2 !important;
     }
 
     p, span, div, label {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: 'Inter', sans-serif !important;
+        letter-spacing: -0.011em !important;
     }
 
     /* Hide Streamlit elements */
@@ -103,7 +121,8 @@ st.markdown("""
 
     /* ========== SIDEBAR ========== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, var(--slate-900) 0%, var(--slate-800) 100%) !important;
+        background: linear-gradient(180deg, #0A0A0F 0%, #111118 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.06) !important;
         padding: 0 !important;
     }
 
@@ -112,7 +131,7 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-        color: var(--slate-300) !important;
+        color: var(--neutral-400) !important;
     }
 
     /* Sidebar Radio Navigation */
@@ -121,60 +140,61 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stRadio > div {
-        gap: 4px !important;
-        padding: 0 16px !important;
+        gap: 2px !important;
+        padding: 0 12px !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div > label {
         background: transparent !important;
         border-radius: var(--radius-sm) !important;
-        padding: 14px 16px !important;
+        padding: 12px 14px !important;
         margin: 0 !important;
-        color: var(--slate-400) !important;
+        color: rgba(255,255,255,0.5) !important;
         font-weight: 500 !important;
-        font-size: 15px !important;
-        transition: all 0.15s ease !important;
+        font-size: 14px !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         border: none !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div > label:hover {
-        background: rgba(255,255,255,0.05) !important;
-        color: var(--white) !important;
+        background: rgba(255,255,255,0.04) !important;
+        color: rgba(255,255,255,0.9) !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-        background: rgba(59, 130, 246, 0.15) !important;
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%) !important;
         color: var(--white) !important;
         font-weight: 600 !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
     }
 
     /* ========== LOGO SECTION ========== */
     .logo-section {
-        padding: 28px 24px 20px 24px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        margin-bottom: 8px;
+        padding: 24px 20px 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        margin-bottom: 4px;
     }
 
     .logo-container {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 12px;
     }
 
     .logo-icon {
-        width: 44px;
-        height: 44px;
-        background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-500) 100%);
-        border-radius: 12px;
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, var(--primary-500) 0%, #818CF8 100%);
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
     }
 
     .logo-icon svg {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
 
     .logo-text {
@@ -183,53 +203,60 @@ st.markdown("""
 
     .logo-title {
         color: var(--white);
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
         margin: 0;
         line-height: 1.2;
     }
 
     .logo-subtitle {
-        color: var(--slate-500);
-        font-size: 12px;
+        color: rgba(255,255,255,0.35);
+        font-size: 11px;
         font-weight: 500;
         margin: 2px 0 0 0;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.1em;
     }
 
     /* ========== USER CARD ========== */
     .user-card {
-        margin: 16px;
-        padding: 16px;
-        background: rgba(255,255,255,0.03);
+        margin: 12px;
+        padding: 14px;
+        background: rgba(255,255,255,0.02);
         border-radius: var(--radius-sm);
-        border: 1px solid rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.04);
+        transition: all 0.2s ease;
+    }
+
+    .user-card:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.08);
     }
 
     .user-info {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
 
     .user-avatar {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 100%);
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--accent-500) 0%, #FB923C 100%);
+        border-radius: var(--radius-xs);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
         color: white;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
     }
 
     .user-details h4 {
-        color: var(--white);
-        font-size: 14px;
+        color: rgba(255,255,255,0.9);
+        font-size: 13px;
         font-weight: 600;
         margin: 0 0 2px 0;
     }
@@ -238,20 +265,30 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: linear-gradient(135deg, var(--green-500) 0%, var(--green-600) 100%);
+        background: linear-gradient(135deg, var(--success-500) 0%, #34D399 100%);
         color: white;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 700;
-        padding: 3px 8px;
+        padding: 2px 7px;
         border-radius: 20px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
+    }
+
+    /* ========== NAV LABEL ========== */
+    .nav-label {
+        padding: 20px 20px 8px 20px;
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.25);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
     }
 
     /* ========== SIDEBAR FOOTER ========== */
     .sidebar-footer {
-        padding: 20px 24px;
-        border-top: 1px solid rgba(255,255,255,0.06);
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255,255,255,0.04);
         margin-top: auto;
     }
 
@@ -259,34 +296,42 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 8px;
-        color: var(--slate-500);
-        font-size: 13px;
+        color: rgba(255,255,255,0.4);
+        font-size: 12px;
     }
 
     .status-dot {
-        width: 8px;
-        height: 8px;
-        background: var(--green-500);
+        width: 7px;
+        height: 7px;
+        background: var(--success-500);
         border-radius: 50%;
-        box-shadow: 0 0 8px var(--green-500);
+        box-shadow: 0 0 10px var(--success-500);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
 
     /* ========== PAGE HEADER ========== */
     .page-header {
-        margin-bottom: 32px;
+        margin-bottom: 36px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--neutral-200);
     }
 
     .page-header h1 {
-        color: var(--slate-900);
-        font-size: 32px;
+        color: var(--neutral-900);
+        font-size: 28px;
         font-weight: 800;
-        margin: 0 0 8px 0;
-        letter-spacing: -0.03em;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.035em;
     }
 
     .page-header p {
-        color: var(--slate-500);
-        font-size: 16px;
+        color: var(--neutral-500);
+        font-size: 15px;
         margin: 0;
         font-weight: 400;
     }
@@ -295,8 +340,8 @@ st.markdown("""
     .metrics-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 40px;
+        gap: 16px;
+        margin-bottom: 48px;
     }
 
     @media (max-width: 1000px) {
@@ -307,114 +352,133 @@ st.markdown("""
 
     .metric-card {
         background: var(--white);
-        border-radius: var(--radius);
-        padding: 24px;
-        border: 1px solid var(--slate-200);
-        transition: all 0.2s ease;
+        border-radius: var(--radius-lg);
+        padding: 20px 22px;
+        border: 1px solid var(--neutral-200);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
     }
 
     .metric-card:hover {
-        border-color: var(--blue-500);
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
-        transform: translateY(-2px);
+        border-color: var(--primary-200);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-4px);
     }
 
-    .metric-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--blue-500) 0%, var(--orange-500) 100%);
+    .metric-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 16px;
     }
 
     .metric-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 16px;
-        font-size: 22px;
+        font-size: 20px;
     }
 
-    .metric-icon.blue { background: var(--blue-50); }
-    .metric-icon.orange { background: var(--orange-50); }
-    .metric-icon.green { background: var(--green-50); }
+    .metric-icon.primary { background: var(--primary-50); }
+    .metric-icon.accent { background: var(--accent-50); }
+    .metric-icon.success { background: var(--success-50); }
+
+    .metric-trend {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        background: var(--success-50);
+        color: var(--success-600);
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 20px;
+    }
+
+    .metric-content {
+        margin-top: 4px;
+    }
 
     .metric-label {
-        color: var(--slate-500);
-        font-size: 13px;
+        color: var(--neutral-500);
+        font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 8px;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
     }
 
     .metric-value {
-        color: var(--slate-900);
-        font-size: 36px;
+        color: var(--neutral-900);
+        font-size: 32px;
         font-weight: 800;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
         line-height: 1;
+    }
+
+    .metric-footer {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--neutral-100);
     }
 
     .metric-tag {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        margin-top: 12px;
         padding: 4px 10px;
-        background: var(--green-50);
-        color: var(--green-600);
-        font-size: 12px;
+        background: var(--neutral-100);
+        color: var(--neutral-600);
+        font-size: 11px;
         font-weight: 600;
         border-radius: 20px;
     }
 
     /* ========== SECTION ========== */
     .section {
-        margin-bottom: 40px;
+        margin-bottom: 48px;
     }
 
     .section-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
     }
 
     .section-title {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
 
     .section-title h2 {
-        color: var(--slate-900);
-        font-size: 20px;
+        color: var(--neutral-900);
+        font-size: 18px;
         font-weight: 700;
         margin: 0;
+        letter-spacing: -0.02em;
     }
 
     .section-badge {
-        background: var(--blue-50);
-        color: var(--blue-600);
-        font-size: 12px;
+        background: var(--primary-50);
+        color: var(--primary-600);
+        font-size: 11px;
         font-weight: 600;
-        padding: 4px 12px;
+        padding: 4px 10px;
         border-radius: 20px;
+        letter-spacing: 0.02em;
     }
 
     /* ========== FEATURE CARDS ========== */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        gap: 14px;
     }
 
     @media (max-width: 900px) {
@@ -425,43 +489,46 @@ st.markdown("""
 
     .feature-card {
         background: var(--white);
-        border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        padding: 24px;
-        transition: all 0.2s ease;
+        border: 1px solid var(--neutral-200);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
     }
 
     .feature-card:hover {
-        border-color: var(--blue-300);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border-color: var(--primary-200);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
 
     .feature-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
+        width: 46px;
+        height: 46px;
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 16px;
-        font-size: 26px;
+        margin-bottom: 14px;
+        font-size: 22px;
     }
 
-    .feature-icon.reddit { background: #FF45001A; }
-    .feature-icon.hn { background: #FF66001A; }
-    .feature-icon.google { background: #4285F41A; }
-    .feature-icon.ph { background: #DA552F1A; }
+    .feature-icon.reddit { background: linear-gradient(135deg, #FF4500 0%, #FF6B35 100%); color: white; font-size: 18px; }
+    .feature-icon.hn { background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%); color: white; font-size: 18px; }
+    .feature-icon.google { background: linear-gradient(135deg, #4285F4 0%, #5B9CF4 100%); color: white; font-size: 18px; }
+    .feature-icon.ph { background: linear-gradient(135deg, #DA552F 0%, #E06B4D 100%); color: white; font-size: 18px; }
 
     .feature-title {
-        color: var(--slate-900);
-        font-size: 16px;
+        color: var(--neutral-900);
+        font-size: 15px;
         font-weight: 700;
-        margin: 0 0 6px 0;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.02em;
     }
 
     .feature-desc {
-        color: var(--slate-500);
-        font-size: 14px;
+        color: var(--neutral-500);
+        font-size: 13px;
         line-height: 1.5;
         margin: 0;
     }
@@ -470,95 +537,103 @@ st.markdown("""
     .steps-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        gap: 16px;
     }
 
     .step-card {
         background: var(--white);
-        border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        padding: 32px 24px;
+        border: 1px solid var(--neutral-200);
+        border-radius: var(--radius-lg);
+        padding: 28px 20px;
         text-align: center;
-        transition: all 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
     }
 
     .step-card:hover {
-        border-color: var(--blue-300);
-        transform: translateY(-2px);
+        border-color: var(--primary-200);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
     }
 
     .step-number {
-        width: 52px;
-        height: 52px;
-        background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-500) 100%);
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 20px auto;
+        margin: 0 auto 18px auto;
         color: white;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 800;
-        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
     }
 
     .step-title {
-        color: var(--slate-900);
-        font-size: 17px;
+        color: var(--neutral-900);
+        font-size: 16px;
         font-weight: 700;
-        margin: 0 0 8px 0;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.02em;
     }
 
     .step-desc {
-        color: var(--slate-500);
-        font-size: 14px;
+        color: var(--neutral-500);
+        font-size: 13px;
         line-height: 1.5;
         margin: 0;
     }
 
     /* ========== BUTTONS ========== */
     .stButton > button {
-        background: linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 100%) !important;
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: var(--radius-sm) !important;
-        padding: 14px 28px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 15px !important;
+        padding: 13px 26px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 14px !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35) !important;
-        transition: all 0.2s ease !important;
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        letter-spacing: -0.01em !important;
     }
 
     .stButton > button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45) !important;
+        box-shadow: 0 10px 24px rgba(99, 102, 241, 0.45) !important;
+    }
+
+    .stButton > button:active {
+        transform: translateY(0) !important;
     }
 
     /* ========== CHECKBOXES ========== */
     .stCheckbox {
         background: var(--white) !important;
-        border: 1px solid var(--slate-200) !important;
+        border: 1px solid var(--neutral-200) !important;
         border-radius: var(--radius-sm) !important;
-        padding: 16px 20px !important;
-        margin: 6px 0 !important;
-        transition: all 0.15s ease !important;
+        padding: 14px 18px !important;
+        margin: 4px 0 !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     .stCheckbox:hover {
-        border-color: var(--blue-400) !important;
-        background: var(--blue-50) !important;
+        border-color: var(--primary-300) !important;
+        background: var(--primary-50) !important;
     }
 
     .stCheckbox label {
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: 500 !important;
-        color: var(--slate-700) !important;
+        color: var(--neutral-700) !important;
     }
 
     /* ========== TABS ========== */
     .stTabs [data-baseweb="tab-list"] {
-        background: var(--slate-100) !important;
+        background: var(--neutral-100) !important;
         border-radius: var(--radius-sm) !important;
         padding: 4px !important;
         gap: 4px !important;
@@ -567,177 +642,185 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         border-radius: var(--radius-xs) !important;
         font-weight: 500 !important;
-        font-size: 14px !important;
-        padding: 12px 20px !important;
-        color: var(--slate-600) !important;
+        font-size: 13px !important;
+        padding: 10px 18px !important;
+        color: var(--neutral-600) !important;
+        transition: all 0.2s ease !important;
     }
 
     .stTabs [aria-selected="true"] {
         background: var(--white) !important;
-        color: var(--blue-600) !important;
+        color: var(--primary-600) !important;
         font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+        box-shadow: var(--shadow-sm) !important;
     }
 
     /* ========== DATA TABLE ========== */
     .stDataFrame {
-        border: 1px solid var(--slate-200) !important;
-        border-radius: var(--radius-sm) !important;
+        border: 1px solid var(--neutral-200) !important;
+        border-radius: var(--radius-md) !important;
         overflow: hidden !important;
     }
 
     /* ========== PROGRESS ========== */
     .stProgress > div > div > div {
-        background: linear-gradient(90deg, var(--blue-500) 0%, var(--orange-500) 100%) !important;
+        background: linear-gradient(90deg, var(--primary-500) 0%, var(--accent-500) 100%) !important;
+        border-radius: 10px !important;
     }
 
     /* ========== ALERTS ========== */
     .stSuccess, .stInfo, .stWarning, .stError {
         border-radius: var(--radius-sm) !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
+        border-left-width: 3px !important;
     }
 
     .stSuccess {
-        background: var(--green-50) !important;
-        border-left: 4px solid var(--green-500) !important;
+        background: var(--success-50) !important;
+        border-left-color: var(--success-500) !important;
     }
 
     .stInfo {
-        background: var(--blue-50) !important;
-        border-left: 4px solid var(--blue-500) !important;
+        background: var(--primary-50) !important;
+        border-left-color: var(--primary-500) !important;
     }
 
     /* ========== EMPTY STATE ========== */
     .empty-state {
         text-align: center;
-        padding: 60px 40px;
-        background: var(--slate-50);
-        border: 2px dashed var(--slate-200);
-        border-radius: var(--radius);
+        padding: 56px 40px;
+        background: linear-gradient(180deg, var(--neutral-50) 0%, var(--white) 100%);
+        border: 1px dashed var(--neutral-300);
+        border-radius: var(--radius-lg);
     }
 
     .empty-icon {
-        font-size: 56px;
-        margin-bottom: 20px;
-        opacity: 0.6;
+        font-size: 52px;
+        margin-bottom: 18px;
+        opacity: 0.5;
     }
 
     .empty-title {
-        color: var(--slate-900);
-        font-size: 20px;
+        color: var(--neutral-900);
+        font-size: 18px;
         font-weight: 700;
-        margin: 0 0 8px 0;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.02em;
     }
 
     .empty-desc {
-        color: var(--slate-500);
-        font-size: 15px;
-        margin: 0 0 24px 0;
+        color: var(--neutral-500);
+        font-size: 14px;
+        margin: 0 0 20px 0;
     }
 
     /* ========== API CARDS ========== */
     .api-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        gap: 14px;
     }
 
     .api-card {
         background: var(--white);
-        border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        padding: 24px;
+        border: 1px solid var(--neutral-200);
+        border-radius: var(--radius-lg);
+        padding: 20px;
         text-align: center;
-        transition: all 0.2s ease;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .api-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
 
     .api-card.connected {
-        border-color: var(--green-500);
-        background: linear-gradient(180deg, var(--white) 0%, var(--green-50) 100%);
+        border-color: var(--success-500);
+        background: linear-gradient(180deg, var(--white) 0%, var(--success-50) 100%);
     }
 
     .api-card.disconnected {
-        border-color: var(--slate-300);
+        border-color: var(--neutral-200);
     }
 
     .api-icon {
-        font-size: 32px;
-        margin-bottom: 12px;
+        font-size: 28px;
+        margin-bottom: 10px;
     }
 
     .api-name {
-        color: var(--slate-900);
-        font-size: 15px;
+        color: var(--neutral-900);
+        font-size: 14px;
         font-weight: 600;
         margin: 0 0 8px 0;
+        letter-spacing: -0.01em;
     }
 
     .api-status {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        font-size: 12px;
+        gap: 5px;
+        font-size: 11px;
         font-weight: 600;
-        padding: 4px 10px;
+        padding: 3px 9px;
         border-radius: 20px;
     }
 
     .api-status.connected {
-        background: var(--green-50);
-        color: var(--green-600);
+        background: var(--success-50);
+        color: var(--success-600);
     }
 
     .api-status.disconnected {
-        background: var(--slate-100);
-        color: var(--slate-500);
+        background: var(--neutral-100);
+        color: var(--neutral-500);
     }
 
     /* ========== TAGS ========== */
     .tags-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
     }
 
     .tag {
-        background: var(--blue-50);
-        color: var(--blue-700);
-        font-size: 13px;
+        background: var(--primary-50);
+        color: var(--primary-700);
+        font-size: 12px;
         font-weight: 500;
-        padding: 8px 14px;
+        padding: 6px 12px;
         border-radius: 20px;
-        border: 1px solid var(--blue-100);
-        transition: all 0.15s ease;
+        border: 1px solid var(--primary-100);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .tag:hover {
-        background: var(--blue-600);
+        background: var(--primary-600);
         color: white;
-        border-color: var(--blue-600);
+        border-color: var(--primary-600);
+        transform: translateY(-1px);
     }
 
     /* ========== LOADING ========== */
     .loading-box {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 18px 20px;
-        background: var(--slate-50);
+        gap: 12px;
+        padding: 16px 18px;
+        background: var(--neutral-50);
         border-radius: var(--radius-sm);
+        border: 1px solid var(--neutral-200);
         margin: 8px 0;
     }
 
     .spinner {
-        width: 22px;
-        height: 22px;
-        border: 3px solid var(--slate-200);
-        border-top-color: var(--blue-500);
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--neutral-200);
+        border-top-color: var(--primary-500);
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin 0.7s linear infinite;
     }
 
     @keyframes spin {
@@ -745,19 +828,19 @@ st.markdown("""
     }
 
     .loading-text {
-        color: var(--slate-700);
-        font-size: 15px;
+        color: var(--neutral-700);
+        font-size: 14px;
         font-weight: 500;
     }
 
     /* ========== RESULTS ========== */
     .results-box {
         display: flex;
-        gap: 32px;
-        padding: 24px;
-        background: var(--green-50);
-        border: 1px solid var(--green-500);
-        border-radius: var(--radius);
+        gap: 28px;
+        padding: 22px 24px;
+        background: linear-gradient(135deg, var(--success-50) 0%, #D1FAE5 100%);
+        border: 1px solid var(--success-500);
+        border-radius: var(--radius-lg);
         margin: 16px 0;
     }
 
@@ -766,57 +849,102 @@ st.markdown("""
     }
 
     .result-value {
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 800;
         line-height: 1;
+        letter-spacing: -0.03em;
     }
 
-    .result-value.green { color: var(--green-600); }
-    .result-value.blue { color: var(--blue-600); }
-    .result-value.orange { color: var(--orange-600); }
+    .result-value.green { color: var(--success-600); }
+    .result-value.blue { color: var(--primary-600); }
+    .result-value.orange { color: var(--accent-600); }
 
     .result-label {
-        color: var(--slate-600);
-        font-size: 12px;
+        color: var(--neutral-600);
+        font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-top: 6px;
+        letter-spacing: 0.06em;
+        margin-top: 5px;
     }
 
     /* ========== STATS BAR ========== */
     .stats-bar {
         display: flex;
-        gap: 40px;
-        padding: 20px 0;
+        gap: 36px;
+        padding: 18px 0;
         margin-bottom: 24px;
-        border-bottom: 1px solid var(--slate-200);
+        border-bottom: 1px solid var(--neutral-200);
     }
 
     .stat-item {
         display: flex;
         align-items: baseline;
-        gap: 8px;
+        gap: 6px;
     }
 
     .stat-value {
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 800;
-        color: var(--slate-900);
+        color: var(--neutral-900);
+        letter-spacing: -0.03em;
     }
 
     .stat-label {
-        font-size: 15px;
-        color: var(--slate-500);
+        font-size: 14px;
+        color: var(--neutral-500);
     }
 
     /* ========== EXPANDER ========== */
     .streamlit-expanderHeader {
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: 600 !important;
         background: var(--white) !important;
-        border: 1px solid var(--slate-200) !important;
+        border: 1px solid var(--neutral-200) !important;
         border-radius: var(--radius-sm) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .streamlit-expanderHeader:hover {
+        border-color: var(--primary-300) !important;
+        background: var(--primary-50) !important;
+    }
+
+    /* ========== SELECT BOX ========== */
+    .stSelectbox > div > div {
+        background: var(--white) !important;
+        border: 1px solid var(--neutral-200) !important;
+        border-radius: var(--radius-sm) !important;
+        font-size: 14px !important;
+    }
+
+    .stSelectbox > div > div:hover {
+        border-color: var(--primary-300) !important;
+    }
+
+    /* ========== SPINNER ========== */
+    .stSpinner > div {
+        border-top-color: var(--primary-500) !important;
+    }
+
+    /* ========== SCROLLBAR ========== */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--neutral-100);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--neutral-300);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--neutral-400);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -842,15 +970,15 @@ def render_sidebar():
         <div class="logo-section">
             <div class="logo-container">
                 <div class="logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                        <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
-                        <line x1="12" y1="22" x2="12" y2="15.5"/>
-                        <polyline points="22,8.5 12,15.5 2,8.5"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
                     </svg>
                 </div>
                 <div class="logo-text">
                     <p class="logo-title">LeadGen Pro</p>
-                    <p class="logo-subtitle">Smart Prospecting</p>
+                    <p class="logo-subtitle">Prospecting AI</p>
                 </div>
             </div>
         </div>
@@ -868,6 +996,9 @@ def render_sidebar():
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+        # Nav Label
+        st.markdown('<div class="nav-label">Menu Principal</div>', unsafe_allow_html=True)
 
         # Navigation
         page = st.radio(
@@ -906,32 +1037,79 @@ def show_dashboard():
     qualified_count = len(st.session_state.filtered_leads)
     keywords_count = len(settings.pain_keywords)
     sources_count = sum([1 for x in [True, True, bool(settings.google_api_key), True] if x])
+    conv_rate = int((qualified_count / leads_count * 100)) if leads_count > 0 else 0
 
     st.markdown(f"""
     <div class="metrics-grid">
         <div class="metric-card">
-            <div class="metric-icon blue">👥</div>
-            <div class="metric-label">Leads Encontrados</div>
-            <div class="metric-value">{leads_count}</div>
-            <div class="metric-tag">Esta sesion</div>
+            <div class="metric-header">
+                <div class="metric-icon primary">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Leads Encontrados</div>
+                <div class="metric-value">{leads_count}</div>
+            </div>
+            <div class="metric-footer">
+                <span class="metric-tag">Esta sesion</span>
+            </div>
         </div>
         <div class="metric-card">
-            <div class="metric-icon green">✓</div>
-            <div class="metric-label">Calificados</div>
-            <div class="metric-value">{qualified_count}</div>
-            <div class="metric-tag">Listos para CRM</div>
+            <div class="metric-header">
+                <div class="metric-icon success">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <span class="metric-trend">+{conv_rate}%</span>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Calificados</div>
+                <div class="metric-value">{qualified_count}</div>
+            </div>
+            <div class="metric-footer">
+                <span class="metric-tag">Listos para CRM</span>
+            </div>
         </div>
         <div class="metric-card">
-            <div class="metric-icon orange">⚡</div>
-            <div class="metric-label">Keywords</div>
-            <div class="metric-value">{keywords_count}</div>
-            <div class="metric-tag">Activos</div>
+            <div class="metric-header">
+                <div class="metric-icon accent">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Keywords</div>
+                <div class="metric-value">{keywords_count}</div>
+            </div>
+            <div class="metric-footer">
+                <span class="metric-tag">Activos</span>
+            </div>
         </div>
         <div class="metric-card">
-            <div class="metric-icon blue">🔗</div>
-            <div class="metric-label">Fuentes</div>
-            <div class="metric-value">{sources_count}/4</div>
-            <div class="metric-tag">Conectadas</div>
+            <div class="metric-header">
+                <div class="metric-icon primary">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Fuentes</div>
+                <div class="metric-value">{sources_count}/4</div>
+            </div>
+            <div class="metric-footer">
+                <span class="metric-tag">Conectadas</span>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -947,22 +1125,41 @@ def show_dashboard():
         </div>
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon reddit">📱</div>
+                <div class="feature-icon reddit">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <circle cx="9" cy="12" r="1.5"/>
+                        <circle cx="15" cy="12" r="1.5"/>
+                        <path d="M12 16c-1.5 0-3-.5-3-1.5s1.5-1 3-1 3 .5 3 1.5-1.5 1-3 1z"/>
+                    </svg>
+                </div>
                 <h3 class="feature-title">Reddit</h3>
                 <p class="feature-desc">Subreddits de negocios y emprendedores</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon hn">🔥</div>
+                <div class="feature-icon hn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                        <text x="6" y="18" font-size="16" font-weight="bold">Y</text>
+                    </svg>
+                </div>
                 <h3 class="feature-title">Hacker News</h3>
                 <p class="feature-desc">Startups y founders tech</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon google">🔍</div>
+                <div class="feature-icon google">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                </div>
                 <h3 class="feature-title">Google</h3>
                 <p class="feature-desc">Busquedas especificas</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon ph">🚀</div>
+                <div class="feature-icon ph">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h4c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2v4z"/>
+                    </svg>
+                </div>
                 <h3 class="feature-title">Product Hunt</h3>
                 <p class="feature-desc">Comunidad de productos</p>
             </div>
@@ -1256,38 +1453,69 @@ def show_analytics():
 
     with HubSpotCRM() as crm:
         if not crm.is_configured():
-            col1, col2, col3 = st.columns(3)
+            rate = (len(st.session_state.filtered_leads) / len(st.session_state.leads) * 100) if st.session_state.leads else 0
 
-            with col1:
-                st.markdown(f"""
+            st.markdown(f"""
+            <div class="metrics-grid" style="grid-template-columns: repeat(3, 1fr);">
                 <div class="metric-card">
-                    <div class="metric-icon blue">👥</div>
-                    <div class="metric-label">Encontrados</div>
-                    <div class="metric-value">{len(st.session_state.leads)}</div>
+                    <div class="metric-header">
+                        <div class="metric-icon primary">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-label">Encontrados</div>
+                        <div class="metric-value">{len(st.session_state.leads)}</div>
+                    </div>
                 </div>
-                """, unsafe_allow_html=True)
-
-            with col2:
-                st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-icon green">✓</div>
-                    <div class="metric-label">Calificados</div>
-                    <div class="metric-value">{len(st.session_state.filtered_leads)}</div>
+                    <div class="metric-header">
+                        <div class="metric-icon success">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-label">Calificados</div>
+                        <div class="metric-value">{len(st.session_state.filtered_leads)}</div>
+                    </div>
                 </div>
-                """, unsafe_allow_html=True)
-
-            with col3:
-                rate = (len(st.session_state.filtered_leads) / len(st.session_state.leads) * 100) if st.session_state.leads else 0
-                st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-icon orange">📊</div>
-                    <div class="metric-label">Tasa</div>
-                    <div class="metric-value">{rate:.0f}%</div>
+                    <div class="metric-header">
+                        <div class="metric-icon accent">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+                                <path d="M18 20V10"/>
+                                <path d="M12 20V4"/>
+                                <path d="M6 20v-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-label">Tasa Conv.</div>
+                        <div class="metric-value">{rate:.0f}%</div>
+                    </div>
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
 
             if st.session_state.leads:
                 st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
+                st.markdown("""
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Por Fuente</h2>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 counts = {}
                 for l in st.session_state.leads:
                     counts[l.source.value] = counts.get(l.source.value, 0) + 1
@@ -1299,18 +1527,79 @@ def show_analytics():
                 stats = crm.get_statistics()
 
             if "error" not in stats:
-                col1, col2, col3, col4 = st.columns(4)
-
-                with col1:
-                    st.metric("Total Leads", stats["total_leads"])
-                with col2:
-                    st.metric("Conversion", f"{stats['conversion_rate']}%")
-                with col3:
-                    st.metric("Win Rate", f"{stats['win_rate']}%")
-                with col4:
-                    st.metric("Ganados", stats["by_stage"].get("closed_won", 0))
+                st.markdown(f"""
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon primary">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Total Leads</div>
+                            <div class="metric-value">{stats["total_leads"]}</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon accent">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Conversion</div>
+                            <div class="metric-value">{stats['conversion_rate']}%</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon success">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                    <path d="M12 20V10"/>
+                                    <path d="M18 20V4"/>
+                                    <path d="M6 20v-4"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Win Rate</div>
+                            <div class="metric-value">{stats['win_rate']}%</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon success">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                    <circle cx="12" cy="8" r="7"/>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-label">Ganados</div>
+                            <div class="metric-value">{stats["by_stage"].get("closed_won", 0)}</div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 if stats["by_stage"]:
+                    st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <h2>Por Etapa</h2>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.bar_chart(stats["by_stage"])
 
 
