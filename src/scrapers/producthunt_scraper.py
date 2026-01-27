@@ -2,8 +2,8 @@
 
 import time
 from typing import List
+from xml.etree import ElementTree as ET
 
-import feedparser
 from bs4 import BeautifulSoup
 
 from src.config import settings
@@ -98,9 +98,9 @@ class ProductHuntScraper(BaseScraper):
 
         try:
             response = self.fetch_url(self.RSS_URL)
-            feed = feedparser.parse(response.text)
+            entries = self._parse_rss(response.text)
 
-            for entry in feed.entries:
+            for entry in entries:
                 lead = self._entry_to_lead(entry)
                 if lead:
                     leads.append(lead)
@@ -110,6 +110,43 @@ class ProductHuntScraper(BaseScraper):
             raise
 
         return leads
+
+    def _parse_rss(self, xml_content: str) -> List[dict]:
+        """Parse RSS XML feed into list of entries."""
+        entries = []
+        try:
+            root = ET.fromstring(xml_content)
+
+            # RSS 2.0 format
+            for item in root.findall('.//item'):
+                entry_data = {
+                    'title': item.findtext('title', ''),
+                    'link': item.findtext('link', ''),
+                    'summary': item.findtext('description', ''),
+                    'author': item.findtext('author', '') or item.findtext('{http://purl.org/dc/elements/1.1/}creator', ''),
+                }
+                entries.append(entry_data)
+
+            # Also try Atom format
+            ns = {'atom': 'http://www.w3.org/2005/Atom'}
+            for entry in root.findall('atom:entry', ns):
+                title_el = entry.find('atom:title', ns)
+                link_el = entry.find('atom:link', ns)
+                summary_el = entry.find('atom:summary', ns) or entry.find('atom:content', ns)
+                author_el = entry.find('atom:author/atom:name', ns)
+
+                entry_data = {
+                    'title': title_el.text if title_el is not None else '',
+                    'link': link_el.get('href', '') if link_el is not None else '',
+                    'summary': summary_el.text if summary_el is not None else '',
+                    'author': author_el.text if author_el is not None else '',
+                }
+                entries.append(entry_data)
+
+        except ET.ParseError as e:
+            self.logger.debug(f"XML parse error: {e}")
+
+        return entries
 
     def _scrape_topic(self, topic: str) -> List[Lead]:
         """

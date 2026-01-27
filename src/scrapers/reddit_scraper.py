@@ -2,8 +2,7 @@
 
 import time
 from typing import List
-
-import feedparser
+from xml.etree import ElementTree as ET
 
 from src.config import settings
 from src.utils.models import Lead, LeadBatch, LeadSource
@@ -15,6 +14,11 @@ class RedditScraper(BaseScraper):
 
     source = LeadSource.REDDIT
     BASE_URL = "https://www.reddit.com/r/{subreddit}/search.rss"
+
+    # XML namespaces for Atom feeds
+    NAMESPACES = {
+        'atom': 'http://www.w3.org/2005/Atom',
+    }
 
     def __init__(self):
         super().__init__()
@@ -87,9 +91,9 @@ class RedditScraper(BaseScraper):
 
         try:
             response = self.fetch_url(url)
-            feed = feedparser.parse(response.text)
+            entries = self._parse_rss(response.text)
 
-            for entry in feed.entries:
+            for entry in entries:
                 lead = self._entry_to_lead(entry, subreddit)
                 if lead and lead.keywords_matched:
                     leads.append(lead)
@@ -106,9 +110,9 @@ class RedditScraper(BaseScraper):
 
         try:
             response = self.fetch_url(url)
-            feed = feedparser.parse(response.text)
+            entries = self._parse_rss(response.text)
 
-            for entry in feed.entries:
+            for entry in entries:
                 lead = self._entry_to_lead(entry, subreddit)
                 if lead and lead.keywords_matched:
                     leads.append(lead)
@@ -118,12 +122,55 @@ class RedditScraper(BaseScraper):
 
         return leads
 
+    def _parse_rss(self, xml_content: str) -> List[dict]:
+        """Parse RSS/Atom XML feed into list of entries."""
+        entries = []
+        try:
+            root = ET.fromstring(xml_content)
+
+            # Handle Atom feed format (Reddit uses this)
+            for entry in root.findall('atom:entry', self.NAMESPACES):
+                entry_data = {
+                    'title': self._get_text(entry, 'atom:title'),
+                    'link': self._get_attr(entry, 'atom:link', 'href'),
+                    'id': self._get_text(entry, 'atom:id'),
+                    'author': self._get_text(entry, 'atom:author/atom:name'),
+                    'content': self._get_text(entry, 'atom:content'),
+                }
+                entries.append(entry_data)
+
+            # Also try RSS 2.0 format
+            for item in root.findall('.//item'):
+                entry_data = {
+                    'title': item.findtext('title', ''),
+                    'link': item.findtext('link', ''),
+                    'id': item.findtext('guid', ''),
+                    'author': item.findtext('author', ''),
+                    'content': item.findtext('description', ''),
+                }
+                entries.append(entry_data)
+
+        except ET.ParseError as e:
+            self.logger.debug(f"XML parse error: {e}")
+
+        return entries
+
+    def _get_text(self, element: ET.Element, path: str) -> str:
+        """Get text from XML element by path."""
+        el = element.find(path, self.NAMESPACES)
+        return el.text if el is not None and el.text else ''
+
+    def _get_attr(self, element: ET.Element, path: str, attr: str) -> str:
+        """Get attribute from XML element by path."""
+        el = element.find(path, self.NAMESPACES)
+        return el.get(attr, '') if el is not None else ''
+
     def _entry_to_lead(self, entry: dict, subreddit: str) -> Lead | None:
         """
         Convert RSS entry to Lead object.
 
         Args:
-            entry: feedparser entry
+            entry: Parsed RSS entry dict
             subreddit: Name of subreddit
 
         Returns:
@@ -131,7 +178,7 @@ class RedditScraper(BaseScraper):
         """
         try:
             title = entry.get("title", "")
-            content = entry.get("summary", "") or entry.get("content", [{}])[0].get("value", "")
+            content = entry.get("content", "")
             full_text = f"{title} {content}"
 
             # Check for pain keywords
