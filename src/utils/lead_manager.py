@@ -138,33 +138,104 @@ class LeadManager:
 
             for row in reader:
                 try:
-                    # Create a hash for deduplication
-                    title = row.get('title', row.get('Title', ''))
-                    url = row.get('url', row.get('URL', row.get('Url', '')))
-                    author = row.get('author', row.get('Author', row.get('name', row.get('Name', ''))))
-                    email = row.get('email', row.get('Email', ''))
+                    # Normalize keys to lowercase
+                    row_lower = {k.lower().strip(): v for k, v in row.items()}
 
-                    if not title and not url:
+                    # Contact info
+                    title = row_lower.get('title', row_lower.get('titulo', row_lower.get('name', row_lower.get('nombre', ''))))
+                    url = row_lower.get('url', row_lower.get('link', row_lower.get('website', '')))
+                    author = row_lower.get('author', row_lower.get('autor', row_lower.get('contact', row_lower.get('contacto', ''))))
+                    email = row_lower.get('email', row_lower.get('correo', row_lower.get('e-mail', row_lower.get('mail', ''))))
+                    phone = row_lower.get('phone', row_lower.get('telefono', row_lower.get('tel', row_lower.get('mobile', row_lower.get('celular', '')))))
+
+                    # Company info
+                    company = row_lower.get('company', row_lower.get('empresa', row_lower.get('organization', '')))
+                    website = row_lower.get('website', row_lower.get('sitio web', row_lower.get('web', '')))
+
+                    # Professional info
+                    position = row_lower.get('position', row_lower.get('cargo', row_lower.get('job title', row_lower.get('puesto', ''))))
+                    linkedin = row_lower.get('linkedin', row_lower.get('linkedin url', ''))
+                    twitter_handle = row_lower.get('twitter', row_lower.get('x', ''))
+
+                    # Location
+                    location = row_lower.get('location', row_lower.get('ubicacion', row_lower.get('city', row_lower.get('ciudad', ''))))
+                    country = row_lower.get('country', row_lower.get('pais', ''))
+
+                    # Business info
+                    industry = row_lower.get('industry', row_lower.get('industria', row_lower.get('sector', '')))
+                    employees = row_lower.get('employees', row_lower.get('empleados', ''))
+                    revenue = row_lower.get('revenue', row_lower.get('ingresos', ''))
+
+                    # Content
+                    content = row_lower.get('content', row_lower.get('contenido', row_lower.get('description', row_lower.get('descripcion', ''))))
+                    notes = row_lower.get('notes', row_lower.get('notas', row_lower.get('comments', '')))
+
+                    # Scoring
+                    pain_score_raw = row_lower.get('pain_score', row_lower.get('pain', row_lower.get('score', row_lower.get('priority', 0))))
+                    status = row_lower.get('status', row_lower.get('estado', 'new'))
+                    tags_raw = row_lower.get('tags', row_lower.get('etiquetas', ''))
+
+                    if not title and not url and not email and not phone and not company:
                         errors += 1
                         continue
 
-                    unique_string = f"{url}|{title.lower().strip()}|{author.lower().strip()}"
+                    unique_string = f"{url}|{str(title).lower().strip()}|{str(author).lower().strip()}|{str(email).lower().strip()}"
                     lead_hash = hashlib.md5(unique_string.encode()).hexdigest()
 
                     if lead_hash in self._seen_hashes:
                         duplicates += 1
                         continue
 
+                    # Parse pain score
+                    try:
+                        pain_value = int(float(pain_score_raw)) if pain_score_raw else 0
+                    except (ValueError, TypeError):
+                        pain_value = 0
+
+                    # Parse tags
+                    tags_list = []
+                    if tags_raw:
+                        if isinstance(tags_raw, str):
+                            tags_list = [t.strip() for t in tags_raw.split(',') if t.strip()]
+
                     # Create lead dict
                     lead_dict = {
-                        'title': title,
-                        'author': author,
-                        'email': email,
-                        'url': url,
-                        'content': row.get('content', row.get('Content', row.get('description', row.get('Description', '')))),
-                        'source': row.get('source', row.get('Source', 'imported')),
-                        'industry': row.get('industry', row.get('Industry', '')),
-                        'pain_score': int(row.get('pain_score', row.get('Pain', row.get('pain', 0))) or 0),
+                        # Contact info
+                        'title': str(title) if title else '',
+                        'author': str(author) if author else '',
+                        'email': str(email) if email else '',
+                        'phone': str(phone) if phone else '',
+                        'url': str(url) if url else '',
+
+                        # Company info
+                        'company': str(company) if company else '',
+                        'website': str(website) if website else '',
+
+                        # Professional info
+                        'position': str(position) if position else '',
+                        'linkedin': str(linkedin) if linkedin else '',
+                        'twitter': str(twitter_handle) if twitter_handle else '',
+
+                        # Location
+                        'location': str(location) if location else '',
+                        'country': str(country) if country else '',
+
+                        # Business info
+                        'industry': str(industry) if industry else '',
+                        'employees': str(employees) if employees else '',
+                        'revenue': str(revenue) if revenue else '',
+
+                        # Content
+                        'content': str(content) if content else '',
+                        'notes': str(notes) if notes else '',
+
+                        # Scoring & Status
+                        'pain_score': pain_value,
+                        'status': str(status) if status else 'new',
+                        'tags': tags_list,
+
+                        # Meta
+                        'source': row_lower.get('source', 'csv_import'),
                         'hash': lead_hash,
                         'saved_at': datetime.now().isoformat(),
                         'imported': True
@@ -275,21 +346,48 @@ class LeadManager:
 
                     for _, row in df.iterrows():
                         try:
-                            # Try to find common column names
-                            title = self._get_column_value(row, ['title', 'titulo', 'name', 'nombre', 'company', 'empresa'])
-                            url = self._get_column_value(row, ['url', 'link', 'website', 'sitio', 'web'])
-                            author = self._get_column_value(row, ['author', 'autor', 'contact', 'contacto', 'name', 'nombre', 'person', 'persona'])
-                            email = self._get_column_value(row, ['email', 'correo', 'e-mail', 'mail'])
-                            content = self._get_column_value(row, ['content', 'contenido', 'description', 'descripcion', 'notes', 'notas'])
-                            industry = self._get_column_value(row, ['industry', 'industria', 'sector', 'category', 'categoria'])
-                            pain_score = self._get_column_value(row, ['pain_score', 'pain', 'score', 'puntuacion', 'priority', 'prioridad'])
+                            # Try to find common column names - Contact Info
+                            title = self._get_column_value(row, ['title', 'titulo', 'name', 'nombre', 'company', 'empresa', 'business', 'negocio'])
+                            url = self._get_column_value(row, ['url', 'link', 'website', 'sitio', 'web', 'pagina'])
+                            author = self._get_column_value(row, ['author', 'autor', 'contact', 'contacto', 'person', 'persona', 'contact name', 'nombre contacto'])
+                            email = self._get_column_value(row, ['email', 'correo', 'e-mail', 'mail', 'email address', 'correo electronico'])
+
+                            # Phone numbers
+                            phone = self._get_column_value(row, ['phone', 'telefono', 'tel', 'telephone', 'mobile', 'movil', 'celular', 'cell', 'phone number', 'numero telefono', 'whatsapp'])
+
+                            # Company info
+                            company = self._get_column_value(row, ['company', 'empresa', 'organization', 'organizacion', 'business', 'negocio', 'company name', 'nombre empresa'])
+
+                            # Professional info
+                            position = self._get_column_value(row, ['position', 'cargo', 'job title', 'titulo', 'role', 'rol', 'puesto', 'job', 'trabajo', 'title'])
+                            linkedin = self._get_column_value(row, ['linkedin', 'linkedin url', 'linkedin profile', 'perfil linkedin'])
+                            twitter_handle = self._get_column_value(row, ['twitter', 'x', 'twitter url', 'twitter handle', '@'])
+
+                            # Location
+                            location = self._get_column_value(row, ['location', 'ubicacion', 'city', 'ciudad', 'address', 'direccion', 'place', 'lugar'])
+                            country = self._get_column_value(row, ['country', 'pais', 'nation', 'nacion'])
+
+                            # Business info
+                            industry = self._get_column_value(row, ['industry', 'industria', 'sector', 'category', 'categoria', 'vertical', 'niche', 'nicho'])
+                            employees = self._get_column_value(row, ['employees', 'empleados', 'team size', 'tamano equipo', 'headcount', 'staff'])
+                            revenue = self._get_column_value(row, ['revenue', 'ingresos', 'sales', 'ventas', 'facturacion', 'billing'])
+                            website = self._get_column_value(row, ['website', 'sitio web', 'web', 'homepage', 'pagina web', 'domain', 'dominio'])
+
+                            # Content
+                            content = self._get_column_value(row, ['content', 'contenido', 'description', 'descripcion', 'bio', 'about', 'acerca'])
+                            notes = self._get_column_value(row, ['notes', 'notas', 'comments', 'comentarios', 'observations', 'observaciones'])
+
+                            # Scoring
+                            pain_score = self._get_column_value(row, ['pain_score', 'pain', 'score', 'puntuacion', 'priority', 'prioridad', 'rating', 'calificacion'])
+                            status = self._get_column_value(row, ['status', 'estado', 'stage', 'etapa', 'lead status', 'estado lead'])
+                            tags = self._get_column_value(row, ['tags', 'etiquetas', 'labels', 'categories', 'categorias'])
 
                             # Skip empty rows
-                            if not title and not url and not email:
+                            if not title and not url and not email and not phone and not company:
                                 continue
 
                             # Generate hash for deduplication
-                            unique_string = f"{url}|{str(title).lower().strip()}|{str(author).lower().strip()}"
+                            unique_string = f"{url}|{str(title).lower().strip()}|{str(author).lower().strip()}|{str(email).lower().strip()}"
                             lead_hash = hashlib.md5(unique_string.encode()).hexdigest()
 
                             if lead_hash in self._seen_hashes:
@@ -302,15 +400,51 @@ class LeadManager:
                             except (ValueError, TypeError):
                                 pain_value = 0
 
+                            # Process tags
+                            tags_list = []
+                            if tags:
+                                if isinstance(tags, str):
+                                    tags_list = [t.strip() for t in tags.split(',') if t.strip()]
+                                elif isinstance(tags, list):
+                                    tags_list = tags
+
                             lead_dict = {
+                                # Contact info
                                 'title': str(title) if title else '',
                                 'author': str(author) if author else '',
                                 'email': str(email) if email else '',
+                                'phone': str(phone) if phone else '',
                                 'url': str(url) if url else '',
-                                'content': str(content) if content else '',
-                                'source': f'excel:{sheet_name}',
+
+                                # Company info
+                                'company': str(company) if company else '',
+                                'website': str(website) if website else '',
+
+                                # Professional info
+                                'position': str(position) if position else '',
+                                'linkedin': str(linkedin) if linkedin else '',
+                                'twitter': str(twitter_handle) if twitter_handle else '',
+
+                                # Location
+                                'location': str(location) if location else '',
+                                'country': str(country) if country else '',
+
+                                # Business info
                                 'industry': str(industry) if industry else '',
+                                'employees': str(employees) if employees else '',
+                                'revenue': str(revenue) if revenue else '',
+
+                                # Content
+                                'content': str(content) if content else '',
+                                'notes': str(notes) if notes else '',
+
+                                # Scoring & Status
                                 'pain_score': pain_value,
+                                'status': str(status) if status else 'new',
+                                'tags': tags_list,
+
+                                # Meta
+                                'source': f'excel:{sheet_name}',
                                 'hash': lead_hash,
                                 'saved_at': datetime.now().isoformat(),
                                 'imported': True,
@@ -441,33 +575,74 @@ class LeadManager:
 class CSVExporter:
     """Export leads to CSV format."""
 
+    # Complete field list for exports
+    EXPORT_FIELDS = [
+        # Contact info
+        'title', 'author', 'email', 'phone', 'url',
+        # Company info
+        'company', 'website',
+        # Professional info
+        'position', 'linkedin', 'twitter',
+        # Location
+        'location', 'country',
+        # Business info
+        'industry', 'employees', 'revenue',
+        # Scoring
+        'pain_score', 'urgency', 'status',
+        # Content
+        'content_preview', 'notes',
+        # Meta
+        'source', 'tags', 'saved_at'
+    ]
+
     @staticmethod
     def export_leads(leads: List[Lead]) -> str:
         """Export leads to CSV string."""
         output = io.StringIO()
 
-        fieldnames = [
-            'title', 'author', 'email', 'url', 'source', 'industry',
-            'pain_score', 'urgency', 'keywords_matched', 'content_preview',
-            'found_at'
-        ]
+        fieldnames = CSVExporter.EXPORT_FIELDS
 
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
 
         for lead in leads:
+            # Handle tags
+            tags_str = ''
+            if hasattr(lead, 'tags') and lead.tags:
+                tags_str = ', '.join(lead.tags) if isinstance(lead.tags, list) else str(lead.tags)
+
             writer.writerow({
+                # Contact info
                 'title': lead.title[:100] if lead.title else '',
-                'author': lead.author or '',
+                'author': getattr(lead, 'author', '') or getattr(lead, 'name', '') or '',
                 'email': lead.email or '',
+                'phone': getattr(lead, 'phone', '') or '',
                 'url': lead.url or '',
-                'source': lead.source.value if hasattr(lead.source, 'value') else str(lead.source),
+                # Company info
+                'company': getattr(lead, 'company', '') or '',
+                'website': getattr(lead, 'website', '') or '',
+                # Professional info
+                'position': getattr(lead, 'position', '') or '',
+                'linkedin': getattr(lead, 'linkedin', '') or '',
+                'twitter': getattr(lead, 'twitter', '') or '',
+                # Location
+                'location': getattr(lead, 'location', '') or '',
+                'country': getattr(lead, 'country', '') or '',
+                # Business info
                 'industry': lead.industry or '',
+                'employees': getattr(lead, 'employees', '') or '',
+                'revenue': getattr(lead, 'revenue', '') or '',
+                # Scoring
                 'pain_score': lead.pain_score,
                 'urgency': lead.urgency.value if hasattr(lead.urgency, 'value') else str(lead.urgency),
-                'keywords_matched': ', '.join(lead.keywords_matched[:5]) if lead.keywords_matched else '',
+                'status': getattr(lead, 'status', 'new') or 'new',
+                # Content
                 'content_preview': lead.content[:200] if lead.content else '',
-                'found_at': str(lead.found_at) if lead.found_at else ''
+                'notes': getattr(lead, 'notes', '') or '',
+                # Meta
+                'source': lead.source.value if hasattr(lead.source, 'value') else str(lead.source),
+                'tags': tags_str,
+                'saved_at': str(lead.found_at) if lead.found_at else ''
             })
 
         return output.getvalue()
@@ -477,33 +652,50 @@ class CSVExporter:
         """Export leads from dictionary format to CSV string."""
         output = io.StringIO()
 
-        fieldnames = [
-            'title', 'author', 'email', 'url', 'source', 'industry',
-            'pain_score', 'urgency', 'keywords_matched', 'content_preview',
-            'saved_at'
-        ]
+        fieldnames = CSVExporter.EXPORT_FIELDS
 
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
 
         for lead in leads:
-            keywords = lead.get('keywords_matched', [])
-            if isinstance(keywords, list):
-                keywords_str = ', '.join(keywords[:5])
+            # Handle tags
+            tags = lead.get('tags', [])
+            if isinstance(tags, list):
+                tags_str = ', '.join(tags)
             else:
-                keywords_str = str(keywords)
+                tags_str = str(tags) if tags else ''
 
             writer.writerow({
+                # Contact info
                 'title': str(lead.get('title', ''))[:100],
-                'author': lead.get('author', ''),
+                'author': lead.get('author', lead.get('name', '')),
                 'email': lead.get('email', ''),
+                'phone': lead.get('phone', ''),
                 'url': lead.get('url', ''),
-                'source': lead.get('source', ''),
+                # Company info
+                'company': lead.get('company', ''),
+                'website': lead.get('website', ''),
+                # Professional info
+                'position': lead.get('position', ''),
+                'linkedin': lead.get('linkedin', ''),
+                'twitter': lead.get('twitter', ''),
+                # Location
+                'location': lead.get('location', ''),
+                'country': lead.get('country', ''),
+                # Business info
                 'industry': lead.get('industry', ''),
+                'employees': lead.get('employees', ''),
+                'revenue': lead.get('revenue', ''),
+                # Scoring
                 'pain_score': lead.get('pain_score', 0),
                 'urgency': lead.get('urgency', ''),
-                'keywords_matched': keywords_str,
+                'status': lead.get('status', 'new'),
+                # Content
                 'content_preview': str(lead.get('content', ''))[:200],
+                'notes': lead.get('notes', ''),
+                # Meta
+                'source': lead.get('source', ''),
+                'tags': tags_str,
                 'saved_at': lead.get('saved_at', '')
             })
 

@@ -43,19 +43,33 @@ class Lead(BaseModel):
     phone: Optional[str] = Field(default=None, description="Phone number if available")
     website: Optional[str] = Field(default=None, description="Business website if found")
 
+    # Professional info
+    position: Optional[str] = Field(default=None, description="Job title/position")
+    linkedin: Optional[str] = Field(default=None, description="LinkedIn profile URL")
+    twitter: Optional[str] = Field(default=None, description="Twitter/X profile URL")
+
+    # Location
+    location: Optional[str] = Field(default=None, description="City, State, Country")
+    country: Optional[str] = Field(default=None, description="Country")
+    timezone: Optional[str] = Field(default=None, description="Timezone")
+
     # Content
     title: str = Field(description="Title of post or search result")
     content: str = Field(description="Full text content")
     url: str = Field(description="URL to the original content")
+    notes: Optional[str] = Field(default=None, description="Additional notes")
 
     # Classification
     industry: Optional[str] = Field(default=None, description="Detected industry category")
     business_size: Optional[str] = Field(default=None, description="Estimated business size")
+    revenue: Optional[str] = Field(default=None, description="Estimated revenue range")
+    employees: Optional[str] = Field(default=None, description="Number of employees")
 
     # Metadata
     keywords_matched: List[str] = Field(default_factory=list, description="Pain keywords found")
     urgency_keywords_matched: List[str] = Field(default_factory=list, description="Urgency keywords found")
     subreddit: Optional[str] = Field(default=None, description="Subreddit if from Reddit")
+    tags: List[str] = Field(default_factory=list, description="Custom tags")
 
     # Scoring
     pain_score: int = Field(default=0, description="Pain score 0-100")
@@ -70,6 +84,12 @@ class Lead(BaseModel):
     found_at: datetime = Field(default_factory=datetime.utcnow)
     sent_to_crm: bool = Field(default=False)
     hubspot_id: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default="new", description="Lead status: new, contacted, qualified, converted, lost")
+    last_contact: Optional[datetime] = Field(default=None, description="Last contact date")
+
+    # Custom fields
+    author: Optional[str] = Field(default=None, description="Author alias for compatibility")
+    posted_at: Optional[datetime] = Field(default=None, description="When content was posted")
 
     def __hash__(self):
         return hash(self.id)
