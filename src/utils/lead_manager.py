@@ -84,6 +84,8 @@ class LeadManager:
                 lead_dict = lead.model_dump()
                 lead_dict['hash'] = lead_hash
                 lead_dict['saved_at'] = datetime.now().isoformat()
+                # Set default CRM status for new leads
+                lead_dict['status'] = 'new'
                 # Convert datetime objects to strings
                 if lead_dict.get('found_at'):
                     lead_dict['found_at'] = str(lead_dict['found_at'])

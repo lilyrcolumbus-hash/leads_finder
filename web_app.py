@@ -1709,6 +1709,18 @@ def show_search():
         </div>
         """, unsafe_allow_html=True)
 
+        # Navigation buttons after search
+        with results:
+            nav_col1, nav_col2 = st.columns(2)
+            with nav_col1:
+                if st.button("📋 View in CRM", type="primary", use_container_width=True):
+                    st.session_state.nav_page = "CRM"
+                    st.rerun()
+            with nav_col2:
+                if st.button("📊 View All Leads", use_container_width=True):
+                    st.session_state.nav_page = "My Leads"
+                    st.rerun()
+
     # Preview
     if st.session_state.scraping_done and st.session_state.filtered_leads:
         st.markdown(f"""
