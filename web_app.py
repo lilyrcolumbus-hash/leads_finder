@@ -916,10 +916,81 @@ st.markdown("""
         border: 1px solid var(--neutral-200) !important;
         border-radius: var(--radius-sm) !important;
         font-size: 14px !important;
+        color: var(--neutral-800) !important;
     }
 
     .stSelectbox > div > div:hover {
         border-color: var(--primary-300) !important;
+    }
+
+    .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label {
+        color: var(--neutral-700) !important;
+    }
+
+    /* ========== TEXT INPUTS ========== */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea,
+    .stNumberInput > div > div > input {
+        background: var(--white) !important;
+        border: 1px solid var(--neutral-200) !important;
+        border-radius: var(--radius-sm) !important;
+        color: var(--neutral-800) !important;
+        font-size: 14px !important;
+    }
+
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus,
+    .stNumberInput > div > div > input:focus {
+        border-color: var(--primary-400) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    }
+
+    .stTextInput > div > div > input::placeholder,
+    .stTextArea > div > div > textarea::placeholder {
+        color: var(--neutral-400) !important;
+    }
+
+    /* ========== MULTISELECT ========== */
+    .stMultiSelect > div > div {
+        background: var(--white) !important;
+        border: 1px solid var(--neutral-200) !important;
+        color: var(--neutral-800) !important;
+    }
+
+    .stMultiSelect span {
+        color: var(--neutral-800) !important;
+    }
+
+    /* ========== RADIO BUTTONS (main area) ========== */
+    .main .stRadio label {
+        color: var(--neutral-700) !important;
+    }
+
+    /* ========== ALL LABELS AND TEXT ========== */
+    .main p, .main span, .main label, .main div {
+        color: var(--neutral-700);
+    }
+
+    .main h1, .main h2, .main h3, .main h4 {
+        color: var(--neutral-900) !important;
+    }
+
+    /* ========== SELECTBOX DROPDOWN ========== */
+    [data-baseweb="select"] span,
+    [data-baseweb="select"] div {
+        color: var(--neutral-800) !important;
+    }
+
+    [data-baseweb="menu"] {
+        background: var(--white) !important;
+    }
+
+    [data-baseweb="menu"] li {
+        color: var(--neutral-800) !important;
+    }
+
+    [data-baseweb="menu"] li:hover {
+        background: var(--primary-50) !important;
     }
 
     /* ========== SPINNER ========== */
