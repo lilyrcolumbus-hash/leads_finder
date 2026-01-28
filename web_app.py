@@ -2790,30 +2790,40 @@ def show_crm():
                 if len(stage_leads) > 8:
                     st.caption(f"+{len(stage_leads) - 8} more leads")
 
-    # ==================== TAB 2: ALL CONTACTS ====================
+    # ==================== TAB 2: ALL CONTACTS (DATA TABLE) ====================
     with tab2:
-        st.markdown("### Contact Management")
+        st.markdown("### Contact Database")
 
-        # Filters
-        filter_col1, filter_col2, filter_col3, filter_col4 = st.columns([2, 2, 2, 1])
+        # Top toolbar
+        toolbar_col1, toolbar_col2, toolbar_col3, toolbar_col4, toolbar_col5 = st.columns([3, 2, 2, 2, 1])
 
-        with filter_col1:
-            search_term = st.text_input("🔍 Search", placeholder="Name, email, company...", key="crm_search")
+        with toolbar_col1:
+            search_term = st.text_input("🔍 Search contacts", placeholder="Name, email, company, phone...", key="crm_search", label_visibility="collapsed")
 
-        with filter_col2:
+        with toolbar_col2:
             filter_stage = st.selectbox(
-                "Filter by Stage",
-                ["All Stages"] + [f"{v['icon']} {v['name']}" for v in CRM_STAGES.values()],
-                key="crm_filter_stage"
+                "Stage",
+                ["All Stages"] + list(CRM_STAGES.keys()),
+                format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}" if x in CRM_STAGES else "All Stages",
+                key="crm_filter_stage",
+                label_visibility="collapsed"
             )
 
-        with filter_col3:
-            sort_by = st.selectbox("Sort by", ["Score (High to Low)", "Score (Low to High)", "Name A-Z", "Recent First"], key="crm_sort")
+        with toolbar_col3:
+            sort_options = {
+                "recent": "Most Recent",
+                "score_high": "Score (High to Low)",
+                "score_low": "Score (Low to High)",
+                "name_az": "Name A-Z",
+                "company": "Company A-Z"
+            }
+            sort_by = st.selectbox("Sort", list(sort_options.keys()), format_func=lambda x: sort_options[x], key="crm_sort", label_visibility="collapsed")
 
-        with filter_col4:
-            st.write("")
-            st.write("")
-            if st.button("🔄", key="refresh_contacts", help="Refresh"):
+        with toolbar_col4:
+            view_mode = st.selectbox("View", ["Table View", "Card View"], key="crm_view_mode", label_visibility="collapsed")
+
+        with toolbar_col5:
+            if st.button("🔄", key="refresh_contacts", help="Refresh", use_container_width=True):
                 st.rerun()
 
         # Apply filters
@@ -2825,149 +2835,224 @@ def show_crm():
                             search_lower in str(l.get('title', '')).lower() or
                             search_lower in str(l.get('email', '')).lower() or
                             search_lower in str(l.get('company', '')).lower() or
+                            search_lower in str(l.get('phone', '')).lower() or
                             search_lower in str(l.get('author', '')).lower()]
 
         if filter_stage != "All Stages":
-            stage_key = [k for k, v in CRM_STAGES.items() if f"{v['icon']} {v['name']}" == filter_stage]
-            if stage_key:
-                filtered_leads = [l for l in filtered_leads if l.get('status', 'new') == stage_key[0]]
+            filtered_leads = [l for l in filtered_leads if l.get('status', 'new') == filter_stage]
 
         # Sort
-        if sort_by == "Score (High to Low)":
+        if sort_by == "score_high":
             filtered_leads.sort(key=lambda x: x.get('pain_score', 0), reverse=True)
-        elif sort_by == "Score (Low to High)":
+        elif sort_by == "score_low":
             filtered_leads.sort(key=lambda x: x.get('pain_score', 0))
-        elif sort_by == "Name A-Z":
+        elif sort_by == "name_az":
             filtered_leads.sort(key=lambda x: str(x.get('title', '')).lower())
+        elif sort_by == "company":
+            filtered_leads.sort(key=lambda x: str(x.get('company', '')).lower())
+        elif sort_by == "recent":
+            filtered_leads.sort(key=lambda x: x.get('saved_at', ''), reverse=True)
 
-        st.caption(f"Showing {len(filtered_leads)} contacts")
+        # Results count and bulk actions
+        result_col1, result_col2 = st.columns([3, 1])
+        with result_col1:
+            st.caption(f"📊 **{len(filtered_leads)}** contacts found")
+        with result_col2:
+            if filtered_leads:
+                csv_data = csv_exporter.export_leads_from_dict(filtered_leads)
+                st.download_button("📥 Export", csv_data, f"contacts_{datetime.now().strftime('%Y%m%d')}.csv", "text/csv", use_container_width=True)
 
-        # Display contacts
-        for lead in filtered_leads[:30]:
-            lead_hash = lead.get('hash', '')
-            lead_title = lead.get('title', lead.get('company', 'Unknown'))
-            lead_email = lead.get('email', 'No email')
-            lead_phone = lead.get('phone', '')
-            lead_company = lead.get('company', '')
-            lead_position = lead.get('position', '')
-            lead_location = lead.get('location', '')
-            lead_status = lead.get('status', 'new')
-            lead_industry = lead.get('industry', '')
-            pain_score = lead.get('pain_score', 0)
-            lead_notes = lead.get('notes', '')
-            activity_log = lead.get('activity_log', [])
-            hubspot_synced = lead.get('hubspot_synced', False)
+        st.markdown("---")
 
-            stage_info = CRM_STAGES.get(lead_status, CRM_STAGES['new'])
-            initials = lead_title[:2].upper() if lead_title else "??"
+        if view_mode == "Table View":
+            # Professional Data Table View
+            if filtered_leads:
+                # Create DataFrame for display
+                table_data = []
+                for lead in filtered_leads:
+                    stage = lead.get('status', 'new')
+                    stage_info = CRM_STAGES.get(stage, CRM_STAGES['new'])
+                    table_data.append({
+                        'Status': f"{stage_info['icon']} {stage_info['name']}",
+                        'Name': lead.get('title', '')[:40],
+                        'Email': lead.get('email', ''),
+                        'Phone': lead.get('phone', ''),
+                        'Company': lead.get('company', '')[:30],
+                        'Position': lead.get('position', '')[:25],
+                        'Location': lead.get('location', ''),
+                        'Score': lead.get('pain_score', 0),
+                        'Source': lead.get('source', '')[:15],
+                        '_hash': lead.get('hash', '')
+                    })
 
-            with st.expander(f"{stage_info['icon']} **{lead_title[:60]}** | {lead_email} | Score: {pain_score}"):
-                # Contact detail layout
-                detail_col1, detail_col2 = st.columns([2, 1])
+                df = pd.DataFrame(table_data)
 
-                with detail_col1:
-                    st.markdown(f"""
-                    <div class="contact-header">
-                        <div class="contact-avatar">{initials}</div>
-                        <div>
-                            <h3 class="contact-name">{lead_title}</h3>
-                            <p class="contact-company">{lead_position + ' at ' if lead_position else ''}{lead_company if lead_company else 'No company'}</p>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                # Display table with selection
+                st.dataframe(
+                    df.drop(columns=['_hash']),
+                    use_container_width=True,
+                    height=400,
+                    column_config={
+                        "Status": st.column_config.TextColumn("Status", width="small"),
+                        "Name": st.column_config.TextColumn("Name", width="medium"),
+                        "Email": st.column_config.TextColumn("Email", width="medium"),
+                        "Phone": st.column_config.TextColumn("Phone", width="small"),
+                        "Company": st.column_config.TextColumn("Company", width="medium"),
+                        "Position": st.column_config.TextColumn("Position", width="small"),
+                        "Location": st.column_config.TextColumn("Location", width="small"),
+                        "Score": st.column_config.ProgressColumn("Score", min_value=0, max_value=100, format="%d"),
+                        "Source": st.column_config.TextColumn("Source", width="small"),
+                    }
+                )
 
-                    # Contact info grid
-                    info_col1, info_col2 = st.columns(2)
+                # Contact detail section below table
+                st.markdown("### Contact Details")
+                st.caption("Select a contact below to view and edit details")
 
-                    with info_col1:
-                        st.markdown("**Contact Info:**")
-                        st.write(f"📧 {lead_email}")
-                        if lead_phone:
-                            st.write(f"📱 {lead_phone}")
-                        if lead_location:
-                            st.write(f"📍 {lead_location}")
+                # Contact selector
+                contact_options = {lead.get('hash', ''): f"{lead.get('title', 'Unknown')} - {lead.get('email', 'No email')}" for lead in filtered_leads[:50]}
 
-                    with info_col2:
-                        st.markdown("**Business Info:**")
-                        if lead_company:
-                            st.write(f"🏢 {lead_company}")
-                        if lead_industry:
-                            st.write(f"🏭 {lead_industry}")
-                        st.write(f"⭐ Score: {pain_score}")
-
-                with detail_col2:
-                    # Status badge
-                    st.markdown(f"""
-                    <div style="background: {stage_info['bg']}; border: 1px solid {stage_info['color']};
-                                border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 12px;">
-                        <span style="font-size: 24px;">{stage_info['icon']}</span>
-                        <p style="margin: 4px 0 0 0; font-weight: 600; color: {stage_info['color']};">{stage_info['name']}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                    # HubSpot status
-                    if hubspot_synced:
-                        st.success("✓ Synced to HubSpot")
-                    else:
-                        st.info("Not synced to HubSpot")
-
-                st.markdown("---")
-
-                # Actions row
-                action_col1, action_col2, action_col3, action_col4 = st.columns(4)
-
-                with action_col1:
-                    new_status = st.selectbox(
-                        "Change Status",
-                        list(CRM_STAGES.keys()),
-                        index=list(CRM_STAGES.keys()).index(lead_status) if lead_status in CRM_STAGES else 0,
-                        key=f"status_select_{lead_hash}",
-                        format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}"
+                if contact_options:
+                    selected_hash = st.selectbox(
+                        "Select Contact",
+                        list(contact_options.keys()),
+                        format_func=lambda x: contact_options.get(x, "Unknown"),
+                        key="selected_contact"
                     )
 
-                with action_col2:
-                    if st.button("✓ Update", key=f"update_btn_{lead_hash}", type="primary"):
-                        if lead_manager.update_lead_status(lead_hash, new_status):
-                            st.success("Updated!")
-                            st.rerun()
+                    # Find the selected lead
+                    selected_lead = next((l for l in filtered_leads if l.get('hash') == selected_hash), None)
 
-                with action_col3:
-                    if st.button("📧 Email", key=f"email_btn_{lead_hash}"):
-                        st.info(f"Open email client for: {lead_email}")
+                    if selected_lead:
+                        # Contact detail card
+                        detail_col1, detail_col2, detail_col3 = st.columns([2, 2, 1])
 
-                with action_col4:
-                    if st.button("🗑️ Delete", key=f"delete_btn_{lead_hash}"):
-                        if lead_manager.delete_lead(lead_hash):
-                            st.success("Deleted!")
-                            st.rerun()
+                        with detail_col1:
+                            st.markdown("**Contact Information**")
+                            st.text_input("👤 Name", value=selected_lead.get('title', ''), key="edit_name", disabled=True)
+                            st.text_input("📧 Email", value=selected_lead.get('email', ''), key="edit_email", disabled=True)
+                            st.text_input("📱 Phone", value=selected_lead.get('phone', ''), key="edit_phone", disabled=True)
+                            st.text_input("🔗 LinkedIn", value=selected_lead.get('linkedin', ''), key="edit_linkedin", disabled=True)
 
-                # Notes section
-                st.markdown("**Notes & Activity:**")
+                        with detail_col2:
+                            st.markdown("**Business Information**")
+                            st.text_input("🏢 Company", value=selected_lead.get('company', ''), key="edit_company", disabled=True)
+                            st.text_input("💼 Position", value=selected_lead.get('position', ''), key="edit_position", disabled=True)
+                            st.text_input("🏭 Industry", value=selected_lead.get('industry', ''), key="edit_industry", disabled=True)
+                            st.text_input("📍 Location", value=selected_lead.get('location', ''), key="edit_location", disabled=True)
 
-                notes_col1, notes_col2 = st.columns([2, 1])
+                        with detail_col3:
+                            st.markdown("**Status & Actions**")
 
-                with notes_col1:
-                    new_note = st.text_area("Add a note...", key=f"note_input_{lead_hash}", height=80)
-                    if st.button("💾 Save Note", key=f"save_note_btn_{lead_hash}"):
-                        if new_note:
-                            if lead_manager.add_note_to_lead(lead_hash, new_note):
-                                st.success("Note saved!")
-                                st.rerun()
+                            current_status = selected_lead.get('status', 'new')
+                            new_status = st.selectbox(
+                                "Pipeline Stage",
+                                list(CRM_STAGES.keys()),
+                                index=list(CRM_STAGES.keys()).index(current_status) if current_status in CRM_STAGES else 0,
+                                format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
+                                key="detail_status"
+                            )
 
-                with notes_col2:
-                    if lead_notes:
-                        st.info(f"📝 {lead_notes[:200]}...")
+                            if st.button("✓ Update Status", type="primary", use_container_width=True):
+                                if lead_manager.update_lead_status(selected_hash, new_status):
+                                    st.success("Status updated!")
+                                    st.rerun()
 
-                # Activity log
-                if activity_log:
-                    st.markdown("**Recent Activity:**")
-                    for activity in activity_log[-5:][::-1]:
-                        if activity.get('type') == 'status_change':
-                            from_stage = CRM_STAGES.get(activity.get('from'), {}).get('name', activity.get('from'))
-                            to_stage = CRM_STAGES.get(activity.get('to'), {}).get('name', activity.get('to'))
-                            st.caption(f"📌 Status: {from_stage} → {to_stage} | {activity.get('timestamp', '')[:10]}")
-                        elif activity.get('type') == 'note':
-                            st.caption(f"📝 Note added | {activity.get('timestamp', '')[:10]}")
+                            st.markdown("---")
+
+                            if st.button("🗑️ Delete Contact", use_container_width=True):
+                                if lead_manager.delete_lead(selected_hash):
+                                    st.success("Contact deleted!")
+                                    st.rerun()
+
+                        # Notes section
+                        st.markdown("---")
+                        notes_col1, notes_col2 = st.columns([2, 1])
+
+                        with notes_col1:
+                            st.markdown("**Notes**")
+                            current_notes = selected_lead.get('notes', '')
+                            if current_notes:
+                                st.info(current_notes)
+                            new_note = st.text_area("Add a new note...", key="new_note_detail", height=100)
+                            if st.button("💾 Save Note", key="save_note_detail"):
+                                if new_note:
+                                    if lead_manager.add_note_to_lead(selected_hash, new_note):
+                                        st.success("Note saved!")
+                                        st.rerun()
+
+                        with notes_col2:
+                            st.markdown("**Activity History**")
+                            activity_log = selected_lead.get('activity_log', [])
+                            if activity_log:
+                                for activity in activity_log[-5:][::-1]:
+                                    if activity.get('type') == 'status_change':
+                                        st.caption(f"📌 {activity.get('from')} → {activity.get('to')}")
+                                    elif activity.get('type') == 'note':
+                                        st.caption(f"📝 Note added")
+                            else:
+                                st.caption("No activity yet")
+
+            else:
+                st.info("No contacts match your filters")
+
+        else:
+            # Card View (original expandable view but improved)
+            if filtered_leads:
+                # Display in a grid of cards
+                card_cols = st.columns(2)
+
+                for idx, lead in enumerate(filtered_leads[:20]):
+                    with card_cols[idx % 2]:
+                        lead_hash = lead.get('hash', '')
+                        lead_title = lead.get('title', 'Unknown')
+                        lead_email = lead.get('email', 'No email')
+                        lead_phone = lead.get('phone', '')
+                        lead_company = lead.get('company', '')
+                        lead_status = lead.get('status', 'new')
+                        pain_score = lead.get('pain_score', 0)
+
+                        stage_info = CRM_STAGES.get(lead_status, CRM_STAGES['new'])
+
+                        with st.container(border=True):
+                            # Card header
+                            header_col1, header_col2 = st.columns([3, 1])
+                            with header_col1:
+                                st.markdown(f"**{lead_title[:35]}**")
+                                st.caption(f"{lead_company[:25]}" if lead_company else "No company")
+                            with header_col2:
+                                st.markdown(f"""
+                                <div style="background: {stage_info['bg']}; border-radius: 6px; padding: 4px 8px; text-align: center;">
+                                    <span style="font-size: 12px; color: {stage_info['color']}; font-weight: 600;">{stage_info['name']}</span>
+                                </div>
+                                """, unsafe_allow_html=True)
+
+                            # Contact info
+                            st.caption(f"📧 {lead_email}")
+                            if lead_phone:
+                                st.caption(f"📱 {lead_phone}")
+
+                            # Actions
+                            btn_col1, btn_col2, btn_col3 = st.columns(3)
+                            with btn_col1:
+                                if st.button("👁️ View", key=f"view_card_{lead_hash}", use_container_width=True):
+                                    st.session_state.selected_contact = lead_hash
+                            with btn_col2:
+                                stages_list = list(CRM_STAGES.keys())
+                                current_idx = stages_list.index(lead_status) if lead_status in stages_list else 0
+                                if current_idx < len(stages_list) - 1 and lead_status not in ['won', 'lost']:
+                                    if st.button("➡️ Next", key=f"next_card_{lead_hash}", use_container_width=True):
+                                        lead_manager.update_lead_status(lead_hash, stages_list[current_idx + 1])
+                                        st.rerun()
+                            with btn_col3:
+                                if st.button("🗑️", key=f"del_card_{lead_hash}", use_container_width=True):
+                                    lead_manager.delete_lead(lead_hash)
+                                    st.rerun()
+
+                if len(filtered_leads) > 20:
+                    st.info(f"Showing 20 of {len(filtered_leads)} contacts. Use filters to narrow results.")
+            else:
+                st.info("No contacts match your filters")
 
     # ==================== TAB 3: ACTIVITIES ====================
     with tab3:
