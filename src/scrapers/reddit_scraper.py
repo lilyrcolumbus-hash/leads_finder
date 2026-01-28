@@ -24,9 +24,22 @@ class RedditScraper(BaseScraper):
         super().__init__()
         self.subreddits = settings.subreddits
 
-    def scrape(self) -> LeadBatch:
+    # Map time filter values to Reddit's t parameter
+    TIME_MAP = {
+        "day": "day",
+        "week": "week",
+        "month": "month",
+        "quarter": "month",  # Reddit doesn't have quarter, use month
+        "year": "year",
+        "all": "all"
+    }
+
+    def scrape(self, time_filter: str = "week") -> LeadBatch:
         """
         Scrape Reddit for leads matching pain keywords.
+
+        Args:
+            time_filter: Time range for posts (day, week, month, quarter, year, all)
 
         Returns:
             LeadBatch with found leads
@@ -34,14 +47,27 @@ class RedditScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        self.logger.info(f"Starting Reddit scrape for {len(self.subreddits)} subreddits")
+        # Convert time filter to Reddit's format
+        reddit_time = self.TIME_MAP.get(time_filter, "week")
+        self.current_time_filter = reddit_time
 
-        for subreddit in self.subreddits:
+        # Only search the most relevant subreddits (limit to 8 for speed)
+        top_subreddits = [
+            "smallbusiness", "entrepreneur", "startups",
+            "HVAC", "Plumbing", "electricians",
+            "contractors", "sweatystartup"
+        ]
+        # Filter to only include subreddits from our config
+        subreddits_to_search = [s for s in top_subreddits if s in self.subreddits][:8]
+
+        self.logger.info(f"Starting Reddit scrape for {len(subreddits_to_search)} subreddits (time: {reddit_time})")
+
+        for subreddit in subreddits_to_search:
             try:
                 leads = self._scrape_subreddit(subreddit)
                 all_leads.extend(leads)
                 self.logger.info(f"Found {len(leads)} potential leads in r/{subreddit}")
-                time.sleep(2)  # Rate limiting
+                time.sleep(0.5)  # Reduced delay
             except Exception as e:
                 error_msg = f"Error scraping r/{subreddit}: {str(e)}"
                 self.logger.error(error_msg)
@@ -68,15 +94,17 @@ class RedditScraper(BaseScraper):
         """
         leads = []
 
-        # Search for each pain keyword
-        for keyword in self.pain_keywords[:10]:  # Limit to avoid rate limits
+        # Use only top 3 most effective keywords for speed
+        top_keywords = ["business", "customers", "phone"]
+
+        for keyword in top_keywords:
             try:
                 leads.extend(self._search_keyword(subreddit, keyword))
-                time.sleep(1)  # Be nice to Reddit
+                time.sleep(0.3)  # Short delay
             except Exception as e:
                 self.logger.warning(f"Error searching '{keyword}' in r/{subreddit}: {e}")
 
-        # Also get recent posts from the subreddit
+        # Also get recent/top posts from the subreddit
         try:
             leads.extend(self._get_recent_posts(subreddit))
         except Exception as e:
@@ -87,15 +115,17 @@ class RedditScraper(BaseScraper):
     def _search_keyword(self, subreddit: str, keyword: str) -> List[Lead]:
         """Search subreddit for a specific keyword."""
         leads = []
-        url = f"https://www.reddit.com/r/{subreddit}/search.rss?q={keyword}&restrict_sr=1&sort=new&limit=25"
+        time_param = getattr(self, 'current_time_filter', 'week')
+        url = f"https://www.reddit.com/r/{subreddit}/search.rss?q={keyword}&restrict_sr=1&sort=new&t={time_param}&limit=25"
 
         try:
             response = self.fetch_url(url)
             entries = self._parse_rss(response.text)
 
             for entry in entries:
-                lead = self._entry_to_lead(entry, subreddit)
-                if lead and lead.keywords_matched:
+                # Pass the search keyword so we can include it even if not found in parsed content
+                lead = self._entry_to_lead(entry, subreddit, search_keyword=keyword)
+                if lead:
                     leads.append(lead)
 
         except Exception as e:
@@ -106,7 +136,9 @@ class RedditScraper(BaseScraper):
     def _get_recent_posts(self, subreddit: str) -> List[Lead]:
         """Get recent posts from subreddit RSS feed."""
         leads = []
-        url = f"https://www.reddit.com/r/{subreddit}/new.rss?limit=50"
+        time_param = getattr(self, 'current_time_filter', 'week')
+        # Use top posts with time filter instead of just new
+        url = f"https://www.reddit.com/r/{subreddit}/top.rss?t={time_param}&limit=50"
 
         try:
             response = self.fetch_url(url)
@@ -165,13 +197,14 @@ class RedditScraper(BaseScraper):
         el = element.find(path, self.NAMESPACES)
         return el.get(attr, '') if el is not None else ''
 
-    def _entry_to_lead(self, entry: dict, subreddit: str) -> Lead | None:
+    def _entry_to_lead(self, entry: dict, subreddit: str, search_keyword: str = None) -> Lead | None:
         """
         Convert RSS entry to Lead object.
 
         Args:
             entry: Parsed RSS entry dict
             subreddit: Name of subreddit
+            search_keyword: The keyword used to find this entry (optional)
 
         Returns:
             Lead object or None if not relevant
@@ -183,7 +216,12 @@ class RedditScraper(BaseScraper):
 
             # Check for pain keywords
             keywords = self.find_keywords(full_text)
-            if not keywords:
+
+            # If no keywords found but we have a search keyword, use that
+            # (Reddit search returned this, so it's relevant)
+            if not keywords and search_keyword:
+                keywords = [f"search:{search_keyword}"]
+            elif not keywords:
                 return None
 
             # Extract author

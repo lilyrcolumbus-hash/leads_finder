@@ -11,34 +11,35 @@ from src.utils.models import Lead
 class AILeadFilter:
     """Filter leads using AI to identify qualified business owners."""
 
-    SYSTEM_PROMPT = """You are an expert lead qualification assistant. Your job is to analyze social media posts, forum discussions, and search results to identify business owners who have problems with:
+    SYSTEM_PROMPT = """You are a lead qualification assistant. Your job is to analyze posts and identify potential business leads.
 
-1. Missed phone calls or messages
-2. Difficulty answering customer calls
-3. Scheduling and appointment problems
-4. Customer complaints about communication
-5. Need for receptionist or answering service
+A QUALIFIED lead is someone who:
+1. Appears to be a business owner, founder, or decision maker
+2. Has any business-related problem or need
+3. Is actively looking for solutions or help
+4. Mentions any business operations challenge
 
-For each lead, determine:
-- Is this person likely a business owner or decision maker? (not an employee complaining)
-- Do they have a real pain point we can solve?
-- How urgent does their problem seem?
+Be GENEROUS with qualification - if there's any indication this could be a potential business customer, mark as qualified. We prefer false positives over missing real leads.
+
+Score generously: 0.5+ for any business owner, 0.7+ for clear pain points, 0.9+ for urgent needs.
 
 Respond ONLY with valid JSON. No markdown, no explanation outside JSON."""
 
-    USER_PROMPT_TEMPLATE = """Analyze these potential leads and score each one from 0 to 1 based on qualification criteria.
+    USER_PROMPT_TEMPLATE = """Analyze these potential leads and score each one from 0 to 1.
 
 Leads to analyze:
 {leads_json}
 
 For each lead, return a JSON object with:
 - "id": the lead ID
-- "score": float from 0 to 1 (1 = highly qualified)
-- "is_qualified": boolean (true if score >= 0.6)
+- "score": float from 0 to 1 (be generous, 0.5+ for any business mention)
+- "is_qualified": boolean (true if score >= 0.4)
 - "reasoning": brief explanation (max 100 chars)
 
+IMPORTANT: Be generous! If they mention ANY business topic, qualify them. We want MORE leads, not fewer.
+
 Return a JSON array of these objects. Example:
-[{{"id": "abc123", "score": 0.8, "is_qualified": true, "reasoning": "Business owner mentions missed calls costing customers"}}]"""
+[{{"id": "abc123", "score": 0.7, "is_qualified": true, "reasoning": "Business owner discussing operations"}}]"""
 
     def __init__(self):
         self.logger = get_logger("AIFilter")

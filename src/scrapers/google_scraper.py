@@ -21,9 +21,22 @@ class GoogleScraper(BaseScraper):
         self.search_engine_id = settings.google_search_engine_id
         self.search_queries = settings.google_search_queries
 
-    def scrape(self) -> LeadBatch:
+    # Map time filter values to Google's dateRestrict parameter
+    TIME_MAP = {
+        "day": "d1",       # Last 24 hours
+        "week": "w1",      # Last week
+        "month": "m1",     # Last month
+        "quarter": "m3",   # Last 3 months
+        "year": "y1",      # Last year
+        "all": ""          # No restriction
+    }
+
+    def scrape(self, time_filter: str = "week") -> LeadBatch:
         """
         Scrape Google Search for leads.
+
+        Args:
+            time_filter: Time range for results (day, week, month, quarter, year, all)
 
         Returns:
             LeadBatch with found leads
@@ -37,7 +50,10 @@ class GoogleScraper(BaseScraper):
             batch.errors.append(error_msg)
             return batch
 
-        self.logger.info(f"Starting Google Search scrape with {len(self.search_queries)} queries")
+        # Convert time filter to Google's format
+        self.current_date_restrict = self.TIME_MAP.get(time_filter, "w1")
+
+        self.logger.info(f"Starting Google Search scrape with {len(self.search_queries)} queries (time: {time_filter})")
 
         for query in self.search_queries:
             try:
@@ -79,6 +95,7 @@ class GoogleScraper(BaseScraper):
         """
         leads = []
 
+        # Build base URL
         url = (
             f"{self.BASE_URL}"
             f"?key={self.api_key}"
@@ -87,6 +104,11 @@ class GoogleScraper(BaseScraper):
             f"&start={start}"
             f"&num=10"
         )
+
+        # Add date restriction if set
+        date_restrict = getattr(self, 'current_date_restrict', '')
+        if date_restrict:
+            url += f"&dateRestrict={date_restrict}"
 
         try:
             response = self.fetch_url(url)

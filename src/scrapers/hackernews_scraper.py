@@ -1,6 +1,7 @@
 """Hacker News scraper using the public Algolia API."""
 
 import time
+from datetime import datetime, timedelta
 from typing import List, Optional
 from urllib.parse import quote
 
@@ -15,6 +16,16 @@ class HackerNewsScraper(BaseScraper):
     source = LeadSource.HACKER_NEWS
     SEARCH_URL = "https://hn.algolia.com/api/v1/search"
     ITEM_URL = "https://news.ycombinator.com/item?id={item_id}"
+
+    # Map time filter to days
+    TIME_MAP = {
+        "day": 1,
+        "week": 7,
+        "month": 30,
+        "quarter": 90,
+        "year": 365,
+        "all": 0  # No filter
+    }
 
     def __init__(self):
         super().__init__()
@@ -31,9 +42,12 @@ class HackerNewsScraper(BaseScraper):
             "call center small business"
         ]
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = "week") -> LeadBatch:
         """
         Scrape Hacker News for leads.
+
+        Args:
+            time_filter: Time range for results (day, week, month, quarter, year, all)
 
         Returns:
             LeadBatch with found leads
@@ -41,17 +55,31 @@ class HackerNewsScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        self.logger.info("Starting Hacker News scrape")
+        # Calculate timestamp filter
+        days = self.TIME_MAP.get(time_filter, 7)
+        if days > 0:
+            cutoff = datetime.now() - timedelta(days=days)
+            self.min_timestamp = int(cutoff.timestamp())
+        else:
+            self.min_timestamp = 0
 
-        # Search for general pain keywords
-        search_terms = self.pain_keywords[:8] + self.hn_keywords
+        self.logger.info(f"Starting Hacker News scrape (time: {time_filter})")
+
+        # Use only top 5 most effective search terms for speed
+        search_terms = [
+            "small business",
+            "startup phone",
+            "customer service",
+            "scheduling",
+            "answering service"
+        ]
 
         for term in search_terms:
             try:
                 leads = self._search_hn(term)
                 all_leads.extend(leads)
                 self.logger.debug(f"Found {len(leads)} results for '{term}'")
-                time.sleep(0.5)  # Rate limiting
+                time.sleep(0.2)  # Short delay
             except Exception as e:
                 error_msg = f"Error searching HN for '{term}': {str(e)}"
                 self.logger.warning(error_msg)
@@ -99,12 +127,17 @@ class HackerNewsScraper(BaseScraper):
         if tags:
             url += f"&tags={tags}"
 
+        # Add time filter if set
+        min_ts = getattr(self, 'min_timestamp', 0)
+        if min_ts > 0:
+            url += f"&numericFilters=created_at_i>{min_ts}"
+
         try:
             response = self.fetch_url(url)
             data = response.json()
 
             for hit in data.get("hits", []):
-                lead = self._hit_to_lead(hit)
+                lead = self._hit_to_lead(hit, search_query=query)
                 if lead:
                     leads.append(lead)
 
@@ -135,12 +168,13 @@ class HackerNewsScraper(BaseScraper):
 
         return leads
 
-    def _hit_to_lead(self, hit: dict) -> Lead | None:
+    def _hit_to_lead(self, hit: dict, search_query: str = None) -> Lead | None:
         """
         Convert Algolia hit to Lead object.
 
         Args:
             hit: Search result from Algolia
+            search_query: The query used to find this hit (optional)
 
         Returns:
             Lead object or None if not relevant
@@ -156,7 +190,11 @@ class HackerNewsScraper(BaseScraper):
 
             # Check for pain keywords
             keywords = self.find_keywords(full_text)
-            if not keywords:
+
+            # If no keywords found but we have a search query, use that
+            if not keywords and search_query:
+                keywords = [f"search:{search_query}"]
+            elif not keywords:
                 return None
 
             # Build URL
