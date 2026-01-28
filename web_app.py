@@ -22,7 +22,7 @@ from src.utils.scoring import enrich_leads, calculate_pain_score
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.utils.background_tasks import task_manager, TaskStatus
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -1591,29 +1591,30 @@ def show_search():
     st.divider()
 
     # Active Sources Section
-    st.subheader("📡 Active Sources (4 Available)")
+    st.subheader("📡 Active Sources (6 Available)")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         use_reddit = st.checkbox("🔴 Reddit - Business subreddits", value=True, key="reddit_check")
         use_hn = st.checkbox("🟠 Hacker News - Startups", value=True, key="hn_check")
     with col2:
         use_google = st.checkbox("🔵 Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="google_check")
         use_ph = st.checkbox("🟣 Product Hunt", value=True, key="ph_check")
+    with col3:
+        use_indeed = st.checkbox("💼 Indeed - Hiring Receptionists", value=True, key="indeed_check")
+        use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
 
     st.divider()
 
     # Coming Soon Sources
-    st.subheader("🚀 Coming Soon (6 More)")
+    st.subheader("🚀 Coming Soon (4 More)")
 
-    coming_cols = st.columns(6)
+    coming_cols = st.columns(4)
     coming_sources = [
         ("🔷", "LinkedIn"),
         ("🐦", "Twitter/X"),
-        ("⭐", "Yelp"),
         ("📍", "Google Business"),
-        ("📘", "Facebook"),
-        ("🏆", "G2/Clutch")
+        ("📘", "Facebook")
     ]
     for i, (icon, name) in enumerate(coming_sources):
         with coming_cols[i]:
@@ -1667,6 +1668,8 @@ def show_search():
         if use_hn: scrapers.append(("Hacker News", HackerNewsScraper))
         if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
         if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
+        if use_indeed: scrapers.append(("Indeed", IndeedScraper))
+        if use_yelp: scrapers.append(("Yelp", YelpScraper))
 
         if not scrapers:
             st.warning("Select at least one source")

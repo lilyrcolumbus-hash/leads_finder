@@ -15,6 +15,7 @@ class LeadSource(str, Enum):
     LINKEDIN = "linkedin"
     TWITTER = "twitter"
     YELP = "yelp"
+    INDEED = "indeed"
     GOOGLE_MY_BUSINESS = "google_my_business"
     FACEBOOK = "facebook"
     G2_CLUTCH = "g2_clutch"
