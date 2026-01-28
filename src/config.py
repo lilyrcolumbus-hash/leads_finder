@@ -23,12 +23,53 @@ class Settings(BaseSettings):
         "entrepreneur",
         "startups",
         "sidehustle",
-        # Home Services
+        # HVAC / Air Conditioning
         "HVAC",
+        "hvacadvice",
+        "refrigeration",
+        # Plumbing
         "Plumbing",
+        "Plumbers",
+        # Electrical
         "electricians",
+        "electrical",
+        # Roofing
         "Roofing",
+        "roofers",
+        # Landscaping / Lawn Care
         "landscaping",
+        "lawncare",
+        "arborists",
+        "irrigation",
+        # General Contractors / Construction
+        "Construction",
+        "contractors",
+        "homebuilding",
+        # Cleaning Services
+        "cleaningservice",
+        "pressurewashing",
+        "windowcleaning",
+        # Pest Control
+        "pestcontrol",
+        # Painting
+        "painters",
+        "paint",
+        # Flooring
+        "Flooring",
+        "Hardwood",
+        "Tile",
+        # Garage Doors / Gates
+        "garagedoorservice",
+        # Locksmith
+        "Locksmith",
+        # Appliance Repair
+        "appliancerepair",
+        # Pool Services
+        "pools",
+        "swimmingpools",
+        # Moving Services
+        "moving",
+        "movingcompanies",
         # Medical/Health
         "dentistry",
         "medicalpractice",
@@ -36,36 +77,88 @@ class Settings(BaseSettings):
         "pharmacy",
         "chiropractors",
         "physicaltherapy",
+        "optometry",
+        "audiology",
+        "mentalhealth",
+        "therapists",
         # Legal
         "lawyers",
         "lawfirm",
+        "paralegal",
         # Beauty/Wellness
         "salonprofessionals",
         "estheticians",
         "nails",
+        "hairstylist",
+        "barbershop",
+        "massage",
+        "tattoo",
         # Food/Restaurant
         "restaurantowners",
         "kitchenconfidential",
+        "foodtrucks",
+        "catering",
+        "bakery",
         # Automotive
         "automotivemechanics",
         "autodetailing",
+        "autobody",
+        "tires",
+        "Diesel",
         # Professional Services
         "insurance",
         "realestate",
         "realtors",
-        "accounting"
+        "accounting",
+        "bookkeeping",
+        "financialplanning",
+        # Fitness / Gyms
+        "gymowners",
+        "personaltraining",
+        "yoga",
+        "crossfit",
+        # Pet Services
+        "doggrooming",
+        "petcare",
+        "petsitting",
+        "dogtraining",
+        # Photography / Events
+        "WeddingPhotography",
+        "photography",
+        "weddingplanning",
+        "eventplanning"
     ]
 
     # Industry categories for filtering
     industries: Dict[str, List[str]] = {
-        "Medical/Dental": ["dentistry", "medicalpractice", "veterinary", "pharmacy", "chiropractors", "physicaltherapy"],
-        "Legal": ["lawyers", "lawfirm"],
-        "Beauty/Spa": ["salonprofessionals", "estheticians", "nails"],
-        "Automotive": ["automotivemechanics", "autodetailing"],
-        "Restaurants": ["restaurantowners", "kitchenconfidential"],
+        # Home Services - Specific Categories
+        "HVAC / Air Conditioning": ["HVAC", "hvacadvice", "refrigeration"],
+        "Plumbing": ["Plumbing", "Plumbers"],
+        "Electrical": ["electricians", "electrical"],
+        "Roofing": ["Roofing", "roofers"],
+        "Landscaping / Lawn": ["landscaping", "lawncare", "arborists", "irrigation"],
+        "General Contractors": ["Construction", "contractors", "homebuilding"],
+        "Cleaning Services": ["cleaningservice", "pressurewashing", "windowcleaning"],
+        "Pest Control": ["pestcontrol"],
+        "Painting": ["painters", "paint"],
+        "Flooring": ["Flooring", "Hardwood", "Tile"],
+        "Pool Services": ["pools", "swimmingpools"],
+        "Moving Services": ["moving", "movingcompanies"],
+        "Locksmith": ["Locksmith"],
+        "Appliance Repair": ["appliancerepair"],
+        # Professional Services
+        "Medical/Dental": ["dentistry", "medicalpractice", "veterinary", "pharmacy", "chiropractors", "physicaltherapy", "optometry", "audiology"],
+        "Mental Health": ["mentalhealth", "therapists"],
+        "Legal": ["lawyers", "lawfirm", "paralegal"],
+        "Beauty/Spa": ["salonprofessionals", "estheticians", "nails", "hairstylist", "barbershop", "massage", "tattoo"],
+        "Automotive": ["automotivemechanics", "autodetailing", "autobody", "tires", "Diesel"],
+        "Restaurants": ["restaurantowners", "kitchenconfidential", "foodtrucks", "catering", "bakery"],
         "Real Estate": ["realestate", "realtors"],
-        "Home Services": ["HVAC", "Plumbing", "electricians", "Roofing", "landscaping"],
-        "General Business": ["smallbusiness", "sweatystartup", "entrepreneur", "startups", "sidehustle", "insurance", "accounting"]
+        "Financial": ["insurance", "accounting", "bookkeeping", "financialplanning"],
+        "Fitness / Gyms": ["gymowners", "personaltraining", "yoga", "crossfit"],
+        "Pet Services": ["doggrooming", "petcare", "petsitting", "dogtraining"],
+        "Photography / Events": ["WeddingPhotography", "photography", "weddingplanning", "eventplanning"],
+        "General Business": ["smallbusiness", "sweatystartup", "entrepreneur", "startups", "sidehustle"]
     }
 
     # Pain point keywords (expanded for better detection)

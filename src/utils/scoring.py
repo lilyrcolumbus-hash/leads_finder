@@ -87,13 +87,33 @@ def detect_industry(lead: Lead) -> str:
     content_lower = lead.content.lower() + " " + lead.title.lower()
 
     industry_keywords = {
-        "Medical/Dental": ["patient", "clinic", "doctor", "dentist", "medical", "healthcare", "appointment", "practice"],
-        "Legal": ["lawyer", "attorney", "law firm", "legal", "client consultation", "case"],
-        "Beauty/Spa": ["salon", "spa", "hair", "nails", "beauty", "stylist", "esthetician"],
-        "Automotive": ["mechanic", "auto shop", "car repair", "dealership", "automotive"],
-        "Restaurants": ["restaurant", "cafe", "reservation", "dining", "kitchen", "food service"],
-        "Real Estate": ["realtor", "real estate", "property", "showing", "listing", "buyer", "seller"],
-        "Home Services": ["hvac", "plumbing", "electrical", "roofing", "contractor", "home repair"]
+        # Home Services - Specific
+        "HVAC / Air Conditioning": ["hvac", "air conditioning", "ac unit", "furnace", "heating", "cooling", "refrigeration", "ductwork"],
+        "Plumbing": ["plumber", "plumbing", "pipe", "drain", "water heater", "leak", "sewer", "faucet"],
+        "Electrical": ["electrician", "electrical", "wiring", "outlet", "circuit", "panel", "lighting"],
+        "Roofing": ["roofing", "roofer", "roof", "shingles", "gutter", "leak repair"],
+        "Landscaping / Lawn": ["landscaping", "lawn care", "mowing", "irrigation", "tree service", "garden"],
+        "General Contractors": ["contractor", "construction", "remodel", "renovation", "building", "home improvement"],
+        "Cleaning Services": ["cleaning service", "pressure washing", "window cleaning", "janitorial", "maid service"],
+        "Pest Control": ["pest control", "exterminator", "termite", "rodent", "insect"],
+        "Painting": ["painter", "painting", "interior paint", "exterior paint"],
+        "Flooring": ["flooring", "hardwood", "tile", "carpet", "laminate"],
+        "Pool Services": ["pool service", "pool cleaning", "swimming pool", "pool maintenance"],
+        "Moving Services": ["moving company", "movers", "relocation", "packing"],
+        "Locksmith": ["locksmith", "lock", "key", "security"],
+        "Appliance Repair": ["appliance repair", "refrigerator repair", "washer", "dryer", "dishwasher"],
+        # Professional Services
+        "Medical/Dental": ["patient", "clinic", "doctor", "dentist", "medical", "healthcare", "appointment", "practice", "veterinary", "vet", "pharmacy", "chiropractor", "physical therapy", "optometrist"],
+        "Mental Health": ["therapist", "counselor", "psychologist", "mental health", "therapy session"],
+        "Legal": ["lawyer", "attorney", "law firm", "legal", "client consultation", "case", "paralegal"],
+        "Beauty/Spa": ["salon", "spa", "hair", "nails", "beauty", "stylist", "esthetician", "barbershop", "massage", "tattoo"],
+        "Automotive": ["mechanic", "auto shop", "car repair", "dealership", "automotive", "auto body", "tire", "oil change"],
+        "Restaurants": ["restaurant", "cafe", "reservation", "dining", "kitchen", "food service", "catering", "food truck", "bakery"],
+        "Real Estate": ["realtor", "real estate", "property", "showing", "listing", "buyer", "seller", "open house"],
+        "Financial": ["insurance", "accounting", "bookkeeping", "tax", "financial planning", "cpa"],
+        "Fitness / Gyms": ["gym", "fitness", "personal trainer", "yoga", "crossfit", "workout"],
+        "Pet Services": ["dog grooming", "pet sitting", "dog training", "pet care", "boarding"],
+        "Photography / Events": ["photographer", "wedding", "event planning", "videographer"]
     }
 
     best_match = "General Business"
