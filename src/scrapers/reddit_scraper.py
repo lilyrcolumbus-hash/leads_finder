@@ -112,8 +112,9 @@ class RedditScraper(BaseScraper):
             entries = self._parse_rss(response.text)
 
             for entry in entries:
-                lead = self._entry_to_lead(entry, subreddit)
-                if lead and lead.keywords_matched:
+                # Pass the search keyword so we can include it even if not found in parsed content
+                lead = self._entry_to_lead(entry, subreddit, search_keyword=keyword)
+                if lead:
                     leads.append(lead)
 
         except Exception as e:
@@ -185,13 +186,14 @@ class RedditScraper(BaseScraper):
         el = element.find(path, self.NAMESPACES)
         return el.get(attr, '') if el is not None else ''
 
-    def _entry_to_lead(self, entry: dict, subreddit: str) -> Lead | None:
+    def _entry_to_lead(self, entry: dict, subreddit: str, search_keyword: str = None) -> Lead | None:
         """
         Convert RSS entry to Lead object.
 
         Args:
             entry: Parsed RSS entry dict
             subreddit: Name of subreddit
+            search_keyword: The keyword used to find this entry (optional)
 
         Returns:
             Lead object or None if not relevant
@@ -203,7 +205,12 @@ class RedditScraper(BaseScraper):
 
             # Check for pain keywords
             keywords = self.find_keywords(full_text)
-            if not keywords:
+
+            # If no keywords found but we have a search keyword, use that
+            # (Reddit search returned this, so it's relevant)
+            if not keywords and search_keyword:
+                keywords = [f"search:{search_keyword}"]
+            elif not keywords:
                 return None
 
             # Extract author

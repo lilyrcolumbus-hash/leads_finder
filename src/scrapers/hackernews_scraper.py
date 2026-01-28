@@ -131,7 +131,7 @@ class HackerNewsScraper(BaseScraper):
             data = response.json()
 
             for hit in data.get("hits", []):
-                lead = self._hit_to_lead(hit)
+                lead = self._hit_to_lead(hit, search_query=query)
                 if lead:
                     leads.append(lead)
 
@@ -162,12 +162,13 @@ class HackerNewsScraper(BaseScraper):
 
         return leads
 
-    def _hit_to_lead(self, hit: dict) -> Lead | None:
+    def _hit_to_lead(self, hit: dict, search_query: str = None) -> Lead | None:
         """
         Convert Algolia hit to Lead object.
 
         Args:
             hit: Search result from Algolia
+            search_query: The query used to find this hit (optional)
 
         Returns:
             Lead object or None if not relevant
@@ -183,7 +184,11 @@ class HackerNewsScraper(BaseScraper):
 
             # Check for pain keywords
             keywords = self.find_keywords(full_text)
-            if not keywords:
+
+            # If no keywords found but we have a search query, use that
+            if not keywords and search_query:
+                keywords = [f"search:{search_query}"]
+            elif not keywords:
                 return None
 
             # Build URL
