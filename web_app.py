@@ -1663,7 +1663,30 @@ def show_leads():
 
     st.divider()
 
+    # Import Section
+    st.subheader("📤 Import Leads")
+
+    uploaded_file = st.file_uploader(
+        "Upload CSV file with leads",
+        type=['csv'],
+        help="CSV should have columns: title, author, email, url, industry (optional)"
+    )
+
+    if uploaded_file is not None:
+        if st.button("📥 Import Leads", type="primary"):
+            csv_content = uploaded_file.getvalue().decode('utf-8')
+            result = lead_manager.import_from_csv(csv_content)
+
+            if result.get('error_message'):
+                st.error(f"Error: {result['error_message']}")
+            else:
+                st.success(f"✅ Imported: {result['imported']} | Duplicates skipped: {result['duplicates']} | Errors: {result['errors']}")
+                st.rerun()
+
+    st.divider()
+
     # Export and Actions Row
+    st.subheader("📥 Export Leads")
     col_exp1, col_exp2, col_exp3, col_exp4 = st.columns(4)
 
     with col_exp1:

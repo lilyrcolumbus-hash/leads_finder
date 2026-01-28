@@ -113,6 +113,85 @@ class LeadManager:
         except Exception:
             return []
 
+    def import_from_csv(self, csv_content: str) -> Dict:
+        """Import leads from CSV content. Returns stats about import."""
+        imported = 0
+        duplicates = 0
+        errors = 0
+
+        try:
+            reader = csv.DictReader(io.StringIO(csv_content))
+
+            existing_data = {'leads': [], 'last_updated': None}
+            if self.storage_path.exists():
+                try:
+                    with open(self.storage_path, 'r') as f:
+                        existing_data = json.load(f)
+                except Exception:
+                    pass
+
+            for row in reader:
+                try:
+                    # Create a hash for deduplication
+                    title = row.get('title', row.get('Title', ''))
+                    url = row.get('url', row.get('URL', row.get('Url', '')))
+                    author = row.get('author', row.get('Author', row.get('name', row.get('Name', ''))))
+                    email = row.get('email', row.get('Email', ''))
+
+                    if not title and not url:
+                        errors += 1
+                        continue
+
+                    unique_string = f"{url}|{title.lower().strip()}|{author.lower().strip()}"
+                    lead_hash = hashlib.md5(unique_string.encode()).hexdigest()
+
+                    if lead_hash in self._seen_hashes:
+                        duplicates += 1
+                        continue
+
+                    # Create lead dict
+                    lead_dict = {
+                        'title': title,
+                        'author': author,
+                        'email': email,
+                        'url': url,
+                        'content': row.get('content', row.get('Content', row.get('description', row.get('Description', '')))),
+                        'source': row.get('source', row.get('Source', 'imported')),
+                        'industry': row.get('industry', row.get('Industry', '')),
+                        'pain_score': int(row.get('pain_score', row.get('Pain', row.get('pain', 0))) or 0),
+                        'hash': lead_hash,
+                        'saved_at': datetime.now().isoformat(),
+                        'imported': True
+                    }
+
+                    existing_data['leads'].append(lead_dict)
+                    self._seen_hashes.add(lead_hash)
+                    imported += 1
+
+                except Exception as e:
+                    errors += 1
+                    continue
+
+            existing_data['last_updated'] = datetime.now().isoformat()
+            existing_data['total_count'] = len(existing_data['leads'])
+
+            with open(self.storage_path, 'w') as f:
+                json.dump(existing_data, f, indent=2, default=str)
+
+        except Exception as e:
+            return {
+                'imported': 0,
+                'duplicates': 0,
+                'errors': 1,
+                'error_message': str(e)
+            }
+
+        return {
+            'imported': imported,
+            'duplicates': duplicates,
+            'errors': errors
+        }
+
     def get_stats(self) -> Dict:
         """Get statistics about saved leads."""
         leads = self.load_leads()
