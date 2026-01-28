@@ -32,7 +32,14 @@ class LeadManager:
 
     def _generate_hash(self, lead: Lead) -> str:
         """Generate unique hash for a lead based on URL, title, and author."""
-        unique_string = f"{lead.url}|{lead.title.lower().strip()}|{lead.author.lower().strip()}"
+        url = lead.url or ""
+        title = (lead.title or "").lower().strip()
+        author = (lead.username or lead.author if hasattr(lead, 'author') else "") or ""
+        if isinstance(author, str):
+            author = author.lower().strip()
+        else:
+            author = ""
+        unique_string = f"{url}|{title}|{author}"
         return hashlib.md5(unique_string.encode()).hexdigest()
 
     def _load_seen_hashes(self):
