@@ -990,7 +990,7 @@ def render_sidebar():
             <div class="user-info">
                 <div class="user-avatar">U</div>
                 <div class="user-details">
-                    <h4>Usuario</h4>
+                    <h4>User</h4>
                     <span class="user-badge">PRO</span>
                 </div>
             </div>
@@ -998,12 +998,12 @@ def render_sidebar():
         """, unsafe_allow_html=True)
 
         # Nav Label
-        st.markdown('<div class="nav-label">Menu Principal</div>', unsafe_allow_html=True)
+        st.markdown('<div class="nav-label">Main Menu</div>', unsafe_allow_html=True)
 
         # Navigation
         page = st.radio(
             "nav",
-            ["Dashboard", "Buscar Leads", "Mis Leads", "Analytics", "Configuracion"],
+            ["Dashboard", "Find Leads", "My Leads", "Analytics", "Settings"],
             label_visibility="collapsed"
         )
 
@@ -1012,7 +1012,7 @@ def render_sidebar():
         <div class="sidebar-footer">
             <div class="sidebar-stats">
                 <span class="status-dot"></span>
-                <span>{len(st.session_state.filtered_leads)} leads activos</span>
+                <span>{len(st.session_state.filtered_leads)} active leads</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1028,7 +1028,7 @@ def show_dashboard():
     st.markdown("""
     <div class="page-header">
         <h1>Dashboard</h1>
-        <p>Resumen de tu actividad de prospeccion</p>
+        <p>Overview of your prospecting activity</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1053,11 +1053,11 @@ def show_dashboard():
                 </div>
             </div>
             <div class="metric-content">
-                <div class="metric-label">Leads Encontrados</div>
+                <div class="metric-label">Leads Found</div>
                 <div class="metric-value">{leads_count}</div>
             </div>
             <div class="metric-footer">
-                <span class="metric-tag">Esta sesion</span>
+                <span class="metric-tag">This session</span>
             </div>
         </div>
         <div class="metric-card">
@@ -1071,11 +1071,11 @@ def show_dashboard():
                 <span class="metric-trend">+{conv_rate}%</span>
             </div>
             <div class="metric-content">
-                <div class="metric-label">Calificados</div>
+                <div class="metric-label">Qualified</div>
                 <div class="metric-value">{qualified_count}</div>
             </div>
             <div class="metric-footer">
-                <span class="metric-tag">Listos para CRM</span>
+                <span class="metric-tag">Ready for CRM</span>
             </div>
         </div>
         <div class="metric-card">
@@ -1091,7 +1091,7 @@ def show_dashboard():
                 <div class="metric-value">{keywords_count}</div>
             </div>
             <div class="metric-footer">
-                <span class="metric-tag">Activos</span>
+                <span class="metric-tag">Active</span>
             </div>
         </div>
         <div class="metric-card">
@@ -1104,11 +1104,11 @@ def show_dashboard():
                 </div>
             </div>
             <div class="metric-content">
-                <div class="metric-label">Fuentes</div>
+                <div class="metric-label">Sources</div>
                 <div class="metric-value">{sources_count}/4</div>
             </div>
             <div class="metric-footer">
-                <span class="metric-tag">Conectadas</span>
+                <span class="metric-tag">Connected</span>
             </div>
         </div>
     </div>
@@ -1119,8 +1119,8 @@ def show_dashboard():
     <div class="section">
         <div class="section-header">
             <div class="section-title">
-                <h2>Fuentes de Datos</h2>
-                <span class="section-badge">4 Plataformas</span>
+                <h2>Data Sources</h2>
+                <span class="section-badge">4 Platforms</span>
             </div>
         </div>
         <div class="features-grid">
@@ -1133,7 +1133,7 @@ def show_dashboard():
                     </svg>
                 </div>
                 <h3 class="feature-title">Reddit</h3>
-                <p class="feature-desc">Subreddits de negocios y emprendedores</p>
+                <p class="feature-desc">Business and entrepreneur subreddits</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon hn">
@@ -1142,7 +1142,7 @@ def show_dashboard():
                     </svg>
                 </div>
                 <h3 class="feature-title">Hacker News</h3>
-                <p class="feature-desc">Startups y founders tech</p>
+                <p class="feature-desc">Tech startups and founders</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon google">
@@ -1152,7 +1152,7 @@ def show_dashboard():
                     </svg>
                 </div>
                 <h3 class="feature-title">Google</h3>
-                <p class="feature-desc">Busquedas especificas</p>
+                <p class="feature-desc">Targeted search queries</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon ph">
@@ -1161,7 +1161,7 @@ def show_dashboard():
                     </svg>
                 </div>
                 <h3 class="feature-title">Product Hunt</h3>
-                <p class="feature-desc">Comunidad de productos</p>
+                <p class="feature-desc">Product community</p>
             </div>
         </div>
     </div>
@@ -1172,25 +1172,25 @@ def show_dashboard():
     <div class="section">
         <div class="section-header">
             <div class="section-title">
-                <h2>Como Funciona</h2>
-                <span class="section-badge">3 Pasos</span>
+                <h2>How It Works</h2>
+                <span class="section-badge">3 Steps</span>
             </div>
         </div>
         <div class="steps-grid">
             <div class="step-card">
                 <div class="step-number">1</div>
-                <h3 class="step-title">Buscar</h3>
-                <p class="step-desc">Selecciona fuentes y encuentra prospectos automaticamente</p>
+                <h3 class="step-title">Search</h3>
+                <p class="step-desc">Select sources and find prospects automatically</p>
             </div>
             <div class="step-card">
                 <div class="step-number">2</div>
-                <h3 class="step-title">Calificar</h3>
-                <p class="step-desc">La IA evalua y puntua cada lead por relevancia</p>
+                <h3 class="step-title">Qualify</h3>
+                <p class="step-desc">AI evaluates and scores each lead by relevance</p>
             </div>
             <div class="step-card">
                 <div class="step-number">3</div>
-                <h3 class="step-title">Exportar</h3>
-                <p class="step-desc">Envia los mejores leads directo a HubSpot</p>
+                <h3 class="step-title">Export</h3>
+                <p class="step-desc">Send the best leads directly to HubSpot</p>
             </div>
         </div>
     </div>
@@ -1200,8 +1200,8 @@ def show_dashboard():
 def show_search():
     st.markdown("""
     <div class="page-header">
-        <h1>Buscar Leads</h1>
-        <p>Encuentra prospectos con problemas de comunicacion</p>
+        <h1>Find Leads</h1>
+        <p>Find prospects with communication problems</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1210,8 +1210,8 @@ def show_search():
     <div class="section">
         <div class="section-header">
             <div class="section-title">
-                <h2>Fuentes</h2>
-                <span class="section-badge">Selecciona</span>
+                <h2>Sources</h2>
+                <span class="section-badge">Select</span>
             </div>
         </div>
     </div>
@@ -1219,7 +1219,7 @@ def show_search():
 
     col1, col2 = st.columns(2)
     with col1:
-        use_reddit = st.checkbox("Reddit - Subreddits de negocios", value=True)
+        use_reddit = st.checkbox("Reddit - Business subreddits", value=True)
         use_hn = st.checkbox("Hacker News - Startups", value=True)
     with col2:
         use_google = st.checkbox("Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key)
@@ -1234,22 +1234,22 @@ def show_search():
     <div class="section">
         <div class="section-header">
             <div class="section-title">
-                <h2>Calificacion AI</h2>
-                <span class="section-badge">Recomendado</span>
+                <h2>AI Qualification</h2>
+                <span class="section-badge">Recommended</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    use_ai = st.checkbox("Usar IA para calificar leads", value=ai_available, disabled=not ai_available)
+    use_ai = st.checkbox("Use AI to qualify leads", value=ai_available, disabled=not ai_available)
 
     if not ai_available:
-        st.info("Configura OpenAI o Anthropic API key para usar calificacion con IA")
+        st.info("Configure OpenAI or Anthropic API key to use AI qualification")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
     # Search Button
-    if st.button("Iniciar Busqueda", type="primary", use_container_width=True):
+    if st.button("Start Search", type="primary", use_container_width=True):
         all_leads = []
         progress = st.progress(0)
         status = st.empty()
@@ -1262,14 +1262,14 @@ def show_search():
         if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
 
         if not scrapers:
-            st.warning("Selecciona al menos una fuente")
+            st.warning("Select at least one source")
             return
 
         for i, (name, Scraper) in enumerate(scrapers):
             status.markdown(f"""
             <div class="loading-box">
                 <div class="spinner"></div>
-                <span class="loading-text">Buscando en {name}...</span>
+                <span class="loading-text">Searching {name}...</span>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1292,7 +1292,7 @@ def show_search():
             status.markdown("""
             <div class="loading-box">
                 <div class="spinner"></div>
-                <span class="loading-text">Calificando con IA...</span>
+                <span class="loading-text">Qualifying with AI...</span>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1302,7 +1302,7 @@ def show_search():
                 qualified = [l for l in filtered if l.is_qualified]
                 st.session_state.filtered_leads = qualified
                 with results:
-                    st.success(f"IA califico {len(qualified)}/{len(all_leads)} leads")
+                    st.success(f"AI qualified {len(qualified)}/{len(all_leads)} leads")
             except:
                 st.session_state.filtered_leads = all_leads
         else:
@@ -1315,11 +1315,11 @@ def show_search():
         <div class="results-box">
             <div class="result-item">
                 <div class="result-value green">{len(st.session_state.filtered_leads)}</div>
-                <div class="result-label">Calificados</div>
+                <div class="result-label">Qualified</div>
             </div>
             <div class="result-item">
                 <div class="result-value blue">{len(all_leads)}</div>
-                <div class="result-label">Encontrados</div>
+                <div class="result-label">Found</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1330,7 +1330,7 @@ def show_search():
         <div class="section" style="margin-top: 32px;">
             <div class="section-header">
                 <div class="section-title">
-                    <h2>Resultados</h2>
+                    <h2>Results</h2>
                     <span class="section-badge">{len(st.session_state.filtered_leads)} leads</span>
                 </div>
             </div>
@@ -1339,11 +1339,11 @@ def show_search():
 
         for lead in st.session_state.filtered_leads[:5]:
             with st.expander(f"{lead.title[:65]}..."):
-                st.write(f"**Fuente:** {lead.source.value}")
+                st.write(f"**Source:** {lead.source.value}")
                 st.write(f"**Keywords:** {', '.join(lead.keywords_matched[:4])}")
                 if lead.ai_score:
                     st.write(f"**Score:** {lead.ai_score:.2f}")
-                st.write(f"[Ver original]({lead.url})")
+                st.write(f"[View original]({lead.url})")
                 st.write("---")
                 st.write(lead.content[:350] + "...")
 
@@ -1351,20 +1351,20 @@ def show_search():
 def show_leads():
     st.markdown("""
     <div class="page-header">
-        <h1>Mis Leads</h1>
-        <p>Gestiona y exporta tus prospectos</p>
+        <h1>My Leads</h1>
+        <p>Manage and export your prospects</p>
     </div>
     """, unsafe_allow_html=True)
 
-    tab1, tab2 = st.tabs(["Leads Locales", "HubSpot"])
+    tab1, tab2 = st.tabs(["Local Leads", "HubSpot"])
 
     with tab1:
         if not st.session_state.filtered_leads:
             st.markdown("""
             <div class="empty-state">
                 <div class="empty-icon">🔍</div>
-                <h3 class="empty-title">Sin leads todavia</h3>
-                <p class="empty-desc">Ve a Buscar Leads para encontrar prospectos</p>
+                <h3 class="empty-title">No leads yet</h3>
+                <p class="empty-desc">Go to Find Leads to find prospects</p>
             </div>
             """, unsafe_allow_html=True)
         else:
@@ -1373,19 +1373,19 @@ def show_leads():
             <div class="stats-bar">
                 <div class="stat-item">
                     <span class="stat-value">{len(st.session_state.filtered_leads)}</span>
-                    <span class="stat-label">totales</span>
+                    <span class="stat-label">total</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-value" style="color: var(--green-600);">{qualified}</span>
-                    <span class="stat-label">calificados</span>
+                    <span class="stat-label">qualified</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
             data = [{
                 "ID": l.id[:8],
-                "Titulo": l.title[:45] + "..." if len(l.title) > 45 else l.title,
-                "Fuente": l.source.value,
+                "Title": l.title[:45] + "..." if len(l.title) > 45 else l.title,
+                "Source": l.source.value,
                 "Keywords": ", ".join(l.keywords_matched[:3]),
                 "Score": f"{l.ai_score:.2f}" if l.ai_score else "-"
             } for l in st.session_state.filtered_leads]
@@ -1394,22 +1394,22 @@ def show_leads():
 
             st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
-            if st.button("Enviar a HubSpot", type="primary"):
+            if st.button("Send to HubSpot", type="primary"):
                 with HubSpotCRM() as crm:
                     if not crm.is_configured():
-                        st.error("HubSpot no configurado")
+                        st.error("HubSpot not configured")
                     else:
-                        with st.spinner("Enviando..."):
+                        with st.spinner("Sending..."):
                             r = crm.send_leads_to_crm(st.session_state.filtered_leads)
                         st.markdown(f"""
                         <div class="results-box">
                             <div class="result-item">
                                 <div class="result-value green">{r['created']}</div>
-                                <div class="result-label">Creados</div>
+                                <div class="result-label">Created</div>
                             </div>
                             <div class="result-item">
                                 <div class="result-value orange">{r['existing']}</div>
-                                <div class="result-label">Existentes</div>
+                                <div class="result-label">Existing</div>
                             </div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -1420,34 +1420,34 @@ def show_leads():
                 st.markdown("""
                 <div class="empty-state">
                     <div class="empty-icon">☁️</div>
-                    <h3 class="empty-title">HubSpot no conectado</h3>
-                    <p class="empty-desc">Agrega HUBSPOT_API_KEY en .env</p>
+                    <h3 class="empty-title">HubSpot not connected</h3>
+                    <p class="empty-desc">Add HUBSPOT_API_KEY in .env</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
-                stage = st.selectbox("Filtrar etapa", ["Todos"] + [s.value for s in LeadStage])
+                stage = st.selectbox("Filter by stage", ["All"] + [s.value for s in LeadStage])
 
-                if st.button("Cargar", type="primary"):
-                    with st.spinner("Cargando..."):
-                        contacts = crm.get_all_contacts() if stage == "Todos" else crm.get_contacts_by_stage(LeadStage(stage))
+                if st.button("Load", type="primary"):
+                    with st.spinner("Loading..."):
+                        contacts = crm.get_all_contacts() if stage == "All" else crm.get_contacts_by_stage(LeadStage(stage))
 
                     if contacts:
                         data = [{
-                            "Nombre": f"{c.firstname or ''} {c.lastname or ''}".strip() or "-",
+                            "Name": f"{c.firstname or ''} {c.lastname or ''}".strip() or "-",
                             "Email": c.email or "-",
-                            "Empresa": c.company or "-",
-                            "Etapa": c.lead_stage.value
+                            "Company": c.company or "-",
+                            "Stage": c.lead_stage.value
                         } for c in contacts]
                         st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
                     else:
-                        st.info("Sin contactos")
+                        st.info("No contacts")
 
 
 def show_analytics():
     st.markdown("""
     <div class="page-header">
         <h1>Analytics</h1>
-        <p>Metricas y rendimiento</p>
+        <p>Metrics and performance</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1469,7 +1469,7 @@ def show_analytics():
                         </div>
                     </div>
                     <div class="metric-content">
-                        <div class="metric-label">Encontrados</div>
+                        <div class="metric-label">Found</div>
                         <div class="metric-value">{len(st.session_state.leads)}</div>
                     </div>
                 </div>
@@ -1483,7 +1483,7 @@ def show_analytics():
                         </div>
                     </div>
                     <div class="metric-content">
-                        <div class="metric-label">Calificados</div>
+                        <div class="metric-label">Qualified</div>
                         <div class="metric-value">{len(st.session_state.filtered_leads)}</div>
                     </div>
                 </div>
@@ -1498,7 +1498,7 @@ def show_analytics():
                         </div>
                     </div>
                     <div class="metric-content">
-                        <div class="metric-label">Tasa Conv.</div>
+                        <div class="metric-label">Conv. Rate</div>
                         <div class="metric-value">{rate:.0f}%</div>
                     </div>
                 </div>
@@ -1511,7 +1511,7 @@ def show_analytics():
                 <div class="section">
                     <div class="section-header">
                         <div class="section-title">
-                            <h2>Por Fuente</h2>
+                            <h2>By Source</h2>
                         </div>
                     </div>
                 </div>
@@ -1521,9 +1521,9 @@ def show_analytics():
                     counts[l.source.value] = counts.get(l.source.value, 0) + 1
                 st.bar_chart(counts)
 
-            st.info("Conecta HubSpot para ver estadisticas completas")
+            st.info("Connect HubSpot to view complete statistics")
         else:
-            with st.spinner("Cargando..."):
+            with st.spinner("Loading..."):
                 stats = crm.get_statistics()
 
             if "error" not in stats:
@@ -1582,7 +1582,7 @@ def show_analytics():
                             </div>
                         </div>
                         <div class="metric-content">
-                            <div class="metric-label">Ganados</div>
+                            <div class="metric-label">Won</div>
                             <div class="metric-value">{stats["by_stage"].get("closed_won", 0)}</div>
                         </div>
                     </div>
@@ -1595,7 +1595,7 @@ def show_analytics():
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">
-                                <h2>Por Etapa</h2>
+                                <h2>By Stage</h2>
                             </div>
                         </div>
                     </div>
@@ -1606,8 +1606,8 @@ def show_analytics():
 def show_config():
     st.markdown("""
     <div class="page-header">
-        <h1>Configuracion</h1>
-        <p>APIs y parametros del sistema</p>
+        <h1>Settings</h1>
+        <p>APIs and system parameters</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1616,7 +1616,7 @@ def show_config():
     <div class="section">
         <div class="section-header">
             <div class="section-title">
-                <h2>Integraciones</h2>
+                <h2>Integrations</h2>
             </div>
         </div>
     </div>
@@ -1632,7 +1632,7 @@ def show_config():
     html = '<div class="api-grid">'
     for icon, name, key in apis:
         status = "connected" if key else "disconnected"
-        label = "Conectado" if key else "No configurado"
+        label = "Connected" if key else "Not configured"
         html += f"""
         <div class="api-card {status}">
             <div class="api-icon">{icon}</div>
@@ -1672,7 +1672,7 @@ def show_config():
     st.markdown(f'<div class="tags-container">{tags}</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
-    st.info("Edita el archivo .env para cambiar la configuracion")
+    st.info("Edit the .env file to change the configuration")
 
 
 # ============================================
@@ -1683,13 +1683,13 @@ def main():
 
     if page == "Dashboard":
         show_dashboard()
-    elif page == "Buscar Leads":
+    elif page == "Find Leads":
         show_search()
-    elif page == "Mis Leads":
+    elif page == "My Leads":
         show_leads()
     elif page == "Analytics":
         show_analytics()
-    elif page == "Configuracion":
+    elif page == "Settings":
         show_config()
 
 
