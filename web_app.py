@@ -138,10 +138,10 @@ st.markdown("""
     #MainMenu, footer, header {visibility: hidden;}
     .stDeployButton {display: none;}
 
-    /* ========== SIDEBAR ========== */
+    /* ========== SIDEBAR - LIGHT THEME ========== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0A0A0F 0%, #111118 100%) !important;
-        border-right: 1px solid rgba(255,255,255,0.06) !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+        border-right: 1px solid #E5E7EB !important;
         padding: 0 !important;
     }
 
@@ -150,7 +150,7 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-        color: var(--neutral-400) !important;
+        color: #6B7280 !important;
     }
 
     /* Sidebar Radio Navigation */
@@ -168,7 +168,7 @@ st.markdown("""
         border-radius: var(--radius-sm) !important;
         padding: 12px 14px !important;
         margin: 0 !important;
-        color: rgba(255,255,255,0.5) !important;
+        color: #6B7280 !important;
         font-weight: 500 !important;
         font-size: 14px !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -176,8 +176,8 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stRadio > div > label:hover {
-        background: rgba(255,255,255,0.04) !important;
-        color: rgba(255,255,255,0.9) !important;
+        background: #F3F4F6 !important;
+        color: #1F2937 !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
@@ -187,11 +187,12 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
     }
 
-    /* ========== LOGO SECTION ========== */
+    /* ========== LOGO SECTION - LIGHT ========== */
     .logo-section {
         padding: 24px 20px 20px 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.04);
+        border-bottom: 1px solid #E5E7EB;
         margin-bottom: 4px;
+        background: #FFFFFF;
     }
 
     .logo-container {
@@ -221,7 +222,7 @@ st.markdown("""
     }
 
     .logo-title {
-        color: var(--white);
+        color: #1F2937;
         font-size: 18px;
         font-weight: 700;
         letter-spacing: -0.03em;
@@ -230,7 +231,7 @@ st.markdown("""
     }
 
     .logo-subtitle {
-        color: rgba(255,255,255,0.35);
+        color: #9CA3AF;
         font-size: 11px;
         font-weight: 500;
         margin: 2px 0 0 0;
@@ -238,19 +239,19 @@ st.markdown("""
         letter-spacing: 0.1em;
     }
 
-    /* ========== USER CARD ========== */
+    /* ========== USER CARD - LIGHT ========== */
     .user-card {
         margin: 12px;
         padding: 14px;
-        background: rgba(255,255,255,0.02);
+        background: #F9FAFB;
         border-radius: var(--radius-sm);
-        border: 1px solid rgba(255,255,255,0.04);
+        border: 1px solid #E5E7EB;
         transition: all 0.2s ease;
     }
 
     .user-card:hover {
-        background: rgba(255,255,255,0.04);
-        border-color: rgba(255,255,255,0.08);
+        background: #F3F4F6;
+        border-color: #D1D5DB;
     }
 
     .user-info {
@@ -274,7 +275,7 @@ st.markdown("""
     }
 
     .user-details h4 {
-        color: rgba(255,255,255,0.9);
+        color: #1F2937;
         font-size: 13px;
         font-weight: 600;
         margin: 0 0 2px 0;
@@ -294,28 +295,29 @@ st.markdown("""
         letter-spacing: 0.06em;
     }
 
-    /* ========== NAV LABEL ========== */
+    /* ========== NAV LABEL - LIGHT ========== */
     .nav-label {
         padding: 20px 20px 8px 20px;
         font-size: 10px;
         font-weight: 600;
-        color: rgba(255,255,255,0.25);
+        color: #9CA3AF;
         text-transform: uppercase;
         letter-spacing: 0.12em;
     }
 
-    /* ========== SIDEBAR FOOTER ========== */
+    /* ========== SIDEBAR FOOTER - LIGHT ========== */
     .sidebar-footer {
         padding: 16px 20px;
-        border-top: 1px solid rgba(255,255,255,0.04);
+        border-top: 1px solid #E5E7EB;
         margin-top: auto;
+        background: #FFFFFF;
     }
 
     .sidebar-stats {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: rgba(255,255,255,0.4);
+        color: #6B7280;
         font-size: 12px;
     }
 
