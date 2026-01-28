@@ -46,19 +46,27 @@ class YelpScraper(BaseScraper):
             "poor communication"
         ]
 
-    def scrape(self, time_filter: str = "week") -> LeadBatch:
+    def scrape(self, time_filter: str = "week", location: str = "") -> LeadBatch:
         """
         Scrape Yelp for businesses with phone/service complaints.
+
+        Args:
+            time_filter: Time range (not used by Yelp, but kept for API consistency)
+            location: Location to search (city, state, zip code)
         """
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        self.logger.info("Starting Yelp scrape for businesses with phone issues")
+        # Store location for use in search
+        self.search_location = location
+
+        location_msg = f" in {location}" if location else ""
+        self.logger.info(f"Starting Yelp scrape for businesses{location_msg}")
 
         # Search businesses in target categories
         for category in self.categories[:5]:  # Limit for speed
             try:
-                leads = self._search_category(category)
+                leads = self._search_category(category, location)
                 all_leads.extend(leads)
                 self.logger.info(f"Found {len(leads)} businesses in '{category}'")
                 time.sleep(1)
@@ -76,14 +84,17 @@ class YelpScraper(BaseScraper):
         self.logger.info(f"Yelp scrape complete: {batch.total_found} businesses found")
         return batch
 
-    def _search_category(self, category: str) -> List[Lead]:
+    def _search_category(self, category: str, user_location: str = "") -> List[Lead]:
         """Search Yelp for businesses in a category."""
         leads = []
 
-        # Search in major US cities
-        locations = ["New York", "Los Angeles", "Chicago", "Houston", "Miami"]
+        # Use user-provided location or default to major US cities
+        if user_location:
+            locations = [user_location]
+        else:
+            locations = ["New York", "Los Angeles", "Chicago", "Houston", "Miami"]
 
-        for location in locations[:2]:  # Limit locations for speed
+        for location in locations[:3]:  # Limit locations for speed
             url = f"{self.BASE_URL}?find_desc={quote(category)}&find_loc={quote(location)}"
 
             try:

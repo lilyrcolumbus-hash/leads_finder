@@ -30,9 +30,13 @@ class IndeedScraper(BaseScraper):
             "virtual assistant"
         ]
 
-    def scrape(self, time_filter: str = "week") -> LeadBatch:
+    def scrape(self, time_filter: str = "week", location: str = "") -> LeadBatch:
         """
         Scrape Indeed for companies hiring receptionists.
+
+        Args:
+            time_filter: Time range for job postings
+            location: Location to search (city, state, zip code)
 
         Companies posting these jobs = potential customers for AI receptionist.
         """
@@ -50,11 +54,15 @@ class IndeedScraper(BaseScraper):
         }
         date_filter = time_map.get(time_filter, "7")
 
-        self.logger.info(f"Starting Indeed scrape for receptionist jobs")
+        # Store location for use in search
+        self.search_location = location
+
+        location_msg = f" in {location}" if location else ""
+        self.logger.info(f"Starting Indeed scrape for receptionist jobs{location_msg}")
 
         for query in self.job_queries[:4]:  # Limit queries for speed
             try:
-                leads = self._search_jobs(query, date_filter)
+                leads = self._search_jobs(query, date_filter, location)
                 all_leads.extend(leads)
                 self.logger.info(f"Found {len(leads)} job postings for '{query}'")
                 time.sleep(1)  # Rate limiting
@@ -72,12 +80,14 @@ class IndeedScraper(BaseScraper):
         self.logger.info(f"Indeed scrape complete: {batch.total_found} companies found")
         return batch
 
-    def _search_jobs(self, query: str, date_filter: str) -> List[Lead]:
+    def _search_jobs(self, query: str, date_filter: str, location: str = "") -> List[Lead]:
         """Search Indeed for job postings."""
         leads = []
 
         # Build URL
         url = f"{self.BASE_URL}?q={quote(query)}&sort=date"
+        if location:
+            url += f"&l={quote(location)}"
         if date_filter:
             url += f"&fromage={date_filter}"
 

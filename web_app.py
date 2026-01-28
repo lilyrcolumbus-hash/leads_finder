@@ -1638,6 +1638,44 @@ def show_search():
 
     st.divider()
 
+    # Location Filter
+    st.subheader("📍 Location Filter (for Indeed & Yelp)")
+
+    location_col1, location_col2 = st.columns(2)
+    with location_col1:
+        search_city = st.text_input("City", placeholder="Miami, Los Angeles, etc.", key="search_city")
+    with location_col2:
+        us_states = [
+            "All States", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+            "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+            "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+            "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+            "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+        ]
+        search_state = st.selectbox("State", us_states, key="search_state")
+
+    zip_col1, zip_col2 = st.columns(2)
+    with zip_col1:
+        search_zip = st.text_input("Zip Code (optional)", placeholder="33101", key="search_zip")
+    with zip_col2:
+        search_radius = st.selectbox("Radius", ["10 miles", "25 miles", "50 miles", "100 miles"], index=1, key="search_radius")
+
+    # Build location string
+    location_parts = []
+    if search_city:
+        location_parts.append(search_city)
+    if search_state and search_state != "All States":
+        location_parts.append(search_state)
+    if search_zip:
+        location_parts.append(search_zip)
+
+    search_location = ", ".join(location_parts) if location_parts else ""
+
+    if search_location:
+        st.success(f"📍 Searching in: **{search_location}**")
+
+    st.divider()
+
     # Industry Filter
     st.subheader("🏢 Filter by Industry (Optional)")
     industries = ["All Industries"] + list(settings.industries.keys())
@@ -1685,7 +1723,11 @@ def show_search():
 
             try:
                 with Scraper() as s:
-                    batch = s.scrape(time_filter=selected_time)
+                    # Pass location to Indeed and Yelp scrapers
+                    if name in ["Indeed", "Yelp"] and search_location:
+                        batch = s.scrape(time_filter=selected_time, location=search_location)
+                    else:
+                        batch = s.scrape(time_filter=selected_time)
                     all_leads.extend(batch.leads)
                     with results:
                         st.success(f"{name}: {len(batch.leads)} leads")
