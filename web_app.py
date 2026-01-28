@@ -1143,6 +1143,8 @@ if 'filtered_leads' not in st.session_state:
     st.session_state.filtered_leads = []
 if 'scraping_done' not in st.session_state:
     st.session_state.scraping_done = False
+if 'nav_page' not in st.session_state:
+    st.session_state.nav_page = "Dashboard"
 
 
 # ============================================
@@ -1186,11 +1188,19 @@ def render_sidebar():
         st.markdown('<div class="nav-label">Main Menu</div>', unsafe_allow_html=True)
 
         # Navigation
+        pages = ["Dashboard", "Find Leads", "My Leads", "Analytics", "Settings"]
+        current_index = pages.index(st.session_state.nav_page) if st.session_state.nav_page in pages else 0
+
         page = st.radio(
             "nav",
-            ["Dashboard", "Find Leads", "My Leads", "Analytics", "Settings"],
+            pages,
+            index=current_index,
             label_visibility="collapsed"
         )
+
+        # Sync radio selection with session state
+        if page != st.session_state.nav_page:
+            st.session_state.nav_page = page
 
         # Footer
         st.markdown(f"""
@@ -1202,20 +1212,38 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        return page
-
 
 # ============================================
 # PAGES
 # ============================================
 def show_dashboard():
     # Header
-    st.markdown("""
-    <div class="page-header">
-        <h1>Dashboard</h1>
-        <p>Overview of your prospecting activity</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.title("📊 Dashboard")
+    st.caption("Overview of your prospecting activity")
+
+    st.divider()
+
+    # Quick Actions
+    st.subheader("⚡ Quick Actions")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        if st.button("🔎 Start Searching", type="primary", use_container_width=True):
+            st.session_state.nav_page = "Find Leads"
+            st.rerun()
+
+    with col2:
+        if st.button("📋 View My Leads", use_container_width=True):
+            st.session_state.nav_page = "My Leads"
+            st.rerun()
+
+    with col3:
+        if st.button("⚙️ Configure APIs", use_container_width=True):
+            st.session_state.nav_page = "Settings"
+            st.rerun()
+
+    st.divider()
 
     # Metrics
     leads_count = len(st.session_state.leads)
@@ -2008,7 +2036,9 @@ def show_config():
 # MAIN
 # ============================================
 def main():
-    page = render_sidebar()
+    render_sidebar()
+
+    page = st.session_state.nav_page
 
     if page == "Dashboard":
         show_dashboard()
