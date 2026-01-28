@@ -1765,8 +1765,25 @@ def show_leads():
 
     st.divider()
 
-    # Import Section
+    # Import Section with Field Mapping
     st.subheader("📤 Import Leads")
+
+    # Define standard CRM fields
+    CRM_FIELDS = {
+        'name': {'label': 'Name / Title', 'icon': '👤', 'required': False},
+        'email': {'label': 'Email', 'icon': '📧', 'required': False},
+        'phone': {'label': 'Phone', 'icon': '📱', 'required': False},
+        'company': {'label': 'Company', 'icon': '🏢', 'required': False},
+        'position': {'label': 'Position/Job Title', 'icon': '💼', 'required': False},
+        'website': {'label': 'Website', 'icon': '🌐', 'required': False},
+        'linkedin': {'label': 'LinkedIn', 'icon': '🔗', 'required': False},
+        'location': {'label': 'Location/City', 'icon': '📍', 'required': False},
+        'country': {'label': 'Country', 'icon': '🌍', 'required': False},
+        'industry': {'label': 'Industry', 'icon': '🏭', 'required': False},
+        'notes': {'label': 'Notes', 'icon': '📝', 'required': False},
+        'source': {'label': 'Source', 'icon': '📥', 'required': False},
+        'status': {'label': 'Status', 'icon': '📊', 'required': False},
+    }
 
     uploaded_file = st.file_uploader(
         "Upload file with leads",
@@ -1778,63 +1795,211 @@ def show_leads():
         file_extension = uploaded_file.name.split('.')[-1].lower()
 
         if file_extension in ['xlsx', 'xls']:
-            # Excel file - show sheet selection
+            # Excel file - show sheet selection and field mapping
             file_content = uploaded_file.getvalue()
             sheets = lead_manager.get_excel_sheets(file_content)
 
             if sheets:
                 st.info(f"📊 Excel file detected with **{len(sheets)} sheet(s)**: {', '.join(sheets)}")
 
-                # Multi-select for sheets
-                selected_sheets = st.multiselect(
-                    "Select sheets to import",
-                    options=sheets,
-                    default=sheets,
-                    help="Select one or more sheets to import. All selected sheets will be processed."
-                )
+                # Sheet selection
+                selected_sheet = st.selectbox("Select sheet to preview", sheets)
 
-                col_import1, col_import2 = st.columns([1, 3])
-                with col_import1:
-                    import_all = st.checkbox("Import all sheets", value=True)
+                # Read the selected sheet for preview
+                try:
+                    import pandas as pd
+                    import io
+                    df_preview = pd.read_excel(io.BytesIO(file_content), sheet_name=selected_sheet, nrows=5)
+                    df_full = pd.read_excel(io.BytesIO(file_content), sheet_name=selected_sheet)
+                    file_columns = list(df_preview.columns)
 
-                if import_all:
-                    selected_sheets = sheets
+                    st.success(f"Found **{len(df_full)}** rows and **{len(file_columns)}** columns")
 
-                if selected_sheets:
-                    if st.button(f"📥 Import {len(selected_sheets)} Sheet(s)", type="primary"):
-                        with st.spinner(f"Importing {len(selected_sheets)} sheet(s)..."):
-                            result = lead_manager.import_from_excel(file_content, selected_sheets)
+                    # Data Preview
+                    with st.expander("📋 Data Preview (first 5 rows)", expanded=True):
+                        st.dataframe(df_preview, use_container_width=True)
 
+                    # Field Mapping Section
+                    st.markdown("### 🔗 Field Mapping")
+                    st.caption("Match your file columns to CRM fields. Leave as 'Skip' to ignore a column.")
+
+                    # Auto-detect column mappings
+                    auto_mappings = {}
+                    column_lower_map = {col.lower().strip(): col for col in file_columns}
+
+                    mapping_hints = {
+                        'name': ['name', 'nombre', 'title', 'titulo', 'contact', 'contacto', 'full name', 'nombre completo'],
+                        'email': ['email', 'correo', 'e-mail', 'mail', 'email address'],
+                        'phone': ['phone', 'telefono', 'tel', 'mobile', 'celular', 'whatsapp', 'telephone'],
+                        'company': ['company', 'empresa', 'organization', 'business', 'company name'],
+                        'position': ['position', 'cargo', 'job', 'title', 'role', 'puesto', 'job title'],
+                        'website': ['website', 'web', 'sitio', 'url', 'domain'],
+                        'linkedin': ['linkedin', 'linkedin url'],
+                        'location': ['location', 'city', 'ciudad', 'ubicacion', 'address'],
+                        'country': ['country', 'pais', 'nation'],
+                        'industry': ['industry', 'industria', 'sector', 'vertical'],
+                        'notes': ['notes', 'notas', 'comments', 'comentarios'],
+                        'source': ['source', 'fuente', 'origen'],
+                        'status': ['status', 'estado', 'stage'],
+                    }
+
+                    for field, hints in mapping_hints.items():
+                        for hint in hints:
+                            if hint in column_lower_map:
+                                auto_mappings[field] = column_lower_map[hint]
+                                break
+
+                    # Display mapping interface
+                    mapping_cols = st.columns(3)
+                    field_mappings = {}
+
+                    for idx, (field_key, field_info) in enumerate(CRM_FIELDS.items()):
+                        with mapping_cols[idx % 3]:
+                            default_idx = 0
+                            options = ['-- Skip --'] + file_columns
+                            if field_key in auto_mappings:
+                                try:
+                                    default_idx = options.index(auto_mappings[field_key])
+                                except ValueError:
+                                    default_idx = 0
+
+                            selected = st.selectbox(
+                                f"{field_info['icon']} {field_info['label']}",
+                                options=options,
+                                index=default_idx,
+                                key=f"map_{field_key}"
+                            )
+                            if selected != '-- Skip --':
+                                field_mappings[field_key] = selected
+
+                    # Import buttons
+                    st.markdown("---")
+                    import_col1, import_col2, import_col3 = st.columns([2, 2, 1])
+
+                    with import_col1:
+                        import_all_sheets = st.checkbox("Import all sheets with same mapping", value=False)
+
+                    with import_col2:
+                        st.caption(f"Mapped **{len(field_mappings)}** fields")
+
+                    with import_col3:
+                        if st.button("📥 Import", type="primary", use_container_width=True):
+                            sheets_to_import = sheets if import_all_sheets else [selected_sheet]
+
+                            with st.spinner(f"Importing {len(sheets_to_import)} sheet(s)..."):
+                                result = lead_manager.import_from_excel_mapped(
+                                    file_content,
+                                    sheets_to_import,
+                                    field_mappings
+                                )
+
+                            if result.get('error_message'):
+                                st.error(f"Error: {result['error_message']}")
+                            else:
+                                st.success(f"✅ Imported: **{result['imported']}** | Duplicates: {result['duplicates']} | Errors: {result['errors']}")
+                                st.rerun()
+
+                except Exception as e:
+                    st.error(f"Error reading file: {str(e)}")
+                    # Fallback to original import
+                    if st.button("📥 Import (Auto-detect fields)", type="primary"):
+                        result = lead_manager.import_from_excel(file_content, sheets)
                         if result.get('error_message'):
                             st.error(f"Error: {result['error_message']}")
                         else:
-                            st.success(f"✅ Total Imported: **{result['imported']}** | Duplicates: {result['duplicates']} | Errors: {result['errors']}")
-
-                            # Show per-sheet breakdown
-                            if result.get('sheets_processed'):
-                                with st.expander("📋 Sheet Details", expanded=False):
-                                    for sheet_info in result['sheets_processed']:
-                                        if 'error' in sheet_info:
-                                            st.error(f"❌ **{sheet_info['name']}**: {sheet_info['error']}")
-                                        else:
-                                            st.write(f"✅ **{sheet_info['name']}**: {sheet_info['imported']} imported, {sheet_info['duplicates']} duplicates")
+                            st.success(f"✅ Imported: **{result['imported']}**")
                             st.rerun()
-                else:
-                    st.warning("Please select at least one sheet to import.")
             else:
-                st.error("Could not read sheets from Excel file. Make sure the file is valid.")
+                st.error("Could not read sheets from Excel file.")
 
         else:
-            # CSV file - original logic
-            if st.button("📥 Import Leads", type="primary"):
+            # CSV file with field mapping
+            try:
+                import pandas as pd
+                import io
                 csv_content = uploaded_file.getvalue().decode('utf-8')
-                result = lead_manager.import_from_csv(csv_content)
+                df_preview = pd.read_csv(io.StringIO(csv_content), nrows=5)
+                df_full = pd.read_csv(io.StringIO(csv_content))
+                file_columns = list(df_preview.columns)
 
-                if result.get('error_message'):
-                    st.error(f"Error: {result['error_message']}")
-                else:
-                    st.success(f"✅ Imported: {result['imported']} | Duplicates skipped: {result['duplicates']} | Errors: {result['errors']}")
-                    st.rerun()
+                st.success(f"Found **{len(df_full)}** rows and **{len(file_columns)}** columns")
+
+                # Data Preview
+                with st.expander("📋 Data Preview (first 5 rows)", expanded=True):
+                    st.dataframe(df_preview, use_container_width=True)
+
+                # Field Mapping
+                st.markdown("### 🔗 Field Mapping")
+                st.caption("Match your file columns to CRM fields")
+
+                # Auto-detect
+                auto_mappings = {}
+                column_lower_map = {col.lower().strip(): col for col in file_columns}
+
+                mapping_hints = {
+                    'name': ['name', 'nombre', 'title', 'titulo', 'contact'],
+                    'email': ['email', 'correo', 'e-mail', 'mail'],
+                    'phone': ['phone', 'telefono', 'tel', 'mobile', 'celular'],
+                    'company': ['company', 'empresa', 'organization'],
+                    'position': ['position', 'cargo', 'job', 'title', 'role'],
+                    'website': ['website', 'web', 'url'],
+                    'linkedin': ['linkedin'],
+                    'location': ['location', 'city', 'ciudad'],
+                    'country': ['country', 'pais'],
+                    'industry': ['industry', 'industria', 'sector'],
+                    'notes': ['notes', 'notas', 'comments'],
+                    'source': ['source', 'fuente'],
+                    'status': ['status', 'estado'],
+                }
+
+                for field, hints in mapping_hints.items():
+                    for hint in hints:
+                        if hint in column_lower_map:
+                            auto_mappings[field] = column_lower_map[hint]
+                            break
+
+                mapping_cols = st.columns(3)
+                field_mappings = {}
+
+                for idx, (field_key, field_info) in enumerate(CRM_FIELDS.items()):
+                    with mapping_cols[idx % 3]:
+                        default_idx = 0
+                        options = ['-- Skip --'] + file_columns
+                        if field_key in auto_mappings:
+                            try:
+                                default_idx = options.index(auto_mappings[field_key])
+                            except ValueError:
+                                default_idx = 0
+
+                        selected = st.selectbox(
+                            f"{field_info['icon']} {field_info['label']}",
+                            options=options,
+                            index=default_idx,
+                            key=f"csv_map_{field_key}"
+                        )
+                        if selected != '-- Skip --':
+                            field_mappings[field_key] = selected
+
+                st.markdown("---")
+                if st.button("📥 Import Leads", type="primary"):
+                    result = lead_manager.import_from_csv_mapped(csv_content, field_mappings)
+
+                    if result.get('error_message'):
+                        st.error(f"Error: {result['error_message']}")
+                    else:
+                        st.success(f"✅ Imported: {result['imported']} | Duplicates: {result['duplicates']} | Errors: {result['errors']}")
+                        st.rerun()
+
+            except Exception as e:
+                st.error(f"Error reading CSV: {str(e)}")
+                if st.button("📥 Import (Auto-detect)", type="primary"):
+                    csv_content = uploaded_file.getvalue().decode('utf-8')
+                    result = lead_manager.import_from_csv(csv_content)
+                    if result.get('error_message'):
+                        st.error(f"Error: {result['error_message']}")
+                    else:
+                        st.success(f"✅ Imported: {result['imported']}")
+                        st.rerun()
 
     st.divider()
 

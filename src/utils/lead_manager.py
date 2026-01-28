@@ -509,6 +509,238 @@ class LeadManager:
                 return value
         return None
 
+    def import_from_excel_mapped(self, file_content: bytes, sheet_names: List[str], field_mappings: Dict[str, str]) -> Dict:
+        """
+        Import leads from Excel with explicit field mappings.
+
+        Args:
+            file_content: Raw bytes of the Excel file
+            sheet_names: List of sheet names to import
+            field_mappings: Dict mapping CRM fields to column names (e.g., {'email': 'Email Address', 'name': 'Contact Name'})
+
+        Returns:
+            Dict with import statistics
+        """
+        if not PANDAS_AVAILABLE:
+            return {'imported': 0, 'duplicates': 0, 'errors': 1, 'error_message': 'Pandas not available'}
+
+        total_imported = 0
+        total_duplicates = 0
+        total_errors = 0
+
+        try:
+            excel_file = pd.ExcelFile(io.BytesIO(file_content))
+
+            # Load existing data
+            existing_data = {'leads': [], 'last_updated': None}
+            if self.storage_path.exists():
+                try:
+                    with open(self.storage_path, 'r') as f:
+                        existing_data = json.load(f)
+                except Exception:
+                    pass
+
+            for sheet_name in sheet_names:
+                if sheet_name not in excel_file.sheet_names:
+                    continue
+
+                df = pd.read_excel(excel_file, sheet_name=sheet_name)
+
+                for _, row in df.iterrows():
+                    try:
+                        # Extract values using the explicit mappings
+                        def get_mapped_value(field_key):
+                            if field_key in field_mappings:
+                                col_name = field_mappings[field_key]
+                                if col_name in row.index:
+                                    val = row[col_name]
+                                    if pd.notna(val):
+                                        return str(val).strip()
+                            return ''
+
+                        name = get_mapped_value('name')
+                        email = get_mapped_value('email')
+                        phone = get_mapped_value('phone')
+                        company = get_mapped_value('company')
+                        position = get_mapped_value('position')
+                        website = get_mapped_value('website')
+                        linkedin = get_mapped_value('linkedin')
+                        location = get_mapped_value('location')
+                        country = get_mapped_value('country')
+                        industry = get_mapped_value('industry')
+                        notes = get_mapped_value('notes')
+                        source = get_mapped_value('source') or f'excel:{sheet_name}'
+                        status = get_mapped_value('status') or 'new'
+
+                        # Skip empty rows
+                        if not name and not email and not phone and not company:
+                            continue
+
+                        # Generate hash for deduplication
+                        unique_string = f"{email}|{name.lower()}|{phone}|{company.lower()}"
+                        lead_hash = hashlib.md5(unique_string.encode()).hexdigest()
+
+                        if lead_hash in self._seen_hashes:
+                            total_duplicates += 1
+                            continue
+
+                        # Create lead dict
+                        lead_dict = {
+                            'title': name,
+                            'author': name,
+                            'email': email,
+                            'phone': phone,
+                            'company': company,
+                            'position': position,
+                            'website': website,
+                            'linkedin': linkedin,
+                            'location': location,
+                            'country': country,
+                            'industry': industry,
+                            'notes': notes,
+                            'source': source,
+                            'status': status,
+                            'pain_score': 0,
+                            'url': website or linkedin or '',
+                            'content': notes,
+                            'hash': lead_hash,
+                            'saved_at': datetime.now().isoformat(),
+                            'imported': True,
+                            'import_sheet': sheet_name
+                        }
+
+                        existing_data['leads'].append(lead_dict)
+                        self._seen_hashes.add(lead_hash)
+                        total_imported += 1
+
+                    except Exception:
+                        total_errors += 1
+
+            # Save
+            existing_data['last_updated'] = datetime.now().isoformat()
+            existing_data['total_count'] = len(existing_data['leads'])
+
+            with open(self.storage_path, 'w') as f:
+                json.dump(existing_data, f, indent=2, default=str)
+
+        except Exception as e:
+            return {'imported': 0, 'duplicates': 0, 'errors': 1, 'error_message': str(e)}
+
+        return {
+            'imported': total_imported,
+            'duplicates': total_duplicates,
+            'errors': total_errors
+        }
+
+    def import_from_csv_mapped(self, csv_content: str, field_mappings: Dict[str, str]) -> Dict:
+        """
+        Import leads from CSV with explicit field mappings.
+
+        Args:
+            csv_content: CSV string content
+            field_mappings: Dict mapping CRM fields to column names
+
+        Returns:
+            Dict with import statistics
+        """
+        imported = 0
+        duplicates = 0
+        errors = 0
+
+        try:
+            if not PANDAS_AVAILABLE:
+                return {'imported': 0, 'duplicates': 0, 'errors': 1, 'error_message': 'Pandas not available'}
+
+            df = pd.read_csv(io.StringIO(csv_content))
+
+            existing_data = {'leads': [], 'last_updated': None}
+            if self.storage_path.exists():
+                try:
+                    with open(self.storage_path, 'r') as f:
+                        existing_data = json.load(f)
+                except Exception:
+                    pass
+
+            for _, row in df.iterrows():
+                try:
+                    def get_mapped_value(field_key):
+                        if field_key in field_mappings:
+                            col_name = field_mappings[field_key]
+                            if col_name in row.index:
+                                val = row[col_name]
+                                if pd.notna(val):
+                                    return str(val).strip()
+                        return ''
+
+                    name = get_mapped_value('name')
+                    email = get_mapped_value('email')
+                    phone = get_mapped_value('phone')
+                    company = get_mapped_value('company')
+                    position = get_mapped_value('position')
+                    website = get_mapped_value('website')
+                    linkedin = get_mapped_value('linkedin')
+                    location = get_mapped_value('location')
+                    country = get_mapped_value('country')
+                    industry = get_mapped_value('industry')
+                    notes = get_mapped_value('notes')
+                    source = get_mapped_value('source') or 'csv_import'
+                    status = get_mapped_value('status') or 'new'
+
+                    if not name and not email and not phone and not company:
+                        continue
+
+                    unique_string = f"{email}|{name.lower()}|{phone}|{company.lower()}"
+                    lead_hash = hashlib.md5(unique_string.encode()).hexdigest()
+
+                    if lead_hash in self._seen_hashes:
+                        duplicates += 1
+                        continue
+
+                    lead_dict = {
+                        'title': name,
+                        'author': name,
+                        'email': email,
+                        'phone': phone,
+                        'company': company,
+                        'position': position,
+                        'website': website,
+                        'linkedin': linkedin,
+                        'location': location,
+                        'country': country,
+                        'industry': industry,
+                        'notes': notes,
+                        'source': source,
+                        'status': status,
+                        'pain_score': 0,
+                        'url': website or linkedin or '',
+                        'content': notes,
+                        'hash': lead_hash,
+                        'saved_at': datetime.now().isoformat(),
+                        'imported': True
+                    }
+
+                    existing_data['leads'].append(lead_dict)
+                    self._seen_hashes.add(lead_hash)
+                    imported += 1
+
+                except Exception:
+                    errors += 1
+
+            existing_data['last_updated'] = datetime.now().isoformat()
+            existing_data['total_count'] = len(existing_data['leads'])
+
+            with open(self.storage_path, 'w') as f:
+                json.dump(existing_data, f, indent=2, default=str)
+
+        except Exception as e:
+            return {'imported': 0, 'duplicates': 0, 'errors': 1, 'error_message': str(e)}
+
+        return {
+            'imported': imported,
+            'duplicates': duplicates,
+            'errors': errors
+        }
+
     def get_stats(self) -> Dict:
         """Get statistics about saved leads."""
         leads = self.load_leads()
