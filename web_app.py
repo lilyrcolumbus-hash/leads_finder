@@ -20,6 +20,7 @@ from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadSource, LeadUrgency
 from src.utils.scoring import enrich_leads, calculate_pain_score
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
+from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
@@ -1700,6 +1701,28 @@ def show_search():
                 st.session_state.filtered_leads = all_leads
         else:
             st.session_state.filtered_leads = all_leads
+
+        # Hunter.io email enrichment for leads without emails
+        if settings.hunter_api_key and all_leads:
+            leads_without_email = [l for l in all_leads if not l.email]
+            if leads_without_email:
+                status.markdown("""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Finding emails with Hunter.io...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                try:
+                    enriched_count, _ = enrich_leads_with_hunter(all_leads, max_lookups=15)
+                    if enriched_count > 0:
+                        with results:
+                            st.success(f"Hunter.io found {enriched_count} emails")
+                        # Re-save leads with new emails
+                        lead_manager.save_leads(all_leads)
+                except Exception as e:
+                    with results:
+                        st.warning(f"Hunter.io: Could not enrich emails")
 
         st.session_state.scraping_done = True
         progress.progress(1.0)
