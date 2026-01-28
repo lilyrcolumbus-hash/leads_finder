@@ -551,6 +551,161 @@ class LeadManager:
             'hot_leads': hot_leads
         }
 
+    def update_lead(self, lead_hash: str, updates: Dict) -> bool:
+        """
+        Update a specific lead by its hash.
+
+        Args:
+            lead_hash: The hash of the lead to update
+            updates: Dictionary of fields to update
+
+        Returns:
+            True if updated successfully
+        """
+        if not self.storage_path.exists():
+            return False
+
+        try:
+            with open(self.storage_path, 'r') as f:
+                data = json.load(f)
+
+            for lead in data.get('leads', []):
+                if lead.get('hash') == lead_hash:
+                    for key, value in updates.items():
+                        lead[key] = value
+                    lead['updated_at'] = datetime.now().isoformat()
+
+                    with open(self.storage_path, 'w') as f:
+                        json.dump(data, f, indent=2, default=str)
+                    return True
+
+            return False
+        except Exception:
+            return False
+
+    def add_note_to_lead(self, lead_hash: str, note: str, author: str = "User") -> bool:
+        """
+        Add a note to a lead's activity history.
+
+        Args:
+            lead_hash: The hash of the lead
+            note: The note text to add
+            author: Who added the note
+
+        Returns:
+            True if added successfully
+        """
+        if not self.storage_path.exists():
+            return False
+
+        try:
+            with open(self.storage_path, 'r') as f:
+                data = json.load(f)
+
+            for lead in data.get('leads', []):
+                if lead.get('hash') == lead_hash:
+                    if 'activity_log' not in lead:
+                        lead['activity_log'] = []
+
+                    lead['activity_log'].append({
+                        'type': 'note',
+                        'content': note,
+                        'author': author,
+                        'timestamp': datetime.now().isoformat()
+                    })
+                    lead['updated_at'] = datetime.now().isoformat()
+
+                    with open(self.storage_path, 'w') as f:
+                        json.dump(data, f, indent=2, default=str)
+                    return True
+
+            return False
+        except Exception:
+            return False
+
+    def update_lead_status(self, lead_hash: str, new_status: str) -> bool:
+        """
+        Update a lead's pipeline status.
+
+        Args:
+            lead_hash: The hash of the lead
+            new_status: New status (new, contacted, demo, proposal, won, lost)
+
+        Returns:
+            True if updated successfully
+        """
+        if not self.storage_path.exists():
+            return False
+
+        try:
+            with open(self.storage_path, 'r') as f:
+                data = json.load(f)
+
+            for lead in data.get('leads', []):
+                if lead.get('hash') == lead_hash:
+                    old_status = lead.get('status', 'new')
+                    lead['status'] = new_status
+                    lead['updated_at'] = datetime.now().isoformat()
+
+                    # Add to activity log
+                    if 'activity_log' not in lead:
+                        lead['activity_log'] = []
+
+                    lead['activity_log'].append({
+                        'type': 'status_change',
+                        'from': old_status,
+                        'to': new_status,
+                        'timestamp': datetime.now().isoformat()
+                    })
+
+                    with open(self.storage_path, 'w') as f:
+                        json.dump(data, f, indent=2, default=str)
+                    return True
+
+            return False
+        except Exception:
+            return False
+
+    def get_lead_by_hash(self, lead_hash: str) -> Optional[Dict]:
+        """Get a specific lead by its hash."""
+        leads = self.load_leads()
+        for lead in leads:
+            if lead.get('hash') == lead_hash:
+                return lead
+        return None
+
+    def get_leads_by_status(self, status: str) -> List[Dict]:
+        """Get all leads with a specific status."""
+        leads = self.load_leads()
+        return [l for l in leads if l.get('status', 'new') == status]
+
+    def delete_lead(self, lead_hash: str) -> bool:
+        """Delete a lead from storage."""
+        if not self.storage_path.exists():
+            return False
+
+        try:
+            with open(self.storage_path, 'r') as f:
+                data = json.load(f)
+
+            original_count = len(data.get('leads', []))
+            data['leads'] = [l for l in data.get('leads', []) if l.get('hash') != lead_hash]
+
+            if len(data['leads']) < original_count:
+                # Remove from seen hashes
+                self._seen_hashes.discard(lead_hash)
+
+                data['last_updated'] = datetime.now().isoformat()
+                data['total_count'] = len(data['leads'])
+
+                with open(self.storage_path, 'w') as f:
+                    json.dump(data, f, indent=2, default=str)
+                return True
+
+            return False
+        except Exception:
+            return False
+
     def clear_storage(self):
         """Clear all saved leads."""
         self._seen_hashes.clear()
