@@ -2228,389 +2228,815 @@ def show_analytics():
 
 
 def show_crm():
-    """Internal CRM with pipeline management."""
+    """Professional CRM with complete pipeline management."""
+
+    # CRM-specific CSS
     st.markdown("""
-    <div class="page-header">
-        <h1>CRM Pipeline</h1>
-        <p>Manage your leads through the sales pipeline</p>
-    </div>
+    <style>
+        /* CRM Dashboard Cards */
+        .crm-kpi-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .crm-kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .crm-kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1E293B;
+            margin: 8px 0;
+        }
+        .crm-kpi-label {
+            font-size: 13px;
+            color: #64748B;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .crm-kpi-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        /* Pipeline Stage Header */
+        .pipeline-stage {
+            background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            margin-bottom: 12px;
+            border: 1px solid #E2E8F0;
+        }
+        .pipeline-stage-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin: 6px 0 2px 0;
+        }
+        .pipeline-stage-count {
+            font-size: 11px;
+            color: #64748B;
+        }
+
+        /* Lead Card */
+        .lead-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .lead-card:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        .lead-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .lead-card-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1E293B;
+            margin: 0;
+            line-height: 1.3;
+        }
+        .lead-card-company {
+            font-size: 11px;
+            color: #64748B;
+            margin: 4px 0 0 0;
+        }
+        .lead-card-score {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .lead-card-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .lead-card-tag {
+            background: #F1F5F9;
+            color: #475569;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .lead-card-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #F1F5F9;
+        }
+        .lead-action-btn {
+            flex: 1;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .lead-action-btn:hover {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        /* Contact Detail Card */
+        .contact-detail-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .contact-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .contact-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .contact-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1E293B;
+            margin: 0;
+        }
+        .contact-company {
+            font-size: 14px;
+            color: #64748B;
+            margin: 4px 0 0 0;
+        }
+
+        /* Activity Timeline */
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            background: #F1F5F9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .activity-content {
+            flex: 1;
+        }
+        .activity-text {
+            font-size: 13px;
+            color: #1E293B;
+            margin: 0;
+        }
+        .activity-time {
+            font-size: 11px;
+            color: #94A3B8;
+            margin-top: 4px;
+        }
+
+        /* Quick Action Buttons */
+        .quick-action-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .quick-action-btn {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quick-action-btn:hover {
+            border-color: #3B82F6;
+            background: #EFF6FF;
+        }
+        .quick-action-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .quick-action-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #475569;
+        }
+    </style>
     """, unsafe_allow_html=True)
 
     # CRM Stage definitions
     CRM_STAGES = {
-        'new': {'name': 'New', 'icon': '📥', 'color': '#3B82F6'},
-        'contacted': {'name': 'Contacted', 'icon': '📧', 'color': '#8B5CF6'},
-        'demo': {'name': 'Demo', 'icon': '🎯', 'color': '#F59E0B'},
-        'proposal': {'name': 'Proposal', 'icon': '📋', 'color': '#EC4899'},
-        'won': {'name': 'Won', 'icon': '✅', 'color': '#10B981'},
-        'lost': {'name': 'Lost', 'icon': '❌', 'color': '#EF4444'}
+        'new': {'name': 'New', 'icon': '📥', 'color': '#3B82F6', 'bg': '#EFF6FF'},
+        'contacted': {'name': 'Contacted', 'icon': '📧', 'color': '#8B5CF6', 'bg': '#F5F3FF'},
+        'demo': {'name': 'Demo', 'icon': '🎯', 'color': '#F59E0B', 'bg': '#FFFBEB'},
+        'proposal': {'name': 'Proposal', 'icon': '📋', 'color': '#EC4899', 'bg': '#FDF2F8'},
+        'won': {'name': 'Won', 'icon': '✅', 'color': '#10B981', 'bg': '#ECFDF5'},
+        'lost': {'name': 'Lost', 'icon': '❌', 'color': '#EF4444', 'bg': '#FEF2F2'}
     }
+
+    # Initialize session state for CRM
+    if 'crm_selected_lead' not in st.session_state:
+        st.session_state.crm_selected_lead = None
+    if 'crm_view' not in st.session_state:
+        st.session_state.crm_view = 'pipeline'
 
     # Load all saved leads
     all_leads = lead_manager.load_leads()
 
+    # Calculate stats
+    status_counts = {stage: len([l for l in all_leads if l.get('status', 'new') == stage]) for stage in CRM_STAGES.keys()}
+    total_leads = len(all_leads)
+    won_count = status_counts.get('won', 0)
+    lost_count = status_counts.get('lost', 0)
+    active_count = total_leads - won_count - lost_count
+    win_rate = (won_count / (won_count + lost_count) * 100) if (won_count + lost_count) > 0 else 0
+    avg_score = sum(l.get('pain_score', 0) for l in all_leads) / total_leads if total_leads > 0 else 0
+
+    # Page Header
+    st.markdown("""
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1E293B;">CRM Pipeline</h1>
+            <p style="margin: 4px 0 0 0; color: #64748B;">Manage your sales pipeline and track deals</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Empty state
     if not all_leads:
         st.markdown("""
-        <div class="empty-state">
-            <div class="empty-icon">📋</div>
-            <h3 class="empty-title">No leads in CRM</h3>
-            <p class="empty-desc">Import leads or search for new leads to start managing your pipeline</p>
+        <div style="text-align: center; padding: 60px 20px; background: #F8FAFC; border-radius: 16px; border: 2px dashed #E2E8F0;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+            <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 20px;">No leads in your CRM</h3>
+            <p style="margin: 0; color: #64748B;">Import leads or search for new leads to start building your pipeline</p>
         </div>
         """, unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🔍 Find Leads", type="primary", use_container_width=True):
+                st.session_state.nav_page = "Find Leads"
+                st.rerun()
+            if st.button("📥 Import Leads", use_container_width=True):
+                st.session_state.nav_page = "My Leads"
+                st.rerun()
         return
 
-    # Tabs for different views
-    tab1, tab2, tab3 = st.tabs(["Pipeline View", "Lead Details", "Quick Actions"])
+    # KPI Dashboard
+    st.markdown("### Dashboard")
+    kpi_cols = st.columns(6)
 
+    kpi_data = [
+        ("📊", "Total Leads", total_leads, "#3B82F6"),
+        ("🔥", "Active", active_count, "#F59E0B"),
+        ("📈", "Win Rate", f"{win_rate:.0f}%", "#10B981"),
+        ("✅", "Won", won_count, "#10B981"),
+        ("❌", "Lost", lost_count, "#EF4444"),
+        ("⭐", "Avg Score", f"{avg_score:.0f}", "#8B5CF6")
+    ]
+
+    for i, (icon, label, value, color) in enumerate(kpi_data):
+        with kpi_cols[i]:
+            st.markdown(f"""
+            <div class="crm-kpi-card">
+                <div class="crm-kpi-icon">{icon}</div>
+                <div class="crm-kpi-value" style="color: {color};">{value}</div>
+                <div class="crm-kpi-label">{label}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+
+    # Main CRM Tabs
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎯 Pipeline", "👥 All Contacts", "📝 Activities", "⚡ Quick Actions", "🔗 HubSpot"])
+
+    # ==================== TAB 1: PIPELINE VIEW ====================
     with tab1:
-        # Pipeline Statistics
-        st.subheader("Pipeline Overview")
+        st.markdown("### Sales Pipeline")
 
-        # Count leads by status
-        status_counts = {}
-        for stage in CRM_STAGES.keys():
-            status_counts[stage] = len([l for l in all_leads if l.get('status', 'new') == stage])
-
-        # Display metrics in columns
-        cols = st.columns(6)
-        for i, (stage_key, stage_info) in enumerate(CRM_STAGES.items()):
-            with cols[i]:
-                st.metric(
-                    label=f"{stage_info['icon']} {stage_info['name']}",
-                    value=status_counts.get(stage_key, 0)
-                )
-
-        st.divider()
-
-        # Pipeline Kanban View
-        st.subheader("Pipeline Board")
-
-        # Create columns for each stage
+        # Pipeline columns
         stage_cols = st.columns(6)
 
         for i, (stage_key, stage_info) in enumerate(CRM_STAGES.items()):
             with stage_cols[i]:
+                # Stage header
                 st.markdown(f"""
-                <div style="background: {stage_info['color']}15;
-                            border-top: 3px solid {stage_info['color']};
-                            border-radius: 8px;
-                            padding: 12px 8px;
-                            margin-bottom: 8px;
-                            text-align: center;">
-                    <span style="font-size: 20px;">{stage_info['icon']}</span>
-                    <p style="font-weight: 600; margin: 4px 0 0 0; color: {stage_info['color']};">
-                        {stage_info['name']}
-                    </p>
-                    <span style="font-size: 12px; color: #64748B;">
-                        {status_counts.get(stage_key, 0)} leads
-                    </span>
+                <div class="pipeline-stage" style="border-top: 3px solid {stage_info['color']}; background: {stage_info['bg']};">
+                    <span style="font-size: 24px;">{stage_info['icon']}</span>
+                    <p class="pipeline-stage-title" style="color: {stage_info['color']};">{stage_info['name']}</p>
+                    <span class="pipeline-stage-count">{status_counts.get(stage_key, 0)} leads</span>
                 </div>
                 """, unsafe_allow_html=True)
 
-                # Show leads in this stage
+                # Get leads for this stage
                 stage_leads = [l for l in all_leads if l.get('status', 'new') == stage_key]
 
-                for lead in stage_leads[:5]:  # Show max 5 per column
-                    lead_title = lead.get('title', lead.get('company', 'Unknown'))[:25]
+                # Show leads
+                for idx, lead in enumerate(stage_leads[:8]):
+                    lead_hash = lead.get('hash', '')
+                    lead_title = lead.get('title', lead.get('company', 'Unknown'))[:30]
+                    lead_company = lead.get('company', '')[:20]
                     lead_email = lead.get('email', '')
-                    lead_company = lead.get('company', '')[:15]
                     pain_score = lead.get('pain_score', 0)
 
+                    # Lead card
                     st.markdown(f"""
-                    <div style="background: white;
-                                border: 1px solid #E2E8F0;
-                                border-radius: 6px;
-                                padding: 10px;
-                                margin-bottom: 6px;
-                                box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                        <p style="font-weight: 500; font-size: 12px; margin: 0; color: #1E293B;">
-                            {lead_title}
-                        </p>
-                        {f'<p style="font-size: 10px; color: #64748B; margin: 2px 0 0 0;">{lead_company}</p>' if lead_company else ''}
-                        <div style="display: flex; justify-content: space-between; margin-top: 6px;">
-                            <span style="font-size: 10px; background: #F1F5F9; padding: 2px 6px; border-radius: 4px;">
-                                Score: {pain_score}
-                            </span>
+                    <div class="lead-card">
+                        <div class="lead-card-header">
+                            <div>
+                                <p class="lead-card-title">{lead_title}</p>
+                                {f'<p class="lead-card-company">{lead_company}</p>' if lead_company else ''}
+                            </div>
+                            <span class="lead-card-score">{pain_score}</span>
+                        </div>
+                        <div class="lead-card-info">
+                            {f'<span class="lead-card-tag">📧 {lead_email[:20]}</span>' if lead_email else ''}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
 
-                if len(stage_leads) > 5:
-                    st.caption(f"+{len(stage_leads) - 5} more")
+                    # Quick action buttons for each lead
+                    btn_cols = st.columns(3)
 
+                    # Get next stage
+                    stages_list = list(CRM_STAGES.keys())
+                    current_idx = stages_list.index(stage_key) if stage_key in stages_list else 0
+
+                    with btn_cols[0]:
+                        if current_idx > 0:
+                            if st.button("⬅️", key=f"prev_{lead_hash}_{idx}", help="Move to previous stage"):
+                                prev_stage = stages_list[current_idx - 1]
+                                lead_manager.update_lead_status(lead_hash, prev_stage)
+                                st.rerun()
+
+                    with btn_cols[1]:
+                        if st.button("👁️", key=f"view_{lead_hash}_{idx}", help="View details"):
+                            st.session_state.crm_selected_lead = lead_hash
+                            st.session_state.crm_view = 'detail'
+
+                    with btn_cols[2]:
+                        if current_idx < len(stages_list) - 1 and stage_key not in ['won', 'lost']:
+                            if st.button("➡️", key=f"next_{lead_hash}_{idx}", help="Move to next stage"):
+                                next_stage = stages_list[current_idx + 1]
+                                lead_manager.update_lead_status(lead_hash, next_stage)
+                                st.rerun()
+
+                if len(stage_leads) > 8:
+                    st.caption(f"+{len(stage_leads) - 8} more leads")
+
+    # ==================== TAB 2: ALL CONTACTS ====================
     with tab2:
-        st.subheader("Lead Management")
+        st.markdown("### Contact Management")
 
-        # Filter options
-        col1, col2, col3 = st.columns([2, 2, 1])
+        # Filters
+        filter_col1, filter_col2, filter_col3, filter_col4 = st.columns([2, 2, 2, 1])
 
-        with col1:
-            filter_status = st.selectbox(
-                "Filter by Status",
-                ["All"] + list(CRM_STAGES.keys()),
-                format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}" if x != "All" else "All Stages"
+        with filter_col1:
+            search_term = st.text_input("🔍 Search", placeholder="Name, email, company...", key="crm_search")
+
+        with filter_col2:
+            filter_stage = st.selectbox(
+                "Filter by Stage",
+                ["All Stages"] + [f"{v['icon']} {v['name']}" for v in CRM_STAGES.values()],
+                key="crm_filter_stage"
             )
 
-        with col2:
-            search_query = st.text_input("Search leads", placeholder="Name, email, company...")
+        with filter_col3:
+            sort_by = st.selectbox("Sort by", ["Score (High to Low)", "Score (Low to High)", "Name A-Z", "Recent First"], key="crm_sort")
 
-        with col3:
+        with filter_col4:
             st.write("")
             st.write("")
-            refresh = st.button("🔄 Refresh")
+            if st.button("🔄", key="refresh_contacts", help="Refresh"):
+                st.rerun()
 
-        # Filter leads
-        filtered_leads = all_leads
-        if filter_status != "All":
-            filtered_leads = [l for l in filtered_leads if l.get('status', 'new') == filter_status]
-        if search_query:
-            query_lower = search_query.lower()
+        # Apply filters
+        filtered_leads = all_leads.copy()
+
+        if search_term:
+            search_lower = search_term.lower()
             filtered_leads = [l for l in filtered_leads if
-                            query_lower in str(l.get('title', '')).lower() or
-                            query_lower in str(l.get('email', '')).lower() or
-                            query_lower in str(l.get('company', '')).lower() or
-                            query_lower in str(l.get('author', '')).lower()]
+                            search_lower in str(l.get('title', '')).lower() or
+                            search_lower in str(l.get('email', '')).lower() or
+                            search_lower in str(l.get('company', '')).lower() or
+                            search_lower in str(l.get('author', '')).lower()]
 
-        st.caption(f"Showing {len(filtered_leads)} leads")
+        if filter_stage != "All Stages":
+            stage_key = [k for k, v in CRM_STAGES.items() if f"{v['icon']} {v['name']}" == filter_stage]
+            if stage_key:
+                filtered_leads = [l for l in filtered_leads if l.get('status', 'new') == stage_key[0]]
 
-        # Display leads in expandable format
-        for lead in filtered_leads[:20]:
+        # Sort
+        if sort_by == "Score (High to Low)":
+            filtered_leads.sort(key=lambda x: x.get('pain_score', 0), reverse=True)
+        elif sort_by == "Score (Low to High)":
+            filtered_leads.sort(key=lambda x: x.get('pain_score', 0))
+        elif sort_by == "Name A-Z":
+            filtered_leads.sort(key=lambda x: str(x.get('title', '')).lower())
+
+        st.caption(f"Showing {len(filtered_leads)} contacts")
+
+        # Display contacts
+        for lead in filtered_leads[:30]:
             lead_hash = lead.get('hash', '')
-            lead_title = lead.get('title', lead.get('company', 'Unknown Lead'))
+            lead_title = lead.get('title', lead.get('company', 'Unknown'))
             lead_email = lead.get('email', 'No email')
             lead_phone = lead.get('phone', '')
             lead_company = lead.get('company', '')
+            lead_position = lead.get('position', '')
+            lead_location = lead.get('location', '')
             lead_status = lead.get('status', 'new')
+            lead_industry = lead.get('industry', '')
             pain_score = lead.get('pain_score', 0)
             lead_notes = lead.get('notes', '')
             activity_log = lead.get('activity_log', [])
+            hubspot_synced = lead.get('hubspot_synced', False)
 
-            with st.expander(f"{CRM_STAGES.get(lead_status, CRM_STAGES['new'])['icon']} {lead_title[:50]} - {lead_email}"):
-                # Lead info columns
-                info_col1, info_col2 = st.columns(2)
+            stage_info = CRM_STAGES.get(lead_status, CRM_STAGES['new'])
+            initials = lead_title[:2].upper() if lead_title else "??"
 
-                with info_col1:
-                    st.markdown("**Contact Information:**")
-                    st.write(f"📧 Email: {lead_email}")
-                    if lead_phone:
-                        st.write(f"📱 Phone: {lead_phone}")
-                    if lead_company:
-                        st.write(f"🏢 Company: {lead_company}")
-                    if lead.get('position'):
-                        st.write(f"💼 Position: {lead.get('position')}")
-                    if lead.get('location'):
-                        st.write(f"📍 Location: {lead.get('location')}")
+            with st.expander(f"{stage_info['icon']} **{lead_title[:60]}** | {lead_email} | Score: {pain_score}"):
+                # Contact detail layout
+                detail_col1, detail_col2 = st.columns([2, 1])
 
-                with info_col2:
-                    st.markdown("**Lead Details:**")
-                    st.write(f"🎯 Pain Score: {pain_score}")
-                    st.write(f"📊 Status: {CRM_STAGES.get(lead_status, CRM_STAGES['new'])['name']}")
-                    if lead.get('source'):
-                        st.write(f"📥 Source: {lead.get('source')}")
-                    if lead.get('industry'):
-                        st.write(f"🏭 Industry: {lead.get('industry')}")
+                with detail_col1:
+                    st.markdown(f"""
+                    <div class="contact-header">
+                        <div class="contact-avatar">{initials}</div>
+                        <div>
+                            <h3 class="contact-name">{lead_title}</h3>
+                            <p class="contact-company">{lead_position + ' at ' if lead_position else ''}{lead_company if lead_company else 'No company'}</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                # Status change
+                    # Contact info grid
+                    info_col1, info_col2 = st.columns(2)
+
+                    with info_col1:
+                        st.markdown("**Contact Info:**")
+                        st.write(f"📧 {lead_email}")
+                        if lead_phone:
+                            st.write(f"📱 {lead_phone}")
+                        if lead_location:
+                            st.write(f"📍 {lead_location}")
+
+                    with info_col2:
+                        st.markdown("**Business Info:**")
+                        if lead_company:
+                            st.write(f"🏢 {lead_company}")
+                        if lead_industry:
+                            st.write(f"🏭 {lead_industry}")
+                        st.write(f"⭐ Score: {pain_score}")
+
+                with detail_col2:
+                    # Status badge
+                    st.markdown(f"""
+                    <div style="background: {stage_info['bg']}; border: 1px solid {stage_info['color']};
+                                border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 12px;">
+                        <span style="font-size: 24px;">{stage_info['icon']}</span>
+                        <p style="margin: 4px 0 0 0; font-weight: 600; color: {stage_info['color']};">{stage_info['name']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    # HubSpot status
+                    if hubspot_synced:
+                        st.success("✓ Synced to HubSpot")
+                    else:
+                        st.info("Not synced to HubSpot")
+
                 st.markdown("---")
-                status_col1, status_col2, status_col3 = st.columns([2, 2, 1])
 
-                with status_col1:
+                # Actions row
+                action_col1, action_col2, action_col3, action_col4 = st.columns(4)
+
+                with action_col1:
                     new_status = st.selectbox(
                         "Change Status",
                         list(CRM_STAGES.keys()),
                         index=list(CRM_STAGES.keys()).index(lead_status) if lead_status in CRM_STAGES else 0,
-                        key=f"status_{lead_hash}",
+                        key=f"status_select_{lead_hash}",
                         format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}"
                     )
 
-                with status_col2:
-                    if st.button("Update Status", key=f"update_{lead_hash}", type="primary"):
+                with action_col2:
+                    if st.button("✓ Update", key=f"update_btn_{lead_hash}", type="primary"):
                         if lead_manager.update_lead_status(lead_hash, new_status):
-                            st.success(f"Status updated to {CRM_STAGES[new_status]['name']}")
+                            st.success("Updated!")
                             st.rerun()
-                        else:
-                            st.error("Failed to update status")
 
-                with status_col3:
-                    if st.button("🗑️ Delete", key=f"delete_{lead_hash}"):
+                with action_col3:
+                    if st.button("📧 Email", key=f"email_btn_{lead_hash}"):
+                        st.info(f"Open email client for: {lead_email}")
+
+                with action_col4:
+                    if st.button("🗑️ Delete", key=f"delete_btn_{lead_hash}"):
                         if lead_manager.delete_lead(lead_hash):
-                            st.success("Lead deleted")
+                            st.success("Deleted!")
                             st.rerun()
-                        else:
-                            st.error("Failed to delete lead")
 
                 # Notes section
-                st.markdown("**Notes:**")
-                if lead_notes:
-                    st.info(lead_notes)
+                st.markdown("**Notes & Activity:**")
 
-                new_note = st.text_area("Add Note", key=f"note_{lead_hash}", placeholder="Enter a note...")
-                if st.button("Save Note", key=f"save_note_{lead_hash}"):
-                    if new_note:
-                        if lead_manager.add_note_to_lead(lead_hash, new_note):
-                            st.success("Note added!")
-                            st.rerun()
-                        else:
-                            st.error("Failed to add note")
+                notes_col1, notes_col2 = st.columns([2, 1])
 
-                # Activity Log
+                with notes_col1:
+                    new_note = st.text_area("Add a note...", key=f"note_input_{lead_hash}", height=80)
+                    if st.button("💾 Save Note", key=f"save_note_btn_{lead_hash}"):
+                        if new_note:
+                            if lead_manager.add_note_to_lead(lead_hash, new_note):
+                                st.success("Note saved!")
+                                st.rerun()
+
+                with notes_col2:
+                    if lead_notes:
+                        st.info(f"📝 {lead_notes[:200]}...")
+
+                # Activity log
                 if activity_log:
-                    st.markdown("**Activity Log:**")
-                    for activity in activity_log[-5:]:
+                    st.markdown("**Recent Activity:**")
+                    for activity in activity_log[-5:][::-1]:
                         if activity.get('type') == 'status_change':
-                            st.caption(f"📌 Status changed from {activity.get('from')} to {activity.get('to')} - {activity.get('timestamp', '')[:10]}")
+                            from_stage = CRM_STAGES.get(activity.get('from'), {}).get('name', activity.get('from'))
+                            to_stage = CRM_STAGES.get(activity.get('to'), {}).get('name', activity.get('to'))
+                            st.caption(f"📌 Status: {from_stage} → {to_stage} | {activity.get('timestamp', '')[:10]}")
                         elif activity.get('type') == 'note':
-                            st.caption(f"📝 Note: {activity.get('content', '')[:50]}... - {activity.get('timestamp', '')[:10]}")
+                            st.caption(f"📝 Note added | {activity.get('timestamp', '')[:10]}")
 
+    # ==================== TAB 3: ACTIVITIES ====================
     with tab3:
-        st.subheader("Quick Actions")
+        st.markdown("### Activity Feed")
 
-        # Bulk status update
-        st.markdown("### Bulk Status Update")
+        # Collect all activities
+        all_activities = []
+        for lead in all_leads:
+            lead_title = lead.get('title', lead.get('company', 'Unknown'))
+            for activity in lead.get('activity_log', []):
+                activity['lead_title'] = lead_title
+                activity['lead_hash'] = lead.get('hash')
+                all_activities.append(activity)
+
+        # Sort by timestamp
+        all_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+        if all_activities:
+            for activity in all_activities[:50]:
+                icon = "📌" if activity.get('type') == 'status_change' else "📝"
+                lead_title = activity.get('lead_title', 'Unknown')
+                timestamp = activity.get('timestamp', '')[:16].replace('T', ' ')
+
+                if activity.get('type') == 'status_change':
+                    from_stage = CRM_STAGES.get(activity.get('from'), {}).get('name', activity.get('from'))
+                    to_stage = CRM_STAGES.get(activity.get('to'), {}).get('name', activity.get('to'))
+                    text = f"**{lead_title}** moved from {from_stage} to {to_stage}"
+                else:
+                    content = activity.get('content', '')[:100]
+                    text = f"Note added to **{lead_title}**: {content}"
+
+                st.markdown(f"""
+                <div class="activity-item">
+                    <div class="activity-icon">{icon}</div>
+                    <div class="activity-content">
+                        <p class="activity-text">{text}</p>
+                        <p class="activity-time">{timestamp}</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No activities yet. Start moving leads through stages or adding notes to see activity here.")
+
+    # ==================== TAB 4: QUICK ACTIONS ====================
+    with tab4:
+        st.markdown("### Quick Actions")
+
+        # Bulk Actions
+        st.markdown("#### 📦 Bulk Operations")
 
         bulk_col1, bulk_col2, bulk_col3 = st.columns(3)
 
         with bulk_col1:
-            from_status = st.selectbox(
-                "From Status",
+            from_stage = st.selectbox(
+                "Move from",
                 list(CRM_STAGES.keys()),
                 format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
-                key="bulk_from"
+                key="bulk_from_stage"
             )
 
         with bulk_col2:
-            to_status = st.selectbox(
-                "To Status",
+            to_stage = st.selectbox(
+                "Move to",
                 list(CRM_STAGES.keys()),
                 format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
-                key="bulk_to"
+                key="bulk_to_stage"
             )
 
         with bulk_col3:
+            from_count = status_counts.get(from_stage, 0)
             st.write("")
-            st.write("")
-            from_leads = [l for l in all_leads if l.get('status', 'new') == from_status]
-            if st.button(f"Move {len(from_leads)} leads", type="primary"):
-                moved = 0
-                for lead in from_leads:
-                    if lead_manager.update_lead_status(lead.get('hash'), to_status):
-                        moved += 1
-                st.success(f"Moved {moved} leads from {CRM_STAGES[from_status]['name']} to {CRM_STAGES[to_status]['name']}")
-                st.rerun()
+            if st.button(f"Move {from_count} leads", type="primary", use_container_width=True):
+                if from_count > 0:
+                    moved = 0
+                    for lead in all_leads:
+                        if lead.get('status', 'new') == from_stage:
+                            if lead_manager.update_lead_status(lead.get('hash'), to_stage):
+                                moved += 1
+                    st.success(f"Moved {moved} leads!")
+                    st.rerun()
+                else:
+                    st.warning("No leads to move")
 
-        st.divider()
+        st.markdown("---")
 
-        # Statistics
-        st.markdown("### Pipeline Statistics")
+        # Quick Stats
+        st.markdown("#### 📊 Pipeline Health")
 
-        total = len(all_leads)
-        won = status_counts.get('won', 0)
-        lost = status_counts.get('lost', 0)
-        active = total - won - lost
+        health_cols = st.columns(4)
 
-        stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
+        with health_cols[0]:
+            conversion = (won_count / total_leads * 100) if total_leads > 0 else 0
+            st.metric("Conversion Rate", f"{conversion:.1f}%", help="Percentage of leads that became customers")
 
-        with stat_col1:
-            st.metric("Total Leads", total)
+        with health_cols[1]:
+            in_progress = status_counts.get('contacted', 0) + status_counts.get('demo', 0) + status_counts.get('proposal', 0)
+            st.metric("In Progress", in_progress, help="Leads being actively worked")
 
-        with stat_col2:
-            st.metric("Active Pipeline", active)
+        with health_cols[2]:
+            new_leads = status_counts.get('new', 0)
+            st.metric("Uncontacted", new_leads, help="New leads not yet contacted")
 
-        with stat_col3:
-            win_rate = (won / (won + lost) * 100) if (won + lost) > 0 else 0
-            st.metric("Win Rate", f"{win_rate:.1f}%")
+        with health_cols[3]:
+            hot_leads = len([l for l in all_leads if l.get('pain_score', 0) >= 70])
+            st.metric("Hot Leads", hot_leads, help="Leads with score >= 70")
 
-        with stat_col4:
-            avg_score = sum(l.get('pain_score', 0) for l in all_leads) / total if total > 0 else 0
-            st.metric("Avg Score", f"{avg_score:.0f}")
+        st.markdown("---")
 
-        st.divider()
+        # Stage distribution chart
+        st.markdown("#### 📈 Stage Distribution")
 
-        # HubSpot Sync option
+        chart_data = {CRM_STAGES[k]['name']: v for k, v in status_counts.items()}
+        st.bar_chart(chart_data)
+
+    # ==================== TAB 5: HUBSPOT ====================
+    with tab5:
         st.markdown("### HubSpot Integration")
 
         with HubSpotCRM() as crm:
             if crm.is_configured():
-                st.success("✓ HubSpot is connected")
+                st.success("✓ HubSpot is connected and ready")
 
-                sync_col1, sync_col2 = st.columns(2)
+                hubspot_col1, hubspot_col2 = st.columns(2)
 
-                with sync_col1:
-                    st.markdown("**Sync to HubSpot:**")
-                    sync_status = st.selectbox(
-                        "Select status to sync",
+                with hubspot_col1:
+                    st.markdown("#### Sync Leads to HubSpot")
+
+                    sync_stage = st.selectbox(
+                        "Select stage to sync",
                         list(CRM_STAGES.keys()),
                         format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
-                        key="hubspot_sync_status"
+                        key="hubspot_sync_stage"
                     )
-                    leads_to_sync = [l for l in all_leads if l.get('status', 'new') == sync_status and not l.get('hubspot_synced')]
-                    st.caption(f"{len(leads_to_sync)} leads ready to sync")
 
-                    if st.button(f"Sync {len(leads_to_sync)} leads to HubSpot", type="primary"):
+                    leads_to_sync = [l for l in all_leads if l.get('status', 'new') == sync_stage and not l.get('hubspot_synced')]
+                    st.info(f"{len(leads_to_sync)} leads ready to sync")
+
+                    if st.button(f"🔄 Sync {len(leads_to_sync)} leads", type="primary", use_container_width=True):
                         if leads_to_sync:
+                            progress = st.progress(0)
                             synced = 0
-                            with st.spinner("Syncing to HubSpot..."):
-                                for lead_dict in leads_to_sync:
-                                    try:
-                                        # Create Lead object for HubSpot
-                                        from src.utils.models import Lead, LeadSource, LeadUrgency
-                                        lead_obj = Lead(
-                                            id=lead_dict.get('hash', ''),
-                                            source=LeadSource.REDDIT,
-                                            title=lead_dict.get('title', ''),
-                                            content=lead_dict.get('content', ''),
-                                            url=lead_dict.get('url', ''),
-                                            email=lead_dict.get('email'),
-                                            name=lead_dict.get('author'),
-                                            company=lead_dict.get('company'),
-                                            phone=lead_dict.get('phone'),
-                                            industry=lead_dict.get('industry'),
-                                            pain_score=lead_dict.get('pain_score', 0),
-                                            ai_score=lead_dict.get('pain_score', 0) / 100.0,
-                                            ai_reasoning=lead_dict.get('notes', '')
-                                        )
-                                        result = crm.create_contact(lead_obj)
-                                        if result:
-                                            # Mark as synced
-                                            lead_manager.update_lead(lead_dict.get('hash'), {
-                                                'hubspot_synced': True,
-                                                'hubspot_id': result
-                                            })
-                                            synced += 1
-                                    except Exception as e:
-                                        st.warning(f"Error syncing lead: {str(e)[:50]}")
 
-                            st.success(f"Synced {synced} leads to HubSpot!")
+                            for i, lead_dict in enumerate(leads_to_sync):
+                                try:
+                                    from src.utils.models import Lead as LeadModel, LeadSource
+                                    lead_obj = LeadModel(
+                                        id=lead_dict.get('hash', ''),
+                                        source=LeadSource.REDDIT,
+                                        title=lead_dict.get('title', ''),
+                                        content=lead_dict.get('content', ''),
+                                        url=lead_dict.get('url', ''),
+                                        email=lead_dict.get('email'),
+                                        name=lead_dict.get('author'),
+                                        company=lead_dict.get('company'),
+                                        phone=lead_dict.get('phone'),
+                                        industry=lead_dict.get('industry'),
+                                        pain_score=lead_dict.get('pain_score', 0)
+                                    )
+                                    result = crm.create_contact(lead_obj)
+                                    if result:
+                                        lead_manager.update_lead(lead_dict.get('hash'), {
+                                            'hubspot_synced': True,
+                                            'hubspot_id': result
+                                        })
+                                        synced += 1
+                                except Exception as e:
+                                    st.warning(f"Error: {str(e)[:50]}")
+
+                                progress.progress((i + 1) / len(leads_to_sync))
+
+                            st.success(f"✓ Synced {synced} leads to HubSpot!")
                             st.rerun()
                         else:
-                            st.info("No leads to sync in this status")
+                            st.info("No leads to sync in this stage")
 
-                with sync_col2:
-                    st.markdown("**Sync Statistics:**")
+                with hubspot_col2:
+                    st.markdown("#### Sync Statistics")
+
                     synced_count = len([l for l in all_leads if l.get('hubspot_synced')])
-                    not_synced = len(all_leads) - synced_count
-                    st.metric("Synced to HubSpot", synced_count)
-                    st.metric("Not Synced", not_synced)
+                    not_synced = total_leads - synced_count
 
-                    if st.button("View HubSpot Contacts"):
-                        contacts = crm.get_all_contacts(limit=10)
-                        if contacts:
-                            st.write(f"Found {len(contacts)} contacts in HubSpot")
-                            for c in contacts[:5]:
-                                st.caption(f"• {c.firstname or ''} {c.lastname or ''} - {c.email or 'No email'}")
-                        else:
-                            st.info("No contacts found in HubSpot")
+                    stat_col1, stat_col2 = st.columns(2)
+                    with stat_col1:
+                        st.metric("Synced", synced_count, delta=None)
+                    with stat_col2:
+                        st.metric("Pending", not_synced, delta=None)
+
+                    # Progress bar
+                    sync_pct = (synced_count / total_leads * 100) if total_leads > 0 else 0
+                    st.progress(sync_pct / 100)
+                    st.caption(f"{sync_pct:.0f}% synced")
+
+                st.markdown("---")
+
+                # View HubSpot contacts
+                st.markdown("#### HubSpot Contacts")
+                if st.button("📋 Load HubSpot Contacts", use_container_width=True):
+                    with st.spinner("Loading..."):
+                        try:
+                            contacts = crm.get_all_contacts(limit=20)
+                            if contacts:
+                                st.write(f"Found {len(contacts)} contacts:")
+                                for c in contacts[:10]:
+                                    name = f"{c.firstname or ''} {c.lastname or ''}".strip() or "No name"
+                                    st.caption(f"• {name} - {c.email or 'No email'}")
+                            else:
+                                st.info("No contacts found in HubSpot")
+                        except Exception as e:
+                            st.error(f"Error loading contacts: {str(e)}")
 
             else:
-                st.warning("HubSpot not configured")
+                st.warning("⚠️ HubSpot is not configured")
+
                 st.markdown("""
-                **To connect HubSpot:**
-                1. Create a free HubSpot account at [hubspot.com](https://hubspot.com)
-                2. Go to Settings → Integrations → API Keys
-                3. Create a Private App and get your API key
-                4. Add `HUBSPOT_API_KEY=your_key` to your `.env` file
+                ### How to Connect HubSpot
+
+                1. **Create a HubSpot account** at [hubspot.com](https://www.hubspot.com) (free tier available)
+
+                2. **Create a Private App:**
+                   - Go to Settings → Integrations → Private Apps
+                   - Click "Create a private app"
+                   - Give it a name (e.g., "LeadGen Pro")
+                   - Under Scopes, enable: `crm.objects.contacts.read` and `crm.objects.contacts.write`
+                   - Click "Create app" and copy the Access Token
+
+                3. **Add to your `.env` file:**
+                   ```
+                   HUBSPOT_API_KEY=your_access_token_here
+                   ```
+
+                4. **Restart the application**
                 """)
-                st.caption("You can use the internal CRM without HubSpot - your data is saved locally.")
+
+                st.info("💡 You can use the internal CRM without HubSpot. Your data is saved locally.")
 
 
 def show_config():
