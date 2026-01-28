@@ -723,59 +723,70 @@ st.markdown("""
     }
 
     .api-card {
-        background: var(--white);
-        border: 1px solid var(--neutral-200);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        text-align: center;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #FFFFFF !important;
+        border: 1px solid #E5E5E5 !important;
+        border-radius: 16px !important;
+        padding: 24px 20px !important;
+        text-align: center !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: block !important;
+        min-height: 120px !important;
     }
 
     .api-card:hover {
-        box-shadow: var(--shadow-md);
-        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+        transform: translateY(-2px) !important;
     }
 
     .api-card.connected {
-        border-color: var(--success-500);
-        background: linear-gradient(180deg, var(--white) 0%, var(--success-50) 100%);
+        border-color: #10B981 !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #ECFDF5 100%) !important;
     }
 
     .api-card.disconnected {
-        border-color: var(--neutral-200);
+        border-color: #E5E5E5 !important;
+        background: #FFFFFF !important;
     }
 
     .api-icon {
-        font-size: 28px;
-        margin-bottom: 10px;
+        font-size: 32px !important;
+        margin-bottom: 12px !important;
+        display: block !important;
     }
 
     .api-name {
-        color: var(--neutral-900);
-        font-size: 14px;
-        font-weight: 600;
-        margin: 0 0 8px 0;
-        letter-spacing: -0.01em;
+        color: #171717 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        margin: 0 0 10px 0 !important;
+        letter-spacing: -0.01em !important;
+        display: block !important;
+    }
+
+    h4.api-name {
+        color: #171717 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
     }
 
     .api-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 3px 9px;
-        border-radius: 20px;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        padding: 4px 12px !important;
+        border-radius: 20px !important;
     }
 
     .api-status.connected {
-        background: var(--success-50);
-        color: var(--success-600);
+        background: #ECFDF5 !important;
+        color: #059669 !important;
     }
 
     .api-status.disconnected {
-        background: var(--neutral-100);
-        color: var(--neutral-500);
+        background: #F5F5F5 !important;
+        color: #737373 !important;
     }
 
     /* ========== TAGS ========== */
@@ -1017,6 +1028,88 @@ st.markdown("""
 
     ::-webkit-scrollbar-thumb:hover {
         background: var(--neutral-400);
+    }
+
+    /* ========== HIDE STREAMLIT KEYBOARD SHORTCUTS ========== */
+    [data-testid="stKeyboardShortcuts"],
+    [class*="keyboard"],
+    .stKeyboardShortcut,
+    [aria-label*="keyboard"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* ========== ENHANCED CHECKBOX STYLING ========== */
+    .stCheckbox > label {
+        color: var(--neutral-800) !important;
+        font-weight: 500 !important;
+    }
+
+    .stCheckbox > label > div {
+        color: var(--neutral-800) !important;
+    }
+
+    .stCheckbox > label > div > p,
+    .stCheckbox > label > div > span {
+        color: var(--neutral-800) !important;
+        font-weight: 500 !important;
+    }
+
+    .stCheckbox [data-testid="stMarkdownContainer"] p {
+        color: var(--neutral-800) !important;
+    }
+
+    /* ========== ENHANCED ALERTS ========== */
+    .stAlert {
+        border-radius: var(--radius-md) !important;
+        padding: 16px 20px !important;
+        border: none !important;
+        box-shadow: var(--shadow-sm) !important;
+    }
+
+    .stAlert > div {
+        color: var(--neutral-800) !important;
+    }
+
+    [data-testid="stAlert"] {
+        border-radius: var(--radius-md) !important;
+        border-left: 4px solid !important;
+    }
+
+    [data-baseweb="notification"] {
+        border-radius: var(--radius-md) !important;
+        background: var(--primary-50) !important;
+        border-left: 4px solid var(--primary-500) !important;
+    }
+
+    [data-baseweb="notification"] [data-testid="stMarkdownContainer"] p {
+        color: var(--neutral-800) !important;
+        font-weight: 500 !important;
+    }
+
+    /* Info alert styling */
+    .element-container:has([data-testid="stAlert"]) [role="alert"] {
+        background: linear-gradient(135deg, var(--primary-50) 0%, #E0E7FF 100%) !important;
+        border-left-color: var(--primary-500) !important;
+        border-radius: var(--radius-md) !important;
+        padding: 16px 20px !important;
+    }
+
+    /* ========== ENHANCED PAGE TITLES ========== */
+    .page-header h1 {
+        color: #0F172A !important;
+        font-weight: 800 !important;
+        text-shadow: none !important;
+    }
+
+    .section-title h2 {
+        color: #1E293B !important;
+        font-weight: 700 !important;
+    }
+
+    /* Ensure all main content has dark text */
+    .main h1, .main h2, .main h3 {
+        color: #0F172A !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -1394,7 +1487,17 @@ def show_search():
     use_ai = st.checkbox("Use AI to qualify leads", value=ai_available, disabled=not ai_available)
 
     if not ai_available:
-        st.info("Configure OpenAI or Anthropic API key to use AI qualification")
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+                    border-left: 4px solid #6366F1;
+                    border-radius: 12px;
+                    padding: 14px 18px;
+                    margin-top: 8px;">
+            <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
+                Configure OpenAI or Anthropic API key in Settings to enable AI qualification
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -1662,7 +1765,7 @@ def show_leads():
                 <div class="empty-state">
                     <div class="empty-icon">☁️</div>
                     <h3 class="empty-title">HubSpot not connected</h3>
-                    <p class="empty-desc">Add HUBSPOT_API_KEY in .env</p>
+                    <p class="empty-desc">Configure your HubSpot API key in Settings to enable CRM integration</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
@@ -1681,7 +1784,17 @@ def show_leads():
                         } for c in contacts]
                         st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
                     else:
-                        st.info("No contacts")
+                        st.markdown("""
+                        <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+                                    border-left: 4px solid #6366F1;
+                                    border-radius: 12px;
+                                    padding: 14px 18px;
+                                    text-align: center;">
+                            <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
+                                No contacts found for this filter
+                            </p>
+                        </div>
+                        """, unsafe_allow_html=True)
 
 
 def show_analytics():
@@ -1762,7 +1875,17 @@ def show_analytics():
                     counts[l.source.value] = counts.get(l.source.value, 0) + 1
                 st.bar_chart(counts)
 
-            st.info("Connect HubSpot to view complete statistics")
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+                        border-left: 4px solid #6366F1;
+                        border-radius: 12px;
+                        padding: 14px 18px;
+                        margin-top: 16px;">
+                <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
+                    Connect HubSpot in Settings to view complete CRM statistics
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
             with st.spinner("Loading..."):
                 stats = crm.get_statistics()
@@ -1969,7 +2092,17 @@ def show_config():
             st.markdown(f'<div class="tags-container">{all_kw_tags}</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
-    st.info("Edit the .env file to change the configuration. Add your Secrets in Streamlit Cloud settings.")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, var(--primary-50) 0%, #E0E7FF 100%);
+                border-left: 4px solid var(--primary-500);
+                border-radius: 12px;
+                padding: 16px 20px;
+                margin-top: 16px;">
+        <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
+            <strong>How to configure API keys:</strong> Go to your Streamlit Cloud dashboard → Settings → Secrets to add or update your API credentials securely.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================
