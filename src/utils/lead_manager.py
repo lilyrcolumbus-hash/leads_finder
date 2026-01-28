@@ -7,9 +7,15 @@ import csv
 import hashlib
 import requests
 from pathlib import Path
-from typing import List, Optional, Dict, Set
+from typing import List, Optional, Dict, Set, Tuple
 from datetime import datetime
 import io
+
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
 
 from src.utils.models import Lead
 from src.config import settings
@@ -191,6 +197,183 @@ class LeadManager:
             'duplicates': duplicates,
             'errors': errors
         }
+
+    def get_excel_sheets(self, file_content: bytes) -> List[str]:
+        """Get list of sheet names from an Excel file."""
+        if not PANDAS_AVAILABLE:
+            return []
+
+        try:
+            excel_file = pd.ExcelFile(io.BytesIO(file_content))
+            return excel_file.sheet_names
+        except Exception:
+            return []
+
+    def import_from_excel(self, file_content: bytes, sheet_names: List[str] = None) -> Dict:
+        """
+        Import leads from Excel file (supports multiple sheets).
+
+        Args:
+            file_content: Raw bytes of the Excel file
+            sheet_names: List of sheet names to import. If None, imports all sheets.
+
+        Returns:
+            Dict with import statistics
+        """
+        if not PANDAS_AVAILABLE:
+            return {
+                'imported': 0,
+                'duplicates': 0,
+                'errors': 1,
+                'error_message': 'Pandas not available. Please install pandas and openpyxl.'
+            }
+
+        total_imported = 0
+        total_duplicates = 0
+        total_errors = 0
+        sheets_processed = []
+
+        try:
+            excel_file = pd.ExcelFile(io.BytesIO(file_content))
+            available_sheets = excel_file.sheet_names
+
+            # If no sheets specified, import all
+            if sheet_names is None:
+                sheet_names = available_sheets
+            else:
+                # Validate sheet names
+                sheet_names = [s for s in sheet_names if s in available_sheets]
+
+            if not sheet_names:
+                return {
+                    'imported': 0,
+                    'duplicates': 0,
+                    'errors': 1,
+                    'error_message': 'No valid sheets found to import.'
+                }
+
+            # Load existing data
+            existing_data = {'leads': [], 'last_updated': None}
+            if self.storage_path.exists():
+                try:
+                    with open(self.storage_path, 'r') as f:
+                        existing_data = json.load(f)
+                except Exception:
+                    pass
+
+            # Process each sheet
+            for sheet_name in sheet_names:
+                try:
+                    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+
+                    # Normalize column names (lowercase, strip whitespace)
+                    df.columns = [str(col).lower().strip() for col in df.columns]
+
+                    sheet_imported = 0
+                    sheet_duplicates = 0
+                    sheet_errors = 0
+
+                    for _, row in df.iterrows():
+                        try:
+                            # Try to find common column names
+                            title = self._get_column_value(row, ['title', 'titulo', 'name', 'nombre', 'company', 'empresa'])
+                            url = self._get_column_value(row, ['url', 'link', 'website', 'sitio', 'web'])
+                            author = self._get_column_value(row, ['author', 'autor', 'contact', 'contacto', 'name', 'nombre', 'person', 'persona'])
+                            email = self._get_column_value(row, ['email', 'correo', 'e-mail', 'mail'])
+                            content = self._get_column_value(row, ['content', 'contenido', 'description', 'descripcion', 'notes', 'notas'])
+                            industry = self._get_column_value(row, ['industry', 'industria', 'sector', 'category', 'categoria'])
+                            pain_score = self._get_column_value(row, ['pain_score', 'pain', 'score', 'puntuacion', 'priority', 'prioridad'])
+
+                            # Skip empty rows
+                            if not title and not url and not email:
+                                continue
+
+                            # Generate hash for deduplication
+                            unique_string = f"{url}|{str(title).lower().strip()}|{str(author).lower().strip()}"
+                            lead_hash = hashlib.md5(unique_string.encode()).hexdigest()
+
+                            if lead_hash in self._seen_hashes:
+                                sheet_duplicates += 1
+                                continue
+
+                            # Create lead dict
+                            try:
+                                pain_value = int(float(pain_score)) if pain_score else 0
+                            except (ValueError, TypeError):
+                                pain_value = 0
+
+                            lead_dict = {
+                                'title': str(title) if title else '',
+                                'author': str(author) if author else '',
+                                'email': str(email) if email else '',
+                                'url': str(url) if url else '',
+                                'content': str(content) if content else '',
+                                'source': f'excel:{sheet_name}',
+                                'industry': str(industry) if industry else '',
+                                'pain_score': pain_value,
+                                'hash': lead_hash,
+                                'saved_at': datetime.now().isoformat(),
+                                'imported': True,
+                                'import_sheet': sheet_name
+                            }
+
+                            existing_data['leads'].append(lead_dict)
+                            self._seen_hashes.add(lead_hash)
+                            sheet_imported += 1
+
+                        except Exception:
+                            sheet_errors += 1
+                            continue
+
+                    total_imported += sheet_imported
+                    total_duplicates += sheet_duplicates
+                    total_errors += sheet_errors
+                    sheets_processed.append({
+                        'name': sheet_name,
+                        'imported': sheet_imported,
+                        'duplicates': sheet_duplicates,
+                        'errors': sheet_errors
+                    })
+
+                except Exception as e:
+                    total_errors += 1
+                    sheets_processed.append({
+                        'name': sheet_name,
+                        'error': str(e)
+                    })
+
+            # Save updated data
+            existing_data['last_updated'] = datetime.now().isoformat()
+            existing_data['total_count'] = len(existing_data['leads'])
+
+            with open(self.storage_path, 'w') as f:
+                json.dump(existing_data, f, indent=2, default=str)
+
+        except Exception as e:
+            return {
+                'imported': 0,
+                'duplicates': 0,
+                'errors': 1,
+                'error_message': f'Error reading Excel file: {str(e)}'
+            }
+
+        return {
+            'imported': total_imported,
+            'duplicates': total_duplicates,
+            'errors': total_errors,
+            'sheets_processed': sheets_processed
+        }
+
+    def _get_column_value(self, row, possible_names: List[str]):
+        """Get value from row trying multiple possible column names."""
+        for name in possible_names:
+            if name in row.index:
+                value = row[name]
+                # Handle NaN values
+                if pd.isna(value):
+                    continue
+                return value
+        return None
 
     def get_stats(self) -> Dict:
         """Get statistics about saved leads."""

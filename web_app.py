@@ -1769,21 +1769,72 @@ def show_leads():
     st.subheader("📤 Import Leads")
 
     uploaded_file = st.file_uploader(
-        "Upload CSV file with leads",
-        type=['csv'],
-        help="CSV should have columns: title, author, email, url, industry (optional)"
+        "Upload file with leads",
+        type=['csv', 'xlsx', 'xls'],
+        help="Supports CSV and Excel files (.xlsx, .xls). Excel files can have multiple sheets."
     )
 
     if uploaded_file is not None:
-        if st.button("📥 Import Leads", type="primary"):
-            csv_content = uploaded_file.getvalue().decode('utf-8')
-            result = lead_manager.import_from_csv(csv_content)
+        file_extension = uploaded_file.name.split('.')[-1].lower()
 
-            if result.get('error_message'):
-                st.error(f"Error: {result['error_message']}")
+        if file_extension in ['xlsx', 'xls']:
+            # Excel file - show sheet selection
+            file_content = uploaded_file.getvalue()
+            sheets = lead_manager.get_excel_sheets(file_content)
+
+            if sheets:
+                st.info(f"📊 Excel file detected with **{len(sheets)} sheet(s)**: {', '.join(sheets)}")
+
+                # Multi-select for sheets
+                selected_sheets = st.multiselect(
+                    "Select sheets to import",
+                    options=sheets,
+                    default=sheets,
+                    help="Select one or more sheets to import. All selected sheets will be processed."
+                )
+
+                col_import1, col_import2 = st.columns([1, 3])
+                with col_import1:
+                    import_all = st.checkbox("Import all sheets", value=True)
+
+                if import_all:
+                    selected_sheets = sheets
+
+                if selected_sheets:
+                    if st.button(f"📥 Import {len(selected_sheets)} Sheet(s)", type="primary"):
+                        with st.spinner(f"Importing {len(selected_sheets)} sheet(s)..."):
+                            result = lead_manager.import_from_excel(file_content, selected_sheets)
+
+                        if result.get('error_message'):
+                            st.error(f"Error: {result['error_message']}")
+                        else:
+                            st.success(f"✅ Total Imported: **{result['imported']}** | Duplicates: {result['duplicates']} | Errors: {result['errors']}")
+
+                            # Show per-sheet breakdown
+                            if result.get('sheets_processed'):
+                                with st.expander("📋 Sheet Details", expanded=False):
+                                    for sheet_info in result['sheets_processed']:
+                                        if 'error' in sheet_info:
+                                            st.error(f"❌ **{sheet_info['name']}**: {sheet_info['error']}")
+                                        else:
+                                            st.write(f"✅ **{sheet_info['name']}**: {sheet_info['imported']} imported, {sheet_info['duplicates']} duplicates")
+                            st.rerun()
+                else:
+                    st.warning("Please select at least one sheet to import.")
             else:
-                st.success(f"✅ Imported: {result['imported']} | Duplicates skipped: {result['duplicates']} | Errors: {result['errors']}")
-                st.rerun()
+                st.error("Could not read sheets from Excel file. Make sure the file is valid.")
+
+        else:
+            # CSV file - original logic
+            if st.button("📥 Import Leads", type="primary"):
+                csv_content = uploaded_file.getvalue().decode('utf-8')
+                result = lead_manager.import_from_csv(csv_content)
+
+                if result.get('error_message'):
+                    st.error(f"Error: {result['error_message']}")
+                else:
+                    st.success(f"✅ Imported: {result['imported']} | Duplicates skipped: {result['duplicates']} | Errors: {result['errors']}")
+                    st.rerun()
 
     st.divider()
 
