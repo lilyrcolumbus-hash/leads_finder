@@ -51,14 +51,23 @@ class RedditScraper(BaseScraper):
         reddit_time = self.TIME_MAP.get(time_filter, "week")
         self.current_time_filter = reddit_time
 
-        self.logger.info(f"Starting Reddit scrape for {len(self.subreddits)} subreddits (time: {reddit_time})")
+        # Only search the most relevant subreddits (limit to 8 for speed)
+        top_subreddits = [
+            "smallbusiness", "entrepreneur", "startups",
+            "HVAC", "Plumbing", "electricians",
+            "contractors", "sweatystartup"
+        ]
+        # Filter to only include subreddits from our config
+        subreddits_to_search = [s for s in top_subreddits if s in self.subreddits][:8]
 
-        for subreddit in self.subreddits:
+        self.logger.info(f"Starting Reddit scrape for {len(subreddits_to_search)} subreddits (time: {reddit_time})")
+
+        for subreddit in subreddits_to_search:
             try:
                 leads = self._scrape_subreddit(subreddit)
                 all_leads.extend(leads)
                 self.logger.info(f"Found {len(leads)} potential leads in r/{subreddit}")
-                time.sleep(2)  # Rate limiting
+                time.sleep(0.5)  # Reduced delay
             except Exception as e:
                 error_msg = f"Error scraping r/{subreddit}: {str(e)}"
                 self.logger.error(error_msg)
@@ -85,15 +94,17 @@ class RedditScraper(BaseScraper):
         """
         leads = []
 
-        # Search for each pain keyword
-        for keyword in self.pain_keywords[:10]:  # Limit to avoid rate limits
+        # Use only top 3 most effective keywords for speed
+        top_keywords = ["business", "customers", "phone"]
+
+        for keyword in top_keywords:
             try:
                 leads.extend(self._search_keyword(subreddit, keyword))
-                time.sleep(1)  # Be nice to Reddit
+                time.sleep(0.3)  # Short delay
             except Exception as e:
                 self.logger.warning(f"Error searching '{keyword}' in r/{subreddit}: {e}")
 
-        # Also get recent posts from the subreddit
+        # Also get recent/top posts from the subreddit
         try:
             leads.extend(self._get_recent_posts(subreddit))
         except Exception as e:

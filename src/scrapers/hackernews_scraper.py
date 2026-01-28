@@ -65,15 +65,21 @@ class HackerNewsScraper(BaseScraper):
 
         self.logger.info(f"Starting Hacker News scrape (time: {time_filter})")
 
-        # Search for general pain keywords
-        search_terms = self.pain_keywords[:8] + self.hn_keywords
+        # Use only top 5 most effective search terms for speed
+        search_terms = [
+            "small business",
+            "startup phone",
+            "customer service",
+            "scheduling",
+            "answering service"
+        ]
 
         for term in search_terms:
             try:
                 leads = self._search_hn(term)
                 all_leads.extend(leads)
                 self.logger.debug(f"Found {len(leads)} results for '{term}'")
-                time.sleep(0.5)  # Rate limiting
+                time.sleep(0.2)  # Short delay
             except Exception as e:
                 error_msg = f"Error searching HN for '{term}': {str(e)}"
                 self.logger.warning(error_msg)
