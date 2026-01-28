@@ -114,13 +114,30 @@ st.markdown("""
         font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
 
+    /* ========== MAIN CONTENT AREA - LIGHT BACKGROUND ========== */
+    .stApp {
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 50%, #F1F5F9 100%) !important;
+        /* Para usar imagen de fondo, reemplaza la línea de arriba con:
+        background: url('TU_URL_DE_IMAGEN') center center / cover no-repeat fixed !important;
+        */
+    }
+
     .main {
-        background: linear-gradient(135deg, var(--neutral-50) 0%, #F8FAFC 100%) !important;
+        background: transparent !important;
+    }
+
+    [data-testid="stAppViewContainer"] {
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 50%, #F1F5F9 100%) !important;
+    }
+
+    [data-testid="stMain"] {
+        background: transparent !important;
     }
 
     .main .block-container {
         padding: 2.5rem 3.5rem 4rem 3.5rem !important;
         max-width: 1280px !important;
+        background: transparent !important;
     }
 
     h1, h2, h3, h4, h5, h6 {
