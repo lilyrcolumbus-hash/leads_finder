@@ -36,6 +36,24 @@ st.set_page_config(
 # ============================================
 st.markdown("""
 <style>
+    /* ========== HIDE KEYBOARD SHORTCUTS (PRIORITY) ========== */
+    *[class*="keyboard"],
+    *[id*="keyboard"],
+    *[data-testid*="keyboard"],
+    *[aria-label*="keyboard"],
+    div[class*="Keyboard"],
+    button[title*="keyboard"],
+    [data-testid="stKeyboardShortcuts"],
+    .stKeyboardShortcut {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
+
     /* ========== FONTS ========== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -1383,121 +1401,59 @@ def show_dashboard():
 
 
 def show_search():
-    st.markdown("""
-    <div class="page-header">
-        <h1>Find Leads</h1>
-        <p>Find prospects with communication problems</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Page Title
+    st.title("🔎 Find Leads")
+    st.caption("Find prospects with communication problems")
 
-    # Sources - Active
-    st.markdown("""
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Active Sources</h2>
-                <span class="section-badge">4 Available</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.divider()
+
+    # Active Sources Section
+    st.subheader("📡 Active Sources (4 Available)")
 
     col1, col2 = st.columns(2)
     with col1:
-        use_reddit = st.checkbox("Reddit - Business subreddits", value=True)
-        use_hn = st.checkbox("Hacker News - Startups", value=True)
+        use_reddit = st.checkbox("🔴 Reddit - Business subreddits", value=True, key="reddit_check")
+        use_hn = st.checkbox("🟠 Hacker News - Startups", value=True, key="hn_check")
     with col2:
-        use_google = st.checkbox("Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key)
-        use_ph = st.checkbox("Product Hunt", value=True)
+        use_google = st.checkbox("🔵 Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="google_check")
+        use_ph = st.checkbox("🟣 Product Hunt", value=True, key="ph_check")
+
+    st.divider()
 
     # Coming Soon Sources
-    st.markdown("""
-    <div class="section" style="margin-top: 24px;">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Coming Soon</h2>
-                <span class="section-badge" style="background: var(--warning-50); color: var(--warning-500);">6 More</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.subheader("🚀 Coming Soon (6 More)")
 
-    st.markdown("""
-    <div class="features-grid" style="grid-template-columns: repeat(6, 1fr); gap: 10px;">
-        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
-            <div style="font-size: 24px; margin-bottom: 6px;">🔷</div>
-            <h3 class="feature-title" style="font-size: 12px;">LinkedIn</h3>
-        </div>
-        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
-            <div style="font-size: 24px; margin-bottom: 6px;">🐦</div>
-            <h3 class="feature-title" style="font-size: 12px;">Twitter/X</h3>
-        </div>
-        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
-            <div style="font-size: 24px; margin-bottom: 6px;">⭐</div>
-            <h3 class="feature-title" style="font-size: 12px;">Yelp</h3>
-        </div>
-        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
-            <div style="font-size: 24px; margin-bottom: 6px;">📍</div>
-            <h3 class="feature-title" style="font-size: 12px;">Google Business</h3>
-        </div>
-        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
-            <div style="font-size: 24px; margin-bottom: 6px;">📘</div>
-            <h3 class="feature-title" style="font-size: 12px;">Facebook</h3>
-        </div>
-        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
-            <div style="font-size: 24px; margin-bottom: 6px;">🏆</div>
-            <h3 class="feature-title" style="font-size: 12px;">G2/Clutch</h3>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    coming_cols = st.columns(6)
+    coming_sources = [
+        ("🔷", "LinkedIn"),
+        ("🐦", "Twitter/X"),
+        ("⭐", "Yelp"),
+        ("📍", "Google Business"),
+        ("📘", "Facebook"),
+        ("🏆", "G2/Clutch")
+    ]
+    for i, (icon, name) in enumerate(coming_sources):
+        with coming_cols[i]:
+            st.markdown(f"**{icon}**")
+            st.caption(name)
 
-    st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
+    st.divider()
 
     # Industry Filter
-    st.markdown("""
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Filter by Industry</h2>
-                <span class="section-badge">Optional</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.subheader("🏢 Filter by Industry (Optional)")
     industries = ["All Industries"] + list(settings.industries.keys())
-    selected_industry = st.selectbox("Select industry to focus on", industries, label_visibility="collapsed")
+    selected_industry = st.selectbox("Select industry", industries)
 
-    st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
+    st.divider()
 
     # AI Option
     ai_available = bool(settings.openai_api_key or settings.anthropic_api_key)
+    st.subheader("🤖 AI Qualification (Recommended)")
 
-    st.markdown("""
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>AI Qualification</h2>
-                <span class="section-badge">Recommended</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    use_ai = st.checkbox("Use AI to qualify leads", value=ai_available, disabled=not ai_available)
+    use_ai = st.checkbox("Use AI to qualify leads automatically", value=ai_available, disabled=not ai_available, key="ai_check")
 
     if not ai_available:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-                    border-left: 4px solid #6366F1;
-                    border-radius: 12px;
-                    padding: 14px 18px;
-                    margin-top: 8px;">
-            <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
-                Configure OpenAI or Anthropic API key in Settings to enable AI qualification
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.info("Configure OpenAI or Anthropic API key in Settings to enable AI qualification")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -1968,141 +1924,82 @@ def show_analytics():
 
 
 def show_config():
-    st.markdown("""
-    <div class="page-header">
-        <h1>Settings</h1>
-        <p>APIs and system parameters</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Page Title
+    st.title("⚙️ Settings")
+    st.caption("APIs and system parameters")
 
-    # APIs Section Header
-    st.markdown("""
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Integrations</h2>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.divider()
 
-    # API Cards - Using columns for better compatibility
+    # API Integrations Section
+    st.subheader("🔗 API Integrations")
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        hubspot_status = "connected" if settings.hubspot_api_key else "disconnected"
-        hubspot_label = "Connected" if settings.hubspot_api_key else "Not configured"
-        st.markdown(f"""
-        <div class="api-card {hubspot_status}">
-            <div class="api-icon">📊</div>
-            <h4 class="api-name">HubSpot</h4>
-            <span class="api-status {hubspot_status}">{hubspot_label}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 📊 HubSpot")
+            if settings.hubspot_api_key:
+                st.success("✓ Connected")
+            else:
+                st.warning("Not configured")
 
     with col2:
-        google_status = "connected" if settings.google_api_key else "disconnected"
-        google_label = "Connected" if settings.google_api_key else "Not configured"
-        st.markdown(f"""
-        <div class="api-card {google_status}">
-            <div class="api-icon">🔍</div>
-            <h4 class="api-name">Google</h4>
-            <span class="api-status {google_status}">{google_label}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 🔍 Google")
+            if settings.google_api_key:
+                st.success("✓ Connected")
+            else:
+                st.warning("Not configured")
 
     with col3:
-        openai_status = "connected" if settings.openai_api_key else "disconnected"
-        openai_label = "Connected" if settings.openai_api_key else "Not configured"
-        st.markdown(f"""
-        <div class="api-card {openai_status}">
-            <div class="api-icon">🤖</div>
-            <h4 class="api-name">OpenAI</h4>
-            <span class="api-status {openai_status}">{openai_label}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 🤖 OpenAI")
+            if settings.openai_api_key:
+                st.success("✓ Connected")
+            else:
+                st.warning("Not configured")
 
     with col4:
-        anthropic_status = "connected" if settings.anthropic_api_key else "disconnected"
-        anthropic_label = "Connected" if settings.anthropic_api_key else "Not configured"
-        st.markdown(f"""
-        <div class="api-card {anthropic_status}">
-            <div class="api-icon">🧠</div>
-            <h4 class="api-name">Anthropic</h4>
-            <span class="api-status {anthropic_status}">{anthropic_label}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 🧠 Anthropic")
+            if settings.anthropic_api_key:
+                st.success("✓ Connected")
+            else:
+                st.warning("Not configured")
+
+    st.divider()
 
     # Industries Section
-    st.markdown("""
-    <div class="section" style="margin-top: 40px;">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Industries Configured</h2>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.subheader(f"🏢 Industries Configured ({len(settings.industries)})")
 
-    industry_tags = "".join([f'<span class="tag">{ind}</span>' for ind in settings.industries.keys()])
-    st.markdown(f'<div class="tags-container">{industry_tags}</div>', unsafe_allow_html=True)
+    industry_list = list(settings.industries.keys())
+    cols = st.columns(5)
+    for i, ind in enumerate(industry_list):
+        with cols[i % 5]:
+            st.markdown(f"• {ind}")
 
-    # Subreddits
-    st.markdown("""
-    <div class="section" style="margin-top: 40px;">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Subreddits</h2>
-                <span class="section-badge">{0} total</span>
-            </div>
-        </div>
-    </div>
-    """.format(len(settings.subreddits)), unsafe_allow_html=True)
+    st.divider()
 
-    # Show first 20 subreddits with expandable
-    first_subs = settings.subreddits[:20]
-    sub_tags = "".join([f'<span class="tag">r/{s}</span>' for s in first_subs])
-    st.markdown(f'<div class="tags-container">{sub_tags}</div>', unsafe_allow_html=True)
+    # Subreddits Section
+    st.subheader(f"📱 Subreddits ({len(settings.subreddits)} total)")
 
-    if len(settings.subreddits) > 20:
-        with st.expander(f"Show all {len(settings.subreddits)} subreddits"):
-            all_tags = "".join([f'<span class="tag">r/{s}</span>' for s in settings.subreddits])
-            st.markdown(f'<div class="tags-container">{all_tags}</div>', unsafe_allow_html=True)
+    with st.expander("View all subreddits"):
+        sub_text = ", ".join([f"r/{s}" for s in settings.subreddits])
+        st.write(sub_text)
 
-    # Keywords
-    st.markdown("""
-    <div class="section" style="margin-top: 40px;">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Pain Keywords</h2>
-                <span class="section-badge">{0} total</span>
-            </div>
-        </div>
-    </div>
-    """.format(len(settings.pain_keywords)), unsafe_allow_html=True)
+    st.divider()
 
-    # Show first 15 keywords with expandable
-    first_keywords = settings.pain_keywords[:15]
-    keyword_tags = "".join([f'<span class="tag">{k}</span>' for k in first_keywords])
-    st.markdown(f'<div class="tags-container">{keyword_tags}</div>', unsafe_allow_html=True)
+    # Keywords Section
+    st.subheader(f"🔑 Pain Keywords ({len(settings.pain_keywords)} total)")
 
-    if len(settings.pain_keywords) > 15:
-        with st.expander(f"Show all {len(settings.pain_keywords)} keywords"):
-            all_kw_tags = "".join([f'<span class="tag">{k}</span>' for k in settings.pain_keywords])
-            st.markdown(f'<div class="tags-container">{all_kw_tags}</div>', unsafe_allow_html=True)
+    with st.expander("View all keywords"):
+        kw_text = ", ".join(settings.pain_keywords)
+        st.write(kw_text)
 
-    st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, var(--primary-50) 0%, #E0E7FF 100%);
-                border-left: 4px solid var(--primary-500);
-                border-radius: 12px;
-                padding: 16px 20px;
-                margin-top: 16px;">
-        <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
-            <strong>How to configure API keys:</strong> Go to your Streamlit Cloud dashboard → Settings → Secrets to add or update your API credentials securely.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.divider()
+
+    # Configuration Info
+    st.info("**How to configure API keys:** Go to your Streamlit Cloud dashboard → Settings → Secrets to add or update your API credentials securely.")
 
 
 # ============================================
