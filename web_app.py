@@ -19,6 +19,7 @@ from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadSource, LeadUrgency
 from src.utils.scoring import enrich_leads, calculate_pain_score
+from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
@@ -1534,12 +1535,33 @@ def show_search():
 
         all_leads = enrich_leads(all_leads)
 
+        # Deduplicate leads
+        status.markdown("""
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <span class="loading-text">Removing duplicates...</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        duplicates_count = lead_manager.get_duplicate_count(all_leads)
+        all_leads = lead_manager.deduplicate(all_leads)
+
+        if duplicates_count > 0:
+            with results:
+                st.info(f"Removed {duplicates_count} duplicate leads")
+
         # Filter by industry if selected
         if selected_industry != "All Industries":
             industry_subreddits = settings.industries.get(selected_industry, [])
             all_leads = [l for l in all_leads if l.subreddit and l.subreddit.lower() in [s.lower() for s in industry_subreddits] or l.industry == selected_industry]
 
         st.session_state.leads = all_leads
+
+        # Auto-save leads to storage
+        saved_count = lead_manager.save_leads(all_leads)
+        if saved_count > 0:
+            with results:
+                st.success(f"Auto-saved {saved_count} new leads to database")
 
         # AI Filter
         if use_ai and all_leads:
@@ -1636,14 +1658,54 @@ def show_search():
 
 
 def show_leads():
-    st.markdown("""
-    <div class="page-header">
-        <h1>My Leads</h1>
-        <p>Manage and export your prospects</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.title("📋 My Leads")
+    st.caption("Manage and export your prospects")
 
-    tab1, tab2 = st.tabs(["Local Leads", "HubSpot"])
+    st.divider()
+
+    # Export and Actions Row
+    col_exp1, col_exp2, col_exp3, col_exp4 = st.columns(4)
+
+    with col_exp1:
+        # CSV Export for session leads
+        if st.session_state.filtered_leads:
+            csv_data = csv_exporter.export_leads(st.session_state.filtered_leads)
+            st.download_button(
+                label="📥 Export CSV (Session)",
+                data=csv_data,
+                file_name=f"leads_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        else:
+            st.button("📥 Export CSV (Session)", disabled=True, use_container_width=True)
+
+    with col_exp2:
+        # CSV Export for all saved leads
+        saved_leads = lead_manager.load_leads()
+        if saved_leads:
+            csv_all_data = csv_exporter.export_leads_from_dict(saved_leads)
+            st.download_button(
+                label=f"📦 Export All ({len(saved_leads)})",
+                data=csv_all_data,
+                file_name=f"all_leads_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+        else:
+            st.button("📦 Export All (0)", disabled=True, use_container_width=True)
+
+    with col_exp3:
+        # Show storage stats
+        stats = lead_manager.get_stats()
+        st.metric("Total Saved", stats['total'])
+
+    with col_exp4:
+        st.metric("Hot Leads", stats.get('hot_leads', 0))
+
+    st.divider()
+
+    tab1, tab2, tab3 = st.tabs(["Session Leads", "Saved Leads", "HubSpot"])
 
     with tab1:
         if not st.session_state.filtered_leads:
@@ -1745,6 +1807,42 @@ def show_leads():
                         """, unsafe_allow_html=True)
 
     with tab2:
+        # Saved Leads from Database
+        saved_leads = lead_manager.load_leads()
+
+        if not saved_leads:
+            st.markdown("""
+            <div class="empty-state">
+                <div class="empty-icon">💾</div>
+                <h3 class="empty-title">No saved leads</h3>
+                <p class="empty-desc">Leads will be automatically saved when you search</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.success(f"Found {len(saved_leads)} saved leads in database")
+
+            # Display saved leads
+            data = [{
+                "Pain": l.get('pain_score', 0),
+                "Title": str(l.get('title', ''))[:40] + "..." if len(str(l.get('title', ''))) > 40 else l.get('title', ''),
+                "Industry": l.get('industry', '-') or '-',
+                "Source": l.get('source', '-'),
+                "Saved": l.get('saved_at', '-')[:10] if l.get('saved_at') else '-'
+            } for l in saved_leads[:100]]  # Limit to 100 for performance
+
+            st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+
+            st.divider()
+
+            # Clear storage button
+            col_clear1, col_clear2 = st.columns([3, 1])
+            with col_clear2:
+                if st.button("🗑️ Clear All Saved", type="secondary"):
+                    lead_manager.clear_storage()
+                    st.success("Storage cleared!")
+                    st.rerun()
+
+    with tab3:
         with HubSpotCRM() as crm:
             if not crm.is_configured():
                 st.markdown("""
@@ -1996,6 +2094,36 @@ def show_config():
                 st.success("✓ Connected")
             else:
                 st.warning("Not configured")
+
+    # Second row of APIs
+    col5, col6, col7, col8 = st.columns(4)
+
+    with col5:
+        with st.container(border=True):
+            st.markdown("### 📧 Hunter.io")
+            if settings.hunter_api_key:
+                st.success("✓ Connected")
+            else:
+                st.info("Optional - Email Finder")
+
+    with col6:
+        # Storage stats
+        with st.container(border=True):
+            st.markdown("### 💾 Storage")
+            stats = lead_manager.get_stats()
+            st.metric("Saved Leads", stats['total'])
+
+    with col7:
+        # Deduplication stats
+        with st.container(border=True):
+            st.markdown("### 🔄 Deduplication")
+            st.success("✓ Active")
+
+    with col8:
+        # Export status
+        with st.container(border=True):
+            st.markdown("### 📥 CSV Export")
+            st.success("✓ Available")
 
     st.divider()
 
