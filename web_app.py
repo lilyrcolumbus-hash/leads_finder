@@ -17,7 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import settings
 from src.utils.logger import setup_logger
-from src.utils.models import Lead, LeadSource
+from src.utils.models import Lead, LeadSource, LeadUrgency
+from src.utils.scoring import enrich_leads, calculate_pain_score
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
@@ -1106,9 +1107,11 @@ def show_dashboard():
     # Metrics
     leads_count = len(st.session_state.leads)
     qualified_count = len(st.session_state.filtered_leads)
+    hot_leads_count = len([l for l in st.session_state.filtered_leads if l.pain_score >= 70])
     keywords_count = len(settings.pain_keywords)
     sources_count = sum([1 for x in [True, True, bool(settings.google_api_key), True] if x])
     conv_rate = int((qualified_count / leads_count * 100)) if leads_count > 0 else 0
+    avg_pain_score = sum(l.pain_score for l in st.session_state.filtered_leads) / len(st.session_state.filtered_leads) if st.session_state.filtered_leads else 0
 
     st.markdown(f"""
     <div class="metrics-grid">
@@ -1129,6 +1132,24 @@ def show_dashboard():
             </div>
             <div class="metric-footer">
                 <span class="metric-tag">This session</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon" style="background: var(--error-50);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
+                        <path d="M12 2L2 22h20L12 2z"/>
+                        <path d="M12 9v4"/>
+                        <path d="M12 17h.01"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-label">Hot Leads</div>
+                <div class="metric-value" style="color: var(--error-500);">{hot_leads_count}</div>
+            </div>
+            <div class="metric-footer">
+                <span class="metric-tag" style="background: var(--error-50); color: var(--error-500);">Score 70+</span>
             </div>
         </div>
         <div class="metric-card">
@@ -1276,13 +1297,13 @@ def show_search():
     </div>
     """, unsafe_allow_html=True)
 
-    # Sources
+    # Sources - Active
     st.markdown("""
     <div class="section">
         <div class="section-header">
             <div class="section-title">
-                <h2>Sources</h2>
-                <span class="section-badge">Select</span>
+                <h2>Active Sources</h2>
+                <span class="section-badge">4 Available</span>
             </div>
         </div>
     </div>
@@ -1295,6 +1316,64 @@ def show_search():
     with col2:
         use_google = st.checkbox("Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key)
         use_ph = st.checkbox("Product Hunt", value=True)
+
+    # Coming Soon Sources
+    st.markdown("""
+    <div class="section" style="margin-top: 24px;">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Coming Soon</h2>
+                <span class="section-badge" style="background: var(--warning-50); color: var(--warning-500);">6 More</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="features-grid" style="grid-template-columns: repeat(6, 1fr); gap: 10px;">
+        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
+            <div style="font-size: 24px; margin-bottom: 6px;">🔷</div>
+            <h3 class="feature-title" style="font-size: 12px;">LinkedIn</h3>
+        </div>
+        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
+            <div style="font-size: 24px; margin-bottom: 6px;">🐦</div>
+            <h3 class="feature-title" style="font-size: 12px;">Twitter/X</h3>
+        </div>
+        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
+            <div style="font-size: 24px; margin-bottom: 6px;">⭐</div>
+            <h3 class="feature-title" style="font-size: 12px;">Yelp</h3>
+        </div>
+        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
+            <div style="font-size: 24px; margin-bottom: 6px;">📍</div>
+            <h3 class="feature-title" style="font-size: 12px;">Google Business</h3>
+        </div>
+        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
+            <div style="font-size: 24px; margin-bottom: 6px;">📘</div>
+            <h3 class="feature-title" style="font-size: 12px;">Facebook</h3>
+        </div>
+        <div class="feature-card" style="padding: 14px; opacity: 0.7;">
+            <div style="font-size: 24px; margin-bottom: 6px;">🏆</div>
+            <h3 class="feature-title" style="font-size: 12px;">G2/Clutch</h3>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
+
+    # Industry Filter
+    st.markdown("""
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Filter by Industry</h2>
+                <span class="section-badge">Optional</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    industries = ["All Industries"] + list(settings.industries.keys())
+    selected_industry = st.selectbox("Select industry to focus on", industries, label_visibility="collapsed")
 
     st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
 
@@ -1356,6 +1435,21 @@ def show_search():
 
             progress.progress((i + 1) / len(scrapers))
 
+        # Enrich leads with Pain Score and Industry
+        status.markdown("""
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <span class="loading-text">Calculating Pain Scores...</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        all_leads = enrich_leads(all_leads)
+
+        # Filter by industry if selected
+        if selected_industry != "All Industries":
+            industry_subreddits = settings.industries.get(selected_industry, [])
+            all_leads = [l for l in all_leads if l.subreddit and l.subreddit.lower() in [s.lower() for s in industry_subreddits] or l.industry == selected_industry]
+
         st.session_state.leads = all_leads
 
         # AI Filter
@@ -1382,11 +1476,18 @@ def show_search():
         st.session_state.scraping_done = True
         progress.progress(1.0)
 
+        # Calculate hot leads (Pain Score >= 70)
+        hot_leads = len([l for l in st.session_state.filtered_leads if l.pain_score >= 70])
+
         status.markdown(f"""
         <div class="results-box">
             <div class="result-item">
                 <div class="result-value green">{len(st.session_state.filtered_leads)}</div>
                 <div class="result-label">Qualified</div>
+            </div>
+            <div class="result-item">
+                <div class="result-value orange">{hot_leads}</div>
+                <div class="result-label">Hot Leads</div>
             </div>
             <div class="result-item">
                 <div class="result-value blue">{len(all_leads)}</div>
@@ -1409,11 +1510,37 @@ def show_search():
         """, unsafe_allow_html=True)
 
         for lead in st.session_state.filtered_leads[:5]:
-            with st.expander(f"{lead.title[:65]}..."):
-                st.write(f"**Source:** {lead.source.value}")
-                st.write(f"**Keywords:** {', '.join(lead.keywords_matched[:4])}")
-                if lead.ai_score:
-                    st.write(f"**Score:** {lead.ai_score:.2f}")
+            # Pain Score badge color
+            if lead.pain_score >= 70:
+                score_color = "var(--error-500)"
+                urgency_label = "HOT"
+            elif lead.pain_score >= 50:
+                score_color = "var(--warning-500)"
+                urgency_label = "HIGH"
+            elif lead.pain_score >= 25:
+                score_color = "var(--primary-500)"
+                urgency_label = "MEDIUM"
+            else:
+                score_color = "var(--neutral-400)"
+                urgency_label = "LOW"
+
+            with st.expander(f"[{lead.pain_score}] {lead.title[:60]}..."):
+                col1, col2, col3 = st.columns([1, 1, 1])
+                with col1:
+                    st.markdown(f"""
+                    <div style="text-align: center; padding: 10px; background: {score_color}15; border-radius: 8px;">
+                        <div style="font-size: 28px; font-weight: 800; color: {score_color};">{lead.pain_score}</div>
+                        <div style="font-size: 10px; font-weight: 600; color: {score_color};">PAIN SCORE</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col2:
+                    st.write(f"**Source:** {lead.source.value}")
+                    st.write(f"**Industry:** {lead.industry or 'Unknown'}")
+                with col3:
+                    st.write(f"**Urgency:** {urgency_label}")
+                    st.write(f"**Keywords:** {len(lead.keywords_matched)}")
+
+                st.write(f"**Matched:** {', '.join(lead.keywords_matched[:5])}")
                 st.write(f"[View original]({lead.url})")
                 st.write("---")
                 st.write(lead.content[:350] + "...")
@@ -1440,6 +1567,9 @@ def show_leads():
             """, unsafe_allow_html=True)
         else:
             qualified = len([l for l in st.session_state.filtered_leads if l.is_qualified])
+            hot_leads = len([l for l in st.session_state.filtered_leads if l.pain_score >= 70])
+            avg_score = sum(l.pain_score for l in st.session_state.filtered_leads) / len(st.session_state.filtered_leads)
+
             st.markdown(f"""
             <div class="stats-bar">
                 <div class="stat-item">
@@ -1447,19 +1577,59 @@ def show_leads():
                     <span class="stat-label">total</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value" style="color: var(--green-600);">{qualified}</span>
+                    <span class="stat-value" style="color: var(--error-500);">{hot_leads}</span>
+                    <span class="stat-label">hot leads</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" style="color: var(--success-600);">{qualified}</span>
                     <span class="stat-label">qualified</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" style="color: var(--primary-600);">{avg_score:.0f}</span>
+                    <span class="stat-label">avg score</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
+            # Filters
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                filter_urgency = st.selectbox("Filter by Urgency", ["All", "Hot (70+)", "High (50+)", "Medium (25+)"])
+            with col2:
+                industries_found = list(set(l.industry for l in st.session_state.filtered_leads if l.industry))
+                filter_industry = st.selectbox("Filter by Industry", ["All"] + industries_found)
+            with col3:
+                sort_by = st.selectbox("Sort by", ["Pain Score", "Date Found", "AI Score"])
+
+            # Apply filters
+            filtered = st.session_state.filtered_leads.copy()
+            if filter_urgency == "Hot (70+)":
+                filtered = [l for l in filtered if l.pain_score >= 70]
+            elif filter_urgency == "High (50+)":
+                filtered = [l for l in filtered if l.pain_score >= 50]
+            elif filter_urgency == "Medium (25+)":
+                filtered = [l for l in filtered if l.pain_score >= 25]
+
+            if filter_industry != "All":
+                filtered = [l for l in filtered if l.industry == filter_industry]
+
+            if sort_by == "Pain Score":
+                filtered = sorted(filtered, key=lambda x: x.pain_score, reverse=True)
+            elif sort_by == "AI Score":
+                filtered = sorted(filtered, key=lambda x: x.ai_score or 0, reverse=True)
+            else:
+                filtered = sorted(filtered, key=lambda x: x.found_at, reverse=True)
+
+            st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
+
             data = [{
-                "ID": l.id[:8],
-                "Title": l.title[:45] + "..." if len(l.title) > 45 else l.title,
+                "Pain": l.pain_score,
+                "Title": l.title[:40] + "..." if len(l.title) > 40 else l.title,
+                "Industry": l.industry or "-",
                 "Source": l.source.value,
-                "Keywords": ", ".join(l.keywords_matched[:3]),
-                "Score": f"{l.ai_score:.2f}" if l.ai_score else "-"
-            } for l in st.session_state.filtered_leads]
+                "Keywords": len(l.keywords_matched),
+                "AI": f"{l.ai_score:.2f}" if l.ai_score else "-"
+            } for l in filtered]
 
             st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
 
