@@ -21,6 +21,7 @@ from src.utils.models import Lead, LeadSource, LeadUrgency
 from src.utils.scoring import enrich_leads, calculate_pain_score
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
+from src.utils.background_tasks import task_manager, TaskStatus
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
@@ -1305,6 +1306,50 @@ def render_sidebar():
         # Sync radio selection with session state
         if page != st.session_state.nav_page:
             st.session_state.nav_page = page
+
+        # Background Task Status
+        current_task = task_manager.get_current_task()
+        if current_task and current_task.status == TaskStatus.RUNNING:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+                        border-radius: 12px; padding: 12px; margin: 16px 0;">
+                <div style="display: flex; align-items: center; gap: 8px; color: white;">
+                    <div class="spinner" style="width: 16px; height: 16px; border-width: 2px;"></div>
+                    <span style="font-size: 13px; font-weight: 500;">Searching...</span>
+                </div>
+                <div style="margin-top: 8px;">
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 4px; height: 6px; overflow: hidden;">
+                        <div style="background: white; height: 100%; width: {current_task.progress}%; transition: width 0.3s;"></div>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 11px; margin-top: 4px;">{current_task.progress_message}</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            # Auto-refresh every 2 seconds while task is running
+            st.markdown("""
+            <script>
+                setTimeout(function() {
+                    window.location.reload();
+                }, 2000);
+            </script>
+            """, unsafe_allow_html=True)
+        elif current_task and current_task.status == TaskStatus.COMPLETED:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+                        border-radius: 12px; padding: 12px; margin: 16px 0;">
+                <div style="display: flex; align-items: center; gap: 8px; color: white;">
+                    <span>✓</span>
+                    <span style="font-size: 13px; font-weight: 500;">Search Complete!</span>
+                </div>
+                <p style="color: rgba(255,255,255,0.9); font-size: 12px; margin-top: 4px;">
+                    Found {current_task.result_count} leads
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("View Results", key="view_task_results", use_container_width=True):
+                task_manager.clear_completed_task()
+                st.session_state.nav_page = "My Leads"
+                st.rerun()
 
         # Footer
         st.markdown(f"""
