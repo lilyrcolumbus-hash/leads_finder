@@ -1852,7 +1852,7 @@ def show_config():
     </div>
     """, unsafe_allow_html=True)
 
-    # APIs
+    # APIs Section Header
     st.markdown("""
     <div class="section">
         <div class="section-header">
@@ -1863,26 +1863,66 @@ def show_config():
     </div>
     """, unsafe_allow_html=True)
 
-    apis = [
-        ("📊", "HubSpot", settings.hubspot_api_key),
-        ("🔍", "Google", settings.google_api_key),
-        ("🤖", "OpenAI", settings.openai_api_key),
-        ("🧠", "Anthropic", settings.anthropic_api_key),
-    ]
+    # API Cards - Using columns for better compatibility
+    col1, col2, col3, col4 = st.columns(4)
 
-    html = '<div class="api-grid">'
-    for icon, name, key in apis:
-        status = "connected" if key else "disconnected"
-        label = "Connected" if key else "Not configured"
-        html += f"""
-        <div class="api-card {status}">
-            <div class="api-icon">{icon}</div>
-            <h4 class="api-name">{name}</h4>
-            <span class="api-status {status}">{label}</span>
+    with col1:
+        hubspot_status = "connected" if settings.hubspot_api_key else "disconnected"
+        hubspot_label = "Connected" if settings.hubspot_api_key else "Not configured"
+        st.markdown(f"""
+        <div class="api-card {hubspot_status}">
+            <div class="api-icon">📊</div>
+            <h4 class="api-name">HubSpot</h4>
+            <span class="api-status {hubspot_status}">{hubspot_label}</span>
         </div>
-        """
-    html += '</div>'
-    st.markdown(html, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+    with col2:
+        google_status = "connected" if settings.google_api_key else "disconnected"
+        google_label = "Connected" if settings.google_api_key else "Not configured"
+        st.markdown(f"""
+        <div class="api-card {google_status}">
+            <div class="api-icon">🔍</div>
+            <h4 class="api-name">Google</h4>
+            <span class="api-status {google_status}">{google_label}</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        openai_status = "connected" if settings.openai_api_key else "disconnected"
+        openai_label = "Connected" if settings.openai_api_key else "Not configured"
+        st.markdown(f"""
+        <div class="api-card {openai_status}">
+            <div class="api-icon">🤖</div>
+            <h4 class="api-name">OpenAI</h4>
+            <span class="api-status {openai_status}">{openai_label}</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        anthropic_status = "connected" if settings.anthropic_api_key else "disconnected"
+        anthropic_label = "Connected" if settings.anthropic_api_key else "Not configured"
+        st.markdown(f"""
+        <div class="api-card {anthropic_status}">
+            <div class="api-icon">🧠</div>
+            <h4 class="api-name">Anthropic</h4>
+            <span class="api-status {anthropic_status}">{anthropic_label}</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Industries Section
+    st.markdown("""
+    <div class="section" style="margin-top: 40px;">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>Industries Configured</h2>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    industry_tags = "".join([f'<span class="tag">{ind}</span>' for ind in settings.industries.keys()])
+    st.markdown(f'<div class="tags-container">{industry_tags}</div>', unsafe_allow_html=True)
 
     # Subreddits
     st.markdown("""
@@ -1890,30 +1930,46 @@ def show_config():
         <div class="section-header">
             <div class="section-title">
                 <h2>Subreddits</h2>
+                <span class="section-badge">{0} total</span>
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """.format(len(settings.subreddits)), unsafe_allow_html=True)
 
-    tags = "".join([f'<span class="tag">r/{s}</span>' for s in settings.subreddits])
-    st.markdown(f'<div class="tags-container">{tags}</div>', unsafe_allow_html=True)
+    # Show first 20 subreddits with expandable
+    first_subs = settings.subreddits[:20]
+    sub_tags = "".join([f'<span class="tag">r/{s}</span>' for s in first_subs])
+    st.markdown(f'<div class="tags-container">{sub_tags}</div>', unsafe_allow_html=True)
+
+    if len(settings.subreddits) > 20:
+        with st.expander(f"Show all {len(settings.subreddits)} subreddits"):
+            all_tags = "".join([f'<span class="tag">r/{s}</span>' for s in settings.subreddits])
+            st.markdown(f'<div class="tags-container">{all_tags}</div>', unsafe_allow_html=True)
 
     # Keywords
     st.markdown("""
     <div class="section" style="margin-top: 40px;">
         <div class="section-header">
             <div class="section-title">
-                <h2>Keywords</h2>
+                <h2>Pain Keywords</h2>
+                <span class="section-badge">{0} total</span>
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """.format(len(settings.pain_keywords)), unsafe_allow_html=True)
 
-    tags = "".join([f'<span class="tag">{k}</span>' for k in settings.pain_keywords])
-    st.markdown(f'<div class="tags-container">{tags}</div>', unsafe_allow_html=True)
+    # Show first 15 keywords with expandable
+    first_keywords = settings.pain_keywords[:15]
+    keyword_tags = "".join([f'<span class="tag">{k}</span>' for k in first_keywords])
+    st.markdown(f'<div class="tags-container">{keyword_tags}</div>', unsafe_allow_html=True)
+
+    if len(settings.pain_keywords) > 15:
+        with st.expander(f"Show all {len(settings.pain_keywords)} keywords"):
+            all_kw_tags = "".join([f'<span class="tag">{k}</span>' for k in settings.pain_keywords])
+            st.markdown(f'<div class="tags-container">{all_kw_tags}</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
-    st.info("Edit the .env file to change the configuration")
+    st.info("Edit the .env file to change the configuration. Add your Secrets in Streamlit Cloud settings.")
 
 
 # ============================================
