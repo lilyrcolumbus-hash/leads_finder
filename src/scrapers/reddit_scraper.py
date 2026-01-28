@@ -24,9 +24,22 @@ class RedditScraper(BaseScraper):
         super().__init__()
         self.subreddits = settings.subreddits
 
-    def scrape(self) -> LeadBatch:
+    # Map time filter values to Reddit's t parameter
+    TIME_MAP = {
+        "day": "day",
+        "week": "week",
+        "month": "month",
+        "quarter": "month",  # Reddit doesn't have quarter, use month
+        "year": "year",
+        "all": "all"
+    }
+
+    def scrape(self, time_filter: str = "week") -> LeadBatch:
         """
         Scrape Reddit for leads matching pain keywords.
+
+        Args:
+            time_filter: Time range for posts (day, week, month, quarter, year, all)
 
         Returns:
             LeadBatch with found leads
@@ -34,7 +47,11 @@ class RedditScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        self.logger.info(f"Starting Reddit scrape for {len(self.subreddits)} subreddits")
+        # Convert time filter to Reddit's format
+        reddit_time = self.TIME_MAP.get(time_filter, "week")
+        self.current_time_filter = reddit_time
+
+        self.logger.info(f"Starting Reddit scrape for {len(self.subreddits)} subreddits (time: {reddit_time})")
 
         for subreddit in self.subreddits:
             try:
@@ -87,7 +104,8 @@ class RedditScraper(BaseScraper):
     def _search_keyword(self, subreddit: str, keyword: str) -> List[Lead]:
         """Search subreddit for a specific keyword."""
         leads = []
-        url = f"https://www.reddit.com/r/{subreddit}/search.rss?q={keyword}&restrict_sr=1&sort=new&limit=25"
+        time_param = getattr(self, 'current_time_filter', 'week')
+        url = f"https://www.reddit.com/r/{subreddit}/search.rss?q={keyword}&restrict_sr=1&sort=new&t={time_param}&limit=25"
 
         try:
             response = self.fetch_url(url)
@@ -106,7 +124,9 @@ class RedditScraper(BaseScraper):
     def _get_recent_posts(self, subreddit: str) -> List[Lead]:
         """Get recent posts from subreddit RSS feed."""
         leads = []
-        url = f"https://www.reddit.com/r/{subreddit}/new.rss?limit=50"
+        time_param = getattr(self, 'current_time_filter', 'week')
+        # Use top posts with time filter instead of just new
+        url = f"https://www.reddit.com/r/{subreddit}/top.rss?t={time_param}&limit=50"
 
         try:
             response = self.fetch_url(url)

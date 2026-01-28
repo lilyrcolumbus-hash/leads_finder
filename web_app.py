@@ -1572,6 +1572,21 @@ def show_search():
 
     st.divider()
 
+    # Time Filter
+    st.subheader("📅 Time Range")
+    time_options = {
+        "Last 24 hours": "day",
+        "Last 7 days": "week",
+        "Last 30 days": "month",
+        "Last 3 months": "quarter",
+        "Last year": "year",
+        "All time": "all"
+    }
+    selected_time_label = st.selectbox("Search posts from:", list(time_options.keys()), index=1)
+    selected_time = time_options[selected_time_label]
+
+    st.divider()
+
     # Industry Filter
     st.subheader("🏢 Filter by Industry (Optional)")
     industries = ["All Industries"] + list(settings.industries.keys())
@@ -1617,7 +1632,7 @@ def show_search():
 
             try:
                 with Scraper() as s:
-                    batch = s.scrape()
+                    batch = s.scrape(time_filter=selected_time)
                     all_leads.extend(batch.leads)
                     with results:
                         st.success(f"{name}: {len(batch.leads)} leads")

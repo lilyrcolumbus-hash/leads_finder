@@ -1,6 +1,7 @@
 """Hacker News scraper using the public Algolia API."""
 
 import time
+from datetime import datetime, timedelta
 from typing import List, Optional
 from urllib.parse import quote
 
@@ -15,6 +16,16 @@ class HackerNewsScraper(BaseScraper):
     source = LeadSource.HACKER_NEWS
     SEARCH_URL = "https://hn.algolia.com/api/v1/search"
     ITEM_URL = "https://news.ycombinator.com/item?id={item_id}"
+
+    # Map time filter to days
+    TIME_MAP = {
+        "day": 1,
+        "week": 7,
+        "month": 30,
+        "quarter": 90,
+        "year": 365,
+        "all": 0  # No filter
+    }
 
     def __init__(self):
         super().__init__()
@@ -31,9 +42,12 @@ class HackerNewsScraper(BaseScraper):
             "call center small business"
         ]
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = "week") -> LeadBatch:
         """
         Scrape Hacker News for leads.
+
+        Args:
+            time_filter: Time range for results (day, week, month, quarter, year, all)
 
         Returns:
             LeadBatch with found leads
@@ -41,7 +55,15 @@ class HackerNewsScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        self.logger.info("Starting Hacker News scrape")
+        # Calculate timestamp filter
+        days = self.TIME_MAP.get(time_filter, 7)
+        if days > 0:
+            cutoff = datetime.now() - timedelta(days=days)
+            self.min_timestamp = int(cutoff.timestamp())
+        else:
+            self.min_timestamp = 0
+
+        self.logger.info(f"Starting Hacker News scrape (time: {time_filter})")
 
         # Search for general pain keywords
         search_terms = self.pain_keywords[:8] + self.hn_keywords
@@ -98,6 +120,11 @@ class HackerNewsScraper(BaseScraper):
         url = f"{self.SEARCH_URL}?query={quote(query)}&hitsPerPage=30"
         if tags:
             url += f"&tags={tags}"
+
+        # Add time filter if set
+        min_ts = getattr(self, 'min_timestamp', 0)
+        if min_ts > 0:
+            url += f"&numericFilters=created_at_i>{min_ts}"
 
         try:
             response = self.fetch_url(url)

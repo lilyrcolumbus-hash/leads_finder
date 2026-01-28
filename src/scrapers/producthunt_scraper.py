@@ -44,9 +44,14 @@ class ProductHuntScraper(BaseScraper):
             "call management"
         ]
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = "week") -> LeadBatch:
         """
         Scrape Product Hunt for relevant founders and discussions.
+
+        Args:
+            time_filter: Time range for results (day, week, month, quarter, year, all)
+                        Note: Product Hunt RSS doesn't support time filtering,
+                        but parameter is accepted for API consistency.
 
         Returns:
             LeadBatch with found leads
@@ -54,7 +59,7 @@ class ProductHuntScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        self.logger.info("Starting Product Hunt scrape")
+        self.logger.info(f"Starting Product Hunt scrape (time filter: {time_filter})")
 
         # Get from main RSS feed
         try:
