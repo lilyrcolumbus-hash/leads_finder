@@ -1246,10 +1246,14 @@ if 'leads' not in st.session_state:
     st.session_state.leads = []
 if 'filtered_leads' not in st.session_state:
     st.session_state.filtered_leads = []
+if 'raw_leads' not in st.session_state:
+    st.session_state.raw_leads = []  # All leads before AI filter
 if 'scraping_done' not in st.session_state:
     st.session_state.scraping_done = False
 if 'nav_page' not in st.session_state:
     st.session_state.nav_page = "Dashboard"
+if 'last_search_results' not in st.session_state:
+    st.session_state.last_search_results = None  # Store search summary
 
 
 # ============================================
@@ -1719,12 +1723,24 @@ def show_search():
             all_leads = [l for l in all_leads if l.subreddit and l.subreddit.lower() in [s.lower() for s in industry_subreddits] or l.industry == selected_industry]
 
         st.session_state.leads = all_leads
+        st.session_state.raw_leads = all_leads.copy()  # Store raw leads before AI filter
 
         # Auto-save leads to storage
         saved_count = lead_manager.save_leads(all_leads)
         if saved_count > 0:
             with results:
                 st.success(f"Auto-saved {saved_count} new leads to database")
+
+        # Store search summary
+        st.session_state.last_search_results = {
+            'total_found': len(all_leads),
+            'sources': {
+                'Reddit': len([l for l in all_leads if l.source.value == 'reddit']),
+                'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
+                'Google': len([l for l in all_leads if l.source.value == 'google_search']),
+                'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
+            }
+        }
 
         # AI Filter
         if use_ai and all_leads:
@@ -1852,6 +1868,63 @@ def show_search():
                 st.write(f"[View original]({lead.url})")
                 st.write("---")
                 st.write(lead.content[:350] + "...")
+
+    # Section to review ALL raw leads (before AI filter)
+    if st.session_state.scraping_done and st.session_state.raw_leads:
+        st.divider()
+
+        raw_count = len(st.session_state.raw_leads)
+        filtered_count = len(st.session_state.filtered_leads)
+        rejected_count = raw_count - filtered_count
+
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+                    border-radius: 12px; padding: 16px; margin: 16px 0; border-left: 4px solid #F59E0B;">
+            <h3 style="margin: 0 0 8px 0; color: #92400E;">📋 Review All Results</h3>
+            <p style="margin: 0; color: #78350F;">
+                Found <strong>{raw_count}</strong> total leads |
+                AI Qualified: <strong>{filtered_count}</strong> |
+                Rejected: <strong>{rejected_count}</strong>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.expander(f"👁️ View ALL {raw_count} leads (before AI filter)", expanded=False):
+            st.info("These are ALL leads found, including those rejected by AI. Review manually to ensure nothing was missed.")
+
+            for i, lead in enumerate(st.session_state.raw_leads):
+                is_qualified = lead in st.session_state.filtered_leads
+                status_icon = "✅" if is_qualified else "❌"
+                status_text = "AI Qualified" if is_qualified else "AI Rejected"
+
+                with st.container():
+                    col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"""
+                        <div style="padding: 8px; margin: 4px 0; background: {'#D1FAE5' if is_qualified else '#FEE2E2'};
+                                    border-radius: 8px; border-left: 3px solid {'#10B981' if is_qualified else '#EF4444'};">
+                            <strong>{status_icon} {lead.title[:70]}{'...' if len(lead.title) > 70 else ''}</strong><br>
+                            <small style="color: #6B7280;">
+                                Source: {lead.source.value} | Score: {lead.pain_score} | {status_text}
+                            </small>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col2:
+                        st.link_button("View", lead.url, use_container_width=True)
+
+        # Clear results button
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🗑️ Clear Search Results", type="secondary", use_container_width=True):
+                st.session_state.raw_leads = []
+                st.session_state.filtered_leads = []
+                st.session_state.leads = []
+                st.session_state.scraping_done = False
+                st.session_state.last_search_results = None
+                st.rerun()
+        with col2:
+            if st.button("💾 Keep & Continue", type="primary", use_container_width=True):
+                st.success("Results saved! You can view them in My Leads or CRM anytime.")
 
 
 def show_leads():
