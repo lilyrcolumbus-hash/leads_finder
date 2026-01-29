@@ -485,6 +485,84 @@ st.markdown("""
         border-radius: 20px;
     }
 
+    /* ========== METRIC TOOLTIPS ========== */
+    .metric-card-wrapper {
+        position: relative;
+    }
+
+    .metric-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        line-height: 1.5;
+        width: 280px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        pointer-events: none;
+        margin-bottom: 10px;
+    }
+
+    .metric-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: #334155;
+    }
+
+    .metric-tooltip-title {
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .metric-tooltip-text {
+        opacity: 0.9;
+        font-weight: 400;
+    }
+
+    .metric-card:hover .metric-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-5px);
+    }
+
+    .metric-help-icon {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 20px;
+        height: 20px;
+        background: var(--slate-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: var(--slate-400);
+        cursor: help;
+        transition: all 0.2s ease;
+    }
+
+    .metric-card:hover .metric-help-icon {
+        background: var(--primary-100);
+        color: var(--primary-600);
+    }
+
     /* ========== SECTION ========== */
     .section {
         margin-bottom: 40px;
@@ -1718,7 +1796,13 @@ def show_dashboard():
 
     st.markdown(f"""
     <div class="metrics-grid">
+        <!-- LEADS FOUND -->
         <div class="metric-card">
+            <div class="metric-tooltip">
+                <div class="metric-tooltip-title">👥 Leads Found</div>
+                <div class="metric-tooltip-text">Total de prospectos encontrados en esta sesión de búsqueda. Incluye todos los resultados de los scrapers antes del filtro de AI.</div>
+            </div>
+            <div class="metric-help-icon">?</div>
             <div class="metric-header">
                 <div class="metric-icon primary">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
@@ -1737,7 +1821,14 @@ def show_dashboard():
                 <span class="metric-tag">This session</span>
             </div>
         </div>
+
+        <!-- HOT LEADS -->
         <div class="metric-card">
+            <div class="metric-tooltip">
+                <div class="metric-tooltip-title">🔥 Hot Leads</div>
+                <div class="metric-tooltip-text"><strong>Contactar AHORA.</strong> Leads con Total Score 80+. Tienen alto dolor (Pain), señales de compra activas (Intent), y son tu cliente ideal (Fit). Máxima prioridad.</div>
+            </div>
+            <div class="metric-help-icon">?</div>
             <div class="metric-header">
                 <div class="metric-icon" style="background: var(--error-50);">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
@@ -1755,7 +1846,14 @@ def show_dashboard():
                 <span class="metric-tag" style="background: var(--error-50); color: var(--error-500);">Total Score 80+</span>
             </div>
         </div>
+
+        <!-- QUALIFIED -->
         <div class="metric-card">
+            <div class="metric-tooltip">
+                <div class="metric-tooltip-title">✅ Qualified</div>
+                <div class="metric-tooltip-text">Leads que pasaron el filtro de AI. El sistema detectó que son relevantes para tu producto (AI Receptionist). Listos para agregar al CRM.</div>
+            </div>
+            <div class="metric-help-icon">?</div>
             <div class="metric-header">
                 <div class="metric-icon success">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
@@ -1773,7 +1871,14 @@ def show_dashboard():
                 <span class="metric-tag">Ready for CRM</span>
             </div>
         </div>
+
+        <!-- KEYWORDS -->
         <div class="metric-card">
+            <div class="metric-tooltip">
+                <div class="metric-tooltip-title">🔑 Keywords</div>
+                <div class="metric-tooltip-text">Palabras clave de dolor que el sistema busca: "missed calls", "need receptionist", "voicemail full", etc. Más keywords = mejor detección de leads con problemas reales.</div>
+            </div>
+            <div class="metric-help-icon">?</div>
             <div class="metric-header">
                 <div class="metric-icon accent">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
@@ -1789,7 +1894,14 @@ def show_dashboard():
                 <span class="metric-tag">Active</span>
             </div>
         </div>
+
+        <!-- SOURCES -->
         <div class="metric-card">
+            <div class="metric-tooltip">
+                <div class="metric-tooltip-title">🔗 Sources</div>
+                <div class="metric-tooltip-text">Fuentes de datos conectadas: Google Maps, Yelp, Indeed, LinkedIn, Reddit, etc. Cada fuente busca leads de diferente manera. Más sources = más cobertura.</div>
+            </div>
+            <div class="metric-help-icon">?</div>
             <div class="metric-header">
                 <div class="metric-icon primary">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
@@ -5575,12 +5687,77 @@ def show_lead_warming():
     warm_leads = [l for l in all_leads if l.get('temperature') == 'warm']
     hot_leads = [l for l in all_leads if l.get('temperature') == 'hot']
 
-    # Stats Row
+    # Stats Row with Tooltips
+    st.markdown("""
+    <style>
+        .warming-stat-wrapper {
+            position: relative;
+        }
+        .warming-stat-card {
+            position: relative;
+            cursor: help;
+        }
+        .warming-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            width: 260px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            pointer-events: none;
+            margin-bottom: 10px;
+        }
+        .warming-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #334155;
+        }
+        .warming-stat-card:hover .warming-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        .warming-help {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            background: #E2E8F0;
+            border-radius: 50%;
+            font-size: 11px;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.markdown(f"""
         <div class="warming-stat-card">
+            <div class="warming-tooltip">
+                <strong>❄️ Cold Leads</strong><br>
+                Leads nuevos que aún no has contactado ni interactuado en LinkedIn. Necesitan 7 días de "calentamiento" antes de enviar email frío.
+            </div>
+            <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">❄️</div>
             <div class="warming-stat-value">{len(cold_leads)}</div>
             <div class="warming-stat-label">Cold Leads</div>
@@ -5590,6 +5767,11 @@ def show_lead_warming():
     with col2:
         st.markdown(f"""
         <div class="warming-stat-card">
+            <div class="warming-tooltip">
+                <strong>🌡️ Warm Leads</strong><br>
+                Leads en proceso de calentamiento (día 3-6). Ya vieron tu perfil, recibieron likes/comentarios. Aún no listos para contacto directo.
+            </div>
+            <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">🌡️</div>
             <div class="warming-stat-value">{len(warm_leads)}</div>
             <div class="warming-stat-label">Warm Leads</div>
@@ -5599,6 +5781,11 @@ def show_lead_warming():
     with col3:
         st.markdown(f"""
         <div class="warming-stat-card">
+            <div class="warming-tooltip">
+                <strong>🔥 Hot Leads</strong><br>
+                <strong>¡Listos para contactar!</strong> Completaron 7 días de warming. Ya te conocen de LinkedIn. Envía email personalizado ahora para +300% respuesta.
+            </div>
+            <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">🔥</div>
             <div class="warming-stat-value">{len(hot_leads)}</div>
             <div class="warming-stat-label">Hot Leads</div>
@@ -5608,6 +5795,11 @@ def show_lead_warming():
     with col4:
         st.markdown(f"""
         <div class="warming-stat-card">
+            <div class="warming-tooltip">
+                <strong>✅ Activities Done</strong><br>
+                Total de acciones de warming completadas: vistas de perfil, likes, comentarios, conexiones enviadas. Más actividad = leads más calientes.
+            </div>
+            <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
             <div class="warming-stat-value">{len([a for a in warming_activities if a.get('completed')])}</div>
             <div class="warming-stat-label">Activities Done</div>
