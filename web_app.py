@@ -4178,43 +4178,47 @@ def generate_assistant_response(user_message: str) -> str:
             import openai
             client = openai.OpenAI(api_key=settings.openai_api_key)
 
-            # System prompt with platform knowledge
-            system_prompt = """Eres un experto en Lead Generation y prospección de ventas para LeadGen Pro, una plataforma de generación de leads para un producto de AI Receptionist (agente telefónico con IA que atiende llamadas, agenda citas, responde preguntas).
+            # System prompt with platform knowledge (bilingual)
+            system_prompt = """You are an expert in Lead Generation and sales prospecting for LeadGen Pro, a lead generation platform for an AI Receptionist product (AI phone agent that answers calls, schedules appointments, responds to questions).
 
-TU CONOCIMIENTO DE LA PLATAFORMA:
+CRITICAL: Detect the language of the user's message and ALWAYS respond in the SAME language:
+- If user writes in Spanish → respond in Spanish
+- If user writes in English → respond in English
 
-FUENTES DE BÚSQUEDA DISPONIBLES (8 total):
-1. Reddit (GRATIS) - Busca en subreddits de negocios como smallbusiness, entrepreneur
-2. Hacker News (GRATIS) - Busca startups y tech companies
-3. Product Hunt (GRATIS) - Encuentra nuevos productos y sus makers
-4. Indeed (GRATIS) - Empresas contratando recepcionistas = necesitan tu solución
-5. Yelp (GRATIS) - Negocios de servicios locales
-6. Google Maps (GRATIS) - Negocios locales con teléfono, website, email
-7. LinkedIn (usa Google API) - Decision makers y dueños de negocios
-8. Google Search (usa Google API) - Quejas sobre teléfonos y atención al cliente
+YOUR PLATFORM KNOWLEDGE:
 
-INDUSTRIAS OBJETIVO para AI Receptionist:
-- Dental (dentistas, ortodoncistas)
-- HVAC (aire acondicionado, calefacción)
-- Legal (abogados, bufetes)
-- Medical (clínicas, consultorios)
-- Beauty (salones, spas)
-- Auto (talleres, concesionarios)
-- Real Estate (inmobiliarias)
-- Insurance (seguros)
+AVAILABLE SEARCH SOURCES (8 total):
+1. Reddit (FREE) - Searches business subreddits like smallbusiness, entrepreneur
+2. Hacker News (FREE) - Searches startups and tech companies
+3. Product Hunt (FREE) - Finds new products and their makers
+4. Indeed (FREE) - Companies hiring receptionists = they need your solution
+5. Yelp (FREE) - Local service businesses
+6. Google Maps (FREE) - Local businesses with phone, website, email
+7. LinkedIn (uses Google API) - Decision makers and business owners
+8. Google Search (uses Google API) - Complaints about phones and customer service
 
-CONSEJOS DE BÚSQUEDA:
-- Usar filtro de ubicación para Indeed, Yelp, Google Maps, LinkedIn
-- Las empresas contratando recepcionistas = oportunidad perfecta
-- Negocios con malas reseñas sobre "no contestan el teléfono" = leads calientes
-- LinkedIn encuentra decision makers directamente
+TARGET INDUSTRIES for AI Receptionist:
+- Dental (dentists, orthodontists) / Dental (dentistas, ortodoncistas)
+- HVAC (air conditioning, heating) / HVAC (aire acondicionado, calefacción)
+- Legal (lawyers, law firms) / Legal (abogados, bufetes)
+- Medical (clinics, doctor offices) / Medical (clínicas, consultorios)
+- Beauty (salons, spas) / Beauty (salones, spas)
+- Auto (repair shops, dealerships) / Auto (talleres, concesionarios)
+- Real Estate (realtors) / Real Estate (inmobiliarias)
+- Insurance (agents, brokers) / Insurance (seguros)
 
-ESTRATEGIAS DE OUTREACH:
-- Cold email: Personalizar con el dolor específico del negocio
-- Usar la "admisión dañina" de Hormozi - reconocer limitaciones para ganar confianza
-- El LTV (valor de vida del cliente) determina cuánto puedes pagar por adquirir leads
+SEARCH TIPS:
+- Use location filter for Indeed, Yelp, Google Maps, LinkedIn
+- Companies hiring receptionists = perfect opportunity
+- Businesses with bad reviews about "don't answer the phone" = hot leads
+- LinkedIn finds decision makers directly
 
-Responde en español, de forma concisa y práctica. Da consejos accionables."""
+OUTREACH STRATEGIES:
+- Cold email: Personalize with the business's specific pain point
+- Use Hormozi's "damaging admission" - acknowledge limitations to gain trust
+- LTV (customer lifetime value) determines how much you can pay to acquire leads
+
+Be concise and practical. Give actionable advice."""
 
             messages = [
                 {"role": "system", "content": system_prompt}
@@ -4247,21 +4251,35 @@ Responde en español, de forma concisa y práctica. Da consejos accionables."""
 
 
 def get_fallback_response(user_message: str) -> str:
-    """Rule-based fallback responses when AI is not available."""
+    """Rule-based fallback responses when AI is not available. Bilingual (ES/EN)."""
 
     message_lower = user_message.lower()
 
-    # Pattern matching for common questions
-    if any(word in message_lower for word in ["más leads", "conseguir", "encontrar más", "mejorar"]):
-        return """<b>Para conseguir más leads:</b><br><br>
+    # Detect language - Spanish indicators
+    spanish_words = ["cómo", "qué", "cuál", "más", "para", "buscar", "mejor", "hola", "gracias", "ayuda", "necesito", "quiero"]
+    is_spanish = any(word in message_lower for word in spanish_words)
+
+    # LEADS - How to get more leads
+    if any(word in message_lower for word in ["más leads", "conseguir", "encontrar más", "mejorar", "more leads", "get more", "find more", "improve"]):
+        if is_spanish:
+            return """<b>Para conseguir más leads:</b><br><br>
 1. <b>Activa Google Maps</b> - Es gratis y encuentra negocios locales con teléfono y email<br>
 2. <b>Usa filtro de ubicación</b> - Enfócate en ciudades específicas (Miami, LA, Houston)<br>
 3. <b>Indeed es oro</b> - Empresas contratando recepcionistas = necesitan tu solución<br>
 4. <b>LinkedIn</b> - Encuentra dueños de negocios directamente (necesita Google API)<br><br>
 💡 <b>Tip:</b> Combina Indeed + Google Maps + Yelp para la misma ciudad = leads locales con datos completos."""
+        else:
+            return """<b>To get more leads:</b><br><br>
+1. <b>Enable Google Maps</b> - It's free and finds local businesses with phone and email<br>
+2. <b>Use location filter</b> - Focus on specific cities (Miami, LA, Houston)<br>
+3. <b>Indeed is gold</b> - Companies hiring receptionists = they need your solution<br>
+4. <b>LinkedIn</b> - Find business owners directly (requires Google API)<br><br>
+💡 <b>Tip:</b> Combine Indeed + Google Maps + Yelp for the same city = local leads with complete data."""
 
-    elif any(word in message_lower for word in ["fuente", "mejor", "cuál usar", "qué fuente"]):
-        return """<b>Mejores fuentes para AI Receptionist:</b><br><br>
+    # SOURCES - Best sources
+    elif any(word in message_lower for word in ["fuente", "mejor", "cuál usar", "qué fuente", "source", "best", "which", "recommend"]):
+        if is_spanish:
+            return """<b>Mejores fuentes para AI Receptionist:</b><br><br>
 🥇 <b>Indeed</b> - Empresas contratando recepcionistas NECESITAN tu producto<br>
 🥈 <b>Google Maps</b> - Dentistas, HVAC, abogados con teléfono directo<br>
 🥉 <b>Yelp</b> - Negocios de servicios con reviews<br><br>
@@ -4270,9 +4288,21 @@ def get_fallback_response(user_message: str) -> str:
 • HVAC → Google Maps + Indeed<br>
 • Legal → LinkedIn + Google Maps<br><br>
 💡 Las fuentes GRATIS (Indeed, Yelp, Google Maps) no gastan créditos de API."""
+        else:
+            return """<b>Best sources for AI Receptionist:</b><br><br>
+🥇 <b>Indeed</b> - Companies hiring receptionists NEED your product<br>
+🥈 <b>Google Maps</b> - Dentists, HVAC, lawyers with direct phone<br>
+🥉 <b>Yelp</b> - Service businesses with reviews<br><br>
+<b>By industry:</b><br>
+• Dental → Google Maps + Yelp<br>
+• HVAC → Google Maps + Indeed<br>
+• Legal → LinkedIn + Google Maps<br><br>
+💡 FREE sources (Indeed, Yelp, Google Maps) don't use API credits."""
 
-    elif any(word in message_lower for word in ["ubicación", "location", "ciudad", "filtro"]):
-        return """<b>Cómo usar el filtro de ubicación:</b><br><br>
+    # LOCATION - How to use location filter
+    elif any(word in message_lower for word in ["ubicación", "location", "ciudad", "filtro", "city", "filter", "area"]):
+        if is_spanish:
+            return """<b>Cómo usar el filtro de ubicación:</b><br><br>
 1. En <b>Find Leads</b>, busca la sección "Location Filter"<br>
 2. Ingresa la ciudad (ej: Miami, Los Angeles)<br>
 3. Selecciona el estado del dropdown<br>
@@ -4283,9 +4313,23 @@ def get_fallback_response(user_message: str) -> str:
 ✅ Google Maps - Busca negocios locales<br>
 ✅ LinkedIn - Filtra perfiles por ubicación<br><br>
 💡 <b>Tip:</b> Empieza con ciudades grandes (Miami, LA, Houston, Dallas) para más resultados."""
+        else:
+            return """<b>How to use the location filter:</b><br><br>
+1. In <b>Find Leads</b>, find the "Location Filter" section<br>
+2. Enter the city (e.g., Miami, Los Angeles)<br>
+3. Select the state from dropdown<br>
+4. Optional: add zip code for more precision<br><br>
+<b>Sources that use location:</b><br>
+✅ Indeed - Searches jobs in that city<br>
+✅ Yelp - Searches businesses in that area<br>
+✅ Google Maps - Searches local businesses<br>
+✅ LinkedIn - Filters profiles by location<br><br>
+💡 <b>Tip:</b> Start with large cities (Miami, LA, Houston, Dallas) for more results."""
 
-    elif any(word in message_lower for word in ["industria", "sector", "qué buscar", "tipo de negocio"]):
-        return """<b>Mejores industrias para AI Receptionist:</b><br><br>
+    # INDUSTRY - What industries to target
+    elif any(word in message_lower for word in ["industria", "sector", "qué buscar", "tipo de negocio", "industry", "target", "business type", "niche"]):
+        if is_spanish:
+            return """<b>Mejores industrias para AI Receptionist:</b><br><br>
 🦷 <b>Dental</b> - Alto volumen de llamadas, muchas citas<br>
 ❄️ <b>HVAC</b> - Emergencias 24/7, necesitan responder siempre<br>
 ⚖️ <b>Legal</b> - No pueden perder clientes potenciales<br>
@@ -4296,20 +4340,46 @@ def get_fallback_response(user_message: str) -> str:
 • Contratan recepcionistas (Indeed)<br>
 • Reviews quejándose de que "no contestan"<br>
 • Negocios pequeños (1-20 empleados)"""
+        else:
+            return """<b>Best industries for AI Receptionist:</b><br><br>
+🦷 <b>Dental</b> - High call volume, many appointments<br>
+❄️ <b>HVAC</b> - 24/7 emergencies, need to always answer<br>
+⚖️ <b>Legal</b> - Can't afford to lose potential clients<br>
+🏥 <b>Medical</b> - Clinics with many daily appointments<br>
+💇 <b>Salons/Spas</b> - Constant reservations<br>
+🚗 <b>Auto Repair</b> - Customers call for emergencies<br><br>
+<b>Signs they need your product:</b><br>
+• Hiring receptionists (Indeed)<br>
+• Reviews complaining "no one answers"<br>
+• Small businesses (1-20 employees)"""
 
-    elif any(word in message_lower for word in ["email", "cold", "outreach", "contactar", "escribir"]):
-        return """<b>Cómo escribir cold emails efectivos:</b><br><br>
+    # EMAIL - Cold outreach
+    elif any(word in message_lower for word in ["email", "cold", "outreach", "contactar", "escribir", "write", "reach out", "contact"]):
+        if is_spanish:
+            return """<b>Cómo escribir cold emails efectivos:</b><br><br>
 <b>Estructura ganadora:</b><br>
 1. <b>Gancho</b> - "Vi que están contratando recepcionista..."<br>
 2. <b>Dolor</b> - "Perder una llamada = perder un cliente de $X"<br>
 3. <b>Solución</b> - "Nuestro AI atiende 24/7, agenda citas automáticamente"<br>
 4. <b>CTA</b> - "¿15 minutos para una demo esta semana?"<br><br>
 <b>Ejemplo:</b><br>
-<i>"Hola [Nombre], vi en Indeed que buscan recepcionista para [Empresa]. ¿Sabías que el 67% de los clientes cuelgan si no contestan en 3 rings? Tengo una solución de IA que atiende 24/7 y agenda citas automáticamente. ¿Tienes 15 min para verlo?"</i><br><br>
+<i>"Hola [Nombre], vi en Indeed que buscan recepcionista para [Empresa]. ¿Sabías que el 67% de los clientes cuelgan si no contestan en 3 rings? Tengo una solución de IA que atiende 24/7. ¿Tienes 15 min para verlo?"</i><br><br>
 💡 <b>Hormozi Tip:</b> Usa "admisión dañina" - "No reemplazamos humanos al 100%, pero cubrimos cuando no están"."""
+        else:
+            return """<b>How to write effective cold emails:</b><br><br>
+<b>Winning structure:</b><br>
+1. <b>Hook</b> - "I saw you're hiring a receptionist..."<br>
+2. <b>Pain</b> - "Missing a call = losing a $X customer"<br>
+3. <b>Solution</b> - "Our AI answers 24/7, schedules appointments automatically"<br>
+4. <b>CTA</b> - "15 minutes for a demo this week?"<br><br>
+<b>Example:</b><br>
+<i>"Hi [Name], I saw on Indeed you're hiring a receptionist for [Company]. Did you know 67% of customers hang up if not answered in 3 rings? I have an AI solution that answers 24/7. Do you have 15 min to see it?"</i><br><br>
+💡 <b>Hormozi Tip:</b> Use "damaging admission" - "We don't replace humans 100%, but we cover when they're not available"."""
 
-    elif any(word in message_lower for word in ["crédito", "api", "costo", "gratis", "pagar"]):
-        return """<b>Costos de la plataforma:</b><br><br>
+    # COST - API credits
+    elif any(word in message_lower for word in ["crédito", "api", "costo", "gratis", "pagar", "credit", "cost", "free", "pay", "price"]):
+        if is_spanish:
+            return """<b>Costos de la plataforma:</b><br><br>
 <b>GRATIS (sin límite):</b><br>
 ✅ Reddit - RSS feeds<br>
 ✅ Hacker News - API pública<br>
@@ -4321,24 +4391,57 @@ def get_fallback_response(user_message: str) -> str:
 • LinkedIn - ~5 queries por búsqueda<br>
 • Google Search - ~15 queries por búsqueda<br><br>
 💡 <b>Tip:</b> Usa solo las fuentes gratis para búsquedas ilimitadas."""
+        else:
+            return """<b>Platform costs:</b><br><br>
+<b>FREE (unlimited):</b><br>
+✅ Reddit - RSS feeds<br>
+✅ Hacker News - Public API<br>
+✅ Product Hunt - RSS feeds<br>
+✅ Indeed - Web scraping<br>
+✅ Yelp - Web scraping<br>
+✅ Google Maps - Web scraping<br><br>
+<b>Use Google API (100 free/day):</b><br>
+• LinkedIn - ~5 queries per search<br>
+• Google Search - ~15 queries per search<br><br>
+💡 <b>Tip:</b> Use only free sources for unlimited searches."""
 
-    elif any(word in message_lower for word in ["hola", "hey", "buenos", "qué tal"]):
-        return """¡Hola! 👋 Soy tu asistente de Lead Generation.<br><br>
+    # GREETING
+    elif any(word in message_lower for word in ["hola", "hey", "buenos", "qué tal", "hello", "hi", "good morning", "good afternoon"]):
+        if is_spanish:
+            return """¡Hola! 👋 Soy tu asistente de Lead Generation.<br><br>
 Puedo ayudarte con:<br>
 • Estrategias para encontrar más leads<br>
 • Qué fuentes usar para tu industria<br>
 • Cómo escribir cold emails efectivos<br>
 • Uso de la plataforma<br><br>
 ¿Qué necesitas hoy?"""
+        else:
+            return """Hello! 👋 I'm your Lead Generation assistant.<br><br>
+I can help you with:<br>
+• Strategies to find more leads<br>
+• Which sources to use for your industry<br>
+• How to write effective cold emails<br>
+• Using the platform<br><br>
+What do you need today?"""
 
+    # DEFAULT
     else:
-        return """Entiendo tu pregunta. Aquí algunos consejos generales:<br><br>
+        if is_spanish:
+            return """Entiendo tu pregunta. Aquí algunos consejos generales:<br><br>
 <b>Para mejores resultados:</b><br>
 1. Usa el <b>filtro de ubicación</b> para enfocarte en ciudades específicas<br>
 2. Activa <b>Google Maps</b> para obtener teléfonos y emails<br>
 3. <b>Indeed</b> encuentra empresas que necesitan tu producto<br>
 4. Revisa los leads en <b>My Leads</b> antes de contactar<br><br>
 ¿Hay algo específico sobre la plataforma o estrategias de lead generation en lo que pueda ayudarte?"""
+        else:
+            return """I understand your question. Here are some general tips:<br><br>
+<b>For better results:</b><br>
+1. Use the <b>location filter</b> to focus on specific cities<br>
+2. Enable <b>Google Maps</b> to get phones and emails<br>
+3. <b>Indeed</b> finds companies that need your product<br>
+4. Review leads in <b>My Leads</b> before contacting<br><br>
+Is there anything specific about the platform or lead generation strategies I can help you with?"""
 
 
 # ============================================
