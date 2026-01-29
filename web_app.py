@@ -27,6 +27,89 @@ from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, Produc
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
+# ============================================
+# TRANSLATIONS / TRADUCCIONES
+# ============================================
+TRANSLATIONS = {
+    'en': {
+        # Analytics Page
+        'analytics_title': 'Analytics',
+        'analytics_subtitle': 'Lead generation performance metrics',
+        'analytics_tooltip_title': 'What is Analytics?',
+        'analytics_tooltip_desc': 'This page shows your lead generation performance:',
+        'leads_found': 'Leads Found',
+        'total_discovered': 'Total discovered',
+        'qualified_leads': 'Qualified Leads',
+        'passed_filters': 'Passed filters',
+        'conversion_rate': 'Conversion Rate',
+        'qualified_total': 'Qualified / Total',
+        'hot_leads': 'Hot Leads',
+        'leads_by_source': 'Leads by Source',
+        'leads_by_source_desc': 'Where your leads come from - identify the best sources',
+        'score_distribution': 'Score Distribution',
+        'lead_quality_by_score': 'Lead quality by score',
+        'ready_to_contact': 'Ready to contact',
+        'need_more_nurturing': 'Need more nurturing',
+        'low_priority': 'Low priority',
+        'no_data_yet': 'No data yet',
+        'go_to_find_leads': 'Go to "Find Leads" to start searching and see analytics here',
+        'connect_hubspot': 'Connect HubSpot for more statistics',
+        'go_to_settings': 'Go to Settings to connect your HubSpot account and view advanced CRM metrics',
+        'loading_hubspot': 'Loading HubSpot statistics...',
+        'hubspot_statistics': 'HubSpot Statistics',
+        'data_synced': 'Data synced from your CRM',
+        'won': 'Won',
+        'by_stage_hubspot': 'By Stage in HubSpot',
+        # Common
+        'main_menu': 'Main Menu',
+        'search': 'Search',
+        'save': 'Save',
+        'cancel': 'Cancel',
+        'delete': 'Delete',
+    },
+    'es': {
+        # Analytics Page
+        'analytics_title': 'Analíticas',
+        'analytics_subtitle': 'Métricas de rendimiento de generación de leads',
+        'analytics_tooltip_title': '¿Para qué es Analytics?',
+        'analytics_tooltip_desc': 'Esta página muestra el rendimiento de tu búsqueda de leads:',
+        'leads_found': 'Leads Encontrados',
+        'total_discovered': 'Total descubiertos',
+        'qualified_leads': 'Leads Calificados',
+        'passed_filters': 'Pasaron el filtro',
+        'conversion_rate': 'Tasa de Conversión',
+        'qualified_total': 'Calificados / Total',
+        'hot_leads': 'Leads Calientes',
+        'leads_by_source': 'Leads por Fuente',
+        'leads_by_source_desc': 'De dónde vienen tus leads - identifica las mejores fuentes',
+        'score_distribution': 'Distribución de Puntuación',
+        'lead_quality_by_score': 'Calidad de tus leads por score',
+        'ready_to_contact': 'Listos para contactar',
+        'need_more_nurturing': 'Necesitan más nurturing',
+        'low_priority': 'Baja prioridad',
+        'no_data_yet': 'No hay datos todavía',
+        'go_to_find_leads': 'Ve a "Find Leads" para buscar leads y ver analíticas aquí',
+        'connect_hubspot': 'Conecta HubSpot para más estadísticas',
+        'go_to_settings': 'Ve a Settings para conectar tu HubSpot y ver métricas avanzadas',
+        'loading_hubspot': 'Cargando estadísticas de HubSpot...',
+        'hubspot_statistics': 'Estadísticas de HubSpot',
+        'data_synced': 'Datos sincronizados de tu CRM',
+        'won': 'Ganados',
+        'by_stage_hubspot': 'Por Etapa en HubSpot',
+        # Common
+        'main_menu': 'Menú Principal',
+        'search': 'Buscar',
+        'save': 'Guardar',
+        'cancel': 'Cancelar',
+        'delete': 'Eliminar',
+    }
+}
+
+def t(key):
+    """Get translation for current language."""
+    lang = st.session_state.get('language', 'en')
+    return TRANSLATIONS.get(lang, TRANSLATIONS['en']).get(key, key)
+
 # Page config
 st.set_page_config(
     page_title="LeadGen Pro",
@@ -1642,6 +1725,10 @@ if 'warming_queue' not in st.session_state:
 if 'warming_schedule' not in st.session_state:
     st.session_state.warming_schedule = {}  # Scheduled warming activities by lead
 
+# Language setting
+if 'language' not in st.session_state:
+    st.session_state.language = 'en'  # 'en' for English, 'es' for Spanish
+
 
 # ============================================
 # SIDEBAR
@@ -1680,8 +1767,67 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
+        # Language Toggle with animated globe
+        current_lang = st.session_state.language
+        lang_label = "🇺🇸 EN" if current_lang == 'en' else "🇪🇸 ES"
+
+        st.markdown(f"""
+        <style>
+            @keyframes globe-spin {{
+                0% {{ transform: rotateY(0deg); }}
+                100% {{ transform: rotateY(360deg); }}
+            }}
+            .lang-toggle-container {{
+                display: flex;
+                justify-content: center;
+                margin: 12px 0;
+            }}
+            .lang-toggle {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+                border: 1px solid #475569;
+                border-radius: 20px;
+                padding: 6px 14px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }}
+            .lang-toggle:hover {{
+                border-color: #3B82F6;
+                box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+            }}
+            .lang-toggle:hover .globe-icon {{
+                animation: globe-spin 1s linear infinite;
+            }}
+            .globe-icon {{
+                font-size: 16px;
+                display: inline-block;
+            }}
+            .lang-text {{
+                font-size: 12px;
+                font-weight: 600;
+                color: #E2E8F0;
+            }}
+        </style>
+        <div class="lang-toggle-container">
+            <div class="lang-toggle" title="Click to switch language">
+                <span class="globe-icon">🌐</span>
+                <span class="lang-text">{lang_label}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Language toggle button (actual functionality)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🔄" if current_lang == 'en' else "🔄", key="lang_toggle", help="Switch to Spanish" if current_lang == 'en' else "Cambiar a Inglés", use_container_width=True):
+                st.session_state.language = 'es' if current_lang == 'en' else 'en'
+                st.rerun()
+
         # Nav Label
-        st.markdown('<div class="nav-label">Main Menu</div>', unsafe_allow_html=True)
+        nav_label = "Main Menu" if st.session_state.language == 'en' else "Menú Principal"
+        st.markdown(f'<div class="nav-label">{nav_label}</div>', unsafe_allow_html=True)
 
         # Navigation
         pages = ["Dashboard", "Find Leads", "My Leads", "Lead Warming", "CRM", "Analytics", "AI Assistant", "Settings"]
@@ -3045,31 +3191,31 @@ def show_analytics():
     """Analytics page with modern visualizations and clear explanations."""
 
     # Page header with explanation tooltip
-    st.markdown("""
+    st.markdown(f"""
     <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h1 style="margin: 0; color: #1E293B; font-size: 28px;">📊 Analytics</h1>
+            <h1 style="margin: 0; color: #1E293B; font-size: 28px;">📊 {t('analytics_title')}</h1>
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
                 <span style="cursor: help; background: #6366F1; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600;">?</span>
                 <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 16px 20px; border-radius: 12px; font-size: 13px; width: 320px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-                    <strong style="color: #818CF8; font-size: 15px;">What is Analytics?</strong><br><br>
-                    This page shows your lead generation performance:<br><br>
-                    • <strong>Leads Found:</strong> Total leads discovered<br>
-                    • <strong>Qualified Leads:</strong> Those that passed quality filters<br>
-                    • <strong>Conversion Rate:</strong> % of good leads vs total<br>
-                    • <strong>By Source:</strong> Where your best leads come from<br><br>
-                    <em style="color: #94A3B8;">Use this data to optimize your search strategy</em>
+                    <strong style="color: #818CF8; font-size: 15px;">{t('analytics_tooltip_title')}</strong><br><br>
+                    {t('analytics_tooltip_desc')}<br><br>
+                    • <strong>{t('leads_found')}:</strong> {t('total_discovered')}<br>
+                    • <strong>{t('qualified_leads')}:</strong> {t('passed_filters')}<br>
+                    • <strong>{t('conversion_rate')}:</strong> {t('qualified_total')}<br>
+                    • <strong>{t('leads_by_source')}:</strong> {t('leads_by_source_desc')}<br><br>
+                    <em style="color: #94A3B8;">{t('go_to_settings').split('.')[0]}</em>
                     <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
                 </div>
             </div>
         </div>
-        <p style="color: #64748B; margin: 0; font-size: 15px;">Lead generation performance metrics</p>
+        <p style="color: #64748B; margin: 0; font-size: 15px;">{t('analytics_subtitle')}</p>
     </div>
     <style>
-        .metric-tooltip-wrapper:hover .metric-tooltip {
+        .metric-tooltip-wrapper:hover .metric-tooltip {{
             opacity: 1 !important;
             visibility: visible !important;
-        }
+        }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -3086,22 +3232,22 @@ def show_analytics():
         st.markdown(f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
             <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 Leads Found</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
                 <div style="font-size: 36px; font-weight: 700;">{total_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Total discovered</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('total_discovered')}</div>
             </div>
             <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ Qualified Leads</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
                 <div style="font-size: 36px; font-weight: 700;">{qualified_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Passed filters</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('passed_filters')}</div>
             </div>
             <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 Conversion Rate</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
                 <div style="font-size: 36px; font-weight: 700;">{rate:.1f}%</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Qualified / Total</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('qualified_total')}</div>
             </div>
             <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 Hot Leads</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
                 <div style="font-size: 36px; font-weight: 700;">{hot_leads}</div>
                 <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Score 70+</div>
             </div>
@@ -3110,10 +3256,10 @@ def show_analytics():
 
         if st.session_state.leads:
             # Source distribution with modern visualization
-            st.markdown("""
+            st.markdown(f"""
             <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 Leads by Source</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">Where your leads come from - identify the best sources</p>
+                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 {t('leads_by_source')}</h3>
+                <p style="color: #64748B; margin: 0; font-size: 13px;">{t('leads_by_source_desc')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3168,10 +3314,10 @@ def show_analytics():
 
             # Score Distribution
             st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
-            st.markdown("""
+            st.markdown(f"""
             <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🎯 Score Distribution</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">Lead quality by score</p>
+                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🎯 {t('score_distribution')}</h3>
+                <p style="color: #64748B; margin: 0; font-size: 13px;">{t('lead_quality_by_score')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3193,59 +3339,59 @@ def show_analytics():
                     <div style="font-size: 32px; margin-bottom: 8px;">🔥</div>
                     <div style="font-size: 28px; font-weight: 700; color: #EF4444;">{score_ranges['🔥 Hot (70-100)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Hot Leads (70-100)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">Ready to contact</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">{t('ready_to_contact')}</div>
                 </div>
                 <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #F59E0B;">
                     <div style="font-size: 32px; margin-bottom: 8px;">🟡</div>
                     <div style="font-size: 28px; font-weight: 700; color: #F59E0B;">{score_ranges['🟡 Warm (40-69)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Warm Leads (40-69)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">Need more nurturing</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">{t('need_more_nurturing')}</div>
                 </div>
                 <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #3B82F6;">
                     <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
                     <div style="font-size: 28px; font-weight: 700; color: #3B82F6;">{score_ranges['❄️ Cold (0-39)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Cold Leads (0-39)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">Low priority</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">{t('low_priority')}</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
         else:
-            st.markdown("""
+            st.markdown(f"""
             <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 40px; text-align: center; margin-top: 24px;">
                 <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-                <h3 style="color: #0369A1; margin: 0 0 8px 0;">No data yet</h3>
-                <p style="color: #0284C7; margin: 0;">Go to "Find Leads" to start searching and see analytics here</p>
+                <h3 style="color: #0369A1; margin: 0 0 8px 0;">{t('no_data_yet')}</h3>
+                <p style="color: #0284C7; margin: 0;">{t('go_to_find_leads')}</p>
             </div>
             """, unsafe_allow_html=True)
 
         # HubSpot connection notice
         if not crm.is_configured():
-            st.markdown("""
+            st.markdown(f"""
             <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
                         border-left: 4px solid #6366F1;
                         border-radius: 12px;
                         padding: 16px 20px;
                         margin-top: 32px;">
                 <p style="color: #1E293B; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">
-                    🔗 Connect HubSpot for more statistics
+                    🔗 {t('connect_hubspot')}
                 </p>
                 <p style="color: #475569; margin: 0; font-size: 13px;">
-                    Go to Settings to connect your HubSpot account and view advanced CRM metrics
+                    {t('go_to_settings')}
                 </p>
             </div>
             """, unsafe_allow_html=True)
         else:
             # Show HubSpot stats if connected
-            with st.spinner("Loading HubSpot statistics..."):
+            with st.spinner(t('loading_hubspot')):
                 stats = crm.get_statistics()
 
             if "error" not in stats:
                 st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
-                st.markdown("""
+                st.markdown(f"""
                 <div style="margin-bottom: 16px;">
-                    <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🔗 HubSpot Statistics</h3>
-                    <p style="color: #64748B; margin: 0; font-size: 13px;">Data synced from your CRM</p>
+                    <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🔗 {t('hubspot_statistics')}</h3>
+                    <p style="color: #64748B; margin: 0; font-size: 13px;">{t('data_synced')}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -3268,8 +3414,8 @@ def show_analytics():
                     </div>
                     <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
                         <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
-                        <div style="font-size: 24px; font-weight: 700; color: #10B981;">{stats.get('by_stage', {}).get('closed_won', 0)}</div>
-                        <div style="font-size: 13px; color: #6B7280;">Won</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #10B981;">{stats.get('by_stage', {{}}).get('closed_won', 0)}</div>
+                        <div style="font-size: 13px; color: #6B7280;">{t('won')}</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -3277,9 +3423,9 @@ def show_analytics():
                 # HubSpot stage distribution
                 if stats.get("by_stage"):
                     st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
-                    st.markdown("""
+                    st.markdown(f"""
                     <div style="margin-bottom: 12px;">
-                        <h4 style="color: #1E293B; margin: 0; font-size: 16px;">By Stage in HubSpot</h4>
+                        <h4 style="color: #1E293B; margin: 0; font-size: 16px;">{t('by_stage_hubspot')}</h4>
                     </div>
                     """, unsafe_allow_html=True)
 
