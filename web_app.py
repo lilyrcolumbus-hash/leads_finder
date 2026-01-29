@@ -3052,18 +3052,18 @@ def show_analytics():
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
                 <span style="cursor: help; background: #6366F1; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600;">?</span>
                 <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 16px 20px; border-radius: 12px; font-size: 13px; width: 320px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-                    <strong style="color: #818CF8; font-size: 15px;">¿Para qué es Analytics?</strong><br><br>
-                    Esta página te muestra el rendimiento de tu búsqueda de leads:<br><br>
-                    • <strong>Leads Encontrados:</strong> Total de leads que has descubierto<br>
-                    • <strong>Leads Calificados:</strong> Los que pasaron el filtro de calidad<br>
-                    • <strong>Tasa de Conversión:</strong> % de leads buenos vs total<br>
-                    • <strong>Por Fuente:</strong> De dónde vienen tus mejores leads<br><br>
-                    <em style="color: #94A3B8;">Usa estos datos para optimizar tu estrategia de búsqueda</em>
+                    <strong style="color: #818CF8; font-size: 15px;">What is Analytics?</strong><br><br>
+                    This page shows your lead generation performance:<br><br>
+                    • <strong>Leads Found:</strong> Total leads discovered<br>
+                    • <strong>Qualified Leads:</strong> Those that passed quality filters<br>
+                    • <strong>Conversion Rate:</strong> % of good leads vs total<br>
+                    • <strong>By Source:</strong> Where your best leads come from<br><br>
+                    <em style="color: #94A3B8;">Use this data to optimize your search strategy</em>
                     <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
                 </div>
             </div>
         </div>
-        <p style="color: #64748B; margin: 0; font-size: 15px;">Métricas de rendimiento de tu generación de leads</p>
+        <p style="color: #64748B; margin: 0; font-size: 15px;">Lead generation performance metrics</p>
     </div>
     <style>
         .metric-tooltip-wrapper:hover .metric-tooltip {
@@ -3086,22 +3086,22 @@ def show_analytics():
         st.markdown(f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
             <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 Leads Encontrados</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 Leads Found</div>
                 <div style="font-size: 36px; font-weight: 700;">{total_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Total descubiertos</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Total discovered</div>
             </div>
             <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ Leads Calificados</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ Qualified Leads</div>
                 <div style="font-size: 36px; font-weight: 700;">{qualified_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Pasaron el filtro</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Passed filters</div>
             </div>
             <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 Tasa Conversión</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 Conversion Rate</div>
                 <div style="font-size: 36px; font-weight: 700;">{rate:.1f}%</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Calificados / Total</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Qualified / Total</div>
             </div>
             <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 Leads Calientes</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 Hot Leads</div>
                 <div style="font-size: 36px; font-weight: 700;">{hot_leads}</div>
                 <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Score 70+</div>
             </div>
@@ -3112,8 +3112,8 @@ def show_analytics():
             # Source distribution with modern visualization
             st.markdown("""
             <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 Leads por Fuente</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">De dónde vienen tus leads - identifica las mejores fuentes</p>
+                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 Leads by Source</h3>
+                <p style="color: #64748B; margin: 0; font-size: 13px;">Where your leads come from - identify the best sources</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3170,8 +3170,8 @@ def show_analytics():
             st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
             st.markdown("""
             <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🎯 Distribución de Puntuación</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">Calidad de tus leads por score</p>
+                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🎯 Score Distribution</h3>
+                <p style="color: #64748B; margin: 0; font-size: 13px;">Lead quality by score</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3193,19 +3193,19 @@ def show_analytics():
                     <div style="font-size: 32px; margin-bottom: 8px;">🔥</div>
                     <div style="font-size: 28px; font-weight: 700; color: #EF4444;">{score_ranges['🔥 Hot (70-100)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Hot Leads (70-100)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">Listos para contactar</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Ready to contact</div>
                 </div>
                 <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #F59E0B;">
                     <div style="font-size: 32px; margin-bottom: 8px;">🟡</div>
                     <div style="font-size: 28px; font-weight: 700; color: #F59E0B;">{score_ranges['🟡 Warm (40-69)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Warm Leads (40-69)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">Necesitan más nurturing</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Need more nurturing</div>
                 </div>
                 <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #3B82F6;">
                     <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
                     <div style="font-size: 28px; font-weight: 700; color: #3B82F6;">{score_ranges['❄️ Cold (0-39)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Cold Leads (0-39)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">Baja prioridad</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Low priority</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -3214,8 +3214,8 @@ def show_analytics():
             st.markdown("""
             <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 40px; text-align: center; margin-top: 24px;">
                 <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-                <h3 style="color: #0369A1; margin: 0 0 8px 0;">No hay datos todavía</h3>
-                <p style="color: #0284C7; margin: 0;">Ve a "Find Leads" para comenzar a buscar leads y ver analytics aquí</p>
+                <h3 style="color: #0369A1; margin: 0 0 8px 0;">No data yet</h3>
+                <p style="color: #0284C7; margin: 0;">Go to "Find Leads" to start searching and see analytics here</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3228,24 +3228,24 @@ def show_analytics():
                         padding: 16px 20px;
                         margin-top: 32px;">
                 <p style="color: #1E293B; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">
-                    🔗 Conecta HubSpot para más estadísticas
+                    🔗 Connect HubSpot for more statistics
                 </p>
                 <p style="color: #475569; margin: 0; font-size: 13px;">
-                    Ve a Settings para conectar tu cuenta de HubSpot y ver métricas avanzadas del CRM
+                    Go to Settings to connect your HubSpot account and view advanced CRM metrics
                 </p>
             </div>
             """, unsafe_allow_html=True)
         else:
             # Show HubSpot stats if connected
-            with st.spinner("Cargando estadísticas de HubSpot..."):
+            with st.spinner("Loading HubSpot statistics..."):
                 stats = crm.get_statistics()
 
             if "error" not in stats:
                 st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
                 st.markdown("""
                 <div style="margin-bottom: 16px;">
-                    <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🔗 Estadísticas de HubSpot</h3>
-                    <p style="color: #64748B; margin: 0; font-size: 13px;">Datos sincronizados de tu CRM</p>
+                    <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🔗 HubSpot Statistics</h3>
+                    <p style="color: #64748B; margin: 0; font-size: 13px;">Data synced from your CRM</p>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -3269,7 +3269,7 @@ def show_analytics():
                     <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
                         <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
                         <div style="font-size: 24px; font-weight: 700; color: #10B981;">{stats.get('by_stage', {}).get('closed_won', 0)}</div>
-                        <div style="font-size: 13px; color: #6B7280;">Ganados</div>
+                        <div style="font-size: 13px; color: #6B7280;">Won</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -3279,7 +3279,7 @@ def show_analytics():
                     st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
                     st.markdown("""
                     <div style="margin-bottom: 12px;">
-                        <h4 style="color: #1E293B; margin: 0; font-size: 16px;">Por Etapa en HubSpot</h4>
+                        <h4 style="color: #1E293B; margin: 0; font-size: 16px;">By Stage in HubSpot</h4>
                     </div>
                     """, unsafe_allow_html=True)
 
