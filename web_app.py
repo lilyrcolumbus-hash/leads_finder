@@ -1555,6 +1555,14 @@ if 'nav_page' not in st.session_state:
 if 'last_search_results' not in st.session_state:
     st.session_state.last_search_results = None  # Store search summary
 
+# Lead Warming session state
+if 'warming_activities' not in st.session_state:
+    st.session_state.warming_activities = []  # List of warming activities performed
+if 'warming_queue' not in st.session_state:
+    st.session_state.warming_queue = []  # Leads queued for warming
+if 'warming_schedule' not in st.session_state:
+    st.session_state.warming_schedule = {}  # Scheduled warming activities by lead
+
 
 # ============================================
 # SIDEBAR
@@ -1597,7 +1605,7 @@ def render_sidebar():
         st.markdown('<div class="nav-label">Main Menu</div>', unsafe_allow_html=True)
 
         # Navigation
-        pages = ["Dashboard", "Find Leads", "My Leads", "CRM", "Analytics", "AI Assistant", "Settings"]
+        pages = ["Dashboard", "Find Leads", "My Leads", "Lead Warming", "CRM", "Analytics", "AI Assistant", "Settings"]
         current_index = pages.index(st.session_state.nav_page) if st.session_state.nav_page in pages else 0
 
         page = st.radio(
@@ -5329,6 +5337,681 @@ def render_floating_assistant():
                 st.rerun()
 
 
+def show_lead_warming():
+    """Lead Warming System - Warm up leads before cold outreach for higher conversion rates."""
+
+    # Lead Warming CSS
+    st.markdown("""
+    <style>
+        /* Temperature Indicators */
+        .temp-cold {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .temp-warm {
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .temp-hot {
+            background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Warming Card */
+        .warming-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        .warming-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Activity Timeline */
+        .activity-timeline {
+            border-left: 3px solid #E2E8F0;
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+        .activity-item {
+            position: relative;
+            padding-bottom: 16px;
+        }
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            background: #3B82F6;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .activity-completed::before {
+            background: #10B981;
+        }
+        .activity-pending::before {
+            background: #94A3B8;
+        }
+
+        /* Warming Stats */
+        .warming-stat-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .warming-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1E293B;
+        }
+        .warming-stat-label {
+            font-size: 12px;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        /* Warming Actions */
+        .warming-action-btn {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .warming-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Header
+    st.markdown("""
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+        <div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1E293B;">🔥 Lead Warming</h1>
+            <p style="margin: 8px 0 0 0; color: #64748B;">Warm up leads before cold outreach for +300% higher response rates</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Load saved leads
+    all_leads = lead_manager.load_leads()
+
+    # Calculate warming stats
+    warming_queue = st.session_state.warming_queue
+    warming_activities = st.session_state.warming_activities
+
+    # Count leads by temperature
+    cold_leads = [l for l in all_leads if l.get('temperature', 'cold') == 'cold']
+    warm_leads = [l for l in all_leads if l.get('temperature') == 'warm']
+    hot_leads = [l for l in all_leads if l.get('temperature') == 'hot']
+
+    # Stats Row
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.markdown(f"""
+        <div class="warming-stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">❄️</div>
+            <div class="warming-stat-value">{len(cold_leads)}</div>
+            <div class="warming-stat-label">Cold Leads</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(f"""
+        <div class="warming-stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">🌡️</div>
+            <div class="warming-stat-value">{len(warm_leads)}</div>
+            <div class="warming-stat-label">Warm Leads</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f"""
+        <div class="warming-stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">🔥</div>
+            <div class="warming-stat-value">{len(hot_leads)}</div>
+            <div class="warming-stat-label">Hot Leads</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown(f"""
+        <div class="warming-stat-card">
+            <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
+            <div class="warming-stat-value">{len([a for a in warming_activities if a.get('completed')])}</div>
+            <div class="warming-stat-label">Activities Done</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # Main tabs
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Warming Queue", "📅 Today's Actions", "📊 Pipeline", "💬 Engagement Tools", "⚙️ Settings"])
+
+    with tab1:
+        st.markdown("### Add Leads to Warming Queue")
+        st.caption("Select leads to start the warming process before cold outreach")
+
+        # Filter to show only cold leads not in queue
+        leads_not_in_queue = [l for l in all_leads if l.get('hash') not in [q.get('hash') for q in warming_queue]]
+
+        if leads_not_in_queue:
+            # Select leads to add
+            selected_leads = st.multiselect(
+                "Select leads to warm up",
+                options=range(len(leads_not_in_queue)),
+                format_func=lambda x: f"{leads_not_in_queue[x].get('name', leads_not_in_queue[x].get('title', 'Unknown'))} - {leads_not_in_queue[x].get('company', leads_not_in_queue[x].get('business_name', 'N/A'))}",
+                key="warming_lead_select"
+            )
+
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                if st.button("➕ Add to Warming Queue", type="primary", use_container_width=True):
+                    for idx in selected_leads:
+                        lead = leads_not_in_queue[idx].copy()
+                        lead['warming_started'] = datetime.now().isoformat()
+                        lead['warming_day'] = 1
+                        lead['temperature'] = 'cold'
+                        lead['warming_actions'] = []
+                        st.session_state.warming_queue.append(lead)
+                    st.success(f"Added {len(selected_leads)} leads to warming queue!")
+                    st.rerun()
+        else:
+            if not all_leads:
+                st.info("No leads found. Go to 'Find Leads' to search for leads first.")
+            else:
+                st.info("All leads are already in the warming queue!")
+
+        st.divider()
+
+        # Show current warming queue
+        st.markdown("### Current Warming Queue")
+
+        if warming_queue:
+            for i, lead in enumerate(warming_queue):
+                temp = lead.get('temperature', 'cold')
+                temp_class = f"temp-{temp}"
+                temp_emoji = "❄️" if temp == "cold" else ("🌡️" if temp == "warm" else "🔥")
+                warming_day = lead.get('warming_day', 1)
+                lead_name = lead.get('name', lead.get('title', 'Unknown'))
+                company = lead.get('company', lead.get('business_name', 'N/A'))
+                linkedin = lead.get('linkedin', lead.get('url', ''))
+
+                with st.expander(f"{temp_emoji} {lead_name} - Day {warming_day}/7", expanded=False):
+                    col1, col2, col3 = st.columns([2, 2, 1])
+
+                    with col1:
+                        st.markdown(f"**Company:** {company}")
+                        st.markdown(f"**Temperature:** <span class='{temp_class}'>{temp.upper()}</span>", unsafe_allow_html=True)
+                        if linkedin:
+                            st.markdown(f"**LinkedIn:** [{linkedin[:40]}...]({linkedin})")
+
+                    with col2:
+                        st.markdown("**Warming Progress:**")
+                        progress = min(warming_day / 7, 1.0)
+                        st.progress(progress)
+                        st.caption(f"Day {warming_day} of 7 - {int(progress * 100)}% complete")
+
+                    with col3:
+                        if temp == "hot":
+                            st.success("✅ Ready to contact!")
+                            if st.button("📧 Send Email", key=f"email_{i}"):
+                                st.session_state.nav_page = "CRM"
+                                st.rerun()
+                        else:
+                            if st.button("⏭️ Next Action", key=f"next_{i}"):
+                                st.session_state[f"show_actions_{i}"] = True
+                                st.rerun()
+
+                    # Show warming timeline
+                    st.markdown("---")
+                    st.markdown("**Warming Timeline:**")
+                    actions = lead.get('warming_actions', [])
+
+                    warming_steps = [
+                        {"day": 1, "action": "View LinkedIn Profile", "icon": "👁️"},
+                        {"day": 2, "action": "Like 2-3 Posts", "icon": "👍"},
+                        {"day": 3, "action": "Comment on Post", "icon": "💬"},
+                        {"day": 4, "action": "Send Connection Request", "icon": "🤝"},
+                        {"day": 5, "action": "Engage with Content", "icon": "📝"},
+                        {"day": 6, "action": "Share Their Content", "icon": "🔄"},
+                        {"day": 7, "action": "Ready for Outreach!", "icon": "🚀"},
+                    ]
+
+                    for step in warming_steps:
+                        completed = step['day'] < warming_day or any(a.get('day') == step['day'] for a in actions)
+                        status = "✅" if completed else ("🔄" if step['day'] == warming_day else "⬜")
+                        st.markdown(f"{status} **Day {step['day']}:** {step['icon']} {step['action']}")
+
+                    # Action buttons
+                    if warming_day <= 7:
+                        st.markdown("---")
+                        action_col1, action_col2 = st.columns(2)
+                        with action_col1:
+                            if st.button(f"✅ Mark Day {warming_day} Complete", key=f"complete_{i}", type="primary"):
+                                # Update the lead
+                                lead['warming_actions'].append({
+                                    'day': warming_day,
+                                    'completed_at': datetime.now().isoformat(),
+                                    'action': warming_steps[warming_day-1]['action']
+                                })
+                                lead['warming_day'] = warming_day + 1
+
+                                # Update temperature based on progress
+                                if warming_day >= 7:
+                                    lead['temperature'] = 'hot'
+                                elif warming_day >= 4:
+                                    lead['temperature'] = 'warm'
+
+                                # Add to activities log
+                                st.session_state.warming_activities.append({
+                                    'lead_name': lead_name,
+                                    'action': warming_steps[warming_day-1]['action'],
+                                    'completed_at': datetime.now().isoformat(),
+                                    'completed': True
+                                })
+
+                                st.success(f"Day {warming_day} marked complete!")
+                                st.rerun()
+
+                        with action_col2:
+                            if st.button("🗑️ Remove from Queue", key=f"remove_{i}"):
+                                st.session_state.warming_queue.pop(i)
+                                st.rerun()
+        else:
+            st.info("No leads in warming queue. Add leads above to start warming them up!")
+
+    with tab2:
+        st.markdown("### Today's Warming Actions")
+        st.caption("Actions scheduled for today based on your warming queue")
+
+        if warming_queue:
+            today_actions = []
+            for lead in warming_queue:
+                warming_day = lead.get('warming_day', 1)
+                if warming_day <= 7:
+                    warming_steps = [
+                        {"day": 1, "action": "View LinkedIn Profile", "icon": "👁️", "description": "Visit their LinkedIn profile so they see you viewed them"},
+                        {"day": 2, "action": "Like 2-3 Posts", "icon": "👍", "description": "Like their recent posts to increase visibility"},
+                        {"day": 3, "action": "Comment on Post", "icon": "💬", "description": "Leave a thoughtful comment on a relevant post"},
+                        {"day": 4, "action": "Send Connection Request", "icon": "🤝", "description": "Send a personalized connection request"},
+                        {"day": 5, "action": "Engage with Content", "icon": "📝", "description": "Continue engaging with their content"},
+                        {"day": 6, "action": "Share Their Content", "icon": "🔄", "description": "Share one of their posts with your network"},
+                        {"day": 7, "action": "Ready for Outreach!", "icon": "🚀", "description": "Lead is warmed up - send your personalized email"},
+                    ]
+                    step = warming_steps[warming_day - 1]
+                    today_actions.append({
+                        'lead': lead,
+                        'step': step,
+                        'warming_day': warming_day
+                    })
+
+            if today_actions:
+                for i, action in enumerate(today_actions):
+                    lead = action['lead']
+                    step = action['step']
+                    lead_name = lead.get('name', lead.get('title', 'Unknown'))
+                    company = lead.get('company', lead.get('business_name', 'N/A'))
+                    linkedin = lead.get('linkedin', lead.get('url', ''))
+
+                    st.markdown(f"""
+                    <div class="warming-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; color: #1E293B;">{step['icon']} {step['action']}</h4>
+                                <p style="margin: 8px 0 0 0; color: #64748B;">{step['description']}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="margin: 0; font-weight: 600; color: #1E293B;">{lead_name}</p>
+                                <p style="margin: 4px 0 0 0; color: #64748B; font-size: 13px;">{company}</p>
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    col1, col2, col3 = st.columns([2, 1, 1])
+                    with col1:
+                        if linkedin and 'linkedin' in linkedin.lower():
+                            st.link_button("🔗 Open LinkedIn Profile", linkedin, use_container_width=True)
+                        else:
+                            st.caption("No LinkedIn URL available")
+                    with col2:
+                        if st.button("✅ Done", key=f"today_done_{i}", type="primary", use_container_width=True):
+                            # Find and update the lead in warming queue
+                            for j, q_lead in enumerate(st.session_state.warming_queue):
+                                if q_lead.get('hash') == lead.get('hash'):
+                                    q_lead['warming_actions'].append({
+                                        'day': action['warming_day'],
+                                        'completed_at': datetime.now().isoformat(),
+                                        'action': step['action']
+                                    })
+                                    q_lead['warming_day'] = action['warming_day'] + 1
+                                    if action['warming_day'] >= 7:
+                                        q_lead['temperature'] = 'hot'
+                                    elif action['warming_day'] >= 4:
+                                        q_lead['temperature'] = 'warm'
+                                    break
+
+                            st.session_state.warming_activities.append({
+                                'lead_name': lead_name,
+                                'action': step['action'],
+                                'completed_at': datetime.now().isoformat(),
+                                'completed': True
+                            })
+                            st.success(f"Marked '{step['action']}' as complete!")
+                            st.rerun()
+                    with col3:
+                        if st.button("⏭️ Skip", key=f"today_skip_{i}", use_container_width=True):
+                            for j, q_lead in enumerate(st.session_state.warming_queue):
+                                if q_lead.get('hash') == lead.get('hash'):
+                                    q_lead['warming_day'] = action['warming_day'] + 1
+                                    break
+                            st.rerun()
+
+                    st.markdown("---")
+            else:
+                st.success("All warming actions for today are complete!")
+        else:
+            st.info("No leads in warming queue. Add leads from the 'Warming Queue' tab to see today's actions.")
+
+    with tab3:
+        st.markdown("### Warming Pipeline")
+        st.caption("Visual overview of leads at each warming stage")
+
+        # Pipeline columns
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%); padding: 16px; border-radius: 12px; text-align: center; color: white; margin-bottom: 16px;">
+                <div style="font-size: 24px;">❄️</div>
+                <div style="font-size: 20px; font-weight: 700;">COLD</div>
+                <div style="font-size: 13px; opacity: 0.9;">Day 1-2</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            cold_in_queue = [l for l in warming_queue if l.get('warming_day', 1) <= 2]
+            for lead in cold_in_queue:
+                lead_name = (lead.get('name') or lead.get('title') or 'Unknown')[:20]
+                st.markdown(f"""
+                <div style="background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                    <div style="font-weight: 600; font-size: 13px; color: #1E293B;">{lead_name}</div>
+                    <div style="font-size: 11px; color: #64748B;">Day {lead.get('warming_day', 1)}/7</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            if not cold_in_queue:
+                st.caption("No leads at this stage")
+
+        with col2:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #FCD34D 0%, #FBBF24 100%); padding: 16px; border-radius: 12px; text-align: center; color: #1E293B; margin-bottom: 16px;">
+                <div style="font-size: 24px;">🌡️</div>
+                <div style="font-size: 20px; font-weight: 700;">WARMING</div>
+                <div style="font-size: 13px; opacity: 0.8;">Day 3-4</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            warming_in_queue = [l for l in warming_queue if 3 <= l.get('warming_day', 1) <= 4]
+            for lead in warming_in_queue:
+                lead_name = (lead.get('name') or lead.get('title') or 'Unknown')[:20]
+                st.markdown(f"""
+                <div style="background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                    <div style="font-weight: 600; font-size: 13px; color: #1E293B;">{lead_name}</div>
+                    <div style="font-size: 11px; color: #64748B;">Day {lead.get('warming_day', 1)}/7</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            if not warming_in_queue:
+                st.caption("No leads at this stage")
+
+        with col3:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #FB923C 0%, #F97316 100%); padding: 16px; border-radius: 12px; text-align: center; color: white; margin-bottom: 16px;">
+                <div style="font-size: 24px;">🔥</div>
+                <div style="font-size: 20px; font-weight: 700;">WARM</div>
+                <div style="font-size: 13px; opacity: 0.9;">Day 5-6</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            warm_in_queue = [l for l in warming_queue if 5 <= l.get('warming_day', 1) <= 6]
+            for lead in warm_in_queue:
+                lead_name = (lead.get('name') or lead.get('title') or 'Unknown')[:20]
+                st.markdown(f"""
+                <div style="background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                    <div style="font-weight: 600; font-size: 13px; color: #1E293B;">{lead_name}</div>
+                    <div style="font-size: 11px; color: #64748B;">Day {lead.get('warming_day', 1)}/7</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            if not warm_in_queue:
+                st.caption("No leads at this stage")
+
+        with col4:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); padding: 16px; border-radius: 12px; text-align: center; color: white; margin-bottom: 16px;">
+                <div style="font-size: 24px;">🚀</div>
+                <div style="font-size: 20px; font-weight: 700;">HOT</div>
+                <div style="font-size: 13px; opacity: 0.9;">Ready!</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            hot_in_queue = [l for l in warming_queue if l.get('warming_day', 1) >= 7]
+            for lead in hot_in_queue:
+                lead_name = (lead.get('name') or lead.get('title') or 'Unknown')[:20]
+                st.markdown(f"""
+                <div style="background: #FEF2F2; border: 2px solid #EF4444; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                    <div style="font-weight: 600; font-size: 13px; color: #1E293B;">{lead_name}</div>
+                    <div style="font-size: 11px; color: #10B981; font-weight: 600;">Ready to contact!</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            if not hot_in_queue:
+                st.caption("No leads ready yet")
+
+    with tab4:
+        st.markdown("### Engagement Tools")
+        st.caption("Templates and tools to help you warm up leads effectively")
+
+        tool_col1, tool_col2 = st.columns(2)
+
+        with tool_col1:
+            st.markdown("#### 💬 Comment Templates")
+            st.caption("Copy these templates for LinkedIn comments")
+
+            comment_templates = [
+                {
+                    "type": "Agreement",
+                    "template": "Great insight! I've seen this in my work too - [specific example]. Thanks for sharing.",
+                },
+                {
+                    "type": "Question",
+                    "template": "Interesting perspective. Have you found that [related question]? I'd love to hear your thoughts.",
+                },
+                {
+                    "type": "Value Add",
+                    "template": "This resonates with me. I'd add that [additional point] can also help. What do you think?",
+                },
+                {
+                    "type": "Industry Specific",
+                    "template": "As someone in [industry], I appreciate this take. We're seeing [relevant trend] as well.",
+                },
+            ]
+
+            for template in comment_templates:
+                with st.expander(f"📝 {template['type']}"):
+                    st.code(template['template'], language=None)
+                    if st.button(f"Copy", key=f"copy_{template['type']}"):
+                        st.toast("Template copied!")
+
+        with tool_col2:
+            st.markdown("#### 🤝 Connection Request Templates")
+            st.caption("Personalized connection request messages")
+
+            connection_templates = [
+                {
+                    "type": "Mutual Interest",
+                    "template": "Hi [Name], I noticed we're both interested in [topic]. I'd love to connect and exchange insights. Looking forward to learning from your experience in [industry].",
+                },
+                {
+                    "type": "Content Appreciation",
+                    "template": "Hi [Name], I've been following your posts about [topic] and find them really valuable. Would love to connect and stay updated on your insights.",
+                },
+                {
+                    "type": "Industry Peer",
+                    "template": "Hi [Name], As a fellow professional in [industry], I'd love to connect. Your work at [Company] looks impressive. Let's stay in touch!",
+                },
+            ]
+
+            for template in connection_templates:
+                with st.expander(f"📝 {template['type']}"):
+                    st.code(template['template'], language=None)
+                    if st.button(f"Copy", key=f"copy_conn_{template['type']}"):
+                        st.toast("Template copied!")
+
+        st.divider()
+
+        st.markdown("#### 📧 Follow-up Email Template (After Warming)")
+        st.caption("Use this after completing the 7-day warming process")
+
+        email_template = """Subject: Following up on our LinkedIn connection
+
+Hi [Name],
+
+I hope this message finds you well! We connected on LinkedIn recently, and I've really enjoyed your insights on [topic they posted about].
+
+I noticed that [Company] is in the [industry] space, and I wanted to reach out because we help businesses like yours [value proposition].
+
+[Specific observation about their company/role that shows you've done your research]
+
+Would you be open to a quick 15-minute call to explore if there might be a fit? I'd love to learn more about your current priorities and see if we can help.
+
+Best regards,
+[Your Name]
+
+P.S. [Reference something specific from their recent LinkedIn activity]"""
+
+        st.code(email_template, language=None)
+
+    with tab5:
+        st.markdown("### Warming Settings")
+        st.caption("Configure your lead warming preferences")
+
+        st.markdown("#### Warming Schedule")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            warming_duration = st.slider(
+                "Warming Duration (days)",
+                min_value=3,
+                max_value=14,
+                value=7,
+                help="Number of days to warm a lead before outreach"
+            )
+
+            daily_actions = st.number_input(
+                "Max Actions Per Day",
+                min_value=1,
+                max_value=50,
+                value=20,
+                help="Maximum number of warming actions per day"
+            )
+
+        with col2:
+            st.markdown("#### Default Warming Sequence")
+
+            sequence_options = st.multiselect(
+                "Actions to include",
+                options=[
+                    "View LinkedIn Profile",
+                    "Like Posts",
+                    "Comment on Posts",
+                    "Send Connection Request",
+                    "Share Content",
+                    "Send InMail",
+                    "Follow Company Page"
+                ],
+                default=[
+                    "View LinkedIn Profile",
+                    "Like Posts",
+                    "Comment on Posts",
+                    "Send Connection Request",
+                    "Share Content"
+                ]
+            )
+
+        st.divider()
+
+        st.markdown("#### Activity Log")
+
+        if warming_activities:
+            activity_df = pd.DataFrame(warming_activities)
+            st.dataframe(
+                activity_df,
+                column_config={
+                    "lead_name": st.column_config.TextColumn("Lead"),
+                    "action": st.column_config.TextColumn("Action"),
+                    "completed_at": st.column_config.DatetimeColumn("Completed", format="DD/MM/YY HH:mm"),
+                    "completed": st.column_config.CheckboxColumn("Done")
+                },
+                use_container_width=True,
+                hide_index=True
+            )
+
+            if st.button("🗑️ Clear Activity Log"):
+                st.session_state.warming_activities = []
+                st.success("Activity log cleared!")
+                st.rerun()
+        else:
+            st.info("No warming activities recorded yet.")
+
+        st.divider()
+
+        # Reset button
+        st.markdown("#### Danger Zone")
+        if st.button("🗑️ Clear All Warming Data", type="secondary"):
+            st.session_state.warming_queue = []
+            st.session_state.warming_activities = []
+            st.session_state.warming_schedule = {}
+            st.success("All warming data cleared!")
+            st.rerun()
+
+
 def main():
     render_sidebar()
 
@@ -5343,6 +6026,8 @@ def main():
         show_search()
     elif page == "My Leads":
         show_leads()
+    elif page == "Lead Warming":
+        show_lead_warming()
     elif page == "CRM":
         show_crm()
     elif page == "Analytics":
