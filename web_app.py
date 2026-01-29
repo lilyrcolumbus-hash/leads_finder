@@ -1597,7 +1597,7 @@ def render_sidebar():
         st.markdown('<div class="nav-label">Main Menu</div>', unsafe_allow_html=True)
 
         # Navigation
-        pages = ["Dashboard", "Find Leads", "My Leads", "CRM", "Analytics", "Settings"]
+        pages = ["Dashboard", "Find Leads", "My Leads", "CRM", "Analytics", "AI Assistant", "Settings"]
         current_index = pages.index(st.session_state.nav_page) if st.session_state.nav_page in pages else 0
 
         page = st.radio(
@@ -3920,6 +3920,428 @@ def show_config():
 
 
 # ============================================
+# AI ASSISTANT
+# ============================================
+def show_ai_assistant():
+    """AI Lead Generation Assistant - Expert advisor for lead generation."""
+
+    # Custom CSS for chat interface
+    st.markdown("""
+    <style>
+        .assistant-header {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            color: white;
+        }
+        .assistant-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+        }
+        .assistant-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        .chat-message {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+            border-left: 4px solid #4F46E5;
+            margin-left: 40px;
+        }
+        .assistant-message {
+            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+            border-left: 4px solid #10B981;
+            margin-right: 40px;
+        }
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .message-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1E293B;
+        }
+        .quick-action-chip {
+            display: inline-block;
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quick-action-chip:hover {
+            background: #4F46E5;
+            color: white;
+            border-color: #4F46E5;
+        }
+        .stats-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4F46E5;
+        }
+        .stats-label {
+            font-size: 12px;
+            color: #64748B;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Initialize chat history
+    if 'assistant_messages' not in st.session_state:
+        st.session_state.assistant_messages = []
+
+    # Header
+    st.markdown("""
+    <div class="assistant-header">
+        <p class="assistant-title">🤖 Lead Generation AI Assistant</p>
+        <p class="assistant-subtitle">Tu experto en estrategias de prospección y generación de leads. Pregúntame cualquier cosa sobre la plataforma o cómo conseguir mejores resultados.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Two columns: Chat + Tips
+    chat_col, tips_col = st.columns([2, 1])
+
+    with tips_col:
+        st.markdown("### 💡 Consejos Rápidos")
+
+        # Quick action buttons
+        quick_questions = [
+            "¿Cómo conseguir más leads?",
+            "¿Qué fuentes son mejores?",
+            "¿Cómo mejorar mi búsqueda?",
+            "¿Cómo usar el filtro de ubicación?",
+            "¿Qué industrias buscar?",
+            "¿Cómo escribir cold emails?"
+        ]
+
+        for q in quick_questions:
+            if st.button(q, key=f"quick_{q}", use_container_width=True):
+                st.session_state.assistant_pending_question = q
+                st.rerun()
+
+        st.markdown("---")
+
+        # Platform stats
+        st.markdown("### 📊 Tu Actividad")
+        stats = lead_manager.get_stats()
+
+        stat_col1, stat_col2 = st.columns(2)
+        with stat_col1:
+            st.markdown(f"""
+            <div class="stats-card">
+                <div class="stats-value">{stats['total']}</div>
+                <div class="stats-label">Leads Guardados</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with stat_col2:
+            qualified = stats.get('qualified', 0)
+            st.markdown(f"""
+            <div class="stats-card">
+                <div class="stats-value">{qualified}</div>
+                <div class="stats-label">Calificados</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # Sources status
+        st.markdown("### 🔌 Fuentes Activas")
+        sources = [
+            ("🔴 Reddit", True),
+            ("🟠 Hacker News", True),
+            ("💼 Indeed", True),
+            ("⭐ Yelp", True),
+            ("📍 Google Maps", True),
+            ("🔷 LinkedIn", bool(settings.google_api_key)),
+            ("🔵 Google Search", bool(settings.google_api_key)),
+        ]
+        for name, active in sources:
+            status = "✅" if active else "❌"
+            st.caption(f"{status} {name}")
+
+    with chat_col:
+        st.markdown("### 💬 Chat con el Asistente")
+
+        # Display chat history
+        chat_container = st.container()
+
+        with chat_container:
+            # Welcome message if no history
+            if not st.session_state.assistant_messages:
+                st.markdown("""
+                <div class="chat-message assistant-message">
+                    <div class="message-header">🤖 Asistente</div>
+                    <div class="message-content">
+                        ¡Hola! Soy tu asistente de Lead Generation. Puedo ayudarte con:
+                        <br><br>
+                        • <b>Estrategias de búsqueda</b> - Qué fuentes usar y cómo configurarlas<br>
+                        • <b>Mejores prácticas</b> - Cómo encontrar leads de calidad<br>
+                        • <b>Cold outreach</b> - Cómo escribir emails que conviertan<br>
+                        • <b>Uso de la plataforma</b> - Cualquier función o característica<br>
+                        • <b>Tu industria</b> - Consejos específicos para AI receptionist
+                        <br><br>
+                        ¿En qué puedo ayudarte hoy?
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Display conversation history
+            for msg in st.session_state.assistant_messages:
+                if msg["role"] == "user":
+                    st.markdown(f"""
+                    <div class="chat-message user-message">
+                        <div class="message-header">👤 Tú</div>
+                        <div class="message-content">{msg["content"]}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="chat-message assistant-message">
+                        <div class="message-header">🤖 Asistente</div>
+                        <div class="message-content">{msg["content"]}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        # Check for pending quick question
+        if 'assistant_pending_question' in st.session_state:
+            pending = st.session_state.assistant_pending_question
+            del st.session_state.assistant_pending_question
+            process_assistant_message(pending)
+            st.rerun()
+
+        # Chat input
+        user_input = st.chat_input("Escribe tu pregunta aquí...")
+
+        if user_input:
+            process_assistant_message(user_input)
+            st.rerun()
+
+        # Clear chat button
+        if st.session_state.assistant_messages:
+            if st.button("🗑️ Limpiar conversación", use_container_width=True):
+                st.session_state.assistant_messages = []
+                st.rerun()
+
+
+def process_assistant_message(user_message: str):
+    """Process user message and generate AI response."""
+
+    # Add user message to history
+    st.session_state.assistant_messages.append({
+        "role": "user",
+        "content": user_message
+    })
+
+    # Generate response
+    response = generate_assistant_response(user_message)
+
+    # Add assistant response to history
+    st.session_state.assistant_messages.append({
+        "role": "assistant",
+        "content": response
+    })
+
+
+def generate_assistant_response(user_message: str) -> str:
+    """Generate AI response using OpenAI or fallback to rule-based."""
+
+    # Try OpenAI first
+    if settings.openai_api_key:
+        try:
+            import openai
+            client = openai.OpenAI(api_key=settings.openai_api_key)
+
+            # System prompt with platform knowledge
+            system_prompt = """Eres un experto en Lead Generation y prospección de ventas para LeadGen Pro, una plataforma de generación de leads para un producto de AI Receptionist (agente telefónico con IA que atiende llamadas, agenda citas, responde preguntas).
+
+TU CONOCIMIENTO DE LA PLATAFORMA:
+
+FUENTES DE BÚSQUEDA DISPONIBLES (8 total):
+1. Reddit (GRATIS) - Busca en subreddits de negocios como smallbusiness, entrepreneur
+2. Hacker News (GRATIS) - Busca startups y tech companies
+3. Product Hunt (GRATIS) - Encuentra nuevos productos y sus makers
+4. Indeed (GRATIS) - Empresas contratando recepcionistas = necesitan tu solución
+5. Yelp (GRATIS) - Negocios de servicios locales
+6. Google Maps (GRATIS) - Negocios locales con teléfono, website, email
+7. LinkedIn (usa Google API) - Decision makers y dueños de negocios
+8. Google Search (usa Google API) - Quejas sobre teléfonos y atención al cliente
+
+INDUSTRIAS OBJETIVO para AI Receptionist:
+- Dental (dentistas, ortodoncistas)
+- HVAC (aire acondicionado, calefacción)
+- Legal (abogados, bufetes)
+- Medical (clínicas, consultorios)
+- Beauty (salones, spas)
+- Auto (talleres, concesionarios)
+- Real Estate (inmobiliarias)
+- Insurance (seguros)
+
+CONSEJOS DE BÚSQUEDA:
+- Usar filtro de ubicación para Indeed, Yelp, Google Maps, LinkedIn
+- Las empresas contratando recepcionistas = oportunidad perfecta
+- Negocios con malas reseñas sobre "no contestan el teléfono" = leads calientes
+- LinkedIn encuentra decision makers directamente
+
+ESTRATEGIAS DE OUTREACH:
+- Cold email: Personalizar con el dolor específico del negocio
+- Usar la "admisión dañina" de Hormozi - reconocer limitaciones para ganar confianza
+- El LTV (valor de vida del cliente) determina cuánto puedes pagar por adquirir leads
+
+Responde en español, de forma concisa y práctica. Da consejos accionables."""
+
+            messages = [
+                {"role": "system", "content": system_prompt}
+            ]
+
+            # Add recent conversation history (last 6 messages)
+            for msg in st.session_state.assistant_messages[-6:]:
+                messages.append({
+                    "role": msg["role"],
+                    "content": msg["content"]
+                })
+
+            # Add current message
+            messages.append({"role": "user", "content": user_message})
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                max_tokens=800,
+                temperature=0.7
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+            # Fallback to rule-based if API fails
+            return get_fallback_response(user_message)
+    else:
+        return get_fallback_response(user_message)
+
+
+def get_fallback_response(user_message: str) -> str:
+    """Rule-based fallback responses when AI is not available."""
+
+    message_lower = user_message.lower()
+
+    # Pattern matching for common questions
+    if any(word in message_lower for word in ["más leads", "conseguir", "encontrar más", "mejorar"]):
+        return """<b>Para conseguir más leads:</b><br><br>
+1. <b>Activa Google Maps</b> - Es gratis y encuentra negocios locales con teléfono y email<br>
+2. <b>Usa filtro de ubicación</b> - Enfócate en ciudades específicas (Miami, LA, Houston)<br>
+3. <b>Indeed es oro</b> - Empresas contratando recepcionistas = necesitan tu solución<br>
+4. <b>LinkedIn</b> - Encuentra dueños de negocios directamente (necesita Google API)<br><br>
+💡 <b>Tip:</b> Combina Indeed + Google Maps + Yelp para la misma ciudad = leads locales con datos completos."""
+
+    elif any(word in message_lower for word in ["fuente", "mejor", "cuál usar", "qué fuente"]):
+        return """<b>Mejores fuentes para AI Receptionist:</b><br><br>
+🥇 <b>Indeed</b> - Empresas contratando recepcionistas NECESITAN tu producto<br>
+🥈 <b>Google Maps</b> - Dentistas, HVAC, abogados con teléfono directo<br>
+🥉 <b>Yelp</b> - Negocios de servicios con reviews<br><br>
+<b>Por industria:</b><br>
+• Dental → Google Maps + Yelp<br>
+• HVAC → Google Maps + Indeed<br>
+• Legal → LinkedIn + Google Maps<br><br>
+💡 Las fuentes GRATIS (Indeed, Yelp, Google Maps) no gastan créditos de API."""
+
+    elif any(word in message_lower for word in ["ubicación", "location", "ciudad", "filtro"]):
+        return """<b>Cómo usar el filtro de ubicación:</b><br><br>
+1. En <b>Find Leads</b>, busca la sección "Location Filter"<br>
+2. Ingresa la ciudad (ej: Miami, Los Angeles)<br>
+3. Selecciona el estado del dropdown<br>
+4. Opcional: agrega código postal para más precisión<br><br>
+<b>Fuentes que usan ubicación:</b><br>
+✅ Indeed - Busca empleos en esa ciudad<br>
+✅ Yelp - Busca negocios en esa área<br>
+✅ Google Maps - Busca negocios locales<br>
+✅ LinkedIn - Filtra perfiles por ubicación<br><br>
+💡 <b>Tip:</b> Empieza con ciudades grandes (Miami, LA, Houston, Dallas) para más resultados."""
+
+    elif any(word in message_lower for word in ["industria", "sector", "qué buscar", "tipo de negocio"]):
+        return """<b>Mejores industrias para AI Receptionist:</b><br><br>
+🦷 <b>Dental</b> - Alto volumen de llamadas, muchas citas<br>
+❄️ <b>HVAC</b> - Emergencias 24/7, necesitan responder siempre<br>
+⚖️ <b>Legal</b> - No pueden perder clientes potenciales<br>
+🏥 <b>Medical</b> - Clínicas con muchas citas diarias<br>
+💇 <b>Salones/Spas</b> - Reservaciones constantes<br>
+🚗 <b>Auto Repair</b> - Clientes llaman para emergencias<br><br>
+<b>Señales de que necesitan tu producto:</b><br>
+• Contratan recepcionistas (Indeed)<br>
+• Reviews quejándose de que "no contestan"<br>
+• Negocios pequeños (1-20 empleados)"""
+
+    elif any(word in message_lower for word in ["email", "cold", "outreach", "contactar", "escribir"]):
+        return """<b>Cómo escribir cold emails efectivos:</b><br><br>
+<b>Estructura ganadora:</b><br>
+1. <b>Gancho</b> - "Vi que están contratando recepcionista..."<br>
+2. <b>Dolor</b> - "Perder una llamada = perder un cliente de $X"<br>
+3. <b>Solución</b> - "Nuestro AI atiende 24/7, agenda citas automáticamente"<br>
+4. <b>CTA</b> - "¿15 minutos para una demo esta semana?"<br><br>
+<b>Ejemplo:</b><br>
+<i>"Hola [Nombre], vi en Indeed que buscan recepcionista para [Empresa]. ¿Sabías que el 67% de los clientes cuelgan si no contestan en 3 rings? Tengo una solución de IA que atiende 24/7 y agenda citas automáticamente. ¿Tienes 15 min para verlo?"</i><br><br>
+💡 <b>Hormozi Tip:</b> Usa "admisión dañina" - "No reemplazamos humanos al 100%, pero cubrimos cuando no están"."""
+
+    elif any(word in message_lower for word in ["crédito", "api", "costo", "gratis", "pagar"]):
+        return """<b>Costos de la plataforma:</b><br><br>
+<b>GRATIS (sin límite):</b><br>
+✅ Reddit - RSS feeds<br>
+✅ Hacker News - API pública<br>
+✅ Product Hunt - RSS feeds<br>
+✅ Indeed - Web scraping<br>
+✅ Yelp - Web scraping<br>
+✅ Google Maps - Web scraping<br><br>
+<b>Usan Google API (100 gratis/día):</b><br>
+• LinkedIn - ~5 queries por búsqueda<br>
+• Google Search - ~15 queries por búsqueda<br><br>
+💡 <b>Tip:</b> Usa solo las fuentes gratis para búsquedas ilimitadas."""
+
+    elif any(word in message_lower for word in ["hola", "hey", "buenos", "qué tal"]):
+        return """¡Hola! 👋 Soy tu asistente de Lead Generation.<br><br>
+Puedo ayudarte con:<br>
+• Estrategias para encontrar más leads<br>
+• Qué fuentes usar para tu industria<br>
+• Cómo escribir cold emails efectivos<br>
+• Uso de la plataforma<br><br>
+¿Qué necesitas hoy?"""
+
+    else:
+        return """Entiendo tu pregunta. Aquí algunos consejos generales:<br><br>
+<b>Para mejores resultados:</b><br>
+1. Usa el <b>filtro de ubicación</b> para enfocarte en ciudades específicas<br>
+2. Activa <b>Google Maps</b> para obtener teléfonos y emails<br>
+3. <b>Indeed</b> encuentra empresas que necesitan tu producto<br>
+4. Revisa los leads en <b>My Leads</b> antes de contactar<br><br>
+¿Hay algo específico sobre la plataforma o estrategias de lead generation en lo que pueda ayudarte?"""
+
+
+# ============================================
 # MAIN
 # ============================================
 def main():
@@ -3937,6 +4359,8 @@ def main():
         show_crm()
     elif page == "Analytics":
         show_analytics()
+    elif page == "AI Assistant":
+        show_ai_assistant()
     elif page == "Settings":
         show_config()
 
