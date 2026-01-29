@@ -626,41 +626,290 @@ st.markdown("""
         margin: 0;
     }
 
-    /* ========== BUTTONS - EXECUTIVE ========== */
+    /* ========== BUTTONS - MODERN PREMIUM DESIGN ========== */
+
+    /* Base button reset and foundation */
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: var(--radius-md) !important;
-        padding: 14px 28px !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25), 0 2px 4px rgba(37, 99, 235, 0.1) !important;
-        transition: all 0.3s ease !important;
-        letter-spacing: -0.01em !important;
+        letter-spacing: 0.02em !important;
+        padding: 12px 24px !important;
+        border-radius: 10px !important;
+        cursor: pointer !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        border: none !important;
+        outline: none !important;
     }
 
-    .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35), 0 4px 8px rgba(37, 99, 235, 0.15) !important;
+    /* Primary Button - Vibrant Blue Gradient */
+    .stButton > button[kind="primary"],
+    .stButton > button:not([kind]) {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #6366F1 100%) !important;
+        color: white !important;
+        box-shadow:
+            0 4px 15px rgba(79, 70, 229, 0.4),
+            0 2px 6px rgba(79, 70, 229, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     }
 
-    .stButton > button:active {
-        transform: translateY(0) !important;
+    .stButton > button[kind="primary"]:hover,
+    .stButton > button:not([kind]):hover {
+        background: linear-gradient(135deg, #4338CA 0%, #6D28D9 50%, #4F46E5 100%) !important;
+        transform: translateY(-3px) scale(1.02) !important;
+        box-shadow:
+            0 8px 25px rgba(79, 70, 229, 0.5),
+            0 4px 12px rgba(79, 70, 229, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     }
 
-    /* Secondary button style */
+    .stButton > button[kind="primary"]:active,
+    .stButton > button:not([kind]):active {
+        transform: translateY(-1px) scale(1) !important;
+        box-shadow:
+            0 4px 12px rgba(79, 70, 229, 0.4),
+            0 2px 4px rgba(79, 70, 229, 0.2) !important;
+    }
+
+    /* Secondary Button - Elegant Glass Effect */
     .stButton > button[kind="secondary"] {
-        background: var(--white) !important;
-        color: var(--slate-700) !important;
-        border: 1px solid var(--border-medium) !important;
-        box-shadow: var(--shadow-sm) !important;
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%) !important;
+        color: #334155 !important;
+        border: 1.5px solid #E2E8F0 !important;
+        box-shadow:
+            0 2px 8px rgba(15, 23, 42, 0.06),
+            0 1px 3px rgba(15, 23, 42, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(8px) !important;
     }
 
     .stButton > button[kind="secondary"]:hover {
-        background: var(--slate-50) !important;
-        border-color: var(--primary-300) !important;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+        color: #4F46E5 !important;
+        border-color: #C7D2FE !important;
+        transform: translateY(-2px) !important;
+        box-shadow:
+            0 6px 20px rgba(79, 70, 229, 0.15),
+            0 3px 8px rgba(79, 70, 229, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+    }
+
+    .stButton > button[kind="secondary"]:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Tertiary/Ghost Button - Minimal Style */
+    .stButton > button[kind="tertiary"] {
+        background: transparent !important;
+        color: #64748B !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 10px 16px !important;
+    }
+
+    .stButton > button[kind="tertiary"]:hover {
+        background: rgba(79, 70, 229, 0.08) !important;
+        color: #4F46E5 !important;
+    }
+
+    /* Icon-only buttons (small square buttons) */
+    .stButton > button:has(span:only-child) {
+        padding: 10px 12px !important;
+        min-width: 40px !important;
+    }
+
+    /* Download buttons - Special Style */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 12px 24px !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        box-shadow:
+            0 4px 15px rgba(16, 185, 129, 0.35),
+            0 2px 6px rgba(16, 185, 129, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #047857 0%, #059669 50%, #10B981 100%) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow:
+            0 8px 25px rgba(16, 185, 129, 0.45),
+            0 4px 12px rgba(16, 185, 129, 0.25) !important;
+    }
+
+    /* Link buttons */
+    .stLinkButton > a {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%) !important;
+        color: #4F46E5 !important;
+        border: 1.5px solid #C7D2FE !important;
+        border-radius: 10px !important;
+        padding: 10px 20px !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        transition: all 0.25s ease !important;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1) !important;
+    }
+
+    .stLinkButton > a:hover {
+        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important;
+        color: white !important;
+        border-color: #4F46E5 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3) !important;
+    }
+
+    /* Button with emoji icon - better alignment */
+    .stButton > button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    /* Disabled button state */
+    .stButton > button:disabled {
+        background: linear-gradient(135deg, #CBD5E1 0%, #E2E8F0 100%) !important;
+        color: #94A3B8 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+        opacity: 0.7 !important;
+    }
+
+    /* Full width button refinement */
+    .stButton > button[data-testid="baseButton-secondary"],
+    .stButton > button[data-testid="baseButton-primary"] {
+        width: 100% !important;
+    }
+
+    /* Button ripple effect on click */
+    .stButton > button::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        width: 0 !important;
+        height: 0 !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-radius: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        transition: width 0.4s ease, height 0.4s ease !important;
+    }
+
+    .stButton > button:active::after {
+        width: 200px !important;
+        height: 200px !important;
+    }
+
+    /* ========== BUTTON TYPE CLASSES ========== */
+
+    /* Success buttons - Green */
+    .btn-success button,
+    [data-testid*="success"] button {
+        background: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%) !important;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
+    }
+
+    .btn-success button:hover,
+    [data-testid*="success"] button:hover {
+        background: linear-gradient(135deg, #047857 0%, #059669 50%, #10B981 100%) !important;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5) !important;
+    }
+
+    /* Danger buttons - Red */
+    .btn-danger button,
+    [data-testid*="danger"] button,
+    [data-testid*="delete"] button,
+    [data-testid*="clear"] button {
+        background: linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%) !important;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4) !important;
+    }
+
+    .btn-danger button:hover,
+    [data-testid*="danger"] button:hover,
+    [data-testid*="delete"] button:hover,
+    [data-testid*="clear"] button:hover {
+        background: linear-gradient(135deg, #B91C1C 0%, #DC2626 50%, #EF4444 100%) !important;
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5) !important;
+    }
+
+    /* Warning buttons - Amber/Orange */
+    .btn-warning button,
+    [data-testid*="warning"] button {
+        background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #FCD34D 100%) !important;
+        color: #1E293B !important;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4) !important;
+    }
+
+    .btn-warning button:hover,
+    [data-testid*="warning"] button:hover {
+        background: linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #FBBF24 100%) !important;
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5) !important;
+    }
+
+    /* Info buttons - Cyan/Blue */
+    .btn-info button,
+    [data-testid*="sync"] button,
+    [data-testid*="refresh"] button {
+        background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 50%, #7DD3FC 100%) !important;
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4) !important;
+    }
+
+    .btn-info button:hover,
+    [data-testid*="sync"] button:hover,
+    [data-testid*="refresh"] button:hover {
+        background: linear-gradient(135deg, #0284C7 0%, #0EA5E9 50%, #38BDF8 100%) !important;
+        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
+    }
+
+    /* Purple/Violet buttons - Import/Export */
+    .btn-purple button,
+    [data-testid*="import"] button,
+    [data-testid*="export"] button {
+        background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 50%, #C4B5FD 100%) !important;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
+    }
+
+    .btn-purple button:hover,
+    [data-testid*="import"] button:hover,
+    [data-testid*="export"] button:hover {
+        background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A78BFA 100%) !important;
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5) !important;
+    }
+
+    /* Mini/Icon buttons */
+    .btn-mini button,
+    [data-testid*="mini"] button,
+    [data-testid*="arrow"] button,
+    [data-testid*="prev"] button,
+    [data-testid*="next"] button {
+        padding: 8px 12px !important;
+        min-width: 42px !important;
+        background: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%) !important;
+        color: #475569 !important;
+        border: 1.5px solid #E2E8F0 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+    }
+
+    .btn-mini button:hover,
+    [data-testid*="mini"] button:hover,
+    [data-testid*="arrow"] button:hover,
+    [data-testid*="prev"] button:hover,
+    [data-testid*="next"] button:hover {
+        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important;
+        color: white !important;
+        border-color: #4F46E5 !important;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
     }
 
     /* ========== CHECKBOXES ========== */
@@ -1237,6 +1486,57 @@ st.markdown("""
         transition: all 0.2s ease !important;
     }
 </style>
+
+<script>
+// Dynamic button styling based on content
+function styleButtons() {
+    const buttons = document.querySelectorAll('.stButton > button');
+
+    buttons.forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        const parent = btn.closest('.stButton');
+
+        // Remove existing style classes
+        parent.classList.remove('btn-success', 'btn-danger', 'btn-warning', 'btn-info', 'btn-purple', 'btn-mini');
+
+        // Success buttons (green)
+        if (text.includes('save') || text.includes('keep') || text.includes('✓') || text.includes('💾') ||
+            text.includes('update') || text.includes('confirm')) {
+            parent.classList.add('btn-success');
+        }
+        // Danger buttons (red)
+        else if (text.includes('delete') || text.includes('clear') || text.includes('remove') ||
+                 text.includes('🗑')) {
+            parent.classList.add('btn-danger');
+        }
+        // Warning buttons (amber)
+        else if (text.includes('view') || text.includes('crm') || text.includes('results') ||
+                 text.includes('👁')) {
+            parent.classList.add('btn-warning');
+        }
+        // Info buttons (cyan)
+        else if (text.includes('sync') || text.includes('refresh') || text.includes('load') ||
+                 text.includes('🔄')) {
+            parent.classList.add('btn-info');
+        }
+        // Purple buttons
+        else if (text.includes('import') || text.includes('export') || text.includes('📥') ||
+                 text.includes('📤')) {
+            parent.classList.add('btn-purple');
+        }
+        // Mini/Icon buttons
+        else if (text === '⬅️' || text === '➡️' || text === '👁️' || text === '🔄' ||
+                 text.length <= 3) {
+            parent.classList.add('btn-mini');
+        }
+    });
+}
+
+// Run on load and periodically to catch dynamically added buttons
+styleButtons();
+const observer = new MutationObserver(styleButtons);
+observer.observe(document.body, { childList: true, subtree: true });
+</script>
 """, unsafe_allow_html=True)
 
 # ============================================
