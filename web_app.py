@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadSource, LeadUrgency
-from src.utils.scoring import enrich_leads, calculate_pain_score
+from src.utils.scoring import enrich_leads, calculate_pain_score, get_lead_grade
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.utils.background_tasks import task_manager, TaskStatus
@@ -1709,11 +1709,11 @@ def show_dashboard():
     # Metrics
     leads_count = len(st.session_state.leads)
     qualified_count = len(st.session_state.filtered_leads)
-    hot_leads_count = len([l for l in st.session_state.filtered_leads if l.pain_score >= 70])
+    hot_leads_count = len([l for l in st.session_state.filtered_leads if getattr(l, 'total_score', l.pain_score) >= 80])
     keywords_count = len(settings.pain_keywords)
     sources_count = sum([1 for x in [True, True, bool(settings.google_api_key), True] if x])
     conv_rate = int((qualified_count / leads_count * 100)) if leads_count > 0 else 0
-    avg_pain_score = sum(l.pain_score for l in st.session_state.filtered_leads) / len(st.session_state.filtered_leads) if st.session_state.filtered_leads else 0
+    avg_total_score = sum(getattr(l, 'total_score', l.pain_score) for l in st.session_state.filtered_leads) / len(st.session_state.filtered_leads) if st.session_state.filtered_leads else 0
 
     st.markdown(f"""
     <div class="metrics-grid">
@@ -1751,7 +1751,7 @@ def show_dashboard():
                 <div class="metric-value" style="color: var(--error-500);">{hot_leads_count}</div>
             </div>
             <div class="metric-footer">
-                <span class="metric-tag" style="background: var(--error-50); color: var(--error-500);">Score 70+</span>
+                <span class="metric-tag" style="background: var(--error-50); color: var(--error-500);">Total Score 80+</span>
             </div>
         </div>
         <div class="metric-card">
@@ -2053,7 +2053,7 @@ def show_search():
         status.markdown("""
         <div class="loading-box">
             <div class="spinner"></div>
-            <span class="loading-text">Calculating Pain Scores...</span>
+            <span class="loading-text">Calculating Lead Scores (Pain + Intent + Fit)...</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -2175,8 +2175,8 @@ def show_search():
         st.session_state.scraping_done = True
         progress.progress(1.0)
 
-        # Calculate hot leads (Pain Score >= 70)
-        hot_leads = len([l for l in st.session_state.filtered_leads if l.pain_score >= 70])
+        # Calculate hot leads (Total Score >= 80)
+        hot_leads = len([l for l in st.session_state.filtered_leads if getattr(l, 'total_score', l.pain_score) >= 80])
 
         status.markdown(f"""
         <div class="results-box">
@@ -2240,40 +2240,78 @@ def show_search():
         """, unsafe_allow_html=True)
 
         for lead in st.session_state.filtered_leads[:5]:
-            # Pain Score badge color
-            if lead.pain_score >= 70:
-                score_color = "var(--error-500)"
-                urgency_label = "HOT"
-            elif lead.pain_score >= 50:
-                score_color = "var(--warning-500)"
-                urgency_label = "HIGH"
-            elif lead.pain_score >= 25:
-                score_color = "var(--primary-500)"
-                urgency_label = "MEDIUM"
-            else:
-                score_color = "var(--neutral-400)"
-                urgency_label = "LOW"
+            # Get lead grade based on total score
+            total_score = getattr(lead, 'total_score', lead.pain_score) or lead.pain_score
+            pain_score = lead.pain_score or 0
+            intent_score = getattr(lead, 'intent_score', 0) or 0
+            fit_score = getattr(lead, 'fit_score', 0) or 0
 
-            with st.expander(f"[{lead.pain_score}] {lead.title[:60]}..."):
-                col1, col2, col3 = st.columns([1, 1, 1])
-                with col1:
-                    st.markdown(f"""
-                    <div style="text-align: center; padding: 10px; background: {score_color}15; border-radius: 8px;">
-                        <div style="font-size: 28px; font-weight: 800; color: {score_color};">{lead.pain_score}</div>
-                        <div style="font-size: 10px; font-weight: 600; color: {score_color};">PAIN SCORE</div>
+            grade = get_lead_grade(total_score)
+            grade_emoji = grade["emoji"]
+            grade_label = grade["label"]
+            grade_color = grade["color"]
+            grade_bg = grade["bg_color"]
+
+            with st.expander(f"{grade_emoji} [{total_score}] {lead.title[:55]}..."):
+                # Triple Score Display
+                st.markdown(f"""
+                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                    <!-- Total Score (Large) -->
+                    <div style="flex: 1; text-align: center; padding: 16px; background: {grade_bg}; border-radius: 12px; border: 2px solid {grade_color};">
+                        <div style="font-size: 36px; font-weight: 800; color: {grade_color};">{total_score}</div>
+                        <div style="font-size: 11px; font-weight: 700; color: {grade_color}; letter-spacing: 0.5px;">{grade_emoji} {grade_label}</div>
+                        <div style="font-size: 10px; color: #64748B; margin-top: 4px;">TOTAL SCORE</div>
                     </div>
-                    """, unsafe_allow_html=True)
-                with col2:
+                    <!-- Individual Scores -->
+                    <div style="flex: 2; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FEE2E2; border-radius: 8px;">
+                            <span style="font-size: 16px;">😣</span>
+                            <div style="flex: 1;">
+                                <div style="font-size: 10px; color: #991B1B; font-weight: 600;">PAIN</div>
+                                <div style="height: 6px; background: #FECACA; border-radius: 3px; overflow: hidden;">
+                                    <div style="width: {pain_score}%; height: 100%; background: #EF4444;"></div>
+                                </div>
+                            </div>
+                            <span style="font-size: 14px; font-weight: 700; color: #DC2626;">{pain_score}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FEF3C7; border-radius: 8px;">
+                            <span style="font-size: 16px;">🎯</span>
+                            <div style="flex: 1;">
+                                <div style="font-size: 10px; color: #92400E; font-weight: 600;">INTENT</div>
+                                <div style="height: 6px; background: #FDE68A; border-radius: 3px; overflow: hidden;">
+                                    <div style="width: {intent_score}%; height: 100%; background: #F59E0B;"></div>
+                                </div>
+                            </div>
+                            <span style="font-size: 14px; font-weight: 700; color: #D97706;">{intent_score}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #DBEAFE; border-radius: 8px;">
+                            <span style="font-size: 16px;">✅</span>
+                            <div style="flex: 1;">
+                                <div style="font-size: 10px; color: #1E40AF; font-weight: 600;">FIT</div>
+                                <div style="height: 6px; background: #BFDBFE; border-radius: 3px; overflow: hidden;">
+                                    <div style="width: {fit_score}%; height: 100%; background: #3B82F6;"></div>
+                                </div>
+                            </div>
+                            <span style="font-size: 14px; font-weight: 700; color: #2563EB;">{fit_score}</span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # Lead Details
+                col1, col2 = st.columns(2)
+                with col1:
                     st.write(f"**Source:** {lead.source.value}")
                     st.write(f"**Industry:** {lead.industry or 'Unknown'}")
-                with col3:
-                    st.write(f"**Urgency:** {urgency_label}")
+                with col2:
+                    st.write(f"**Action:** {grade['action']}")
                     st.write(f"**Keywords:** {len(lead.keywords_matched)}")
 
-                st.write(f"**Matched:** {', '.join(lead.keywords_matched[:5])}")
-                st.write(f"[View original]({lead.url})")
+                if lead.keywords_matched:
+                    st.write(f"**Matched:** {', '.join(lead.keywords_matched[:5])}")
+                st.link_button("View Original", lead.url)
                 st.write("---")
-                st.write(lead.content[:350] + "...")
+                st.caption(lead.content[:350] + "...")
 
     # Section to review ALL raw leads (before AI filter)
     if st.session_state.scraping_done and st.session_state.raw_leads:

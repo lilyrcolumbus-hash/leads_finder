@@ -72,9 +72,13 @@ class Lead(BaseModel):
     subreddit: Optional[str] = Field(default=None, description="Subreddit if from Reddit")
     tags: List[str] = Field(default_factory=list, description="Custom tags")
 
-    # Scoring
-    pain_score: int = Field(default=0, description="Pain score 0-100")
+    # Scoring - Triple Score System
+    pain_score: int = Field(default=0, description="Pain score 0-100 - Level of pain/problem detected")
+    intent_score: int = Field(default=0, description="Intent score 0-100 - Buying signals detected")
+    fit_score: int = Field(default=0, description="Fit score 0-100 - How well they match ideal customer")
+    total_score: int = Field(default=0, description="Total score 0-100 - Combined (Pain + Intent + Fit) / 3")
     urgency: LeadUrgency = Field(default=LeadUrgency.LOW, description="Urgency level")
+    score_breakdown: Optional[Dict[str, Any]] = Field(default=None, description="Detailed score breakdown")
 
     # AI Analysis
     ai_score: Optional[float] = Field(default=None, description="AI relevance score 0-1")
