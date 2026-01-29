@@ -5122,171 +5122,77 @@ Is there anything specific about the platform or lead generation strategies I ca
 def render_floating_assistant():
     """Render a floating AI assistant button accessible from any page."""
 
-    # Initialize state for floating assistant
-    if 'show_floating_assistant' not in st.session_state:
-        st.session_state.show_floating_assistant = False
-    if 'floating_chat_history' not in st.session_state:
-        st.session_state.floating_chat_history = []
+    # Don't show floating button on AI Assistant page
+    if st.session_state.get('nav_page') == "AI Assistant":
+        return
 
-    # CSS for floating button and popup
+    # Create a container at the bottom of the page for the floating button
     st.markdown("""
     <style>
-        /* Floating AI Assistant Button */
-        .floating-assistant-btn {
+        /* Floating AI Assistant Button Container */
+        .floating-ai-container {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3);
             z-index: 9999;
-            transition: all 0.3s ease;
-            animation: pulse-assistant 2s infinite;
         }
-        .floating-assistant-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4);
-        }
-        .floating-assistant-icon {
-            font-size: 28px;
+        .floating-ai-btn {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%);
             color: white;
-        }
-        @keyframes pulse-assistant {
-            0%, 100% { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3); }
-            50% { box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6), 0 4px 16px rgba(99, 102, 241, 0.4); }
-        }
-
-        /* Floating Chat Popup */
-        .floating-chat-popup {
-            position: fixed;
-            bottom: 100px;
-            right: 24px;
-            width: 380px;
-            max-height: 500px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.1);
-            z-index: 9998;
-            overflow: hidden;
-            border: 1px solid #E2E8F0;
-        }
-        .floating-chat-header {
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
-            padding: 16px 20px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .floating-chat-title {
-            font-weight: 700;
-            font-size: 16px;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .floating-chat-close {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .floating-chat-body {
-            padding: 16px;
-            max-height: 340px;
-            overflow-y: auto;
-            background: #F8FAFC;
-        }
-        .floating-chat-input {
-            padding: 12px 16px;
-            border-top: 1px solid #E2E8F0;
-            background: white;
-        }
-        .floating-msg {
-            margin-bottom: 12px;
-            display: flex;
-            gap: 8px;
-        }
-        .floating-msg-user {
-            justify-content: flex-end;
-        }
-        .floating-msg-bubble {
-            max-width: 80%;
-            padding: 10px 14px;
-            border-radius: 16px;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-        .floating-msg-user .floating-msg-bubble {
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-        .floating-msg-assistant .floating-msg-bubble {
-            background: white;
-            color: #1E293B;
-            border: 1px solid #E2E8F0;
-            border-bottom-left-radius: 4px;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Use a sidebar expander for the floating assistant (Streamlit workaround)
-    # Add quick access button in sidebar
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("#### Quick Access")
-        if st.button("🤖 AI Assistant", key="quick_ai_btn", use_container_width=True, help="Open AI Assistant for lead generation help"):
-            st.session_state.nav_page = "AI Assistant"
-            st.rerun()
-
-    # Also render a visual indicator that AI is available
-    st.markdown("""
-    <div style="
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 9999;
-        pointer-events: none;
-    ">
-        <div style="
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
-            color: white;
-            padding: 12px 20px;
+            padding: 14px 24px;
             border-radius: 30px;
             font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
-            animation: fadeIn 0.5s ease;
-        ">
-            <span style="font-size: 18px;">🤖</span>
-            <span>AI Assistant Available</span>
-        </div>
-    </div>
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            animation: pulse-glow 2s infinite;
+        }
+        .floating-ai-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6), 0 4px 16px rgba(99, 102, 241, 0.5); }
+        }
+        /* Custom style for the floating button */
+        div[data-testid="stVerticalBlock"] > div:has(> div > div > button#floating_ai_assistant) {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            z-index: 9999 !important;
+        }
+        button#floating_ai_assistant {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%) !important;
+            color: white !important;
+            border: none !important;
+            padding: 14px 24px !important;
+            border-radius: 30px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4) !important;
+            animation: pulse-glow 2s infinite !important;
+        }
+        button#floating_ai_assistant:hover {
+            transform: translateY(-3px) scale(1.02) !important;
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5) !important;
         }
     </style>
     """, unsafe_allow_html=True)
+
+    # Create a floating button using Streamlit's native button with custom positioning
+    # We'll use a container at the end of the page
+    floating_container = st.container()
+    with floating_container:
+        col1, col2, col3 = st.columns([6, 2, 1])
+        with col3:
+            if st.button("🤖 AI Assistant", key="floating_ai_assistant", type="primary"):
+                st.session_state.nav_page = "AI Assistant"
+                st.rerun()
 
 
 def main():
