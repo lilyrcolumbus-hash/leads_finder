@@ -124,7 +124,16 @@ class LeadManager:
         try:
             with open(self.storage_path, 'r') as f:
                 data = json.load(f)
-                return data.get('leads', [])
+                leads = data.get('leads', [])
+                # Ensure all leads have required fields with defaults
+                for lead in leads:
+                    if not lead.get('status'):
+                        lead['status'] = 'new'
+                    if not lead.get('hash'):
+                        # Generate hash if missing
+                        unique_string = f"{lead.get('url', '')}|{str(lead.get('title', '')).lower()}|{str(lead.get('email', '')).lower()}"
+                        lead['hash'] = hashlib.md5(unique_string.encode()).hexdigest()
+                return leads
         except Exception:
             return []
 

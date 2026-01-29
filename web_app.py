@@ -3493,28 +3493,32 @@ Best regards'''
                 """, unsafe_allow_html=True)
 
                 # Get leads for this stage
-                stage_leads = [l for l in all_leads if l.get('status', 'new') == stage_key]
+                stage_leads = [l for l in all_leads if (l.get('status') or 'new') == stage_key]
 
                 # Show leads
                 for idx, lead in enumerate(stage_leads[:8]):
-                    lead_hash = lead.get('hash', '')
-                    lead_title = lead.get('title', lead.get('company', 'Unknown'))[:30]
-                    lead_company = lead.get('company', '')[:20]
-                    lead_email = lead.get('email', '')
-                    pain_score = lead.get('pain_score', 0)
+                    lead_hash = lead.get('hash') or ''
+                    # Safe string handling
+                    lead_title = (lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown Lead')[:30]
+                    lead_company = (lead.get('company') or '')[:20]
+                    lead_email = lead.get('email') or ''
+                    pain_score = lead.get('pain_score') or 0
 
                     # Lead card
+                    email_display = f'<span class="lead-card-tag">📧 {lead_email[:20]}</span>' if lead_email else ''
+                    company_display = f'<p class="lead-card-company">{lead_company}</p>' if lead_company else ''
+
                     st.markdown(f"""
                     <div class="lead-card">
                         <div class="lead-card-header">
                             <div>
                                 <p class="lead-card-title">{lead_title}</p>
-                                {f'<p class="lead-card-company">{lead_company}</p>' if lead_company else ''}
+                                {company_display}
                             </div>
                             <span class="lead-card-score">{pain_score}</span>
                         </div>
                         <div class="lead-card-info">
-                            {f'<span class="lead-card-tag">📧 {lead_email[:20]}</span>' if lead_email else ''}
+                            {email_display}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
@@ -3628,18 +3632,28 @@ Best regards'''
                 # Create DataFrame for display
                 table_data = []
                 for lead in filtered_leads:
-                    stage = lead.get('status', 'new')
+                    stage = lead.get('status', 'new') or 'new'
                     stage_info = CRM_STAGES.get(stage, CRM_STAGES['new'])
+                    # Safe string handling - convert None to empty string
+                    name = (lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown')[:40]
+                    email = lead.get('email') or ''
+                    phone = lead.get('phone') or ''
+                    company = (lead.get('company') or '')[:30]
+                    position = (lead.get('position') or '')[:25]
+                    location = lead.get('location') or ''
+                    source = (lead.get('source') or '')[:15]
+                    score = lead.get('pain_score') or 0
+
                     table_data.append({
                         'Status': f"{stage_info['icon']} {stage_info['name']}",
-                        'Name': lead.get('title', '')[:40],
-                        'Email': lead.get('email', ''),
-                        'Phone': lead.get('phone', ''),
-                        'Company': lead.get('company', '')[:30],
-                        'Position': lead.get('position', '')[:25],
-                        'Location': lead.get('location', ''),
-                        'Score': lead.get('pain_score', 0),
-                        'Source': lead.get('source', '')[:15],
+                        'Name': name,
+                        'Email': email,
+                        'Phone': phone,
+                        'Company': company,
+                        'Position': position,
+                        'Location': location,
+                        'Score': score,
+                        'Source': source,
                         '_hash': lead.get('hash', '')
                     })
 
@@ -3687,22 +3701,22 @@ Best regards'''
 
                         with detail_col1:
                             st.markdown("**Contact Information**")
-                            st.text_input("👤 Name", value=selected_lead.get('title', ''), key="edit_name", disabled=True)
-                            st.text_input("📧 Email", value=selected_lead.get('email', ''), key="edit_email", disabled=True)
-                            st.text_input("📱 Phone", value=selected_lead.get('phone', ''), key="edit_phone", disabled=True)
-                            st.text_input("🔗 LinkedIn", value=selected_lead.get('linkedin', ''), key="edit_linkedin", disabled=True)
+                            st.text_input("👤 Name", value=selected_lead.get('title') or selected_lead.get('author') or '', key="edit_name", disabled=True)
+                            st.text_input("📧 Email", value=selected_lead.get('email') or '', key="edit_email", disabled=True)
+                            st.text_input("📱 Phone", value=selected_lead.get('phone') or '', key="edit_phone", disabled=True)
+                            st.text_input("🔗 LinkedIn", value=selected_lead.get('linkedin') or selected_lead.get('url') or '', key="edit_linkedin", disabled=True)
 
                         with detail_col2:
                             st.markdown("**Business Information**")
-                            st.text_input("🏢 Company", value=selected_lead.get('company', ''), key="edit_company", disabled=True)
-                            st.text_input("💼 Position", value=selected_lead.get('position', ''), key="edit_position", disabled=True)
-                            st.text_input("🏭 Industry", value=selected_lead.get('industry', ''), key="edit_industry", disabled=True)
-                            st.text_input("📍 Location", value=selected_lead.get('location', ''), key="edit_location", disabled=True)
+                            st.text_input("🏢 Company", value=selected_lead.get('company') or '', key="edit_company", disabled=True)
+                            st.text_input("💼 Position", value=selected_lead.get('position') or '', key="edit_position", disabled=True)
+                            st.text_input("🏭 Industry", value=selected_lead.get('industry') or '', key="edit_industry", disabled=True)
+                            st.text_input("📍 Location", value=selected_lead.get('location') or '', key="edit_location", disabled=True)
 
                         with detail_col3:
                             st.markdown("**Status & Actions**")
 
-                            current_status = selected_lead.get('status', 'new')
+                            current_status = selected_lead.get('status') or 'new'
                             new_status = st.selectbox(
                                 "Pipeline Stage",
                                 list(CRM_STAGES.keys()),
@@ -3729,7 +3743,7 @@ Best regards'''
 
                         with notes_col1:
                             st.markdown("**Notes**")
-                            current_notes = selected_lead.get('notes', '')
+                            current_notes = selected_lead.get('notes') or ''
                             if current_notes:
                                 st.info(current_notes)
                             new_note = st.text_area("Add a new note...", key="new_note_detail", height=100)
@@ -3762,13 +3776,14 @@ Best regards'''
 
                 for idx, lead in enumerate(filtered_leads[:20]):
                     with card_cols[idx % 2]:
-                        lead_hash = lead.get('hash', '')
-                        lead_title = lead.get('title', 'Unknown')
-                        lead_email = lead.get('email', 'No email')
-                        lead_phone = lead.get('phone', '')
-                        lead_company = lead.get('company', '')
-                        lead_status = lead.get('status', 'new')
-                        pain_score = lead.get('pain_score', 0)
+                        # Safe string handling for all fields
+                        lead_hash = lead.get('hash') or ''
+                        lead_title = (lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown')[:35]
+                        lead_email = lead.get('email') or 'No email'
+                        lead_phone = lead.get('phone') or ''
+                        lead_company = (lead.get('company') or '')[:25]
+                        lead_status = lead.get('status') or 'new'
+                        pain_score = lead.get('pain_score') or 0
 
                         stage_info = CRM_STAGES.get(lead_status, CRM_STAGES['new'])
 
@@ -3776,8 +3791,8 @@ Best regards'''
                             # Card header
                             header_col1, header_col2 = st.columns([3, 1])
                             with header_col1:
-                                st.markdown(f"**{lead_title[:35]}**")
-                                st.caption(f"{lead_company[:25]}" if lead_company else "No company")
+                                st.markdown(f"**{lead_title}**")
+                                st.caption(lead_company if lead_company else "No company")
                             with header_col2:
                                 st.markdown(f"""
                                 <div style="background: {stage_info['bg']}; border-radius: 6px; padding: 4px 8px; text-align: center;">
@@ -3906,14 +3921,21 @@ Best regards'''
 
         if st.session_state.crm_deals:
             for deal in st.session_state.crm_deals:
-                stage_info = CRM_STAGES.get(deal.get('stage', 'new'), CRM_STAGES['new'])
+                deal_stage = deal.get('stage') or 'new'
+                stage_info = CRM_STAGES.get(deal_stage, CRM_STAGES['new'])
+                deal_name = deal.get('name') or 'Unnamed Deal'
+                deal_contact = deal.get('contact') or 'None'
+                deal_close = (deal.get('close_date') or 'Not set')[:10]
+                deal_value = deal.get('value') or 0
+                deal_prob = deal.get('probability') or 50
+                deal_id = deal.get('id') or 'unknown'
 
                 with st.container(border=True):
                     d_col1, d_col2, d_col3, d_col4 = st.columns([3, 2, 2, 1])
 
                     with d_col1:
-                        st.markdown(f"**{deal.get('name', 'Unnamed Deal')}**")
-                        st.caption(f"Contact: {deal.get('contact', 'None')[:30] if deal.get('contact') else 'None'}")
+                        st.markdown(f"**{deal_name}**")
+                        st.caption(f"Contact: {deal_contact[:30] if deal_contact != 'None' else 'None'}")
 
                     with d_col2:
                         st.markdown(f"""
@@ -3921,21 +3943,21 @@ Best regards'''
                             <span style="color: {stage_info['color']}; font-weight: 600; font-size: 12px;">{stage_info['icon']} {stage_info['name']}</span>
                         </div>
                         """, unsafe_allow_html=True)
-                        st.caption(f"Close: {deal.get('close_date', 'Not set')[:10]}")
+                        st.caption(f"Close: {deal_close}")
 
                     with d_col3:
-                        st.markdown(f"<div class='deal-value'>${deal.get('value', 0):,.0f}</div>", unsafe_allow_html=True)
-                        st.caption(f"Probability: {deal.get('probability', 50)}%")
+                        st.markdown(f"<div class='deal-value'>${deal_value:,.0f}</div>", unsafe_allow_html=True)
+                        st.caption(f"Probability: {deal_prob}%")
 
                     with d_col4:
                         new_stage = st.selectbox(
                             "Move",
                             list(CRM_STAGES.keys()),
-                            index=list(CRM_STAGES.keys()).index(deal.get('stage', 'new')),
-                            key=f"deal_stage_{deal.get('id')}",
+                            index=list(CRM_STAGES.keys()).index(deal_stage) if deal_stage in CRM_STAGES else 0,
+                            key=f"deal_stage_{deal_id}",
                             label_visibility="collapsed"
                         )
-                        if new_stage != deal.get('stage'):
+                        if new_stage != deal_stage:
                             deal['stage'] = new_stage
                             st.rerun()
         else:
@@ -3979,7 +4001,7 @@ Best regards'''
                 task_priority = st.selectbox("Priority", ["🔴 High", "🟡 Medium", "🟢 Low"])
                 task_contact = st.selectbox(
                     "Associated Contact",
-                    ["None"] + [f"{l.get('title', 'Unknown')[:25]}" for l in all_leads[:30]],
+                    ["None"] + [f"{(l.get('title') or l.get('author') or l.get('company') or 'Unknown')[:25]}" for l in all_leads[:30]],
                     key="task_contact"
                 )
 
