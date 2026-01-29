@@ -3752,6 +3752,25 @@ As a reminder, the solution includes:
 Do you have any questions? I'm happy to jump on a quick call.
 
 Best regards'''
+            },
+            {
+                'id': '5',
+                'name': 'Win-Back / Re-engagement',
+                'subject': 'Still missing calls at {{company}}?',
+                'body': '''Hi {{name}},
+
+We spoke a while back about improving call handling at {{company}}.
+
+Since then, we've helped dozens of {{industry}} businesses:
+- Capture 100% of incoming calls
+- Reduce customer wait times by 80%
+- Book appointments automatically
+
+Things change - if you're still dealing with missed calls or overwhelmed staff, I'd love to reconnect.
+
+Would 15 minutes this week work?
+
+Best regards'''
             }
         ]
 
@@ -4127,7 +4146,30 @@ Best regards'''
 
     # ==================== TAB 3: DEALS/OPPORTUNITIES ====================
     with tab3:
-        st.markdown("### Deals & Opportunities")
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <h3 style="margin: 0; color: #1E293B;">Deals & Opportunities</h3>
+            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
+                <span style="cursor: help; background: #3B82F6; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <strong style="color: #10B981;">What are Deals?</strong><br><br>
+                    Deals track potential revenue from your leads. Use them to:<br><br>
+                    • <strong>Track Value:</strong> Set the $ amount each opportunity is worth<br>
+                    • <strong>Monitor Progress:</strong> Move deals through stages (Demo → Proposal → Won)<br>
+                    • <strong>Forecast Revenue:</strong> See your total pipeline value<br>
+                    • <strong>Set Close Dates:</strong> Track when deals should close<br><br>
+                    <em style="color: #94A3B8;">Create deals for leads showing buying intent!</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                </div>
+            </div>
+        </div>
+        <style>
+            .metric-tooltip-wrapper:hover .metric-tooltip {
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
 
         # Deal stats cards
         deal_col1, deal_col2, deal_col3, deal_col4 = st.columns(4)
@@ -4263,7 +4305,24 @@ Best regards'''
 
     # ==================== TAB 4: TASKS ====================
     with tab4:
-        st.markdown("### Task Management")
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <h3 style="margin: 0; color: #1E293B;">Task Management</h3>
+            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
+                <span style="cursor: help; background: #F59E0B; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <strong style="color: #F59E0B;">What are Tasks?</strong><br><br>
+                    Tasks help you organize your daily follow-up activities:<br><br>
+                    • <strong>📞 Calls:</strong> Schedule follow-up calls with leads<br>
+                    • <strong>📧 Emails:</strong> Track emails you need to send<br>
+                    • <strong>📅 Meetings:</strong> Schedule demos and presentations<br>
+                    • <strong>📝 Notes:</strong> Reminders for research or prep<br><br>
+                    <em style="color: #94A3B8;">Never forget to follow up on a hot lead!</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Task quick stats
         today = datetime.now().date()
@@ -4380,7 +4439,25 @@ Best regards'''
 
     # ==================== TAB 5: EMAIL TEMPLATES ====================
     with tab5:
-        st.markdown("### Email Templates & Composer")
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <h3 style="margin: 0; color: #1E293B;">Email Templates & Composer</h3>
+            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
+                <span style="cursor: help; background: #EC4899; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 300px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <strong style="color: #EC4899;">Email Templates</strong><br><br>
+                    Pre-written email templates for faster outreach:<br><br>
+                    • <strong>Initial Outreach:</strong> First contact with new leads<br>
+                    • <strong>Follow Up:</strong> Second touch after no response<br>
+                    • <strong>Demo Confirmation:</strong> Confirm scheduled demos<br>
+                    • <strong>Proposal Follow-up:</strong> After sending pricing<br>
+                    • <strong>Win-Back:</strong> Re-engage cold leads<br><br>
+                    <em style="color: #94A3B8;">Use placeholders like {{name}}, {{company}}</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         email_subtab1, email_subtab2 = st.tabs(["📝 Compose Email", "📋 Templates"])
 
@@ -4454,7 +4531,23 @@ Best regards'''
 
     # ==================== TAB 6: CALENDAR ====================
     with tab6:
-        st.markdown("### Calendar View")
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <h3 style="margin: 0; color: #1E293B;">Calendar View</h3>
+            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
+                <span style="cursor: help; background: #8B5CF6; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 300px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <strong style="color: #8B5CF6;">Calendar Overview</strong><br><br>
+                    This calendar shows all your scheduled activities:<br><br>
+                    • <strong>📞 Tasks:</strong> Calls, emails, and meetings appear on their due dates<br>
+                    • <strong>💰 Deals:</strong> Deal close dates are highlighted<br>
+                    • <strong>📋 Overview:</strong> See your busiest days at a glance<br><br>
+                    <em style="color: #94A3B8;">Pro tip: Create tasks in the Tasks tab and they'll appear here automatically!</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Calendar controls
         cal_col1, cal_col2, cal_col3 = st.columns([1, 2, 1])
@@ -4554,51 +4647,176 @@ Best regards'''
 
     # ==================== TAB 7: ANALYTICS ====================
     with tab7:
-        st.markdown("### Analytics & Activity Feed")
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <h3 style="margin: 0; color: #1E293B;">Pipeline Analytics</h3>
+            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
+                <span style="cursor: help; background: #06B6D4; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <strong style="color: #06B6D4;">Analytics Dashboard</strong><br><br>
+                    Track your sales performance:<br><br>
+                    • <strong>Funnel:</strong> See how leads progress through stages<br>
+                    • <strong>Conversion:</strong> Your win rate percentage<br>
+                    • <strong>Sources:</strong> Which channels bring the best leads<br>
+                    • <strong>Activity:</strong> Recent actions and updates<br><br>
+                    <em style="color: #94A3B8;">Use this to optimize your sales process!</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         analytics_subtab1, analytics_subtab2, analytics_subtab3 = st.tabs(["📊 Dashboard", "📝 Activity Feed", "⚡ Quick Actions"])
 
         with analytics_subtab1:
-            st.markdown("#### Pipeline Analytics")
+            # Performance metrics cards at top
+            st.markdown("""
+            <div style="margin-bottom: 24px;">
+                <h4 style="color: #1E293B; margin-bottom: 16px; font-size: 18px;">Key Performance Indicators</h4>
+            </div>
+            """, unsafe_allow_html=True)
 
-            # Conversion funnel
-            st.markdown("##### Conversion Funnel")
-            funnel_data = {CRM_STAGES[k]['name']: v for k, v in status_counts.items()}
-            st.bar_chart(funnel_data)
-
-            st.markdown("---")
-
-            # Performance metrics
-            st.markdown("##### Performance Metrics")
             perf_col1, perf_col2, perf_col3, perf_col4 = st.columns(4)
 
+            conversion = (won_count / total_leads * 100) if total_leads > 0 else 0
+            in_progress = status_counts.get('contacted', 0) + status_counts.get('demo', 0) + status_counts.get('proposal', 0)
+            new_leads = status_counts.get('new', 0)
+            hot_leads = len([l for l in all_leads if l.get('pain_score', 0) >= 70])
+
             with perf_col1:
-                conversion = (won_count / total_leads * 100) if total_leads > 0 else 0
-                st.metric("Conversion Rate", f"{conversion:.1f}%")
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Conversion Rate</div>
+                    <div style="font-size: 32px; font-weight: 700;">{conversion:.1f}%</div>
+                    <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Won / Total Leads</div>
+                </div>
+                """, unsafe_allow_html=True)
 
             with perf_col2:
-                in_progress = status_counts.get('contacted', 0) + status_counts.get('demo', 0) + status_counts.get('proposal', 0)
-                st.metric("In Progress", in_progress)
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">In Progress</div>
+                    <div style="font-size: 32px; font-weight: 700;">{in_progress}</div>
+                    <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Active Opportunities</div>
+                </div>
+                """, unsafe_allow_html=True)
 
             with perf_col3:
-                new_leads = status_counts.get('new', 0)
-                st.metric("Uncontacted", new_leads)
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Uncontacted</div>
+                    <div style="font-size: 32px; font-weight: 700;">{new_leads}</div>
+                    <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Need Follow-up</div>
+                </div>
+                """, unsafe_allow_html=True)
 
             with perf_col4:
-                hot_leads = len([l for l in all_leads if l.get('pain_score', 0) >= 70])
-                st.metric("Hot Leads (70+)", hot_leads)
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Hot Leads</div>
+                    <div style="font-size: 32px; font-weight: 700;">{hot_leads}</div>
+                    <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Score 70+</div>
+                </div>
+                """, unsafe_allow_html=True)
 
-            st.markdown("---")
+            st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
 
-            # Source distribution
-            st.markdown("##### Lead Sources")
+            # Modern Funnel Visualization
+            st.markdown("""
+            <div style="margin-bottom: 16px;">
+                <h4 style="color: #1E293B; margin-bottom: 8px; font-size: 18px;">Sales Funnel</h4>
+                <p style="color: #64748B; font-size: 13px; margin: 0;">How leads progress through your pipeline</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Build funnel HTML
+            max_count = max(status_counts.values()) if status_counts.values() else 1
+            funnel_html = ""
+            colors = ['#3B82F6', '#06B6D4', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444']
+
+            for i, (stage_key, stage_info) in enumerate(CRM_STAGES.items()):
+                count = status_counts.get(stage_key, 0)
+                width_pct = max(20, (count / max_count * 100)) if max_count > 0 else 20
+                color = colors[i % len(colors)]
+
+                funnel_html += f"""
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div style="width: 120px; font-size: 13px; font-weight: 600; color: #374151;">
+                        {stage_info['icon']} {stage_info['name']}
+                    </div>
+                    <div style="flex: 1; margin: 0 16px;">
+                        <div style="background: #E5E7EB; border-radius: 8px; height: 32px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, {color} 0%, {color}CC 100%); width: {width_pct}%; height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; transition: width 0.3s ease;">
+                                <span style="color: white; font-weight: 700; font-size: 14px;">{count}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 60px; text-align: right; font-size: 13px; color: #6B7280;">
+                        {(count / total_leads * 100):.0f}% of total
+                    </div>
+                </div>
+                """ if total_leads > 0 else f"""
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div style="width: 120px; font-size: 13px; font-weight: 600; color: #374151;">
+                        {stage_info['icon']} {stage_info['name']}
+                    </div>
+                    <div style="flex: 1; margin: 0 16px;">
+                        <div style="background: #E5E7EB; border-radius: 8px; height: 32px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, {color} 0%, {color}CC 100%); width: 20%; height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;">
+                                <span style="color: white; font-weight: 700; font-size: 14px;">{count}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 60px; text-align: right; font-size: 13px; color: #6B7280;">
+                        0%
+                    </div>
+                </div>
+                """
+
+            st.markdown(f"""
+            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 16px; padding: 24px;">
+                {funnel_html}
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
+
+            # Source distribution with modern cards
+            st.markdown("""
+            <div style="margin-bottom: 16px;">
+                <h4 style="color: #1E293B; margin-bottom: 8px; font-size: 18px;">Lead Sources</h4>
+                <p style="color: #64748B; font-size: 13px; margin: 0;">Where your leads are coming from</p>
+            </div>
+            """, unsafe_allow_html=True)
+
             source_counts = {}
             for lead in all_leads:
                 source = lead.get('source', 'Unknown')
                 source_counts[source] = source_counts.get(source, 0) + 1
 
             if source_counts:
-                st.bar_chart(source_counts)
+                source_colors = {'reddit': '#FF4500', 'google': '#4285F4', 'hackernews': '#FF6600', 'apollo': '#5B5FC7', 'hunter': '#F5A623', 'manual': '#6B7280'}
+                source_icons = {'reddit': '🔴', 'google': '🔵', 'hackernews': '🟠', 'apollo': '🚀', 'hunter': '🎯', 'manual': '✏️'}
+
+                source_html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">'
+                for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
+                    color = source_colors.get(source.lower(), '#6B7280')
+                    icon = source_icons.get(source.lower(), '📊')
+                    pct = (count / total_leads * 100) if total_leads > 0 else 0
+
+                    source_html += f"""
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; text-align: center; border-left: 4px solid {color};">
+                        <div style="font-size: 24px; margin-bottom: 8px;">{icon}</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #1E293B;">{count}</div>
+                        <div style="font-size: 13px; color: #6B7280; text-transform: capitalize;">{source}</div>
+                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 4px;">{pct:.1f}% of total</div>
+                    </div>
+                    """
+                source_html += '</div>'
+
+                st.markdown(source_html, unsafe_allow_html=True)
+            else:
+                st.info("No lead sources to display yet. Start finding leads!")
 
         with analytics_subtab2:
             st.markdown("#### Activity Feed")
