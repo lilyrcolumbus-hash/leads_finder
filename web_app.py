@@ -6215,7 +6215,7 @@ def show_lead_warming():
         <div class="warming-stat-card">
             <div class="warming-tooltip">
                 <strong>❄️ Cold Leads</strong><br>
-                Leads nuevos que aún no has contactado ni interactuado en LinkedIn. Necesitan 7 días de "calentamiento" antes de enviar email frío.
+                New leads you haven't contacted or engaged with on LinkedIn yet. They need 7 days of "warming" before cold email outreach.
             </div>
             <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">❄️</div>
@@ -6229,7 +6229,7 @@ def show_lead_warming():
         <div class="warming-stat-card">
             <div class="warming-tooltip">
                 <strong>🌡️ Warm Leads</strong><br>
-                Leads en proceso de calentamiento (día 3-6). Ya vieron tu perfil, recibieron likes/comentarios. Aún no listos para contacto directo.
+                Leads in warming process (day 3-6). They've seen your profile, received likes/comments. Not ready for direct contact yet.
             </div>
             <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">🌡️</div>
@@ -6243,7 +6243,7 @@ def show_lead_warming():
         <div class="warming-stat-card">
             <div class="warming-tooltip">
                 <strong>🔥 Hot Leads</strong><br>
-                <strong>¡Listos para contactar!</strong> Completaron 7 días de warming. Ya te conocen de LinkedIn. Envía email personalizado ahora para +300% respuesta.
+                <strong>Ready to contact!</strong> Completed 7 days of warming. They already know you from LinkedIn. Send personalized email now for +300% response rate.
             </div>
             <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">🔥</div>
@@ -6257,7 +6257,7 @@ def show_lead_warming():
         <div class="warming-stat-card">
             <div class="warming-tooltip">
                 <strong>✅ Activities Done</strong><br>
-                Total de acciones de warming completadas: vistas de perfil, likes, comentarios, conexiones enviadas. Más actividad = leads más calientes.
+                Total warming actions completed: profile views, likes, comments, connection requests. More activity = warmer leads.
             </div>
             <div class="warming-help">?</div>
             <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
@@ -6593,88 +6593,148 @@ def show_lead_warming():
                 st.caption("No leads ready yet")
 
     with tab4:
-        st.markdown("### Engagement Tools")
-        st.caption("Templates and tools to help you warm up leads effectively")
+        st.markdown("""
+        <div style="margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #1E293B;">💬 Engagement Tools</h3>
+            <p style="margin: 8px 0 0 0; color: #64748B; font-size: 14px;">Templates and tools to help you warm up leads effectively</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Modern template card styles
+        st.markdown("""
+        <style>
+            .template-card {
+                background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+                border: 1px solid #E2E8F0;
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 12px;
+                transition: all 0.2s ease;
+            }
+            .template-card:hover {
+                border-color: #3B82F6;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            }
+            .template-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .template-badge {
+                background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+                color: white;
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+            .template-text {
+                background: #F8FAFC;
+                border: 1px solid #E2E8F0;
+                border-radius: 8px;
+                padding: 12px 16px;
+                font-family: 'Inter', sans-serif;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #334155;
+            }
+            .template-text strong {
+                color: #3B82F6;
+            }
+        </style>
+        """, unsafe_allow_html=True)
 
         tool_col1, tool_col2 = st.columns(2)
 
         with tool_col1:
-            st.markdown("#### 💬 Comment Templates")
-            st.caption("Copy these templates for LinkedIn comments")
+            st.markdown("""
+            <div style="margin-bottom: 16px;">
+                <h4 style="margin: 0; color: #1E293B; font-size: 16px;">💬 Comment Templates</h4>
+                <p style="margin: 4px 0 0 0; color: #64748B; font-size: 12px;">Copy these templates for LinkedIn comments</p>
+            </div>
+            """, unsafe_allow_html=True)
 
             comment_templates = [
-                {
-                    "type": "Agreement",
-                    "template": "Great insight! I've seen this in my work too - [specific example]. Thanks for sharing.",
-                },
-                {
-                    "type": "Question",
-                    "template": "Interesting perspective. Have you found that [related question]? I'd love to hear your thoughts.",
-                },
-                {
-                    "type": "Value Add",
-                    "template": "This resonates with me. I'd add that [additional point] can also help. What do you think?",
-                },
-                {
-                    "type": "Industry Specific",
-                    "template": "As someone in [industry], I appreciate this take. We're seeing [relevant trend] as well.",
-                },
+                {"type": "Agreement", "icon": "👍", "color": "#10B981", "template": "Great insight! I've seen this in my work too - <strong>[specific example]</strong>. Thanks for sharing."},
+                {"type": "Question", "icon": "❓", "color": "#F59E0B", "template": "Interesting perspective. Have you found that <strong>[related question]</strong>? I'd love to hear your thoughts."},
+                {"type": "Value Add", "icon": "💡", "color": "#3B82F6", "template": "This resonates with me. I'd add that <strong>[additional point]</strong> can also help. What do you think?"},
+                {"type": "Industry", "icon": "🏢", "color": "#8B5CF6", "template": "As someone in <strong>[industry]</strong>, I appreciate this take. We're seeing <strong>[relevant trend]</strong> as well."},
             ]
 
-            for template in comment_templates:
-                with st.expander(f"📝 {template['type']}"):
-                    st.code(template['template'], language=None)
-                    if st.button(f"Copy", key=f"copy_{template['type']}"):
-                        st.toast("Template copied!")
+            for i, template in enumerate(comment_templates):
+                st.markdown(f"""
+                <div class="template-card">
+                    <div class="template-header">
+                        <span style="font-size: 18px;">{template['icon']}</span>
+                        <span style="background: {template['color']}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">{template['type']}</span>
+                    </div>
+                    <div class="template-text">{template['template']}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
         with tool_col2:
-            st.markdown("#### 🤝 Connection Request Templates")
-            st.caption("Personalized connection request messages")
+            st.markdown("""
+            <div style="margin-bottom: 16px;">
+                <h4 style="margin: 0; color: #1E293B; font-size: 16px;">🤝 Connection Request Templates</h4>
+                <p style="margin: 4px 0 0 0; color: #64748B; font-size: 12px;">Personalized connection request messages</p>
+            </div>
+            """, unsafe_allow_html=True)
 
             connection_templates = [
-                {
-                    "type": "Mutual Interest",
-                    "template": "Hi [Name], I noticed we're both interested in [topic]. I'd love to connect and exchange insights. Looking forward to learning from your experience in [industry].",
-                },
-                {
-                    "type": "Content Appreciation",
-                    "template": "Hi [Name], I've been following your posts about [topic] and find them really valuable. Would love to connect and stay updated on your insights.",
-                },
-                {
-                    "type": "Industry Peer",
-                    "template": "Hi [Name], As a fellow professional in [industry], I'd love to connect. Your work at [Company] looks impressive. Let's stay in touch!",
-                },
+                {"type": "Mutual Interest", "icon": "🎯", "color": "#EF4444", "template": "Hi <strong>[Name]</strong>, I noticed we're both interested in <strong>[topic]</strong>. I'd love to connect and exchange insights. Looking forward to learning from your experience in <strong>[industry]</strong>."},
+                {"type": "Content Fan", "icon": "⭐", "color": "#F59E0B", "template": "Hi <strong>[Name]</strong>, I've been following your posts about <strong>[topic]</strong> and find them really valuable. Would love to connect and stay updated on your insights."},
+                {"type": "Industry Peer", "icon": "🏆", "color": "#10B981", "template": "Hi <strong>[Name]</strong>, As a fellow professional in <strong>[industry]</strong>, I'd love to connect. Your work at <strong>[Company]</strong> looks impressive. Let's stay in touch!"},
             ]
 
             for template in connection_templates:
-                with st.expander(f"📝 {template['type']}"):
-                    st.code(template['template'], language=None)
-                    if st.button(f"Copy", key=f"copy_conn_{template['type']}"):
-                        st.toast("Template copied!")
+                st.markdown(f"""
+                <div class="template-card">
+                    <div class="template-header">
+                        <span style="font-size: 18px;">{template['icon']}</span>
+                        <span style="background: {template['color']}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">{template['type']}</span>
+                    </div>
+                    <div class="template-text">{template['template']}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
-        st.divider()
+        st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
-        st.markdown("#### 📧 Follow-up Email Template (After Warming)")
-        st.caption("Use this after completing the 7-day warming process")
+        # Email template with modern design
+        st.markdown("""
+        <div style="margin-bottom: 16px;">
+            <h4 style="margin: 0; color: #1E293B; font-size: 16px;">📧 Follow-up Email Template (After Warming)</h4>
+            <p style="margin: 4px 0 0 0; color: #64748B; font-size: 12px;">Use this after completing the 7-day warming process</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        email_template = """Subject: Following up on our LinkedIn connection
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 12px; padding: 20px;">
+            <div style="background: white; border-radius: 8px; padding: 20px; font-family: 'Georgia', serif;">
+                <div style="border-bottom: 1px solid #E2E8F0; padding-bottom: 12px; margin-bottom: 16px;">
+                    <span style="background: #3B82F6; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;">SUBJECT</span>
+                    <span style="margin-left: 12px; color: #1E293B; font-weight: 500;">Following up on our LinkedIn connection</span>
+                </div>
+                <div style="color: #334155; font-size: 14px; line-height: 1.8;">
+                    Hi <strong style="color: #3B82F6;">[Name]</strong>,<br><br>
 
-Hi [Name],
+                    I hope this message finds you well! We connected on LinkedIn recently, and I've really enjoyed your insights on <strong style="color: #3B82F6;">[topic they posted about]</strong>.<br><br>
 
-I hope this message finds you well! We connected on LinkedIn recently, and I've really enjoyed your insights on [topic they posted about].
+                    I noticed that <strong style="color: #3B82F6;">[Company]</strong> is in the <strong style="color: #3B82F6;">[industry]</strong> space, and I wanted to reach out because we help businesses like yours <strong style="color: #3B82F6;">[value proposition]</strong>.<br><br>
 
-I noticed that [Company] is in the [industry] space, and I wanted to reach out because we help businesses like yours [value proposition].
+                    <span style="background: #FEF3C7; padding: 2px 6px; border-radius: 4px;">[Specific observation about their company/role that shows you've done your research]</span><br><br>
 
-[Specific observation about their company/role that shows you've done your research]
+                    Would you be open to a quick 15-minute call to explore if there might be a fit? I'd love to learn more about your current priorities and see if we can help.<br><br>
 
-Would you be open to a quick 15-minute call to explore if there might be a fit? I'd love to learn more about your current priorities and see if we can help.
+                    Best regards,<br>
+                    <strong style="color: #3B82F6;">[Your Name]</strong><br><br>
 
-Best regards,
-[Your Name]
-
-P.S. [Reference something specific from their recent LinkedIn activity]"""
-
-        st.code(email_template, language=None)
+                    <em style="color: #64748B;">P.S. [Reference something specific from their recent LinkedIn activity]</em>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     with tab5:
         st.markdown("### Warming Settings")
