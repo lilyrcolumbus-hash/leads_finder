@@ -2080,6 +2080,32 @@ def show_search():
             with results:
                 st.success(f"Auto-saved {saved_count} new leads to database")
 
+        # AUTO-SYNC TO HUBSPOT if configured
+        with HubSpotCRM() as crm:
+            if crm.is_configured():
+                status.markdown("""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Syncing to HubSpot...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                hubspot_synced = 0
+                for lead in all_leads:
+                    try:
+                        result = crm.create_contact(lead)
+                        if result:
+                            hubspot_synced += 1
+                    except Exception as e:
+                        pass  # Continue with other leads
+
+                if hubspot_synced > 0:
+                    with results:
+                        st.success(f"✅ Auto-synced {hubspot_synced} leads to HubSpot!")
+                else:
+                    with results:
+                        st.info("HubSpot: Leads may already exist or sync failed")
+
         # Store search summary
         st.session_state.last_search_results = {
             'total_found': len(all_leads),
@@ -2163,7 +2189,7 @@ def show_search():
 
         # Navigation buttons after search
         with results:
-            nav_col1, nav_col2 = st.columns(2)
+            nav_col1, nav_col2, nav_col3 = st.columns(3)
             with nav_col1:
                 if st.button("📋 View in CRM", type="primary", use_container_width=True):
                     st.session_state.nav_page = "CRM"
@@ -2172,6 +2198,25 @@ def show_search():
                 if st.button("📊 View All Leads", use_container_width=True):
                     st.session_state.nav_page = "My Leads"
                     st.rerun()
+            with nav_col3:
+                # Manual HubSpot sync button
+                with HubSpotCRM() as crm:
+                    if crm.is_configured():
+                        if st.button("🔗 Sync to HubSpot", use_container_width=True):
+                            sync_progress = st.progress(0)
+                            synced = 0
+                            total = len(all_leads)
+                            for i, lead in enumerate(all_leads):
+                                try:
+                                    result = crm.create_contact(lead)
+                                    if result:
+                                        synced += 1
+                                except:
+                                    pass
+                                sync_progress.progress((i + 1) / total)
+                            st.success(f"Synced {synced}/{total} leads to HubSpot!")
+                    else:
+                        st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True)
 
     # Preview
     if st.session_state.scraping_done and st.session_state.filtered_leads:
@@ -2714,14 +2759,91 @@ def show_leads():
                     <p class="empty-desc">Configure your HubSpot API key in Settings to enable CRM integration</p>
                 </div>
                 """, unsafe_allow_html=True)
+
+                st.info("💡 Ve a Settings y configura tu HubSpot API Key para sincronizar leads automáticamente")
+
             else:
+                st.success("✅ HubSpot está conectado")
+
+                # Sync buttons section
+                st.markdown("### 🔄 Sync Leads to HubSpot")
+
+                sync_col1, sync_col2 = st.columns(2)
+
+                with sync_col1:
+                    # Sync saved leads
+                    saved_leads_for_sync = lead_manager.load_leads()
+                    not_synced = [l for l in saved_leads_for_sync if not l.get('hubspot_synced')]
+
+                    st.markdown(f"**Saved Leads:** {len(saved_leads_for_sync)} total, {len(not_synced)} pending sync")
+
+                    if st.button(f"🔄 Sync {len(not_synced)} Pending Leads", type="primary", use_container_width=True, disabled=len(not_synced)==0):
+                        sync_progress = st.progress(0)
+                        synced_count = 0
+
+                        for i, lead_dict in enumerate(not_synced):
+                            try:
+                                # Create a Lead object from dict
+                                from src.utils.models import Lead as LeadModel, LeadSource
+                                lead_obj = LeadModel(
+                                    id=lead_dict.get('hash', ''),
+                                    source=LeadSource.REDDIT,
+                                    title=lead_dict.get('title') or lead_dict.get('author') or '',
+                                    content=lead_dict.get('content', ''),
+                                    url=lead_dict.get('url', ''),
+                                    email=lead_dict.get('email'),
+                                    name=lead_dict.get('author') or lead_dict.get('title'),
+                                    company=lead_dict.get('company'),
+                                    phone=lead_dict.get('phone'),
+                                    industry=lead_dict.get('industry'),
+                                    pain_score=lead_dict.get('pain_score', 0)
+                                )
+                                result = crm.create_contact(lead_obj)
+                                if result:
+                                    lead_dict['hubspot_synced'] = True
+                                    lead_dict['hubspot_id'] = result
+                                    synced_count += 1
+                            except Exception as e:
+                                pass
+                            sync_progress.progress((i + 1) / len(not_synced))
+
+                        # Save the updated sync status
+                        lead_manager._save_leads_direct(saved_leads_for_sync)
+                        st.success(f"✅ Synced {synced_count} leads to HubSpot!")
+                        st.rerun()
+
+                with sync_col2:
+                    # Sync session leads
+                    session_leads = st.session_state.filtered_leads if st.session_state.filtered_leads else []
+                    st.markdown(f"**Session Leads:** {len(session_leads)} leads from current session")
+
+                    if st.button(f"🔄 Sync {len(session_leads)} Session Leads", use_container_width=True, disabled=len(session_leads)==0):
+                        sync_progress2 = st.progress(0)
+                        synced_count2 = 0
+
+                        for i, lead in enumerate(session_leads):
+                            try:
+                                result = crm.create_contact(lead)
+                                if result:
+                                    synced_count2 += 1
+                            except:
+                                pass
+                            sync_progress2.progress((i + 1) / len(session_leads))
+
+                        st.success(f"✅ Synced {synced_count2} session leads to HubSpot!")
+
+                st.markdown("---")
+
+                # View HubSpot contacts
+                st.markdown("### 📋 HubSpot Contacts")
                 stage = st.selectbox("Filter by stage", ["All"] + [s.value for s in LeadStage])
 
-                if st.button("Load", type="primary"):
+                if st.button("🔍 Load from HubSpot", type="primary"):
                     with st.spinner("Loading..."):
                         contacts = crm.get_all_contacts() if stage == "All" else crm.get_contacts_by_stage(LeadStage(stage))
 
                     if contacts:
+                        st.success(f"Found {len(contacts)} contacts in HubSpot")
                         data = [{
                             "Name": f"{c.firstname or ''} {c.lastname or ''}".strip() or "-",
                             "Email": c.email or "-",
@@ -2730,17 +2852,7 @@ def show_leads():
                         } for c in contacts]
                         st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
                     else:
-                        st.markdown("""
-                        <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-                                    border-left: 4px solid #6366F1;
-                                    border-radius: 12px;
-                                    padding: 14px 18px;
-                                    text-align: center;">
-                            <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
-                                No contacts found for this filter
-                            </p>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        st.info("No contacts found in HubSpot for this filter")
 
 
 def show_analytics():

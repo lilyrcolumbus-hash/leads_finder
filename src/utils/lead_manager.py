@@ -137,6 +137,16 @@ class LeadManager:
         except Exception:
             return []
 
+    def _save_leads_direct(self, leads: List[Dict]) -> None:
+        """Save leads directly to storage (used for updating existing leads)."""
+        existing_data = {
+            'leads': leads,
+            'last_updated': datetime.now().isoformat(),
+            'total_count': len(leads)
+        }
+        with open(self.storage_path, 'w') as f:
+            json.dump(existing_data, f, indent=2, default=str)
+
     def import_from_csv(self, csv_content: str) -> Dict:
         """Import leads from CSV content. Returns stats about import."""
         imported = 0
