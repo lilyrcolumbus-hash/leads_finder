@@ -1,0 +1,444 @@
+#!/usr/bin/env python3
+"""
+Google Maps Scraper - Find local businesses with contact info
+Extracts: Name, Phone, Website, Address, Rating, Reviews
+
+Method: Web scraping Google Maps search results
+"""
+
+import re
+import time
+import requests
+from typing import List, Optional, Dict
+from datetime import datetime
+from urllib.parse import quote_plus
+from bs4 import BeautifulSoup
+
+from ..config import settings
+from ..utils.models import Lead, LeadSource, LeadBatch
+from ..utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+
+class GoogleMapsScraper:
+    """
+    Scrapes Google Maps for local businesses.
+
+    Finds: Dental offices, HVAC companies, Law firms, etc.
+    Extracts: Name, Phone, Website, Address, Rating
+    """
+
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+        })
+
+        # Business categories relevant for AI receptionist
+        self.business_categories = [
+            "dentist",
+            "dental office",
+            "hvac contractor",
+            "plumber",
+            "lawyer",
+            "law firm",
+            "medical clinic",
+            "doctor office",
+            "chiropractor",
+            "veterinarian",
+            "auto repair",
+            "hair salon",
+            "spa",
+            "real estate agent",
+            "insurance agent",
+            "accountant",
+            "fitness center",
+            "yoga studio"
+        ]
+
+        # Default cities to search if no location provided
+        self.default_cities = [
+            "Miami, FL",
+            "Los Angeles, CA",
+            "Houston, TX",
+            "Phoenix, AZ",
+            "Dallas, TX",
+            "San Diego, CA",
+            "Austin, TX",
+            "Denver, CO",
+            "Atlanta, GA",
+            "Chicago, IL"
+        ]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.session.close()
+
+    def scrape(self, time_filter: str = "week", location: str = "",
+               category: str = "") -> LeadBatch:
+        """
+        Scrape Google Maps for local businesses.
+
+        Args:
+            time_filter: Not used (businesses don't have time filter)
+            location: City/State to search (e.g., "Miami, FL")
+            category: Business category (e.g., "dentist")
+
+        Returns:
+            LeadBatch with found businesses
+        """
+        all_leads = []
+
+        # Determine locations to search
+        locations = [location] if location else self.default_cities[:3]
+
+        # Determine categories to search
+        categories = [category] if category else self.business_categories[:4]
+
+        logger.info(f"Google Maps Scraper: Searching {len(categories)} categories in {len(locations)} locations")
+
+        for loc in locations:
+            for cat in categories:
+                try:
+                    leads = self._search_maps(cat, loc)
+                    all_leads.extend(leads)
+                    logger.info(f"Found {len(leads)} businesses for '{cat}' in {loc}")
+                    time.sleep(2)  # Be respectful with rate limiting
+                except Exception as e:
+                    logger.error(f"Error searching {cat} in {loc}: {e}")
+
+        # Deduplicate by phone number or name
+        unique_leads = self._deduplicate(all_leads)
+
+        # Try to find emails for businesses with websites
+        unique_leads = self._enrich_with_emails(unique_leads[:20])  # Limit to 20 for speed
+
+        logger.info(f"Google Maps Scraper: Found {len(unique_leads)} unique businesses")
+
+        return LeadBatch(
+            leads=unique_leads,
+            source=LeadSource.GOOGLE_MY_BUSINESS,
+            scraped_at=datetime.now()
+        )
+
+    def _search_maps(self, category: str, location: str) -> List[Lead]:
+        """Search Google Maps for a category in a location."""
+        leads = []
+
+        query = f"{category} in {location}"
+        search_url = f"https://www.google.com/search?q={quote_plus(query)}&tbm=lcl"
+
+        try:
+            response = self.session.get(search_url, timeout=15)
+
+            if response.status_code != 200:
+                logger.warning(f"Google returned status {response.status_code}")
+                return leads
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find business listings
+            # Google's HTML structure changes frequently, so we try multiple selectors
+            business_divs = soup.find_all('div', {'class': re.compile(r'VkpGBb|rllt__details')})
+
+            if not business_divs:
+                # Try alternative structure
+                business_divs = soup.find_all('div', {'data-attrid': re.compile(r'kc:/local')})
+
+            for div in business_divs[:10]:  # Limit to 10 per search
+                try:
+                    lead = self._parse_business(div, category, location)
+                    if lead:
+                        leads.append(lead)
+                except Exception as e:
+                    logger.debug(f"Error parsing business: {e}")
+                    continue
+
+            # Also try to extract from JSON-LD if present
+            json_leads = self._extract_from_jsonld(soup, category, location)
+            leads.extend(json_leads)
+
+        except Exception as e:
+            logger.error(f"Error fetching Google Maps: {e}")
+
+        return leads
+
+    def _parse_business(self, div, category: str, location: str) -> Optional[Lead]:
+        """Parse a business div into a Lead."""
+        try:
+            # Extract business name
+            name_elem = div.find(['span', 'div'], {'class': re.compile(r'OSrXXb|dbg0pd')})
+            if not name_elem:
+                name_elem = div.find('a', {'class': re.compile(r'rllt__link')})
+
+            name = name_elem.get_text(strip=True) if name_elem else None
+            if not name:
+                return None
+
+            # Extract phone number
+            phone = None
+            phone_pattern = r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}'
+            text = div.get_text()
+            phone_match = re.search(phone_pattern, text)
+            if phone_match:
+                phone = phone_match.group()
+
+            # Extract address
+            address = None
+            addr_elem = div.find(['span', 'div'], {'class': re.compile(r'rllt__details|lqhpac')})
+            if addr_elem:
+                address = addr_elem.get_text(strip=True)
+
+            # Extract rating
+            rating = None
+            rating_elem = div.find(['span'], {'class': re.compile(r'yi40Hd|Aq14fc')})
+            if rating_elem:
+                try:
+                    rating = float(rating_elem.get_text(strip=True))
+                except:
+                    pass
+
+            # Extract website (if available in snippet)
+            website = None
+            link_elem = div.find('a', href=re.compile(r'http'))
+            if link_elem and 'google.com' not in link_elem.get('href', ''):
+                website = link_elem.get('href')
+
+            # Determine industry
+            industry = self._map_category_to_industry(category)
+
+            lead = Lead(
+                id=f"gmaps_{hash(f'{name}{phone}{location}')}",
+                source=LeadSource.GOOGLE_MY_BUSINESS,
+                title=name,
+                content=f"{category.title()} business in {location}. {address or ''}",
+                url=f"https://www.google.com/search?q={quote_plus(name + ' ' + location)}",
+                company=name,
+                phone=phone,
+                website=website,
+                industry=industry,
+                found_at=datetime.now(),
+                pain_score=50,  # Base score for local businesses
+                keywords_matched=[category],
+                is_qualified=True,
+                extra_data={
+                    'address': address,
+                    'rating': rating,
+                    'category': category,
+                    'location': location,
+                    'platform': 'google_maps'
+                }
+            )
+
+            return lead
+
+        except Exception as e:
+            logger.debug(f"Parse error: {e}")
+            return None
+
+    def _extract_from_jsonld(self, soup, category: str, location: str) -> List[Lead]:
+        """Extract business info from JSON-LD structured data."""
+        leads = []
+
+        try:
+            scripts = soup.find_all('script', {'type': 'application/ld+json'})
+
+            for script in scripts:
+                try:
+                    import json
+                    data = json.loads(script.string)
+
+                    # Handle both single object and array
+                    items = data if isinstance(data, list) else [data]
+
+                    for item in items:
+                        if item.get('@type') in ['LocalBusiness', 'Organization', 'MedicalBusiness', 'LegalService']:
+                            name = item.get('name')
+                            if not name:
+                                continue
+
+                            phone = item.get('telephone')
+                            website = item.get('url')
+
+                            address_obj = item.get('address', {})
+                            address = None
+                            if isinstance(address_obj, dict):
+                                address = f"{address_obj.get('streetAddress', '')} {address_obj.get('addressLocality', '')} {address_obj.get('addressRegion', '')}"
+
+                            lead = Lead(
+                                id=f"gmaps_json_{hash(f'{name}{phone}')}",
+                                source=LeadSource.GOOGLE_MY_BUSINESS,
+                                title=name,
+                                content=f"{category.title()} in {location}",
+                                url=website or f"https://www.google.com/search?q={quote_plus(name)}",
+                                company=name,
+                                phone=phone,
+                                website=website,
+                                industry=self._map_category_to_industry(category),
+                                found_at=datetime.now(),
+                                pain_score=50,
+                                keywords_matched=[category],
+                                is_qualified=True,
+                                extra_data={
+                                    'address': address,
+                                    'rating': item.get('aggregateRating', {}).get('ratingValue'),
+                                    'category': category
+                                }
+                            )
+                            leads.append(lead)
+
+                except:
+                    continue
+
+        except Exception as e:
+            logger.debug(f"JSON-LD extraction error: {e}")
+
+        return leads
+
+    def _enrich_with_emails(self, leads: List[Lead]) -> List[Lead]:
+        """Try to find emails by visiting business websites."""
+        for lead in leads:
+            if lead.website and not lead.email:
+                try:
+                    email = self._find_email_on_website(lead.website)
+                    if email:
+                        lead.email = email
+                        logger.info(f"Found email for {lead.company}: {email}")
+                except Exception as e:
+                    logger.debug(f"Error finding email for {lead.company}: {e}")
+
+                time.sleep(1)  # Rate limiting
+
+        return leads
+
+    def _find_email_on_website(self, url: str) -> Optional[str]:
+        """Scrape a website to find email addresses."""
+        try:
+            # Add protocol if missing
+            if not url.startswith('http'):
+                url = 'https://' + url
+
+            response = self.session.get(url, timeout=10)
+
+            if response.status_code != 200:
+                return None
+
+            # Find emails using regex
+            email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+            emails = re.findall(email_pattern, response.text)
+
+            # Filter out common false positives
+            valid_emails = []
+            for email in emails:
+                email_lower = email.lower()
+                # Skip image files, example emails, etc.
+                if not any(x in email_lower for x in ['example.com', '.png', '.jpg', '.gif', 'wixpress', 'sentry']):
+                    valid_emails.append(email)
+
+            # Return first valid email (usually the main contact)
+            if valid_emails:
+                return valid_emails[0]
+
+            # Also check common contact pages
+            contact_pages = ['/contact', '/contact-us', '/about', '/about-us']
+            for page in contact_pages:
+                try:
+                    contact_url = url.rstrip('/') + page
+                    contact_response = self.session.get(contact_url, timeout=5)
+                    if contact_response.status_code == 200:
+                        contact_emails = re.findall(email_pattern, contact_response.text)
+                        for email in contact_emails:
+                            if not any(x in email.lower() for x in ['example.com', '.png', '.jpg']):
+                                return email
+                except:
+                    continue
+
+            return None
+
+        except Exception as e:
+            logger.debug(f"Error fetching {url}: {e}")
+            return None
+
+    def _map_category_to_industry(self, category: str) -> str:
+        """Map search category to industry."""
+        category_lower = category.lower()
+
+        industry_map = {
+            'dentist': 'Healthcare',
+            'dental': 'Healthcare',
+            'doctor': 'Healthcare',
+            'medical': 'Healthcare',
+            'clinic': 'Healthcare',
+            'chiropractor': 'Healthcare',
+            'veterinarian': 'Healthcare',
+            'lawyer': 'Legal',
+            'law firm': 'Legal',
+            'attorney': 'Legal',
+            'hvac': 'Home Services',
+            'plumber': 'Home Services',
+            'contractor': 'Home Services',
+            'roofing': 'Home Services',
+            'auto repair': 'Automotive',
+            'mechanic': 'Automotive',
+            'salon': 'Beauty & Wellness',
+            'spa': 'Beauty & Wellness',
+            'fitness': 'Fitness',
+            'gym': 'Fitness',
+            'yoga': 'Fitness',
+            'real estate': 'Real Estate',
+            'insurance': 'Insurance',
+            'accountant': 'Financial'
+        }
+
+        for key, value in industry_map.items():
+            if key in category_lower:
+                return value
+
+        return 'Local Business'
+
+    def _deduplicate(self, leads: List[Lead]) -> List[Lead]:
+        """Remove duplicate businesses."""
+        seen = set()
+        unique = []
+
+        for lead in leads:
+            # Use phone or name+location as unique key
+            key = lead.phone or f"{lead.company}_{lead.extra_data.get('location', '')}"
+            if key and key not in seen:
+                seen.add(key)
+                unique.append(lead)
+
+        return unique
+
+    def search_category(self, category: str, locations: List[str]) -> LeadBatch:
+        """
+        Search for a specific business category in multiple locations.
+
+        Args:
+            category: Business type (e.g., "dentist")
+            locations: List of cities/states
+
+        Returns:
+            LeadBatch with found businesses
+        """
+        all_leads = []
+
+        for location in locations:
+            leads = self._search_maps(category, location)
+            all_leads.extend(leads)
+            time.sleep(2)
+
+        unique_leads = self._deduplicate(all_leads)
+
+        return LeadBatch(
+            leads=unique_leads,
+            source=LeadSource.GOOGLE_MY_BUSINESS,
+            scraped_at=datetime.now()
+        )

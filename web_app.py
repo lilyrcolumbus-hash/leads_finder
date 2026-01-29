@@ -22,7 +22,7 @@ from src.utils.scoring import enrich_leads, calculate_pain_score
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.utils.background_tasks import task_manager, TaskStatus
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -1891,32 +1891,31 @@ def show_search():
     st.divider()
 
     # Active Sources Section
-    st.subheader("📡 Active Sources (7 Available)")
+    st.subheader("📡 Active Sources (8 Available)")
 
     col1, col2, col3 = st.columns(3)
     with col1:
         use_reddit = st.checkbox("🔴 Reddit - Business subreddits", value=True, key="reddit_check")
-        use_hn = st.checkbox("🟠 Hacker News - Startups", value=True, key="hn_check")
+        use_hn = st.checkbox("🟠 Hacker News - Startups", value=False, key="hn_check")
         use_linkedin = st.checkbox("🔷 LinkedIn - Decision Makers", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="linkedin_check")
     with col2:
-        use_google = st.checkbox("🔵 Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="google_check")
+        use_google = st.checkbox("🔵 Google Search", value=False, disabled=not settings.google_api_key, key="google_check")
         use_ph = st.checkbox("🟣 Product Hunt", value=False, key="ph_check")
         use_indeed = st.checkbox("💼 Indeed - Hiring Receptionists", value=True, key="indeed_check")
     with col3:
         use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
+        use_gmaps = st.checkbox("📍 Google Maps - Local Businesses", value=True, key="gmaps_check")
 
-    if settings.google_api_key:
-        st.info("💡 **LinkedIn Search** usa Google para buscar perfiles de LinkedIn (site:linkedin.com). Encuentra dueños de negocios y decision makers.")
+    st.info("💡 **Google Maps** busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. **GRATIS** - no usa API.")
 
     st.divider()
 
     # Coming Soon Sources
-    st.subheader("🚀 Coming Soon (3 More)")
+    st.subheader("🚀 Coming Soon (2 More)")
 
-    coming_cols = st.columns(3)
+    coming_cols = st.columns(2)
     coming_sources = [
         ("🐦", "Twitter/X"),
-        ("📍", "Google Maps"),
         ("📘", "Facebook Groups")
     ]
     for i, (icon, name) in enumerate(coming_sources):
@@ -2012,6 +2011,7 @@ def show_search():
         if use_indeed: scrapers.append(("Indeed", IndeedScraper))
         if use_yelp: scrapers.append(("Yelp", YelpScraper))
         if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
+        if use_gmaps: scrapers.append(("Google Maps", GoogleMapsScraper))
 
         if not scrapers:
             st.warning("Select at least one source")
@@ -2027,8 +2027,8 @@ def show_search():
 
             try:
                 with Scraper() as s:
-                    # Pass location to Indeed, Yelp, and LinkedIn scrapers
-                    if name in ["Indeed", "Yelp", "LinkedIn"] and search_location:
+                    # Pass location to location-aware scrapers
+                    if name in ["Indeed", "Yelp", "LinkedIn", "Google Maps"] and search_location:
                         batch = s.scrape(time_filter=selected_time, location=search_location)
                     else:
                         batch = s.scrape(time_filter=selected_time)
@@ -2091,6 +2091,7 @@ def show_search():
                 'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
                 'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
                 'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
+                'Google Maps': len([l for l in all_leads if l.source.value == 'google_my_business']),
             }
         }
 
