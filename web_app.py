@@ -3042,173 +3042,269 @@ def show_leads():
 
 
 def show_analytics():
+    """Analytics page with modern visualizations and clear explanations."""
+
+    # Page header with explanation tooltip
     st.markdown("""
-    <div class="page-header">
-        <h1>Analytics</h1>
-        <p>Metrics and performance</p>
+    <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h1 style="margin: 0; color: #1E293B; font-size: 28px;">📊 Analytics</h1>
+            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
+                <span style="cursor: help; background: #6366F1; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 16px 20px; border-radius: 12px; font-size: 13px; width: 320px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+                    <strong style="color: #818CF8; font-size: 15px;">¿Para qué es Analytics?</strong><br><br>
+                    Esta página te muestra el rendimiento de tu búsqueda de leads:<br><br>
+                    • <strong>Leads Encontrados:</strong> Total de leads que has descubierto<br>
+                    • <strong>Leads Calificados:</strong> Los que pasaron el filtro de calidad<br>
+                    • <strong>Tasa de Conversión:</strong> % de leads buenos vs total<br>
+                    • <strong>Por Fuente:</strong> De dónde vienen tus mejores leads<br><br>
+                    <em style="color: #94A3B8;">Usa estos datos para optimizar tu estrategia de búsqueda</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                </div>
+            </div>
+        </div>
+        <p style="color: #64748B; margin: 0; font-size: 15px;">Métricas de rendimiento de tu generación de leads</p>
     </div>
+    <style>
+        .metric-tooltip-wrapper:hover .metric-tooltip {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
     """, unsafe_allow_html=True)
 
     with HubSpotCRM() as crm:
-        if not crm.is_configured():
-            rate = (len(st.session_state.filtered_leads) / len(st.session_state.leads) * 100) if st.session_state.leads else 0
+        total_leads = len(st.session_state.leads)
+        qualified_leads = len(st.session_state.filtered_leads)
+        rate = (qualified_leads / total_leads * 100) if total_leads > 0 else 0
 
+        # Calculate additional metrics
+        hot_leads = len([l for l in st.session_state.leads if getattr(l, 'pain_score', 0) >= 70])
+        avg_score = sum(getattr(l, 'pain_score', 0) for l in st.session_state.leads) / total_leads if total_leads > 0 else 0
+
+        # Modern KPI Cards
+        st.markdown(f"""
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 Leads Encontrados</div>
+                <div style="font-size: 36px; font-weight: 700;">{total_leads}</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Total descubiertos</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ Leads Calificados</div>
+                <div style="font-size: 36px; font-weight: 700;">{qualified_leads}</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Pasaron el filtro</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 Tasa Conversión</div>
+                <div style="font-size: 36px; font-weight: 700;">{rate:.1f}%</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Calificados / Total</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 Leads Calientes</div>
+                <div style="font-size: 36px; font-weight: 700;">{hot_leads}</div>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Score 70+</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.session_state.leads:
+            # Source distribution with modern visualization
+            st.markdown("""
+            <div style="margin-bottom: 16px;">
+                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 Leads por Fuente</h3>
+                <p style="color: #64748B; margin: 0; font-size: 13px;">De dónde vienen tus leads - identifica las mejores fuentes</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Calculate source counts
+            source_counts = {}
+            for l in st.session_state.leads:
+                source_name = l.source.value if hasattr(l.source, 'value') else str(l.source)
+                source_counts[source_name] = source_counts.get(source_name, 0) + 1
+
+            # Source styling
+            source_colors = {
+                'reddit': ('#FF4500', '🔴'),
+                'google': ('#4285F4', '🔵'),
+                'hackernews': ('#FF6600', '🟠'),
+                'apollo': ('#5B5FC7', '🚀'),
+                'hunter': ('#F5A623', '🎯'),
+                'manual': ('#6B7280', '✏️'),
+                'producthunt': ('#DA552F', '🟤'),
+                'linkedin': ('#0A66C2', '🔷')
+            }
+
+            # Build modern bar chart
+            max_count = max(source_counts.values()) if source_counts else 1
+            chart_html = '<div style="background: white; border: 1px solid #E5E7EB; border-radius: 16px; padding: 24px;">'
+
+            for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
+                color, icon = source_colors.get(source.lower(), ('#6B7280', '📊'))
+                width_pct = (count / max_count * 100) if max_count > 0 else 0
+                pct_of_total = (count / total_leads * 100) if total_leads > 0 else 0
+
+                chart_html += f"""
+                <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                    <div style="width: 120px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">{icon}</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151; text-transform: capitalize;">{source}</span>
+                    </div>
+                    <div style="flex: 1; margin: 0 20px;">
+                        <div style="background: #E5E7EB; border-radius: 8px; height: 28px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, {color} 0%, {color}CC 100%); width: {width_pct}%; height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 12px; transition: width 0.5s ease;">
+                                <span style="color: white; font-weight: 700; font-size: 13px;">{count}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 80px; text-align: right;">
+                        <span style="font-size: 14px; font-weight: 600; color: {color};">{pct_of_total:.1f}%</span>
+                    </div>
+                </div>
+                """
+
+            chart_html += '</div>'
+            st.markdown(chart_html, unsafe_allow_html=True)
+
+            # Score Distribution
+            st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
+            st.markdown("""
+            <div style="margin-bottom: 16px;">
+                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🎯 Distribución de Puntuación</h3>
+                <p style="color: #64748B; margin: 0; font-size: 13px;">Calidad de tus leads por score</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Calculate score distribution
+            score_ranges = {'🔥 Hot (70-100)': 0, '🟡 Warm (40-69)': 0, '❄️ Cold (0-39)': 0}
+            for l in st.session_state.leads:
+                score = getattr(l, 'pain_score', 0)
+                if score >= 70:
+                    score_ranges['🔥 Hot (70-100)'] += 1
+                elif score >= 40:
+                    score_ranges['🟡 Warm (40-69)'] += 1
+                else:
+                    score_ranges['❄️ Cold (0-39)'] += 1
+
+            # Score distribution cards
             st.markdown(f"""
-            <div class="metrics-grid" style="grid-template-columns: repeat(3, 1fr);">
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon primary">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                <circle cx="9" cy="7" r="4"/>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-label">Found</div>
-                        <div class="metric-value">{len(st.session_state.leads)}</div>
-                    </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #EF4444;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🔥</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #EF4444;">{score_ranges['🔥 Hot (70-100)']}</div>
+                    <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Hot Leads (70-100)</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Listos para contactar</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon success">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                <polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-label">Qualified</div>
-                        <div class="metric-value">{len(st.session_state.filtered_leads)}</div>
-                    </div>
+                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #F59E0B;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🟡</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #F59E0B;">{score_ranges['🟡 Warm (40-69)']}</div>
+                    <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Warm Leads (40-69)</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Necesitan más nurturing</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon accent">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
-                                <path d="M18 20V10"/>
-                                <path d="M12 20V4"/>
-                                <path d="M6 20v-6"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-label">Conv. Rate</div>
-                        <div class="metric-value">{rate:.0f}%</div>
-                    </div>
+                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #3B82F6;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #3B82F6;">{score_ranges['❄️ Cold (0-39)']}</div>
+                    <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Cold Leads (0-39)</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Baja prioridad</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            if st.session_state.leads:
-                st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
-                st.markdown("""
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">
-                            <h2>By Source</h2>
-                        </div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                counts = {}
-                for l in st.session_state.leads:
-                    counts[l.source.value] = counts.get(l.source.value, 0) + 1
-                st.bar_chart(counts)
+        else:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 40px; text-align: center; margin-top: 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                <h3 style="color: #0369A1; margin: 0 0 8px 0;">No hay datos todavía</h3>
+                <p style="color: #0284C7; margin: 0;">Ve a "Find Leads" para comenzar a buscar leads y ver analytics aquí</p>
+            </div>
+            """, unsafe_allow_html=True)
 
+        # HubSpot connection notice
+        if not crm.is_configured():
             st.markdown("""
             <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
                         border-left: 4px solid #6366F1;
                         border-radius: 12px;
-                        padding: 14px 18px;
-                        margin-top: 16px;">
-                <p style="color: #1E293B; font-weight: 500; margin: 0; font-size: 14px;">
-                    Connect HubSpot in Settings to view complete CRM statistics
+                        padding: 16px 20px;
+                        margin-top: 32px;">
+                <p style="color: #1E293B; font-weight: 600; margin: 0 0 4px 0; font-size: 14px;">
+                    🔗 Conecta HubSpot para más estadísticas
+                </p>
+                <p style="color: #475569; margin: 0; font-size: 13px;">
+                    Ve a Settings para conectar tu cuenta de HubSpot y ver métricas avanzadas del CRM
                 </p>
             </div>
             """, unsafe_allow_html=True)
         else:
-            with st.spinner("Loading..."):
+            # Show HubSpot stats if connected
+            with st.spinner("Cargando estadísticas de HubSpot..."):
                 stats = crm.get_statistics()
 
             if "error" not in stats:
+                st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
+                st.markdown("""
+                <div style="margin-bottom: 16px;">
+                    <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🔗 Estadísticas de HubSpot</h3>
+                    <p style="color: #64748B; margin: 0; font-size: 13px;">Datos sincronizados de tu CRM</p>
+                </div>
+                """, unsafe_allow_html=True)
+
                 st.markdown(f"""
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon primary">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-label">Total Leads</div>
-                            <div class="metric-value">{stats["total_leads"]}</div>
-                        </div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 8px;">👥</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #1E293B;">{stats.get('total_leads', 0)}</div>
+                        <div style="font-size: 13px; color: #6B7280;">Total Leads</div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon accent">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
-                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                                    <polyline points="17 6 23 6 23 12"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-label">Conversion</div>
-                            <div class="metric-value">{stats['conversion_rate']}%</div>
-                        </div>
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 8px;">📈</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #1E293B;">{stats.get('conversion_rate', 0)}%</div>
+                        <div style="font-size: 13px; color: #6B7280;">Conversión</div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon success">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                                    <path d="M12 20V10"/>
-                                    <path d="M18 20V4"/>
-                                    <path d="M6 20v-4"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-label">Win Rate</div>
-                            <div class="metric-value">{stats['win_rate']}%</div>
-                        </div>
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 8px;">🏆</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #1E293B;">{stats.get('win_rate', 0)}%</div>
+                        <div style="font-size: 13px; color: #6B7280;">Win Rate</div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <div class="metric-icon success">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                                    <circle cx="12" cy="8" r="7"/>
-                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="metric-content">
-                            <div class="metric-label">Won</div>
-                            <div class="metric-value">{stats["by_stage"].get("closed_won", 0)}</div>
-                        </div>
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #10B981;">{stats.get('by_stage', {}).get('closed_won', 0)}</div>
+                        <div style="font-size: 13px; color: #6B7280;">Ganados</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
 
-                if stats["by_stage"]:
-                    st.markdown("<div style='height: 32px'></div>", unsafe_allow_html=True)
+                # HubSpot stage distribution
+                if stats.get("by_stage"):
+                    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
                     st.markdown("""
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">
-                                <h2>By Stage</h2>
-                            </div>
-                        </div>
+                    <div style="margin-bottom: 12px;">
+                        <h4 style="color: #1E293B; margin: 0; font-size: 16px;">Por Etapa en HubSpot</h4>
                     </div>
                     """, unsafe_allow_html=True)
-                    st.bar_chart(stats["by_stage"])
+
+                    stage_html = '<div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px;">'
+                    max_stage = max(stats["by_stage"].values()) if stats["by_stage"].values() else 1
+                    stage_colors = ['#3B82F6', '#06B6D4', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444']
+
+                    for i, (stage, count) in enumerate(stats["by_stage"].items()):
+                        color = stage_colors[i % len(stage_colors)]
+                        width = (count / max_stage * 100) if max_stage > 0 else 0
+
+                        stage_html += f"""
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="width: 120px; font-size: 13px; font-weight: 500; color: #374151; text-transform: capitalize;">{stage.replace('_', ' ')}</div>
+                            <div style="flex: 1; margin: 0 16px;">
+                                <div style="background: #E5E7EB; border-radius: 6px; height: 24px; overflow: hidden;">
+                                    <div style="background: {color}; width: {width}%; height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px;">
+                                        <span style="color: white; font-weight: 600; font-size: 12px;">{count}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        """
+                    stage_html += '</div>'
+                    st.markdown(stage_html, unsafe_allow_html=True)
 
 
 def show_crm():
