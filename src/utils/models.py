@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -91,6 +91,7 @@ class Lead(BaseModel):
     # Custom fields
     author: Optional[str] = Field(default=None, description="Author alias for compatibility")
     posted_at: Optional[datetime] = Field(default=None, description="When content was posted")
+    extra_data: Optional[Dict[str, Any]] = Field(default=None, description="Additional data from scrapers")
 
     def __hash__(self):
         return hash(self.id)
