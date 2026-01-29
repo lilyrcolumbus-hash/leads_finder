@@ -21,6 +21,7 @@ from src.utils.models import Lead, LeadSource, LeadUrgency
 from src.utils.scoring import enrich_leads, calculate_pain_score, get_lead_grade
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
+from src.enrichment.apollo_enricher import enrich_leads_with_apollo
 from src.utils.background_tasks import task_manager, TaskStatus
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper
 from src.filters import AILeadFilter
@@ -2171,6 +2172,33 @@ def show_search():
                 except Exception as e:
                     with results:
                         st.warning(f"Hunter.io: Could not enrich emails")
+
+        # Apollo.io Enrichment (if configured)
+        if settings.apollo_api_key and all_leads:
+            leads_to_enrich = [l for l in all_leads if not l.email or not l.phone]
+            if leads_to_enrich:
+                status.markdown("""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Enriching with Apollo.io (email + phone + company data)...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                try:
+                    enriched_leads = enrich_leads_with_apollo(
+                        all_leads,
+                        api_key=settings.apollo_api_key,
+                        max_enrichments=10,
+                        delay_seconds=0.5
+                    )
+                    apollo_enriched = len([l for l in all_leads if l.extra_data and l.extra_data.get('apollo_enriched')])
+                    if apollo_enriched > 0:
+                        with results:
+                            st.success(f"Apollo.io enriched {apollo_enriched} leads (email + phone + company)")
+                        lead_manager.save_leads(all_leads)
+                except Exception as e:
+                    with results:
+                        st.warning(f"Apollo.io: Could not enrich leads")
 
         st.session_state.scraping_done = True
         progress.progress(1.0)
@@ -4718,11 +4746,14 @@ def show_config():
                 st.info("Optional - Email Finder")
 
     with col6:
-        # Storage stats
         with st.container(border=True):
-            st.markdown("### 💾 Storage")
-            stats = lead_manager.get_stats()
-            st.metric("Saved Leads", stats['total'])
+            st.markdown("### 🚀 Apollo.io")
+            if settings.apollo_api_key:
+                st.success("✓ Connected")
+                st.caption("Email + Phone + Company Data")
+            else:
+                st.warning("Not configured")
+                st.caption("Add APOLLO_API_KEY to .env")
 
     with col7:
         # Deduplication stats
@@ -4734,6 +4765,34 @@ def show_config():
         # Export status
         with st.container(border=True):
             st.markdown("### 📥 CSV Export")
+            st.success("✓ Available")
+
+    # Third row - Storage and Stats
+    col9, col10, col11, col12 = st.columns(4)
+
+    with col9:
+        with st.container(border=True):
+            st.markdown("### 💾 Storage")
+            stats = lead_manager.get_stats()
+            st.metric("Saved Leads", stats['total'])
+
+    with col10:
+        with st.container(border=True):
+            st.markdown("### 📊 Triple Score")
+            st.success("✓ Active")
+            st.caption("Pain + Intent + Fit")
+
+    with col11:
+        with st.container(border=True):
+            st.markdown("### 🎯 AI Filter")
+            if settings.openai_api_key or settings.anthropic_api_key:
+                st.success("✓ Ready")
+            else:
+                st.warning("No AI key")
+
+    with col12:
+        with st.container(border=True):
+            st.markdown("### 🔥 Lead Warming")
             st.success("✓ Available")
 
     st.divider()
