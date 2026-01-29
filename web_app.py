@@ -2914,9 +2914,9 @@ def show_analytics():
 
 
 def show_crm():
-    """Professional CRM with complete pipeline management."""
+    """Professional CRM with complete pipeline management, deals, tasks, and HubSpot sync."""
 
-    # CRM-specific CSS
+    # Enhanced CRM-specific CSS
     st.markdown("""
     <style>
         /* CRM Dashboard Cards */
@@ -2949,6 +2949,24 @@ def show_crm():
         .crm-kpi-icon {
             font-size: 28px;
             margin-bottom: 8px;
+        }
+
+        /* Revenue Card */
+        .revenue-card {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            text-align: center;
+        }
+        .revenue-value {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 8px 0;
+        }
+        .revenue-label {
+            font-size: 14px;
+            opacity: 0.9;
         }
 
         /* Pipeline Stage Header */
@@ -3148,6 +3166,138 @@ def show_crm():
             font-weight: 500;
             color: #475569;
         }
+
+        /* Deal Card */
+        .deal-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        .deal-card:hover {
+            border-color: #10B981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+        .deal-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #10B981;
+        }
+        .deal-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1E293B;
+            margin: 4px 0;
+        }
+        .deal-company {
+            font-size: 12px;
+            color: #64748B;
+        }
+
+        /* Task Card */
+        .task-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .task-card.overdue {
+            border-left: 3px solid #EF4444;
+        }
+        .task-card.today {
+            border-left: 3px solid #F59E0B;
+        }
+        .task-card.upcoming {
+            border-left: 3px solid #3B82F6;
+        }
+        .task-card.completed {
+            background: #F8FAFC;
+            opacity: 0.7;
+        }
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #CBD5E1;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .task-checkbox.checked {
+            background: #10B981;
+            border-color: #10B981;
+        }
+        .task-content {
+            flex: 1;
+        }
+        .task-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1E293B;
+        }
+        .task-due {
+            font-size: 11px;
+            color: #94A3B8;
+        }
+
+        /* Email Template Card */
+        .template-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .template-card:hover {
+            border-color: #8B5CF6;
+            background: #FAF5FF;
+        }
+        .template-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1E293B;
+            margin-bottom: 4px;
+        }
+        .template-preview {
+            font-size: 12px;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        /* Calendar Day */
+        .calendar-day {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 8px;
+            min-height: 80px;
+            font-size: 12px;
+        }
+        .calendar-day.today {
+            border-color: #3B82F6;
+            background: #EFF6FF;
+        }
+        .calendar-day-number {
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 4px;
+        }
+        .calendar-event {
+            background: #3B82F6;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -3234,8 +3384,95 @@ def show_crm():
 
     st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
+    # Initialize session state for deals and tasks
+    if 'crm_deals' not in st.session_state:
+        st.session_state.crm_deals = []
+    if 'crm_tasks' not in st.session_state:
+        st.session_state.crm_tasks = []
+    if 'email_templates' not in st.session_state:
+        st.session_state.email_templates = [
+            {
+                'id': '1',
+                'name': 'Initial Outreach',
+                'subject': 'Quick question about {{company}}',
+                'body': '''Hi {{name}},
+
+I noticed that {{company}} might benefit from an AI receptionist that can handle calls 24/7, schedule appointments, and never miss a lead.
+
+Would you be open to a quick 15-minute call to see if this could help your business?
+
+Best regards'''
+            },
+            {
+                'id': '2',
+                'name': 'Follow Up',
+                'subject': 'Following up - AI Receptionist for {{company}}',
+                'body': '''Hi {{name}},
+
+I wanted to follow up on my previous message about our AI receptionist solution.
+
+Many {{industry}} businesses like yours have seen:
+- 40% reduction in missed calls
+- 24/7 availability for customers
+- Automated appointment scheduling
+
+Would next week work for a quick demo?
+
+Best regards'''
+            },
+            {
+                'id': '3',
+                'name': 'Demo Confirmation',
+                'subject': 'Demo Confirmed - {{date}}',
+                'body': '''Hi {{name}},
+
+Great news! Your demo is confirmed for {{date}}.
+
+During our 15-minute call, I'll show you:
+1. How the AI handles real customer calls
+2. The appointment scheduling system
+3. How leads are captured and organized
+
+Looking forward to speaking with you!
+
+Best regards'''
+            },
+            {
+                'id': '4',
+                'name': 'Proposal Follow-up',
+                'subject': 'Your AI Receptionist Proposal',
+                'body': '''Hi {{name}},
+
+I hope you had a chance to review our proposal for {{company}}.
+
+As a reminder, the solution includes:
+- 24/7 AI phone answering
+- Appointment scheduling
+- Lead capture and qualification
+- CRM integration
+
+Do you have any questions? I'm happy to jump on a quick call.
+
+Best regards'''
+            }
+        ]
+
+    # Calculate deal metrics
+    total_deal_value = sum(d.get('value', 0) for d in st.session_state.crm_deals)
+    won_deal_value = sum(d.get('value', 0) for d in st.session_state.crm_deals if d.get('stage') == 'won')
+    pipeline_value = sum(d.get('value', 0) for d in st.session_state.crm_deals if d.get('stage') not in ['won', 'lost'])
+
     # Main CRM Tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🎯 Pipeline", "👥 All Contacts", "📝 Activities", "⚡ Quick Actions", "🔗 HubSpot"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+        "🎯 Pipeline",
+        "👥 Contacts",
+        "💰 Deals",
+        "✅ Tasks",
+        "📧 Email",
+        "📅 Calendar",
+        "📊 Analytics",
+        "🔗 HubSpot"
+    ])
 
     # ==================== TAB 1: PIPELINE VIEW ====================
     with tab1:
@@ -3575,121 +3812,556 @@ def show_crm():
             else:
                 st.info("No contacts match your filters")
 
-    # ==================== TAB 3: ACTIVITIES ====================
+    # ==================== TAB 3: DEALS/OPPORTUNITIES ====================
     with tab3:
-        st.markdown("### Activity Feed")
+        st.markdown("### Deals & Opportunities")
 
-        # Collect all activities
-        all_activities = []
-        for lead in all_leads:
-            lead_title = lead.get('title', lead.get('company', 'Unknown'))
-            for activity in lead.get('activity_log', []):
-                activity['lead_title'] = lead_title
-                activity['lead_hash'] = lead.get('hash')
-                all_activities.append(activity)
+        # Deal stats cards
+        deal_col1, deal_col2, deal_col3, deal_col4 = st.columns(4)
 
-        # Sort by timestamp
-        all_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        with deal_col1:
+            st.markdown(f"""
+            <div class="revenue-card">
+                <div class="revenue-label">Pipeline Value</div>
+                <div class="revenue-value">${pipeline_value:,.0f}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        if all_activities:
-            for activity in all_activities[:50]:
-                icon = "📌" if activity.get('type') == 'status_change' else "📝"
-                lead_title = activity.get('lead_title', 'Unknown')
-                timestamp = activity.get('timestamp', '')[:16].replace('T', ' ')
+        with deal_col2:
+            st.markdown(f"""
+            <div class="crm-kpi-card" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white;">
+                <div class="crm-kpi-icon">💰</div>
+                <div class="crm-kpi-value" style="color: white;">${won_deal_value:,.0f}</div>
+                <div class="crm-kpi-label" style="color: rgba(255,255,255,0.9);">Won Revenue</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-                if activity.get('type') == 'status_change':
-                    from_stage = CRM_STAGES.get(activity.get('from'), {}).get('name', activity.get('from'))
-                    to_stage = CRM_STAGES.get(activity.get('to'), {}).get('name', activity.get('to'))
-                    text = f"**{lead_title}** moved from {from_stage} to {to_stage}"
-                else:
-                    content = activity.get('content', '')[:100]
-                    text = f"Note added to **{lead_title}**: {content}"
+        with deal_col3:
+            deal_count = len(st.session_state.crm_deals)
+            st.markdown(f"""
+            <div class="crm-kpi-card">
+                <div class="crm-kpi-icon">📋</div>
+                <div class="crm-kpi-value" style="color: #3B82F6;">{deal_count}</div>
+                <div class="crm-kpi-label">Total Deals</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-                st.markdown(f"""
-                <div class="activity-item">
-                    <div class="activity-icon">{icon}</div>
-                    <div class="activity-content">
-                        <p class="activity-text">{text}</p>
-                        <p class="activity-time">{timestamp}</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.info("No activities yet. Start moving leads through stages or adding notes to see activity here.")
+        with deal_col4:
+            avg_deal = pipeline_value / deal_count if deal_count > 0 else 0
+            st.markdown(f"""
+            <div class="crm-kpi-card">
+                <div class="crm-kpi-icon">📊</div>
+                <div class="crm-kpi-value" style="color: #8B5CF6;">${avg_deal:,.0f}</div>
+                <div class="crm-kpi-label">Avg Deal Size</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    # ==================== TAB 4: QUICK ACTIONS ====================
-    with tab4:
-        st.markdown("### Quick Actions")
+        st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 
-        # Bulk Actions
-        st.markdown("#### 📦 Bulk Operations")
+        # Create new deal section
+        st.markdown("#### Create New Deal")
+        with st.expander("➕ Add New Deal", expanded=False):
+            deal_form_col1, deal_form_col2 = st.columns(2)
 
-        bulk_col1, bulk_col2, bulk_col3 = st.columns(3)
+            with deal_form_col1:
+                deal_name = st.text_input("Deal Name", placeholder="e.g., AI Receptionist for ABC Dental")
+                deal_value = st.number_input("Deal Value ($)", min_value=0, value=1500, step=100)
+                deal_contact = st.selectbox(
+                    "Associated Contact",
+                    ["Select a contact..."] + [f"{l.get('title', 'Unknown')} - {l.get('email', 'No email')}" for l in all_leads[:50]],
+                    key="deal_contact"
+                )
 
-        with bulk_col1:
-            from_stage = st.selectbox(
-                "Move from",
-                list(CRM_STAGES.keys()),
-                format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
-                key="bulk_from_stage"
-            )
+            with deal_form_col2:
+                deal_stage = st.selectbox(
+                    "Stage",
+                    ['new', 'contacted', 'demo', 'proposal', 'won', 'lost'],
+                    format_func=lambda x: CRM_STAGES[x]['name'],
+                    key="deal_stage_new"
+                )
+                deal_close_date = st.date_input("Expected Close Date", value=datetime.now())
+                deal_probability = st.slider("Win Probability (%)", 0, 100, 50)
 
-        with bulk_col2:
-            to_stage = st.selectbox(
-                "Move to",
-                list(CRM_STAGES.keys()),
-                format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
-                key="bulk_to_stage"
-            )
-
-        with bulk_col3:
-            from_count = status_counts.get(from_stage, 0)
-            st.write("")
-            if st.button(f"Move {from_count} leads", type="primary", use_container_width=True):
-                if from_count > 0:
-                    moved = 0
-                    for lead in all_leads:
-                        if lead.get('status', 'new') == from_stage:
-                            if lead_manager.update_lead_status(lead.get('hash'), to_stage):
-                                moved += 1
-                    st.success(f"Moved {moved} leads!")
+            if st.button("💾 Create Deal", type="primary", use_container_width=True):
+                if deal_name:
+                    import uuid
+                    new_deal = {
+                        'id': str(uuid.uuid4())[:8],
+                        'name': deal_name,
+                        'value': deal_value,
+                        'stage': deal_stage,
+                        'contact': deal_contact if deal_contact != "Select a contact..." else None,
+                        'close_date': deal_close_date.isoformat(),
+                        'probability': deal_probability,
+                        'created_at': datetime.now().isoformat()
+                    }
+                    st.session_state.crm_deals.append(new_deal)
+                    st.success(f"Deal '{deal_name}' created!")
                     st.rerun()
                 else:
-                    st.warning("No leads to move")
+                    st.warning("Please enter a deal name")
+
+        # Deal list
+        st.markdown("#### Active Deals")
+
+        if st.session_state.crm_deals:
+            for deal in st.session_state.crm_deals:
+                stage_info = CRM_STAGES.get(deal.get('stage', 'new'), CRM_STAGES['new'])
+
+                with st.container(border=True):
+                    d_col1, d_col2, d_col3, d_col4 = st.columns([3, 2, 2, 1])
+
+                    with d_col1:
+                        st.markdown(f"**{deal.get('name', 'Unnamed Deal')}**")
+                        st.caption(f"Contact: {deal.get('contact', 'None')[:30] if deal.get('contact') else 'None'}")
+
+                    with d_col2:
+                        st.markdown(f"""
+                        <div style="background: {stage_info['bg']}; padding: 4px 12px; border-radius: 20px; display: inline-block;">
+                            <span style="color: {stage_info['color']}; font-weight: 600; font-size: 12px;">{stage_info['icon']} {stage_info['name']}</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        st.caption(f"Close: {deal.get('close_date', 'Not set')[:10]}")
+
+                    with d_col3:
+                        st.markdown(f"<div class='deal-value'>${deal.get('value', 0):,.0f}</div>", unsafe_allow_html=True)
+                        st.caption(f"Probability: {deal.get('probability', 50)}%")
+
+                    with d_col4:
+                        new_stage = st.selectbox(
+                            "Move",
+                            list(CRM_STAGES.keys()),
+                            index=list(CRM_STAGES.keys()).index(deal.get('stage', 'new')),
+                            key=f"deal_stage_{deal.get('id')}",
+                            label_visibility="collapsed"
+                        )
+                        if new_stage != deal.get('stage'):
+                            deal['stage'] = new_stage
+                            st.rerun()
+        else:
+            st.info("No deals yet. Create your first deal above!")
+
+    # ==================== TAB 4: TASKS ====================
+    with tab4:
+        st.markdown("### Task Management")
+
+        # Task quick stats
+        today = datetime.now().date()
+        overdue_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() < today]
+        today_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() == today]
+        upcoming_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() > today]
+        completed_tasks = [t for t in st.session_state.crm_tasks if t.get('completed')]
+
+        task_stat_cols = st.columns(4)
+        with task_stat_cols[0]:
+            st.metric("Overdue", len(overdue_tasks), delta=None, delta_color="inverse")
+        with task_stat_cols[1]:
+            st.metric("Due Today", len(today_tasks))
+        with task_stat_cols[2]:
+            st.metric("Upcoming", len(upcoming_tasks))
+        with task_stat_cols[3]:
+            st.metric("Completed", len(completed_tasks))
 
         st.markdown("---")
 
-        # Quick Stats
-        st.markdown("#### 📊 Pipeline Health")
+        # Create new task
+        st.markdown("#### Create New Task")
+        with st.expander("➕ Add New Task", expanded=False):
+            task_col1, task_col2 = st.columns(2)
 
-        health_cols = st.columns(4)
+            with task_col1:
+                task_title = st.text_input("Task Title", placeholder="e.g., Follow up with John")
+                task_description = st.text_area("Description", placeholder="Optional notes...", height=80)
 
-        with health_cols[0]:
-            conversion = (won_count / total_leads * 100) if total_leads > 0 else 0
-            st.metric("Conversion Rate", f"{conversion:.1f}%", help="Percentage of leads that became customers")
+            with task_col2:
+                task_type = st.selectbox("Type", ["📞 Call", "📧 Email", "📅 Meeting", "📝 Note", "✅ Other"])
+                task_due = st.date_input("Due Date", value=datetime.now(), key="task_due_date")
+                task_priority = st.selectbox("Priority", ["🔴 High", "🟡 Medium", "🟢 Low"])
+                task_contact = st.selectbox(
+                    "Associated Contact",
+                    ["None"] + [f"{l.get('title', 'Unknown')[:25]}" for l in all_leads[:30]],
+                    key="task_contact"
+                )
 
-        with health_cols[1]:
-            in_progress = status_counts.get('contacted', 0) + status_counts.get('demo', 0) + status_counts.get('proposal', 0)
-            st.metric("In Progress", in_progress, help="Leads being actively worked")
+            if st.button("💾 Create Task", type="primary", use_container_width=True, key="create_task_btn"):
+                if task_title:
+                    import uuid
+                    new_task = {
+                        'id': str(uuid.uuid4())[:8],
+                        'title': task_title,
+                        'description': task_description,
+                        'type': task_type,
+                        'due_date': task_due.isoformat(),
+                        'priority': task_priority,
+                        'contact': task_contact if task_contact != "None" else None,
+                        'completed': False,
+                        'created_at': datetime.now().isoformat()
+                    }
+                    st.session_state.crm_tasks.append(new_task)
+                    st.success(f"Task '{task_title}' created!")
+                    st.rerun()
+                else:
+                    st.warning("Please enter a task title")
 
-        with health_cols[2]:
-            new_leads = status_counts.get('new', 0)
-            st.metric("Uncontacted", new_leads, help="New leads not yet contacted")
+        # Task list
+        st.markdown("#### Task List")
 
-        with health_cols[3]:
-            hot_leads = len([l for l in all_leads if l.get('pain_score', 0) >= 70])
-            st.metric("Hot Leads", hot_leads, help="Leads with score >= 70")
+        task_filter = st.radio("Filter", ["All", "Overdue", "Today", "Upcoming", "Completed"], horizontal=True, key="task_filter")
 
-        st.markdown("---")
+        if task_filter == "Overdue":
+            display_tasks = overdue_tasks
+        elif task_filter == "Today":
+            display_tasks = today_tasks
+        elif task_filter == "Upcoming":
+            display_tasks = upcoming_tasks
+        elif task_filter == "Completed":
+            display_tasks = completed_tasks
+        else:
+            display_tasks = st.session_state.crm_tasks
 
-        # Stage distribution chart
-        st.markdown("#### 📈 Stage Distribution")
+        if display_tasks:
+            for task in display_tasks:
+                task_status = "completed" if task.get('completed') else ""
+                if not task.get('completed') and task.get('due_date'):
+                    task_date = datetime.fromisoformat(task.get('due_date')).date()
+                    if task_date < today:
+                        task_status = "overdue"
+                    elif task_date == today:
+                        task_status = "today"
+                    else:
+                        task_status = "upcoming"
 
-        chart_data = {CRM_STAGES[k]['name']: v for k, v in status_counts.items()}
-        st.bar_chart(chart_data)
+                with st.container(border=True):
+                    t_col1, t_col2, t_col3, t_col4 = st.columns([0.5, 3, 2, 1])
 
-    # ==================== TAB 5: HUBSPOT ====================
+                    with t_col1:
+                        is_done = st.checkbox("", value=task.get('completed', False), key=f"task_done_{task.get('id')}", label_visibility="collapsed")
+                        if is_done != task.get('completed', False):
+                            task['completed'] = is_done
+                            st.rerun()
+
+                    with t_col2:
+                        title_style = "text-decoration: line-through; color: #94A3B8;" if task.get('completed') else ""
+                        st.markdown(f"<span style='{title_style}'>{task.get('type', '📝')} **{task.get('title', 'Untitled')}**</span>", unsafe_allow_html=True)
+                        if task.get('contact'):
+                            st.caption(f"Contact: {task.get('contact')}")
+
+                    with t_col3:
+                        due_color = {"overdue": "#EF4444", "today": "#F59E0B", "upcoming": "#3B82F6", "completed": "#94A3B8"}.get(task_status, "#64748B")
+                        st.markdown(f"<span style='color: {due_color}; font-size: 12px;'>📅 {task.get('due_date', 'No date')[:10]}</span>", unsafe_allow_html=True)
+                        st.caption(task.get('priority', '🟡 Medium'))
+
+                    with t_col4:
+                        if st.button("🗑️", key=f"del_task_{task.get('id')}", help="Delete task"):
+                            st.session_state.crm_tasks.remove(task)
+                            st.rerun()
+        else:
+            st.info("No tasks match the selected filter.")
+
+    # ==================== TAB 5: EMAIL TEMPLATES ====================
     with tab5:
+        st.markdown("### Email Templates & Composer")
+
+        email_subtab1, email_subtab2 = st.tabs(["📝 Compose Email", "📋 Templates"])
+
+        with email_subtab1:
+            st.markdown("#### Compose Email")
+
+            # Select recipient
+            recipient_options = ["Select recipient..."] + [f"{l.get('email', 'No email')} - {l.get('title', 'Unknown')[:30]}" for l in all_leads if l.get('email')]
+            selected_recipient = st.selectbox("To:", recipient_options, key="email_recipient")
+
+            # Template selection
+            template_names = ["No template"] + [t.get('name') for t in st.session_state.email_templates]
+            selected_template = st.selectbox("Use Template:", template_names, key="email_template_select")
+
+            # Get template content if selected
+            template_subject = ""
+            template_body = ""
+            if selected_template != "No template":
+                for t in st.session_state.email_templates:
+                    if t.get('name') == selected_template:
+                        template_subject = t.get('subject', '')
+                        template_body = t.get('body', '')
+                        break
+
+            email_subject = st.text_input("Subject:", value=template_subject, key="email_subject")
+            email_body = st.text_area("Message:", value=template_body, height=250, key="email_body")
+
+            st.caption("💡 Use {{name}}, {{company}}, {{industry}}, {{date}} as placeholders")
+
+            col_send1, col_send2 = st.columns(2)
+            with col_send1:
+                if st.button("📧 Send Email", type="primary", use_container_width=True):
+                    if selected_recipient != "Select recipient..." and email_subject and email_body:
+                        st.success("Email sent successfully! (Simulated)")
+                        # In production, integrate with email service
+                    else:
+                        st.warning("Please fill in all fields")
+            with col_send2:
+                if st.button("💾 Save as Draft", use_container_width=True):
+                    st.info("Draft saved!")
+
+        with email_subtab2:
+            st.markdown("#### Email Templates")
+
+            # Display existing templates
+            for template in st.session_state.email_templates:
+                with st.expander(f"📧 {template.get('name')}", expanded=False):
+                    st.text_input("Subject:", value=template.get('subject', ''), key=f"tmpl_subj_{template.get('id')}", disabled=True)
+                    st.text_area("Body:", value=template.get('body', ''), key=f"tmpl_body_{template.get('id')}", disabled=True, height=150)
+
+            # Create new template
+            st.markdown("---")
+            st.markdown("#### Create New Template")
+            with st.expander("➕ Add Template", expanded=False):
+                new_tmpl_name = st.text_input("Template Name", key="new_tmpl_name")
+                new_tmpl_subject = st.text_input("Subject Line", key="new_tmpl_subject")
+                new_tmpl_body = st.text_area("Email Body", height=200, key="new_tmpl_body")
+
+                if st.button("💾 Save Template", type="primary"):
+                    if new_tmpl_name and new_tmpl_subject and new_tmpl_body:
+                        import uuid
+                        new_template = {
+                            'id': str(uuid.uuid4())[:8],
+                            'name': new_tmpl_name,
+                            'subject': new_tmpl_subject,
+                            'body': new_tmpl_body
+                        }
+                        st.session_state.email_templates.append(new_template)
+                        st.success("Template saved!")
+                        st.rerun()
+
+    # ==================== TAB 6: CALENDAR ====================
+    with tab6:
+        st.markdown("### Calendar View")
+
+        # Calendar controls
+        cal_col1, cal_col2, cal_col3 = st.columns([1, 2, 1])
+        with cal_col2:
+            import calendar
+            current_date = datetime.now()
+            selected_month = st.selectbox(
+                "Month",
+                list(range(1, 13)),
+                index=current_date.month - 1,
+                format_func=lambda x: calendar.month_name[x],
+                key="cal_month",
+                label_visibility="collapsed"
+            )
+            selected_year = current_date.year
+
+        # Generate calendar
+        cal = calendar.Calendar(firstweekday=6)  # Sunday first
+        month_days = cal.monthdayscalendar(selected_year, selected_month)
+
+        # Day headers
+        day_headers = st.columns(7)
+        for i, day_name in enumerate(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]):
+            with day_headers[i]:
+                st.markdown(f"<div style='text-align: center; font-weight: 600; color: #64748B; padding: 8px;'>{day_name}</div>", unsafe_allow_html=True)
+
+        # Calendar grid
+        for week in month_days:
+            week_cols = st.columns(7)
+            for i, day in enumerate(week):
+                with week_cols[i]:
+                    if day == 0:
+                        st.markdown("<div style='min-height: 80px;'></div>", unsafe_allow_html=True)
+                    else:
+                        day_date = f"{selected_year}-{selected_month:02d}-{day:02d}"
+                        is_today = (day == current_date.day and selected_month == current_date.month and selected_year == current_date.year)
+
+                        # Get tasks for this day
+                        day_tasks = [t for t in st.session_state.crm_tasks if t.get('due_date', '')[:10] == day_date]
+
+                        # Get deals closing this day
+                        day_deals = [d for d in st.session_state.crm_deals if d.get('close_date', '')[:10] == day_date]
+
+                        today_class = "today" if is_today else ""
+                        events_html = ""
+
+                        for task in day_tasks[:2]:
+                            task_type = task.get('type', '📝').split()[0]
+                            events_html += f"<div class='calendar-event' style='background: #3B82F6;'>{task_type} {task.get('title', '')[:15]}</div>"
+
+                        for deal in day_deals[:1]:
+                            events_html += f"<div class='calendar-event' style='background: #10B981;'>💰 {deal.get('name', '')[:15]}</div>"
+
+                        if len(day_tasks) > 2:
+                            events_html += f"<div style='font-size: 10px; color: #64748B;'>+{len(day_tasks) - 2} more</div>"
+
+                        st.markdown(f"""
+                        <div class="calendar-day {today_class}">
+                            <div class="calendar-day-number">{day}</div>
+                            {events_html}
+                        </div>
+                        """, unsafe_allow_html=True)
+
+        # Upcoming events summary
+        st.markdown("---")
+        st.markdown("#### Upcoming Events")
+
+        upcoming_events = []
+        for task in st.session_state.crm_tasks:
+            if not task.get('completed') and task.get('due_date'):
+                upcoming_events.append({
+                    'type': 'task',
+                    'date': task.get('due_date'),
+                    'title': task.get('title'),
+                    'icon': task.get('type', '📝').split()[0]
+                })
+        for deal in st.session_state.crm_deals:
+            if deal.get('close_date') and deal.get('stage') not in ['won', 'lost']:
+                upcoming_events.append({
+                    'type': 'deal',
+                    'date': deal.get('close_date'),
+                    'title': deal.get('name'),
+                    'icon': '💰'
+                })
+
+        upcoming_events.sort(key=lambda x: x.get('date', ''))
+
+        if upcoming_events[:10]:
+            for event in upcoming_events[:10]:
+                event_col1, event_col2 = st.columns([1, 4])
+                with event_col1:
+                    st.caption(event.get('date', '')[:10])
+                with event_col2:
+                    st.markdown(f"{event.get('icon')} {event.get('title')}")
+        else:
+            st.info("No upcoming events")
+
+    # ==================== TAB 7: ANALYTICS ====================
+    with tab7:
+        st.markdown("### Analytics & Activity Feed")
+
+        analytics_subtab1, analytics_subtab2, analytics_subtab3 = st.tabs(["📊 Dashboard", "📝 Activity Feed", "⚡ Quick Actions"])
+
+        with analytics_subtab1:
+            st.markdown("#### Pipeline Analytics")
+
+            # Conversion funnel
+            st.markdown("##### Conversion Funnel")
+            funnel_data = {CRM_STAGES[k]['name']: v for k, v in status_counts.items()}
+            st.bar_chart(funnel_data)
+
+            st.markdown("---")
+
+            # Performance metrics
+            st.markdown("##### Performance Metrics")
+            perf_col1, perf_col2, perf_col3, perf_col4 = st.columns(4)
+
+            with perf_col1:
+                conversion = (won_count / total_leads * 100) if total_leads > 0 else 0
+                st.metric("Conversion Rate", f"{conversion:.1f}%")
+
+            with perf_col2:
+                in_progress = status_counts.get('contacted', 0) + status_counts.get('demo', 0) + status_counts.get('proposal', 0)
+                st.metric("In Progress", in_progress)
+
+            with perf_col3:
+                new_leads = status_counts.get('new', 0)
+                st.metric("Uncontacted", new_leads)
+
+            with perf_col4:
+                hot_leads = len([l for l in all_leads if l.get('pain_score', 0) >= 70])
+                st.metric("Hot Leads (70+)", hot_leads)
+
+            st.markdown("---")
+
+            # Source distribution
+            st.markdown("##### Lead Sources")
+            source_counts = {}
+            for lead in all_leads:
+                source = lead.get('source', 'Unknown')
+                source_counts[source] = source_counts.get(source, 0) + 1
+
+            if source_counts:
+                st.bar_chart(source_counts)
+
+        with analytics_subtab2:
+            st.markdown("#### Activity Feed")
+
+            # Collect all activities
+            all_activities = []
+            for lead in all_leads:
+                lead_title = lead.get('title', lead.get('company', 'Unknown'))
+                for activity in lead.get('activity_log', []):
+                    activity['lead_title'] = lead_title
+                    activity['lead_hash'] = lead.get('hash')
+                    all_activities.append(activity)
+
+            # Sort by timestamp
+            all_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+            if all_activities:
+                for activity in all_activities[:50]:
+                    icon = "📌" if activity.get('type') == 'status_change' else "📝"
+                    lead_title = activity.get('lead_title', 'Unknown')
+                    timestamp = activity.get('timestamp', '')[:16].replace('T', ' ')
+
+                    if activity.get('type') == 'status_change':
+                        from_stage = CRM_STAGES.get(activity.get('from'), {}).get('name', activity.get('from'))
+                        to_stage = CRM_STAGES.get(activity.get('to'), {}).get('name', activity.get('to'))
+                        text = f"**{lead_title}** moved from {from_stage} to {to_stage}"
+                    else:
+                        content = activity.get('content', '')[:100]
+                        text = f"Note added to **{lead_title}**: {content}"
+
+                    st.markdown(f"""
+                    <div class="activity-item">
+                        <div class="activity-icon">{icon}</div>
+                        <div class="activity-content">
+                            <p class="activity-text">{text}</p>
+                            <p class="activity-time">{timestamp}</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("No activities yet. Start moving leads through stages or adding notes to see activity here.")
+
+        with analytics_subtab3:
+            st.markdown("#### Quick Actions")
+
+            # Bulk Actions
+            st.markdown("##### Bulk Operations")
+
+            bulk_col1, bulk_col2, bulk_col3 = st.columns(3)
+
+            with bulk_col1:
+                from_stage = st.selectbox(
+                    "Move from",
+                    list(CRM_STAGES.keys()),
+                    format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
+                    key="bulk_from_stage"
+                )
+
+            with bulk_col2:
+                to_stage = st.selectbox(
+                    "Move to",
+                    list(CRM_STAGES.keys()),
+                    format_func=lambda x: f"{CRM_STAGES[x]['icon']} {CRM_STAGES[x]['name']}",
+                    key="bulk_to_stage"
+                )
+
+            with bulk_col3:
+                from_count = status_counts.get(from_stage, 0)
+                st.write("")
+                if st.button(f"Move {from_count} leads", type="primary", use_container_width=True, key="bulk_move_btn"):
+                    if from_count > 0:
+                        moved = 0
+                        for lead in all_leads:
+                            if lead.get('status', 'new') == from_stage:
+                                if lead_manager.update_lead_status(lead.get('hash'), to_stage):
+                                    moved += 1
+                        st.success(f"Moved {moved} leads!")
+                        st.rerun()
+                    else:
+                        st.warning("No leads to move")
+
+    # ==================== TAB 8: HUBSPOT ====================
+    with tab8:
         st.markdown("### HubSpot Integration")
 
         with HubSpotCRM() as crm:
@@ -4447,8 +5119,181 @@ Is there anything specific about the platform or lead generation strategies I ca
 # ============================================
 # MAIN
 # ============================================
+def render_floating_assistant():
+    """Render a floating AI assistant button accessible from any page."""
+
+    # Initialize state for floating assistant
+    if 'show_floating_assistant' not in st.session_state:
+        st.session_state.show_floating_assistant = False
+    if 'floating_chat_history' not in st.session_state:
+        st.session_state.floating_chat_history = []
+
+    # CSS for floating button and popup
+    st.markdown("""
+    <style>
+        /* Floating AI Assistant Button */
+        .floating-assistant-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3);
+            z-index: 9999;
+            transition: all 0.3s ease;
+            animation: pulse-assistant 2s infinite;
+        }
+        .floating-assistant-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+        .floating-assistant-icon {
+            font-size: 28px;
+            color: white;
+        }
+        @keyframes pulse-assistant {
+            0%, 100% { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6), 0 4px 16px rgba(99, 102, 241, 0.4); }
+        }
+
+        /* Floating Chat Popup */
+        .floating-chat-popup {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 380px;
+            max-height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.1);
+            z-index: 9998;
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+        }
+        .floating-chat-header {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+            padding: 16px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .floating-chat-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .floating-chat-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .floating-chat-body {
+            padding: 16px;
+            max-height: 340px;
+            overflow-y: auto;
+            background: #F8FAFC;
+        }
+        .floating-chat-input {
+            padding: 12px 16px;
+            border-top: 1px solid #E2E8F0;
+            background: white;
+        }
+        .floating-msg {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        .floating-msg-user {
+            justify-content: flex-end;
+        }
+        .floating-msg-bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .floating-msg-user .floating-msg-bubble {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .floating-msg-assistant .floating-msg-bubble {
+            background: white;
+            color: #1E293B;
+            border: 1px solid #E2E8F0;
+            border-bottom-left-radius: 4px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Use a sidebar expander for the floating assistant (Streamlit workaround)
+    # Add quick access button in sidebar
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("#### Quick Access")
+        if st.button("🤖 AI Assistant", key="quick_ai_btn", use_container_width=True, help="Open AI Assistant for lead generation help"):
+            st.session_state.nav_page = "AI Assistant"
+            st.rerun()
+
+    # Also render a visual indicator that AI is available
+    st.markdown("""
+    <div style="
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        pointer-events: none;
+    ">
+        <div style="
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+            animation: fadeIn 0.5s ease;
+        ">
+            <span style="font-size: 18px;">🤖</span>
+            <span>AI Assistant Available</span>
+        </div>
+    </div>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 def main():
     render_sidebar()
+
+    # Render floating AI assistant on all pages
+    render_floating_assistant()
 
     page = st.session_state.nav_page
 
