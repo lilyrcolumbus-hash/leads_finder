@@ -6,6 +6,7 @@ from .google_scraper import GoogleScraper
 from .producthunt_scraper import ProductHuntScraper
 from .indeed_scraper import IndeedScraper
 from .yelp_scraper import YelpScraper
+from .linkedin_scraper import LinkedInScraper
 from .base_scraper import BaseScraper
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     "GoogleScraper",
     "ProductHuntScraper",
     "IndeedScraper",
-    "YelpScraper"
+    "YelpScraper",
+    "LinkedInScraper"
 ]

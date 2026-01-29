@@ -22,7 +22,7 @@ from src.utils.scoring import enrich_leads, calculate_pain_score
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.utils.background_tasks import task_manager, TaskStatus
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -1891,30 +1891,33 @@ def show_search():
     st.divider()
 
     # Active Sources Section
-    st.subheader("📡 Active Sources (6 Available)")
+    st.subheader("📡 Active Sources (7 Available)")
 
     col1, col2, col3 = st.columns(3)
     with col1:
         use_reddit = st.checkbox("🔴 Reddit - Business subreddits", value=True, key="reddit_check")
         use_hn = st.checkbox("🟠 Hacker News - Startups", value=True, key="hn_check")
+        use_linkedin = st.checkbox("🔷 LinkedIn - Decision Makers", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="linkedin_check")
     with col2:
         use_google = st.checkbox("🔵 Google Search", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="google_check")
-        use_ph = st.checkbox("🟣 Product Hunt", value=True, key="ph_check")
-    with col3:
+        use_ph = st.checkbox("🟣 Product Hunt", value=False, key="ph_check")
         use_indeed = st.checkbox("💼 Indeed - Hiring Receptionists", value=True, key="indeed_check")
+    with col3:
         use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
+
+    if settings.google_api_key:
+        st.info("💡 **LinkedIn Search** usa Google para buscar perfiles de LinkedIn (site:linkedin.com). Encuentra dueños de negocios y decision makers.")
 
     st.divider()
 
     # Coming Soon Sources
-    st.subheader("🚀 Coming Soon (4 More)")
+    st.subheader("🚀 Coming Soon (3 More)")
 
-    coming_cols = st.columns(4)
+    coming_cols = st.columns(3)
     coming_sources = [
-        ("🔷", "LinkedIn"),
         ("🐦", "Twitter/X"),
-        ("📍", "Google Business"),
-        ("📘", "Facebook")
+        ("📍", "Google Maps"),
+        ("📘", "Facebook Groups")
     ]
     for i, (icon, name) in enumerate(coming_sources):
         with coming_cols[i]:
@@ -2008,6 +2011,7 @@ def show_search():
         if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
         if use_indeed: scrapers.append(("Indeed", IndeedScraper))
         if use_yelp: scrapers.append(("Yelp", YelpScraper))
+        if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
 
         if not scrapers:
             st.warning("Select at least one source")
@@ -2023,8 +2027,8 @@ def show_search():
 
             try:
                 with Scraper() as s:
-                    # Pass location to Indeed and Yelp scrapers
-                    if name in ["Indeed", "Yelp"] and search_location:
+                    # Pass location to Indeed, Yelp, and LinkedIn scrapers
+                    if name in ["Indeed", "Yelp", "LinkedIn"] and search_location:
                         batch = s.scrape(time_filter=selected_time, location=search_location)
                     else:
                         batch = s.scrape(time_filter=selected_time)
@@ -2033,7 +2037,7 @@ def show_search():
                         st.success(f"{name}: {len(batch.leads)} leads")
             except Exception as e:
                 with results:
-                    st.warning(f"{name}: Error")
+                    st.warning(f"{name}: Error - {str(e)[:50]}")
 
             progress.progress((i + 1) / len(scrapers))
 
@@ -2084,6 +2088,9 @@ def show_search():
                 'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
                 'Google': len([l for l in all_leads if l.source.value == 'google_search']),
                 'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
+                'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
+                'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
+                'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
             }
         }
 
