@@ -5493,12 +5493,12 @@ def show_crm():
 
     # CRM Stage definitions
     CRM_STAGES = {
-        'new': {'name': 'New', 'icon': '📥', 'color': '#3B82F6', 'bg': '#EFF6FF'},
-        'contacted': {'name': 'Contacted', 'icon': '📧', 'color': '#8B5CF6', 'bg': '#F5F3FF'},
-        'demo': {'name': 'Demo', 'icon': '🎯', 'color': '#F59E0B', 'bg': '#FFFBEB'},
-        'proposal': {'name': 'Proposal', 'icon': '📋', 'color': '#EC4899', 'bg': '#FDF2F8'},
-        'won': {'name': 'Won', 'icon': '✅', 'color': '#10B981', 'bg': '#ECFDF5'},
-        'lost': {'name': 'Lost', 'icon': '❌', 'color': '#EF4444', 'bg': '#FEF2F2'}
+        'new': {'name': 'New', 'icon': '📥', 'color': '#00FFFF', 'bg': 'linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%)'},
+        'contacted': {'name': 'Contacted', 'icon': '📧', 'color': '#8B5CF6', 'bg': 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%)'},
+        'demo': {'name': 'Demo', 'icon': '🎯', 'color': '#FFD700', 'bg': 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%)'},
+        'proposal': {'name': 'Proposal', 'icon': '📋', 'color': '#FF6B35', 'bg': 'linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%)'},
+        'won': {'name': 'Won', 'icon': '✅', 'color': '#00FF88', 'bg': 'linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%)'},
+        'lost': {'name': 'Lost', 'icon': '❌', 'color': '#FF4444', 'bg': 'linear-gradient(135deg, rgba(255, 68, 68, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%)'}
     }
 
     # Initialize session state for CRM
@@ -5519,23 +5519,34 @@ def show_crm():
     win_rate = (won_count / (won_count + lost_count) * 100) if (won_count + lost_count) > 0 else 0
     avg_score = sum(l.get('pain_score', 0) for l in all_leads) / total_leads if total_leads > 0 else 0
 
-    # Page Header
+    # Holographic Page Header
     st.markdown("""
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <div>
-            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1E293B;">CRM Pipeline</h1>
-            <p style="margin: 4px 0 0 0; color: #64748B;">Manage your sales pipeline and track deals</p>
-        </div>
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            🎯 CRM PIPELINE
+        </h1>
+        <p style="color: #C0C0C0; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+            Manage your sales pipeline and track deals through every stage
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Empty state
+    # Empty state - Holographic
     if not all_leads:
         st.markdown("""
-        <div style="text-align: center; padding: 60px 20px; background: #F8FAFC; border-radius: 16px; border: 2px dashed #E2E8F0;">
-            <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
-            <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 20px;">No leads in your CRM</h3>
-            <p style="margin: 0; color: #64748B;">Import leads or search for new leads to start building your pipeline</p>
+        <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(45, 55, 72, 0.4) 0%, rgba(28, 28, 46, 0.6) 100%); border-radius: 16px; border: 2px dashed rgba(0, 255, 255, 0.3); backdrop-filter: blur(10px);">
+            <div style="font-size: 48px; margin-bottom: 16px; filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));">📋</div>
+            <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 20px; font-family: 'Orbitron', sans-serif;">No leads in your CRM</h3>
+            <p style="margin: 0; color: #C0C0C0;">Import leads or search for new leads to start building your pipeline</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -5549,16 +5560,20 @@ def show_crm():
                 st.rerun()
         return
 
-    # KPI Dashboard
-    st.markdown("### Dashboard")
+    # KPI Dashboard - Holographic
+    st.markdown("""
+    <div style="margin-bottom: 16px;">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">📊 DASHBOARD METRICS</h3>
+    </div>
+    """, unsafe_allow_html=True)
     kpi_cols = st.columns(6)
 
     kpi_data = [
-        ("📊", "Total Leads", total_leads, "#3B82F6"),
-        ("🔥", "Active", active_count, "#F59E0B"),
-        ("📈", "Win Rate", f"{win_rate:.0f}%", "#10B981"),
-        ("✅", "Won", won_count, "#10B981"),
-        ("❌", "Lost", lost_count, "#EF4444"),
+        ("📊", "Total Leads", total_leads, "#00FFFF"),
+        ("🔥", "Active", active_count, "#FFD700"),
+        ("📈", "Win Rate", f"{win_rate:.0f}%", "#00FF88"),
+        ("✅", "Won", won_count, "#00FF88"),
+        ("❌", "Lost", lost_count, "#FF4444"),
         ("⭐", "Avg Score", f"{avg_score:.0f}", "#8B5CF6")
     ]
 
@@ -5685,7 +5700,12 @@ Best regards'''
 
     # ==================== TAB 1: PIPELINE VIEW ====================
     with tab1:
-        st.markdown("### Sales Pipeline")
+        st.markdown("""
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 20px; margin: 0; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">🚀 SALES PIPELINE</h3>
+            <p style="color: #708090; font-size: 13px; margin: 4px 0 0 0;">Drag leads through stages to track progress</p>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Pipeline columns
         stage_cols = st.columns(6)
@@ -5763,7 +5783,12 @@ Best regards'''
 
     # ==================== TAB 2: ALL CONTACTS (DATA TABLE) ====================
     with tab2:
-        st.markdown("### Contact Database")
+        st.markdown("""
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 20px; margin: 0; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">📇 CONTACT DATABASE</h3>
+            <p style="color: #708090; font-size: 13px; margin: 4px 0 0 0;">Search, filter and manage all your contacts</p>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Top toolbar
         toolbar_col1, toolbar_col2, toolbar_col3, toolbar_col4, toolbar_col5 = st.columns([3, 2, 2, 2, 1])
@@ -6040,21 +6065,22 @@ Best regards'''
     with tab3:
         st.markdown("""
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-            <h3 style="margin: 0; color: #1E293B;">Deals & Opportunities</h3>
+            <h3 style="margin: 0; color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 20px; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">💰 DEALS & OPPORTUNITIES</h3>
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #3B82F6; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
-                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <strong style="color: #10B981;">What are Deals?</strong><br><br>
+                <span style="cursor: help; background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 139, 139, 0.5) 100%); color: #00FFFF; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; border: 1px solid rgba(0, 255, 255, 0.4);">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, rgba(28, 28, 46, 0.95) 0%, rgba(45, 55, 72, 0.95) 100%); color: #E5E5E5; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); border: 1px solid rgba(0, 255, 255, 0.3);">
+                    <strong style="color: #00FF88;">What are Deals?</strong><br><br>
                     Deals track potential revenue from your leads. Use them to:<br><br>
-                    • <strong>Track Value:</strong> Set the $ amount each opportunity is worth<br>
-                    • <strong>Monitor Progress:</strong> Move deals through stages (Demo → Proposal → Won)<br>
-                    • <strong>Forecast Revenue:</strong> See your total pipeline value<br>
-                    • <strong>Set Close Dates:</strong> Track when deals should close<br><br>
-                    <em style="color: #94A3B8;">Create deals for leads showing buying intent!</em>
-                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                    • <strong style="color: #00FFFF;">Track Value:</strong> Set the $ amount each opportunity is worth<br>
+                    • <strong style="color: #00FFFF;">Monitor Progress:</strong> Move deals through stages<br>
+                    • <strong style="color: #00FFFF;">Forecast Revenue:</strong> See your total pipeline value<br>
+                    • <strong style="color: #00FFFF;">Set Close Dates:</strong> Track when deals should close<br><br>
+                    <em style="color: #708090;">Create deals for leads showing buying intent!</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid rgba(28, 28, 46, 0.95);"></div>
                 </div>
             </div>
         </div>
+        <p style="color: #708090; font-size: 13px; margin: -12px 0 16px 0;">Track revenue opportunities and deal progress</p>
         <style>
             .metric-tooltip-wrapper:hover .metric-tooltip {
                 opacity: 1 !important;
@@ -6197,16 +6223,16 @@ Best regards'''
 
     # ==================== TAB 4: TASKS ====================
     with tab4:
-        # Modern Task Management Header
+        # Holographic Task Management Header
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid #F59E0B;">
+        <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(255, 215, 0, 0.3); backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);">
             <div style="display: flex; align-items: flex-start; gap: 16px;">
-                <div style="background: #F59E0B; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 28px;">📋</span>
+                <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.1) 100%); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 215, 0, 0.4);">
+                    <span style="font-size: 28px; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));">📋</span>
                 </div>
                 <div style="flex: 1;">
-                    <h3 style="margin: 0 0 8px 0; color: #92400E; font-size: 20px; font-weight: 700;">Task Management</h3>
-                    <p style="margin: 0; color: #78350F; font-size: 14px; line-height: 1.5;">
+                    <h3 style="margin: 0 0 8px 0; color: #FFD700; font-size: 20px; font-weight: 700; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);">TASK MANAGEMENT</h3>
+                    <p style="margin: 0; color: #C0C0C0; font-size: 14px; line-height: 1.5;">
                         Organize your daily follow-up activities and never miss an opportunity. Create tasks for calls, emails, meetings, and notes to stay on top of your sales pipeline.
                     </p>
                 </div>
@@ -6221,28 +6247,28 @@ Best regards'''
         upcoming_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() > today]
         completed_tasks = [t for t in st.session_state.crm_tasks if t.get('completed')]
 
-        # Stats cards with modern design
+        # Stats cards with holographic design
         st.markdown(f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-            <div style="background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #FCA5A5;">
-                <div style="font-size: 32px; font-weight: 800; color: #DC2626;">{len(overdue_tasks)}</div>
-                <div style="font-size: 12px; font-weight: 600; color: #991B1B; text-transform: uppercase; letter-spacing: 0.05em;">Overdue</div>
-                <div style="font-size: 10px; color: #B91C1C; margin-top: 4px;">Need attention now</div>
+            <div style="background: linear-gradient(135deg, rgba(255, 68, 68, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 68, 68, 0.4); backdrop-filter: blur(5px);">
+                <div style="font-size: 32px; font-weight: 800; color: #FF4444; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 68, 68, 0.5);">{len(overdue_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #FF6666; text-transform: uppercase; letter-spacing: 0.05em;">Overdue</div>
+                <div style="font-size: 10px; color: #708090; margin-top: 4px;">Need attention now</div>
             </div>
-            <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #FCD34D;">
-                <div style="font-size: 32px; font-weight: 800; color: #D97706;">{len(today_tasks)}</div>
-                <div style="font-size: 12px; font-weight: 600; color: #92400E; text-transform: uppercase; letter-spacing: 0.05em;">Due Today</div>
-                <div style="font-size: 10px; color: #B45309; margin-top: 4px;">Complete before EOD</div>
+            <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(255, 215, 0, 0.4); backdrop-filter: blur(5px);">
+                <div style="font-size: 32px; font-weight: 800; color: #FFD700; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);">{len(today_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #FFD700; text-transform: uppercase; letter-spacing: 0.05em;">Due Today</div>
+                <div style="font-size: 10px; color: #708090; margin-top: 4px;">Complete before EOD</div>
             </div>
-            <div style="background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #93C5FD;">
-                <div style="font-size: 32px; font-weight: 800; color: #2563EB;">{len(upcoming_tasks)}</div>
-                <div style="font-size: 12px; font-weight: 600; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.05em;">Upcoming</div>
-                <div style="font-size: 10px; color: #1D4ED8; margin-top: 4px;">Scheduled for later</div>
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(0, 255, 255, 0.4); backdrop-filter: blur(5px);">
+                <div style="font-size: 32px; font-weight: 800; color: #00FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);">{len(upcoming_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #00FFFF; text-transform: uppercase; letter-spacing: 0.05em;">Upcoming</div>
+                <div style="font-size: 10px; color: #708090; margin-top: 4px;">Scheduled for later</div>
             </div>
-            <div style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #6EE7B7;">
-                <div style="font-size: 32px; font-weight: 800; color: #059669;">{len(completed_tasks)}</div>
-                <div style="font-size: 12px; font-weight: 600; color: #065F46; text-transform: uppercase; letter-spacing: 0.05em;">Completed</div>
-                <div style="font-size: 10px; color: #047857; margin-top: 4px;">Successfully done</div>
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid rgba(0, 255, 136, 0.4); backdrop-filter: blur(5px);">
+                <div style="font-size: 32px; font-weight: 800; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{len(completed_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #00FF88; text-transform: uppercase; letter-spacing: 0.05em;">Completed</div>
+                <div style="font-size: 10px; color: #708090; margin-top: 4px;">Successfully done</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -6872,7 +6898,12 @@ Best regards'''
 
     # ==================== TAB 8: HUBSPOT ====================
     with tab8:
-        st.markdown("### HubSpot Integration")
+        st.markdown("""
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 20px; margin: 0; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">🔗 HUBSPOT INTEGRATION</h3>
+            <p style="color: #708090; font-size: 13px; margin: 4px 0 0 0;">Sync leads and contacts with your HubSpot CRM</p>
+        </div>
+        """, unsafe_allow_html=True)
 
         with HubSpotCRM() as crm:
             if crm.is_configured():
