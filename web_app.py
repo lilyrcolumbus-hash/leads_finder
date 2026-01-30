@@ -1236,24 +1236,24 @@ st.markdown("""
         box-shadow: var(--shadow-sm) !important;
     }
 
-    /* ========== DATA TABLE - HOLOGRAPHIC ========== */
+    /* ========== DATA TABLE - SILVER METALLIC ========== */
     .stDataFrame {
-        border: 2px solid rgba(0, 255, 255, 0.4) !important;
+        border: 2px solid rgba(192, 192, 192, 0.4) !important;
         border-radius: var(--radius-lg) !important;
         overflow: hidden !important;
         background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1) !important;
     }
 
     .stDataFrame [data-testid="stDataFrameResizable"] {
         background: transparent !important;
     }
 
-    /* ========== PROGRESS - HOLOGRAPHIC ========== */
+    /* ========== PROGRESS - SILVER METALLIC ========== */
     .stProgress > div > div > div {
-        background: linear-gradient(90deg, #00FFFF 0%, #008B8B 100%) !important;
+        background: linear-gradient(90deg, #C0C0C0 0%, #808080 100%) !important;
         border-radius: 10px !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.4) !important;
     }
 
     .stProgress > div > div {
@@ -1276,8 +1276,8 @@ st.markdown("""
     }
 
     .stInfo {
-        background: linear-gradient(135deg, rgba(0, 70, 90, 0.5) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border-left-color: #00FFFF !important;
+        background: linear-gradient(135deg, rgba(70, 80, 100, 0.5) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left-color: #C0C0C0 !important;
     }
 
     .stWarning {
@@ -1290,21 +1290,21 @@ st.markdown("""
         border-left-color: #FF6B6B !important;
     }
 
-    /* ========== EMPTY STATE - HOLOGRAPHIC ========== */
+    /* ========== EMPTY STATE - SILVER METALLIC ========== */
     .empty-state {
         text-align: center;
         padding: 60px 48px;
         background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%);
-        border: 2px dashed rgba(0, 255, 255, 0.4);
+        border: 2px dashed rgba(192, 192, 192, 0.4);
         border-radius: var(--radius-xl);
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1);
     }
 
     .empty-icon {
         font-size: 56px;
         margin-bottom: 20px;
         opacity: 0.8;
-        filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
+        filter: drop-shadow(0 0 10px rgba(192, 192, 192, 0.3));
     }
 
     .empty-title {
@@ -1313,7 +1313,7 @@ st.markdown("""
         font-weight: 700;
         margin: 0 0 8px 0;
         letter-spacing: -0.02em;
-        text-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        text-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
     }
 
     .empty-desc {
@@ -1322,7 +1322,7 @@ st.markdown("""
         margin: 0 0 24px 0;
     }
 
-    /* ========== API CARDS - HIGH CONTRAST HOLOGRAPHIC ========== */
+    /* ========== API CARDS - SILVER METALLIC ========== */
     .api-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1331,21 +1331,21 @@ st.markdown("""
 
     .api-card {
         background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.4) !important;
+        border: 2px solid rgba(192, 192, 192, 0.4) !important;
         border-radius: var(--radius-xl) !important;
         padding: 28px 24px !important;
         text-align: center !important;
         transition: all 0.3s ease !important;
         display: block !important;
         min-height: 140px !important;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
         position: relative !important;
     }
 
     .api-card:hover {
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+        box-shadow: 0 0 25px rgba(192, 192, 192, 0.2), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
         transform: translateY(-3px) !important;
-        border-color: #00FFFF !important;
+        border-color: #C0C0C0 !important;
     }
 
     .api-card.connected {
@@ -1365,7 +1365,7 @@ st.markdown("""
     }
 
     .api-card.disconnected {
-        border-color: rgba(0, 255, 255, 0.3) !important;
+        border-color: rgba(192, 192, 192, 0.3) !important;
         background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
     }
 
@@ -1373,7 +1373,7 @@ st.markdown("""
         font-size: 36px !important;
         margin-bottom: 14px !important;
         display: block !important;
-        filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.3)) !important;
+        filter: drop-shadow(0 0 8px rgba(192, 192, 192, 0.3)) !important;
     }
 
     .api-name {
@@ -1799,25 +1799,25 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* ========== EXPANDER - HIGH CONTRAST HOLOGRAPHIC ========== */
+    /* ========== EXPANDER - DIGITAL SILVER METALLIC ========== */
     .streamlit-expanderHeader {
         font-size: 15px !important;
         font-weight: 600 !important;
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.5) !important;
         border-radius: var(--radius-md) !important;
         transition: all 0.2s ease !important;
         padding: 14px 18px !important;
         color: #E5E5E5 !important;
         backdrop-filter: blur(10px) !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
     }
 
     .streamlit-expanderHeader:hover {
-        border-color: #00FFFF !important;
-        background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-        color: #00FFFF !important;
+        border-color: #C0C0C0 !important;
+        background: linear-gradient(135deg, rgba(100, 110, 130, 0.6) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        color: #FFFFFF !important;
     }
 
     [data-testid="stExpander"] {
@@ -1827,59 +1827,59 @@ st.markdown("""
 
     [data-testid="stExpander"] > div:first-child {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.5) !important;
         border-radius: 12px !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1) !important;
     }
 
     [data-testid="stExpander"] > div > div {
         background: linear-gradient(135deg, rgba(50, 60, 80, 0.95) 0%, rgba(35, 45, 65, 0.95) 100%) !important;
-        border-color: rgba(0, 255, 255, 0.3) !important;
+        border-color: rgba(192, 192, 192, 0.3) !important;
     }
 
-    /* ========== FORM INPUTS - HIGH CONTRAST HOLOGRAPHIC ========== */
-    /* These inputs need to STAND OUT from the dark background */
+    /* ========== FORM INPUTS - DIGITAL SILVER METALLIC ========== */
+    /* Windows/cards use SILVER borders instead of cyan */
 
-    /* Labels - Bright and clear */
+    /* Labels - Silver digital */
     .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label, .stMultiSelect label {
-        color: #00FFFF !important;
+        color: #E5E5E5 !important;
         font-weight: 700 !important;
         font-size: 14px !important;
         margin-bottom: 8px !important;
         text-transform: uppercase !important;
         letter-spacing: 0.1em !important;
-        text-shadow: 0 0 10px rgba(0, 255, 255, 0.3) !important;
+        text-shadow: 0 0 10px rgba(192, 192, 192, 0.3) !important;
     }
 
-    /* SELECT BOX - Light background for contrast */
+    /* SELECT BOX - Silver metallic border */
     .stSelectbox > div > div {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
         border-radius: var(--radius-md) !important;
         font-size: 15px !important;
         color: #FFFFFF !important;
         padding: 6px 10px !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     }
 
     .stSelectbox > div > div:hover {
-        border-color: #00FFFF !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        border-color: #E5E5E5 !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     }
 
-    /* Text Input - High visibility */
+    /* Text Input - Silver metallic */
     .stTextInput > div > div > input {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
         color: #FFFFFF !important;
         border-radius: var(--radius-md) !important;
         padding: 12px 14px !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     }
 
     .stTextInput > div > div > input:focus {
-        border-color: #00FFFF !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        border-color: #E5E5E5 !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
         outline: none !important;
     }
 
@@ -1887,55 +1887,55 @@ st.markdown("""
         color: rgba(192, 192, 192, 0.7) !important;
     }
 
-    /* Text Area - High visibility */
+    /* Text Area - Silver metallic */
     .stTextArea > div > div > textarea {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
         color: #FFFFFF !important;
         border-radius: var(--radius-md) !important;
         padding: 12px 14px !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     }
 
     .stTextArea > div > div > textarea:focus {
-        border-color: #00FFFF !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        border-color: #E5E5E5 !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     }
 
     .stTextArea > div > div > textarea::placeholder {
         color: rgba(192, 192, 192, 0.7) !important;
     }
 
-    /* Number Input - High visibility */
+    /* Number Input - Silver metallic */
     .stNumberInput > div > div > input {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
         color: #FFFFFF !important;
         border-radius: var(--radius-md) !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1) !important;
     }
 
     .stNumberInput > div > div > input:focus {
-        border-color: #00FFFF !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
+        border-color: #E5E5E5 !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.25) !important;
     }
 
-    /* Multiselect - High visibility */
+    /* Multiselect - Silver metallic */
     .stMultiSelect > div > div {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
         color: #FFFFFF !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1) !important;
     }
 
     .stMultiSelect [data-baseweb="tag"] {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 139, 139, 0.4) 100%) !important;
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(128, 128, 128, 0.3) 100%) !important;
         color: #FFFFFF !important;
-        border: 1px solid #00FFFF !important;
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3) !important;
+        border: 1px solid rgba(192, 192, 192, 0.5) !important;
+        box-shadow: 0 0 10px rgba(192, 192, 192, 0.2) !important;
     }
 
-    /* Checkbox - High visibility */
+    /* Checkbox - Silver metallic */
     .stCheckbox > label {
         color: #E5E5E5 !important;
         font-weight: 500 !important;
@@ -1943,14 +1943,14 @@ st.markdown("""
 
     .stCheckbox > label > div[data-testid="stCheckbox"] > div {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
     }
 
     .stCheckbox > label > div[data-testid="stCheckbox"] > div:hover {
-        border-color: #00FFFF !important;
+        border-color: #E5E5E5 !important;
     }
 
-    /* Radio - High visibility */
+    /* Radio - Silver metallic */
     .stRadio > div {
         background: transparent !important;
     }
@@ -1958,49 +1958,49 @@ st.markdown("""
     .stRadio > div > label {
         color: #E5E5E5 !important;
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.9) 0%, rgba(45, 55, 75, 0.9) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.4) !important;
+        border: 2px solid rgba(192, 192, 192, 0.5) !important;
         border-radius: 8px !important;
         padding: 10px 14px !important;
         margin: 4px 0 !important;
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.1) !important;
+        box-shadow: 0 0 10px rgba(192, 192, 192, 0.08) !important;
     }
 
     .stRadio > div > label:hover {
-        border-color: #00FFFF !important;
-        background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2) !important;
+        border-color: #C0C0C0 !important;
+        background: linear-gradient(135deg, rgba(100, 110, 130, 0.9) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.15) !important;
     }
 
     .stRadio > div > label[data-checked="true"] {
-        border-color: #00FFFF !important;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.3) 100%) !important;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important;
+        border-color: #E5E5E5 !important;
+        background: linear-gradient(135deg, rgba(120, 130, 150, 0.5) 0%, rgba(80, 90, 110, 0.6) 100%) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.2) !important;
     }
 
-    /* Date Input - High visibility */
+    /* Date Input - Silver metallic */
     .stDateInput > div > div > input {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border: 2px solid rgba(192, 192, 192, 0.6) !important;
         color: #FFFFFF !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1) !important;
     }
 
     .stDateInput > div > div > input:focus {
-        border-color: #00FFFF !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
+        border-color: #E5E5E5 !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.25) !important;
     }
 
-    /* Slider - High visibility */
+    /* Slider - Silver metallic */
     .stSlider > div > div > div {
-        background: rgba(0, 255, 255, 0.3) !important;
+        background: rgba(192, 192, 192, 0.3) !important;
     }
 
     .stSlider > div > div > div > div {
-        background: #00FFFF !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.5) !important;
+        background: #C0C0C0 !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.5) !important;
     }
 
-    /* ========== SELECTBOX DROPDOWN - HOLOGRAPHIC ========== */
+    /* ========== SELECTBOX DROPDOWN - SILVER METALLIC ========== */
     [data-baseweb="select"] span,
     [data-baseweb="select"] div {
         color: #FFFFFF !important;
@@ -2009,8 +2009,8 @@ st.markdown("""
     [data-baseweb="menu"] {
         background: linear-gradient(135deg, rgba(45, 55, 75, 0.98) 0%, rgba(28, 28, 46, 0.98) 100%) !important;
         border-radius: var(--radius-md) !important;
-        border: 2px solid rgba(0, 255, 255, 0.4) !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 255, 0.2) !important;
+        border: 2px solid rgba(192, 192, 192, 0.5) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(192, 192, 192, 0.1) !important;
         backdrop-filter: blur(20px) !important;
     }
 
@@ -2021,8 +2021,8 @@ st.markdown("""
     }
 
     [data-baseweb="menu"] li:hover {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.3) 100%) !important;
-        color: #00FFFF !important;
+        background: linear-gradient(135deg, rgba(120, 130, 150, 0.4) 0%, rgba(80, 90, 110, 0.5) 100%) !important;
+        color: #FFFFFF !important;
     }
 
     /* ========== MAIN AREA TEXT - HOLOGRAPHIC ========== */
@@ -2032,15 +2032,15 @@ st.markdown("""
 
     .main h1, .main h2, .main h3, .main h4 {
         color: #FFFFFF !important;
-        text-shadow: 0 0 15px rgba(0, 255, 255, 0.3) !important;
+        text-shadow: 0 0 15px rgba(192, 192, 192, 0.2) !important;
     }
 
     /* ========== SPINNER ========== */
     .stSpinner > div {
-        border-top-color: var(--primary-500) !important;
+        border-top-color: #C0C0C0 !important;
     }
 
-    /* ========== SCROLLBAR - HOLOGRAPHIC ========== */
+    /* ========== SCROLLBAR - SILVER METALLIC ========== */
     ::-webkit-scrollbar {
         width: 10px;
         height: 10px;
@@ -2052,13 +2052,13 @@ st.markdown("""
     }
 
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4) 0%, rgba(0, 139, 139, 0.4) 100%);
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.4) 0%, rgba(128, 128, 128, 0.4) 100%);
         border-radius: 5px;
-        border: 1px solid rgba(0, 255, 255, 0.3);
+        border: 1px solid rgba(192, 192, 192, 0.3);
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.6) 0%, rgba(0, 139, 139, 0.6) 100%);
+        background: linear-gradient(135deg, rgba(192, 192, 192, 0.6) 0%, rgba(128, 128, 128, 0.6) 100%);
     }
 
     /* ========== ENHANCED CHECKBOX STYLING - HOLOGRAPHIC ========== */
@@ -2081,12 +2081,12 @@ st.markdown("""
         color: #E5E5E5 !important;
     }
 
-    /* ========== ENHANCED ALERTS - HOLOGRAPHIC ========== */
+    /* ========== ENHANCED ALERTS - SILVER METALLIC ========== */
     .stAlert {
         border-radius: var(--radius-lg) !important;
         padding: 18px 22px !important;
-        border: 2px solid rgba(0, 255, 255, 0.4) !important;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15) !important;
+        border: 2px solid rgba(192, 192, 192, 0.4) !important;
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1) !important;
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
     }
 
@@ -2097,14 +2097,14 @@ st.markdown("""
 
     [data-testid="stAlert"] {
         border-radius: var(--radius-lg) !important;
-        border-left: 4px solid #00FFFF !important;
+        border-left: 4px solid #C0C0C0 !important;
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
     }
 
     [data-baseweb="notification"] {
         border-radius: var(--radius-lg) !important;
-        background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border-left: 4px solid #00FFFF !important;
+        background: linear-gradient(135deg, rgba(100, 110, 130, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left: 4px solid #C0C0C0 !important;
     }
 
     [data-baseweb="notification"] [data-testid="stMarkdownContainer"] p {
@@ -2115,40 +2115,40 @@ st.markdown("""
     /* Info alert styling */
     .element-container:has([data-testid="stAlert"]) [role="alert"] {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border-left-color: #00FFFF !important;
+        border-left-color: #C0C0C0 !important;
         border-radius: var(--radius-lg) !important;
         padding: 18px 22px !important;
     }
 
-    /* ========== CONTAINERS & CARDS - HIGH CONTRAST ========== */
+    /* ========== CONTAINERS & CARDS - SILVER METALLIC ========== */
     [data-testid="stVerticalBlock"] > div:has(> [data-testid="stHorizontalBlock"]) {
         background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%);
         border-radius: var(--radius-xl);
         padding: 24px;
-        border: 2px solid rgba(0, 255, 255, 0.4);
+        border: 2px solid rgba(192, 192, 192, 0.4);
         margin: 16px 0;
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+        box-shadow: 0 0 15px rgba(192, 192, 192, 0.1);
     }
 
     /* File uploader styling */
     .stFileUploader {
         background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
-        border: 2px dashed rgba(0, 255, 255, 0.5) !important;
+        border: 2px dashed rgba(192, 192, 192, 0.5) !important;
         border-radius: var(--radius-lg) !important;
         padding: 32px !important;
         transition: all 0.2s ease !important;
     }
 
     .stFileUploader:hover {
-        border-color: #00FFFF !important;
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(60, 70, 90, 0.95) 100%) !important;
-        box-shadow: 0 0 25px rgba(0, 255, 255, 0.2) !important;
+        border-color: #C0C0C0 !important;
+        background: linear-gradient(135deg, rgba(100, 110, 130, 0.3) 0%, rgba(60, 70, 90, 0.95) 100%) !important;
+        box-shadow: 0 0 20px rgba(192, 192, 192, 0.15) !important;
     }
 
     /* Divider styling */
     hr {
         border: none !important;
-        border-top: 1px solid rgba(0, 255, 255, 0.3) !important;
+        border-top: 1px solid rgba(192, 192, 192, 0.3) !important;
         margin: 24px 0 !important;
     }
 
