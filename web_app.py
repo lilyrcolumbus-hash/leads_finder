@@ -1729,6 +1729,205 @@ if 'warming_schedule' not in st.session_state:
 if 'language' not in st.session_state:
     st.session_state.language = 'en'  # 'en' for English, 'es' for Spanish
 
+# Error notification system
+if 'error_notifications' not in st.session_state:
+    st.session_state.error_notifications = []  # List of error notifications
+
+def add_error_notification(title: str, message: str, error_type: str = "error", source: str = "System"):
+    """Add an error notification to the queue.
+
+    Args:
+        title: Short error title
+        message: Detailed error message
+        error_type: 'error', 'warning', 'api_error', 'network_error'
+        source: Where the error originated (e.g., 'Reddit API', 'HubSpot', 'Search')
+    """
+    from datetime import datetime
+    notification = {
+        'id': datetime.now().timestamp(),
+        'title': title,
+        'message': message,
+        'type': error_type,
+        'source': source,
+        'timestamp': datetime.now().isoformat(),
+        'dismissed': False
+    }
+    st.session_state.error_notifications.append(notification)
+
+def dismiss_notification(notification_id):
+    """Mark a notification as dismissed."""
+    for notif in st.session_state.error_notifications:
+        if notif['id'] == notification_id:
+            notif['dismissed'] = True
+
+def clear_all_notifications():
+    """Clear all notifications."""
+    st.session_state.error_notifications = []
+
+def render_error_notifications():
+    """Render the error notification panel if there are active notifications."""
+    active_notifications = [n for n in st.session_state.error_notifications if not n.get('dismissed')]
+
+    if not active_notifications:
+        return
+
+    # Error notification styles
+    st.markdown("""
+    <style>
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        .error-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        }
+        .error-notification {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+            border: 1px solid #FECACA;
+            border-left: 4px solid #EF4444;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2);
+            animation: slideIn 0.3s ease-out;
+        }
+        .error-notification.warning {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
+            border-color: #FDE68A;
+            border-left-color: #F59E0B;
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.2);
+        }
+        .error-notification.api-error {
+            background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
+            border-color: #BFDBFE;
+            border-left-color: #3B82F6;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+        }
+        .error-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .error-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+        .error-icon.error { background: #FEE2E2; }
+        .error-icon.warning { background: #FEF3C7; }
+        .error-icon.api-error { background: #DBEAFE; }
+        .error-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1E293B;
+            flex: 1;
+        }
+        .error-source {
+            font-size: 10px;
+            color: #64748B;
+            background: #F1F5F9;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .error-message {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+            margin-top: 8px;
+            padding-left: 44px;
+        }
+        .error-time {
+            font-size: 11px;
+            color: #94A3B8;
+            padding-left: 44px;
+            margin-top: 8px;
+        }
+        .error-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-left: 44px;
+        }
+        .notification-badge {
+            position: fixed;
+            top: 85px;
+            right: 25px;
+            background: #EF4444;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 10000;
+            animation: pulse 2s infinite;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Build notifications HTML
+    notifications_html = '<div class="error-panel">'
+
+    for notif in active_notifications[-5:]:  # Show last 5 notifications
+        error_type = notif.get('type', 'error')
+        icon = '⚠️' if error_type == 'warning' else '🔌' if error_type == 'api_error' else '❌'
+        css_class = error_type.replace('_', '-')
+
+        # Format timestamp
+        try:
+            from datetime import datetime
+            ts = datetime.fromisoformat(notif['timestamp'])
+            time_str = ts.strftime('%H:%M:%S')
+        except:
+            time_str = 'Just now'
+
+        notifications_html += f"""
+        <div class="error-notification {css_class}">
+            <div class="error-header">
+                <div style="display: flex; align-items: center;">
+                    <div class="error-icon {css_class}">{icon}</div>
+                    <div class="error-title">{notif['title']}</div>
+                </div>
+                <span class="error-source">{notif['source']}</span>
+            </div>
+            <div class="error-message">{notif['message']}</div>
+            <div class="error-time">🕐 {time_str}</div>
+        </div>
+        """
+
+    notifications_html += '</div>'
+
+    # Badge showing count
+    if len(active_notifications) > 0:
+        notifications_html += f'<div class="notification-badge">{len(active_notifications)}</div>'
+
+    st.markdown(notifications_html, unsafe_allow_html=True)
+
+    # Dismiss button
+    if st.button("✕ Dismiss All Notifications", key="dismiss_all_errors"):
+        clear_all_notifications()
+        st.rerun()
+
 
 # ============================================
 # SIDEBAR
@@ -2302,7 +2501,32 @@ def show_search():
                     all_leads.extend(batch.leads)
                     with results:
                         st.success(f"{name}: {len(batch.leads)} leads")
+            except ConnectionError as e:
+                add_error_notification(
+                    title=f"Connection Failed: {name}",
+                    message=f"Could not connect to {name}. Check your internet connection or try again later.",
+                    error_type="api_error",
+                    source=name
+                )
+                with results:
+                    st.warning(f"{name}: Connection error")
+            except TimeoutError as e:
+                add_error_notification(
+                    title=f"Timeout: {name}",
+                    message=f"{name} took too long to respond. The service might be overloaded.",
+                    error_type="api_error",
+                    source=name
+                )
+                with results:
+                    st.warning(f"{name}: Timeout")
             except Exception as e:
+                error_msg = str(e)[:100]
+                add_error_notification(
+                    title=f"Search Error: {name}",
+                    message=f"Error while searching {name}: {error_msg}",
+                    error_type="error",
+                    source=name
+                )
                 with results:
                     st.warning(f"{name}: Error - {str(e)[:50]}")
 
@@ -3171,8 +3395,17 @@ def show_leads():
                 stage = st.selectbox("Filter by stage", ["All"] + [s.value for s in LeadStage])
 
                 if st.button("🔍 Load from HubSpot", type="primary"):
-                    with st.spinner("Loading..."):
-                        contacts = crm.get_all_contacts() if stage == "All" else crm.get_contacts_by_stage(LeadStage(stage))
+                    try:
+                        with st.spinner("Loading..."):
+                            contacts = crm.get_all_contacts() if stage == "All" else crm.get_contacts_by_stage(LeadStage(stage))
+                    except Exception as e:
+                        add_error_notification(
+                            title="HubSpot Connection Error",
+                            message=f"Could not load contacts from HubSpot. Please check your API key in Settings. Error: {str(e)[:80]}",
+                            error_type="api_error",
+                            source="HubSpot"
+                        )
+                        contacts = []
 
                     if contacts:
                         st.success(f"Found {len(contacts)} contacts in HubSpot")
@@ -3383,8 +3616,17 @@ def show_analytics():
             """, unsafe_allow_html=True)
         else:
             # Show HubSpot stats if connected
-            with st.spinner(t('loading_hubspot')):
-                stats = crm.get_statistics()
+            try:
+                with st.spinner(t('loading_hubspot')):
+                    stats = crm.get_statistics()
+            except Exception as e:
+                add_error_notification(
+                    title="HubSpot Statistics Error",
+                    message=f"Could not load statistics from HubSpot. Error: {str(e)[:80]}",
+                    error_type="api_error",
+                    source="HubSpot"
+                )
+                stats = {"error": str(e)}
 
             if "error" not in stats:
                 st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
@@ -6823,6 +7065,9 @@ def show_lead_warming():
 
 def main():
     render_sidebar()
+
+    # Render error notifications (floating panel)
+    render_error_notifications()
 
     # Render floating AI assistant on all pages
     render_floating_assistant()
