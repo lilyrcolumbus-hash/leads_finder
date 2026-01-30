@@ -5879,143 +5879,285 @@ Best regards'''
 
 
 def show_config():
-    # Page Title
-    st.title("⚙️ Settings")
-    st.caption("APIs and system parameters")
-
-    st.divider()
+    # Modern Settings Header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1E293B 0%, #334155 100%); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 36px;">⚙️</span>
+            </div>
+            <div>
+                <h1 style="margin: 0 0 8px 0; color: white; font-size: 28px; font-weight: 700;">Settings</h1>
+                <p style="margin: 0; color: #94A3B8; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # API Integrations Section
-    st.subheader("🔗 API Integrations")
+    st.markdown("""
+    <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h2 style="margin: 0; color: #1E293B; font-size: 20px; font-weight: 700;">🔗 API Integrations</h2>
+        </div>
+        <p style="margin: 0; color: #64748B; font-size: 14px;">Connect your external services to unlock full platform functionality</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col1, col2, col3, col4 = st.columns(4)
+    # API Cards - Row 1 (Main APIs)
+    st.markdown("""
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+    """, unsafe_allow_html=True)
 
-    with col1:
-        with st.container(border=True):
-            st.markdown("### 📊 HubSpot")
-            if settings.hubspot_api_key:
-                st.success("✓ Connected")
-            else:
-                st.warning("Not configured")
+    # HubSpot
+    hubspot_status = "connected" if settings.hubspot_api_key else "disconnected"
+    hubspot_icon = "✓" if settings.hubspot_api_key else "○"
+    hubspot_color = "#10B981" if settings.hubspot_api_key else "#F59E0B"
+    hubspot_bg = "#D1FAE5" if settings.hubspot_api_key else "#FEF3C7"
+    hubspot_text = "Connected" if settings.hubspot_api_key else "Not configured"
 
-    with col2:
-        with st.container(border=True):
-            st.markdown("### 🔍 Google")
-            if settings.google_api_key:
-                st.success("✓ Connected")
-            else:
-                st.warning("Not configured")
+    # Google
+    google_status = "connected" if settings.google_api_key else "disconnected"
+    google_icon = "✓" if settings.google_api_key else "○"
+    google_color = "#10B981" if settings.google_api_key else "#F59E0B"
+    google_bg = "#D1FAE5" if settings.google_api_key else "#FEF3C7"
+    google_text = "Connected" if settings.google_api_key else "Not configured"
 
-    with col3:
-        with st.container(border=True):
-            st.markdown("### 🤖 OpenAI")
-            if settings.openai_api_key:
-                st.success("✓ Connected")
-            else:
-                st.warning("Not configured")
+    # OpenAI
+    openai_status = "connected" if settings.openai_api_key else "disconnected"
+    openai_icon = "✓" if settings.openai_api_key else "○"
+    openai_color = "#10B981" if settings.openai_api_key else "#F59E0B"
+    openai_bg = "#D1FAE5" if settings.openai_api_key else "#FEF3C7"
+    openai_text = "Connected" if settings.openai_api_key else "Not configured"
 
-    with col4:
-        with st.container(border=True):
-            st.markdown("### 🧠 Anthropic")
-            if settings.anthropic_api_key:
-                st.success("✓ Connected")
-            else:
-                st.warning("Not configured")
+    # Anthropic
+    anthropic_status = "connected" if settings.anthropic_api_key else "disconnected"
+    anthropic_icon = "✓" if settings.anthropic_api_key else "○"
+    anthropic_color = "#10B981" if settings.anthropic_api_key else "#F59E0B"
+    anthropic_bg = "#D1FAE5" if settings.anthropic_api_key else "#FEF3C7"
+    anthropic_text = "Connected" if settings.anthropic_api_key else "Not configured"
 
-    # Second row of APIs
-    col5, col6, col7, col8 = st.columns(4)
+    st.markdown(f"""
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+        <!-- HubSpot -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">HubSpot CRM</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hubspot_bg}; color: {hubspot_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{hubspot_icon}</span> {hubspot_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Sync leads & contacts</p>
+        </div>
+        <!-- Google -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Google Search</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {google_bg}; color: {google_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{google_icon}</span> {google_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Web search for leads</p>
+        </div>
+        <!-- OpenAI -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">🤖</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">OpenAI</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {openai_bg}; color: {openai_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{openai_icon}</span> {openai_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">AI lead qualification</p>
+        </div>
+        <!-- Anthropic -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">🧠</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Anthropic Claude</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {anthropic_bg}; color: {anthropic_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{anthropic_icon}</span> {anthropic_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">AI assistant</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    with col5:
-        with st.container(border=True):
-            st.markdown("### 📧 Hunter.io")
-            if settings.hunter_api_key:
-                st.success("✓ Connected")
-            else:
-                st.info("Optional - Email Finder")
+    # Row 2 - Enrichment APIs
+    hunter_status = "connected" if settings.hunter_api_key else "optional"
+    hunter_icon = "✓" if settings.hunter_api_key else "○"
+    hunter_color = "#10B981" if settings.hunter_api_key else "#3B82F6"
+    hunter_bg = "#D1FAE5" if settings.hunter_api_key else "#DBEAFE"
+    hunter_text = "Connected" if settings.hunter_api_key else "Optional"
 
-    with col6:
-        with st.container(border=True):
-            st.markdown("### 🚀 Apollo.io")
-            if settings.apollo_api_key:
-                st.success("✓ Connected")
-                st.caption("Email + Phone + Company Data")
-            else:
-                st.warning("Not configured")
-                st.caption("Add APOLLO_API_KEY to .env")
+    apollo_status = "connected" if settings.apollo_api_key else "disconnected"
+    apollo_icon = "✓" if settings.apollo_api_key else "○"
+    apollo_color = "#10B981" if settings.apollo_api_key else "#F59E0B"
+    apollo_bg = "#D1FAE5" if settings.apollo_api_key else "#FEF3C7"
+    apollo_text = "Connected" if settings.apollo_api_key else "Not configured"
 
-    with col7:
-        # Deduplication stats
-        with st.container(border=True):
-            st.markdown("### 🔄 Deduplication")
-            st.success("✓ Active")
+    st.markdown(f"""
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+        <!-- Hunter.io -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">📧</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Hunter.io</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hunter_bg}; color: {hunter_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{hunter_icon}</span> {hunter_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Email finder service</p>
+        </div>
+        <!-- Apollo.io -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">🚀</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Apollo.io</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {apollo_bg}; color: {apollo_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{apollo_icon}</span> {apollo_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Email + Phone + Company</p>
+        </div>
+        <!-- Deduplication -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">🔄</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Deduplication</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>✓</span> Active
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Remove duplicate leads</p>
+        </div>
+        <!-- CSV Export -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 12px;">📥</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">CSV Export</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>✓</span> Available
+            </div>
+            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Export leads to CSV</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    with col8:
-        # Export status
-        with st.container(border=True):
-            st.markdown("### 📥 CSV Export")
-            st.success("✓ Available")
+    # System Status Section
+    st.markdown("""
+    <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <h2 style="margin: 0; color: #1E293B; font-size: 20px; font-weight: 700;">📈 System Status</h2>
+        </div>
+        <p style="margin: 0; color: #64748B; font-size: 14px;">Current system features and data statistics</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Third row - Storage and Stats
-    col9, col10, col11, col12 = st.columns(4)
+    stats = lead_manager.get_stats()
+    ai_ready = settings.openai_api_key or settings.anthropic_api_key
 
-    with col9:
-        with st.container(border=True):
-            st.markdown("### 💾 Storage")
-            stats = lead_manager.get_stats()
-            st.metric("Saved Leads", stats['total'])
-
-    with col10:
-        with st.container(border=True):
-            st.markdown("### 📊 Triple Score")
-            st.success("✓ Active")
-            st.caption("Pain + Intent + Fit")
-
-    with col11:
-        with st.container(border=True):
-            st.markdown("### 🎯 AI Filter")
-            if settings.openai_api_key or settings.anthropic_api_key:
-                st.success("✓ Ready")
-            else:
-                st.warning("No AI key")
-
-    with col12:
-        with st.container(border=True):
-            st.markdown("### 🔥 Lead Warming")
-            st.success("✓ Available")
-
-    st.divider()
+    st.markdown(f"""
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+        <!-- Storage -->
+        <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+            <div style="font-size: 28px; margin-bottom: 8px;">💾</div>
+            <div style="font-size: 32px; font-weight: 700;">{stats['total']}</div>
+            <div style="font-size: 14px; opacity: 0.9;">Saved Leads</div>
+        </div>
+        <!-- Triple Score -->
+        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+            <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
+            <div style="font-size: 20px; font-weight: 700;">Triple Score</div>
+            <div style="font-size: 14px; opacity: 0.9;">Pain + Intent + Fit</div>
+        </div>
+        <!-- AI Filter -->
+        <div style="background: linear-gradient(135deg, {'#8B5CF6' if ai_ready else '#F59E0B'} 0%, {'#7C3AED' if ai_ready else '#D97706'} 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+            <div style="font-size: 28px; margin-bottom: 8px;">🎯</div>
+            <div style="font-size: 20px; font-weight: 700;">AI Filter</div>
+            <div style="font-size: 14px; opacity: 0.9;">{'Ready' if ai_ready else 'No AI Key'}</div>
+        </div>
+        <!-- Lead Warming -->
+        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔥</div>
+            <div style="font-size: 20px; font-weight: 700;">Lead Warming</div>
+            <div style="font-size: 14px; opacity: 0.9;">Available</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Industries Section
-    st.subheader(f"🏢 Industries Configured ({len(settings.industries)})")
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div>
+                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🏢 Industries Configured</h3>
+                <p style="margin: 0; color: #64748B; font-size: 13px;">Target industries for lead generation</p>
+            </div>
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                {len(settings.industries)} industries
+            </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+    """, unsafe_allow_html=True)
 
-    industry_list = list(settings.industries.keys())
-    cols = st.columns(5)
-    for i, ind in enumerate(industry_list):
-        with cols[i % 5]:
-            st.markdown(f"• {ind}")
+    industry_tags = ""
+    for ind in list(settings.industries.keys()):
+        industry_tags += f'<span style="background: #F1F5F9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;">{ind}</span>'
 
-    st.divider()
+    st.markdown(f"""
+            {industry_tags}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Subreddits Section
-    st.subheader(f"📱 Subreddits ({len(settings.subreddits)} total)")
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div>
+                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">📱 Reddit Sources</h3>
+                <p style="margin: 0; color: #64748B; font-size: 13px;">Subreddits monitored for leads</p>
+            </div>
+            <div style="background: linear-gradient(135deg, #FF4500 0%, #FF6B35 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                {len(settings.subreddits)} subreddits
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     with st.expander("View all subreddits"):
-        sub_text = ", ".join([f"r/{s}" for s in settings.subreddits])
-        st.write(sub_text)
-
-    st.divider()
+        sub_cols = st.columns(5)
+        for i, s in enumerate(settings.subreddits):
+            with sub_cols[i % 5]:
+                st.markdown(f"• r/{s}")
 
     # Keywords Section
-    st.subheader(f"🔑 Pain Keywords ({len(settings.pain_keywords)} total)")
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div>
+                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🔑 Pain Keywords</h3>
+                <p style="margin: 0; color: #64748B; font-size: 13px;">Keywords that indicate buying intent or pain points</p>
+            </div>
+            <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                {len(settings.pain_keywords)} keywords
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     with st.expander("View all keywords"):
-        kw_text = ", ".join(settings.pain_keywords)
-        st.write(kw_text)
+        kw_cols = st.columns(4)
+        for i, kw in enumerate(settings.pain_keywords):
+            with kw_cols[i % 4]:
+                st.markdown(f"• {kw}")
 
-    st.divider()
-
-    # Configuration Info
-    st.info("**How to configure API keys:** Go to your Streamlit Cloud dashboard → Settings → Secrets to add or update your API credentials securely.")
+    # Configuration Help
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE; border-radius: 16px; padding: 24px; margin-top: 24px;">
+        <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <div style="background: #4F46E5; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 24px;">💡</span>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: #3730A3; font-size: 16px; font-weight: 700;">How to Configure API Keys</h4>
+                <p style="margin: 0; color: #4338CA; font-size: 14px; line-height: 1.6;">
+                    Go to your Streamlit Cloud dashboard → Settings → Secrets to add or update your API credentials securely.
+                    Each API key should be added as an environment variable (e.g., HUBSPOT_API_KEY, OPENAI_API_KEY).
+                </p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================
