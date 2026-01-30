@@ -5083,64 +5083,99 @@ Best regards'''
 
     # ==================== TAB 4: TASKS ====================
     with tab4:
+        # Modern Task Management Header
         st.markdown("""
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-            <h3 style="margin: 0; color: #1E293B;">Task Management</h3>
-            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #F59E0B; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
-                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <strong style="color: #F59E0B;">What are Tasks?</strong><br><br>
-                    Tasks help you organize your daily follow-up activities:<br><br>
-                    • <strong>📞 Calls:</strong> Schedule follow-up calls with leads<br>
-                    • <strong>📧 Emails:</strong> Track emails you need to send<br>
-                    • <strong>📅 Meetings:</strong> Schedule demos and presentations<br>
-                    • <strong>📝 Notes:</strong> Reminders for research or prep<br><br>
-                    <em style="color: #94A3B8;">Never forget to follow up on a hot lead!</em>
-                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid #F59E0B;">
+            <div style="display: flex; align-items: flex-start; gap: 16px;">
+                <div style="background: #F59E0B; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 28px;">📋</span>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0 0 8px 0; color: #92400E; font-size: 20px; font-weight: 700;">Task Management</h3>
+                    <p style="margin: 0; color: #78350F; font-size: 14px; line-height: 1.5;">
+                        Organize your daily follow-up activities and never miss an opportunity. Create tasks for calls, emails, meetings, and notes to stay on top of your sales pipeline.
+                    </p>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Task quick stats
+        # Task quick stats with explanations
         today = datetime.now().date()
         overdue_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() < today]
         today_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() == today]
         upcoming_tasks = [t for t in st.session_state.crm_tasks if not t.get('completed') and t.get('due_date') and datetime.fromisoformat(t.get('due_date')).date() > today]
         completed_tasks = [t for t in st.session_state.crm_tasks if t.get('completed')]
 
-        task_stat_cols = st.columns(4)
-        with task_stat_cols[0]:
-            st.metric("Overdue", len(overdue_tasks), delta=None, delta_color="inverse")
-        with task_stat_cols[1]:
-            st.metric("Due Today", len(today_tasks))
-        with task_stat_cols[2]:
-            st.metric("Upcoming", len(upcoming_tasks))
-        with task_stat_cols[3]:
-            st.metric("Completed", len(completed_tasks))
+        # Stats cards with modern design
+        st.markdown(f"""
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #FCA5A5;">
+                <div style="font-size: 32px; font-weight: 800; color: #DC2626;">{len(overdue_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #991B1B; text-transform: uppercase; letter-spacing: 0.05em;">Overdue</div>
+                <div style="font-size: 10px; color: #B91C1C; margin-top: 4px;">Need attention now</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #FCD34D;">
+                <div style="font-size: 32px; font-weight: 800; color: #D97706;">{len(today_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #92400E; text-transform: uppercase; letter-spacing: 0.05em;">Due Today</div>
+                <div style="font-size: 10px; color: #B45309; margin-top: 4px;">Complete before EOD</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #93C5FD;">
+                <div style="font-size: 32px; font-weight: 800; color: #2563EB;">{len(upcoming_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.05em;">Upcoming</div>
+                <div style="font-size: 10px; color: #1D4ED8; margin-top: 4px;">Scheduled for later</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #6EE7B7;">
+                <div style="font-size: 32px; font-weight: 800; color: #059669;">{len(completed_tasks)}</div>
+                <div style="font-size: 12px; font-weight: 600; color: #065F46; text-transform: uppercase; letter-spacing: 0.05em;">Completed</div>
+                <div style="font-size: 10px; color: #047857; margin-top: 4px;">Successfully done</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.markdown("---")
+        # Create new task - Modern Design
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid #E2E8F0;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 8px; padding: 8px 12px;">
+                    <span style="color: white; font-size: 16px;">+</span>
+                </div>
+                <div>
+                    <h4 style="margin: 0; color: #1E293B; font-size: 16px; font-weight: 700;">Create New Task</h4>
+                    <p style="margin: 0; color: #64748B; font-size: 12px;">Schedule a follow-up activity for a lead</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        # Create new task
-        st.markdown("#### Create New Task")
-        with st.expander("➕ Add New Task", expanded=False):
+        with st.expander("Click here to add a new task", expanded=False):
+            # Explanation inside the form
+            st.markdown("""
+            <div style="background: #F0F9FF; border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 3px solid #3B82F6;">
+                <p style="margin: 0; color: #1E40AF; font-size: 13px;">
+                    <strong>How to create a task:</strong> Fill in the title, select task type (call, email, meeting, etc.), set a due date, and optionally link it to a contact.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
             task_col1, task_col2 = st.columns(2)
 
             with task_col1:
-                task_title = st.text_input("Task Title", placeholder="e.g., Follow up with John")
-                task_description = st.text_area("Description", placeholder="Optional notes...", height=80)
+                task_title = st.text_input("Task Title", placeholder="e.g., Follow up with John about demo", help="Short description of what you need to do")
+                task_description = st.text_area("Description (optional)", placeholder="Add any notes or context for this task...", height=80, help="Additional details to remember")
 
             with task_col2:
-                task_type = st.selectbox("Type", ["📞 Call", "📧 Email", "📅 Meeting", "📝 Note", "✅ Other"])
-                task_due = st.date_input("Due Date", value=datetime.now(), key="task_due_date")
-                task_priority = st.selectbox("Priority", ["🔴 High", "🟡 Medium", "🟢 Low"])
+                task_type = st.selectbox("Task Type", ["📞 Call", "📧 Email", "📅 Meeting", "📝 Note", "✅ Other"], help="What kind of activity is this?")
+                task_due = st.date_input("Due Date", value=datetime.now(), key="task_due_date", help="When should this task be completed?")
+                task_priority = st.selectbox("Priority", ["🔴 High", "🟡 Medium", "🟢 Low"], help="How urgent is this task?")
                 task_contact = st.selectbox(
-                    "Associated Contact",
+                    "Link to Contact (optional)",
                     ["None"] + [f"{(l.get('title') or l.get('author') or l.get('company') or 'Unknown')[:25]}" for l in all_leads[:30]],
-                    key="task_contact"
+                    key="task_contact",
+                    help="Associate this task with a specific lead"
                 )
 
-            if st.button("💾 Create Task", type="primary", use_container_width=True, key="create_task_btn"):
+            if st.button("Create Task", type="primary", use_container_width=True, key="create_task_btn"):
                 if task_title:
                     import uuid
                     new_task = {
@@ -5155,15 +5190,34 @@ Best regards'''
                         'created_at': datetime.now().isoformat()
                     }
                     st.session_state.crm_tasks.append(new_task)
-                    st.success(f"Task '{task_title}' created!")
+                    st.success(f"Task '{task_title}' created successfully!")
                     st.rerun()
                 else:
                     st.warning("Please enter a task title")
 
-        # Task list
-        st.markdown("#### Task List")
+        # Task list with modern header and filter explanation
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #E2E8F0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <div>
+                    <h4 style="margin: 0; color: #1E293B; font-size: 16px; font-weight: 700;">Your Task List</h4>
+                    <p style="margin: 4px 0 0 0; color: #64748B; font-size: 12px;">Check the box to mark a task as complete</p>
+                </div>
+            </div>
+            <div style="background: #F1F5F9; border-radius: 8px; padding: 12px; margin-top: 12px;">
+                <p style="margin: 0; color: #475569; font-size: 12px;">
+                    <strong>Filter Options:</strong>
+                    <span style="color: #DC2626;">All</span> = View all tasks |
+                    <span style="color: #DC2626;">Overdue</span> = Past due date |
+                    <span style="color: #D97706;">Today</span> = Due today |
+                    <span style="color: #2563EB;">Upcoming</span> = Future tasks |
+                    <span style="color: #059669;">Completed</span> = Done tasks
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        task_filter = st.radio("Filter", ["All", "Overdue", "Today", "Upcoming", "Completed"], horizontal=True, key="task_filter")
+        task_filter = st.radio("Filter tasks by status:", ["All", "Overdue", "Today", "Upcoming", "Completed"], horizontal=True, key="task_filter", help="Select a filter to view specific tasks")
 
         if task_filter == "Overdue":
             display_tasks = overdue_tasks
@@ -5188,32 +5242,58 @@ Best regards'''
                     else:
                         task_status = "upcoming"
 
-                with st.container(border=True):
-                    t_col1, t_col2, t_col3, t_col4 = st.columns([0.5, 3, 2, 1])
+                # Status colors and backgrounds
+                status_styles = {
+                    "overdue": {"bg": "#FEE2E2", "border": "#FCA5A5", "color": "#DC2626"},
+                    "today": {"bg": "#FEF3C7", "border": "#FCD34D", "color": "#D97706"},
+                    "upcoming": {"bg": "#DBEAFE", "border": "#93C5FD", "color": "#2563EB"},
+                    "completed": {"bg": "#F1F5F9", "border": "#CBD5E1", "color": "#64748B"}
+                }
+                style = status_styles.get(task_status, {"bg": "#FFFFFF", "border": "#E2E8F0", "color": "#475569"})
 
-                    with t_col1:
-                        is_done = st.checkbox("", value=task.get('completed', False), key=f"task_done_{task.get('id')}", label_visibility="collapsed")
-                        if is_done != task.get('completed', False):
-                            task['completed'] = is_done
-                            st.rerun()
+                # Modern task card
+                st.markdown(f"""
+                <div style="background: {style['bg']}; border: 1px solid {style['border']}; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span style="font-size: 16px;">{task.get('type', '📝').split()[0]}</span>
+                                <span style="font-weight: 600; color: #1E293B; {'text-decoration: line-through; color: #94A3B8;' if task.get('completed') else ''}">{task.get('title', 'Untitled')}</span>
+                                <span style="background: {style['color']}20; color: {style['color']}; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; text-transform: uppercase;">{task_status or 'pending'}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 12px; color: #64748B;">
+                                <span>📅 {task.get('due_date', 'No date')[:10]}</span>
+                                <span>{task.get('priority', '🟡 Medium')}</span>
+                                {f"<span>👤 {task.get('contact')}</span>" if task.get('contact') else ""}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-                    with t_col2:
-                        title_style = "text-decoration: line-through; color: #94A3B8;" if task.get('completed') else ""
-                        st.markdown(f"<span style='{title_style}'>{task.get('type', '📝')} **{task.get('title', 'Untitled')}**</span>", unsafe_allow_html=True)
-                        if task.get('contact'):
-                            st.caption(f"Contact: {task.get('contact')}")
-
-                    with t_col3:
-                        due_color = {"overdue": "#EF4444", "today": "#F59E0B", "upcoming": "#3B82F6", "completed": "#94A3B8"}.get(task_status, "#64748B")
-                        st.markdown(f"<span style='color: {due_color}; font-size: 12px;'>📅 {task.get('due_date', 'No date')[:10]}</span>", unsafe_allow_html=True)
-                        st.caption(task.get('priority', '🟡 Medium'))
-
-                    with t_col4:
-                        if st.button("🗑️", key=f"del_task_{task.get('id')}", help="Delete task"):
-                            st.session_state.crm_tasks.remove(task)
-                            st.rerun()
+                # Actions row
+                act_col1, act_col2, act_col3 = st.columns([2, 1, 1])
+                with act_col1:
+                    is_done = st.checkbox(
+                        "Mark as complete" if not task.get('completed') else "Completed",
+                        value=task.get('completed', False),
+                        key=f"task_done_{task.get('id')}"
+                    )
+                    if is_done != task.get('completed', False):
+                        task['completed'] = is_done
+                        st.rerun()
+                with act_col3:
+                    if st.button("Delete", key=f"del_task_{task.get('id')}", type="secondary"):
+                        st.session_state.crm_tasks.remove(task)
+                        st.rerun()
         else:
-            st.info("No tasks match the selected filter.")
+            st.markdown("""
+            <div style="background: #F8FAFC; border-radius: 12px; padding: 32px; text-align: center; border: 2px dashed #CBD5E1;">
+                <span style="font-size: 48px;">📋</span>
+                <h4 style="margin: 16px 0 8px 0; color: #475569;">No tasks found</h4>
+                <p style="margin: 0; color: #64748B; font-size: 14px;">No tasks match the selected filter. Create a new task above to get started!</p>
+            </div>
+            """, unsafe_allow_html=True)
 
     # ==================== TAB 5: EMAIL TEMPLATES ====================
     with tab5:
