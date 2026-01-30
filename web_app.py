@@ -2762,14 +2762,36 @@ def show_dashboard():
 
 
 def show_search():
-    # Page Title
-    st.title("🔎 Find Leads")
-    st.caption("Find prospects with communication problems")
-
-    st.divider()
+    # Holographic Page Header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            🔎 FIND LEADS
+        </h1>
+        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+            Discover prospects with communication problems
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Active Sources Section
-    st.subheader("📡 Active Sources (8 Available)")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            📡 ACTIVE SOURCES
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">8 data sources available for lead discovery</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -2784,12 +2806,22 @@ def show_search():
         use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
         use_gmaps = st.checkbox("📍 Google Maps - Local Businesses", value=True, key="gmaps_check")
 
-    st.info("💡 **Google Maps** busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. **GRATIS** - no usa API.")
-
-    st.divider()
+    st.markdown("""
+    <div style="background: rgba(0, 128, 255, 0.1); border: 1px solid rgba(0, 128, 255, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+        <span style="color: #0080FF; font-weight: 600;">💡 TIP:</span>
+        <span style="color: #80C4D4;"> Google Maps busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. GRATIS - no usa API.</span>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Coming Soon Sources
-    st.subheader("🚀 Coming Soon (2 More)")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 206, 209, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #00CED1; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            🚀 COMING SOON
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">2 more sources in development</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     coming_cols = st.columns(2)
     coming_sources = [
@@ -2798,13 +2830,18 @@ def show_search():
     ]
     for i, (icon, name) in enumerate(coming_sources):
         with coming_cols[i]:
-            st.markdown(f"**{icon}**")
-            st.caption(name)
-
-    st.divider()
+            st.markdown(f"<span style='color: #00FFFF; font-size: 24px;'>{icon}</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #80C4D4;'>{name}</span>", unsafe_allow_html=True)
 
     # Time Filter
-    st.subheader("📅 Time Range")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            📅 TIME RANGE
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">Filter results by post date</p>
+    </div>
+    """, unsafe_allow_html=True)
     time_options = {
         "Last 24 hours": "day",
         "Last 7 days": "week",
@@ -2816,10 +2853,15 @@ def show_search():
     selected_time_label = st.selectbox("Search posts from:", list(time_options.keys()), index=1)
     selected_time = time_options[selected_time_label]
 
-    st.divider()
-
     # Location Filter
-    st.subheader("📍 Location Filter (for Indeed & Yelp)")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            📍 LOCATION FILTER
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">Target specific geographic areas (for Indeed, Yelp & Google Maps)</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     location_col1, location_col2 = st.columns(2)
     with location_col1:
@@ -2852,25 +2894,43 @@ def show_search():
     search_location = ", ".join(location_parts) if location_parts else ""
 
     if search_location:
-        st.success(f"📍 Searching in: **{search_location}**")
-
-    st.divider()
+        st.markdown(f"""
+        <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+            <span style="color: #00FF88;">📍 Searching in: <strong>{search_location}</strong></span>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Industry Filter
-    st.subheader("🏢 Filter by Industry (Optional)")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            🏢 INDUSTRY FILTER
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">Optional - Focus on specific business verticals</p>
+    </div>
+    """, unsafe_allow_html=True)
     industries = ["All Industries"] + list(settings.industries.keys())
     selected_industry = st.selectbox("Select industry", industries)
 
-    st.divider()
-
     # AI Option
     ai_available = bool(settings.openai_api_key or settings.anthropic_api_key)
-    st.subheader("🤖 AI Qualification (Recommended)")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 206, 209, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #00CED1; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            🤖 AI QUALIFICATION
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">Recommended - Let AI automatically score and qualify leads</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     use_ai = st.checkbox("Use AI to qualify leads automatically", value=ai_available, disabled=not ai_available, key="ai_check")
 
     if not ai_available:
-        st.info("Configure OpenAI or Anthropic API key in Settings to enable AI qualification")
+        st.markdown("""
+        <div style="background: rgba(0, 128, 255, 0.1); border: 1px solid rgba(0, 128, 255, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+            <span style="color: #0080FF;">ℹ️ Configure OpenAI or Anthropic API key in Settings to enable AI qualification</span>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -3325,13 +3385,36 @@ def show_search():
 
 
 def show_leads():
-    st.title("📋 My Leads")
-    st.caption("Manage and export your prospects")
-
-    st.divider()
+    # Holographic Page Header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            📋 MY LEADS
+        </h1>
+        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+            Manage and export your prospects
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Import Section with Field Mapping
-    st.subheader("📤 Import Leads")
+    st.markdown("""
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            📤 IMPORT LEADS
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">Upload CSV or Excel files to import leads</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Define standard CRM fields
     CRM_FIELDS = {
@@ -3864,35 +3947,27 @@ def show_leads():
 
 
 def show_analytics():
-    """Analytics page with modern visualizations and clear explanations."""
+    """Analytics page with holographic visualizations."""
 
-    # Page header with explanation tooltip
+    # Holographic Page Header
     st.markdown(f"""
-    <div style="margin-bottom: 24px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h1 style="margin: 0; color: #1E293B; font-size: 28px;">📊 {t('analytics_title')}</h1>
-            <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #6366F1; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600;">?</span>
-                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 16px 20px; border-radius: 12px; font-size: 13px; width: 320px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-                    <strong style="color: #818CF8; font-size: 15px;">{t('analytics_tooltip_title')}</strong><br><br>
-                    {t('analytics_tooltip_desc')}<br><br>
-                    • <strong>{t('leads_found')}:</strong> {t('total_discovered')}<br>
-                    • <strong>{t('qualified_leads')}:</strong> {t('passed_filters')}<br>
-                    • <strong>{t('conversion_rate')}:</strong> {t('qualified_total')}<br>
-                    • <strong>{t('leads_by_source')}:</strong> {t('leads_by_source_desc')}<br><br>
-                    <em style="color: #94A3B8;">{t('go_to_settings').split('.')[0]}</em>
-                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
-                </div>
-            </div>
-        </div>
-        <p style="color: #64748B; margin: 0; font-size: 15px;">{t('analytics_subtitle')}</p>
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            📊 {t('analytics_title').upper()}
+        </h1>
+        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+            {t('analytics_subtitle')}
+        </p>
     </div>
-    <style>
-        .metric-tooltip-wrapper:hover .metric-tooltip {{
-            opacity: 1 !important;
-            visibility: visible !important;
-        }}
-    </style>
     """, unsafe_allow_html=True)
 
     with HubSpotCRM() as crm:
@@ -3904,38 +3979,76 @@ def show_analytics():
         hot_leads = len([l for l in st.session_state.leads if getattr(l, 'pain_score', 0) >= 70])
         avg_score = sum(getattr(l, 'pain_score', 0) for l in st.session_state.leads) / total_leads if total_leads > 0 else 0
 
-        # Modern KPI Cards
+        # Holographic KPI Cards
         st.markdown(f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{total_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('total_discovered')}</div>
+            <!-- Leads Found -->
+            <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.2) 0%, rgba(0, 40, 80, 0.4) 100%);
+                        border: 1px solid rgba(0, 128, 255, 0.4);
+                        border-radius: 16px;
+                        padding: 24px;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 0 30px rgba(0, 128, 255, 0.2), inset 0 0 30px rgba(0, 128, 255, 0.05);
+                        position: relative;
+                        overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
+                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
+                <div style="color: #0080FF; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(0, 128, 255, 0.5);">{total_leads}</div>
+                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">{t('total_discovered')}</div>
             </div>
-            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{qualified_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('passed_filters')}</div>
+            <!-- Qualified Leads -->
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 40, 40, 0.4) 100%);
+                        border: 1px solid rgba(0, 255, 136, 0.4);
+                        border-radius: 16px;
+                        padding: 24px;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.05);
+                        position: relative;
+                        overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
+                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
+                <div style="color: #00FF88; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);">{qualified_leads}</div>
+                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">{t('passed_filters')}</div>
             </div>
-            <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{rate:.1f}%</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('qualified_total')}</div>
+            <!-- Conversion Rate -->
+            <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.2) 0%, rgba(40, 30, 0, 0.4) 100%);
+                        border: 1px solid rgba(255, 184, 0, 0.4);
+                        border-radius: 16px;
+                        padding: 24px;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 0 30px rgba(255, 184, 0, 0.2), inset 0 0 30px rgba(255, 184, 0, 0.05);
+                        position: relative;
+                        overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
+                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
+                <div style="color: #FFB800; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(255, 184, 0, 0.5);">{rate:.1f}%</div>
+                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">{t('qualified_total')}</div>
             </div>
-            <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{hot_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Score 70+</div>
+            <!-- Hot Leads -->
+            <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.2) 0%, rgba(40, 10, 20, 0.4) 100%);
+                        border: 1px solid rgba(255, 51, 102, 0.4);
+                        border-radius: 16px;
+                        padding: 24px;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 0 30px rgba(255, 51, 102, 0.2), inset 0 0 30px rgba(255, 51, 102, 0.05);
+                        position: relative;
+                        overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
+                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
+                <div style="color: #FF3366; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(255, 51, 102, 0.5);">{hot_leads}</div>
+                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">Score 70+</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         if st.session_state.leads:
-            # Source distribution with modern visualization
+            # Source distribution with holographic visualization
             st.markdown(f"""
-            <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 {t('leads_by_source')}</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">{t('leads_by_source_desc')}</p>
+            <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+                <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+                    📊 {t('leads_by_source').upper()}
+                </h3>
+                <p style="color: #4A7080; font-size: 13px; margin: 0;">{t('leads_by_source_desc')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3945,24 +4058,24 @@ def show_analytics():
                 source_name = l.source.value if hasattr(l.source, 'value') else str(l.source)
                 source_counts[source_name] = source_counts.get(source_name, 0) + 1
 
-            # Source styling
+            # Source styling with neon colors
             source_colors = {
                 'reddit': ('#FF4500', '🔴'),
-                'google': ('#4285F4', '🔵'),
+                'google': ('#0080FF', '🔵'),
                 'hackernews': ('#FF6600', '🟠'),
-                'apollo': ('#5B5FC7', '🚀'),
-                'hunter': ('#F5A623', '🎯'),
-                'manual': ('#6B7280', '✏️'),
-                'producthunt': ('#DA552F', '🟤'),
-                'linkedin': ('#0A66C2', '🔷')
+                'apollo': ('#00CED1', '🚀'),
+                'hunter': ('#FFB800', '🎯'),
+                'manual': ('#80C4D4', '✏️'),
+                'producthunt': ('#FF3366', '🟤'),
+                'linkedin': ('#0080FF', '🔷')
             }
 
-            # Build modern bar chart
+            # Build holographic bar chart
             max_count = max(source_counts.values()) if source_counts else 1
-            chart_html = '<div style="background: white; border: 1px solid #E5E7EB; border-radius: 16px; padding: 24px;">'
+            chart_html = '<div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 24px; backdrop-filter: blur(5px);">'
 
             for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
-                color, icon = source_colors.get(source.lower(), ('#6B7280', '📊'))
+                color, icon = source_colors.get(source.lower(), ('#00FFFF', '📊'))
                 width_pct = (count / max_count * 100) if max_count > 0 else 0
                 pct_of_total = (count / total_leads * 100) if total_leads > 0 else 0
 
@@ -3970,17 +4083,17 @@ def show_analytics():
                 <div style="display: flex; align-items: center; margin-bottom: 16px;">
                     <div style="width: 120px; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 20px;">{icon}</span>
-                        <span style="font-size: 14px; font-weight: 600; color: #374151; text-transform: capitalize;">{source}</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #E0F7FF; text-transform: capitalize;">{source}</span>
                     </div>
                     <div style="flex: 1; margin: 0 20px;">
-                        <div style="background: #E5E7EB; border-radius: 8px; height: 28px; overflow: hidden;">
-                            <div style="background: linear-gradient(90deg, {color} 0%, {color}CC 100%); width: {width_pct}%; height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 12px; transition: width 0.5s ease;">
-                                <span style="color: white; font-weight: 700; font-size: 13px;">{count}</span>
+                        <div style="background: rgba(0, 40, 80, 0.5); border: 1px solid rgba(0, 255, 255, 0.1); border-radius: 8px; height: 28px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, {color} 0%, {color}99 100%); width: {width_pct}%; height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 12px; transition: width 0.5s ease; box-shadow: 0 0 15px {color}40;">
+                                <span style="color: white; font-weight: 700; font-size: 13px; text-shadow: 0 0 10px rgba(255,255,255,0.5);">{count}</span>
                             </div>
                         </div>
                     </div>
                     <div style="width: 80px; text-align: right;">
-                        <span style="font-size: 14px; font-weight: 600; color: {color};">{pct_of_total:.1f}%</span>
+                        <span style="font-size: 14px; font-weight: 600; color: {color}; text-shadow: 0 0 10px {color}80;">{pct_of_total:.1f}%</span>
                     </div>
                 </div>
                 """
@@ -3991,9 +4104,11 @@ def show_analytics():
             # Score Distribution
             st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
             st.markdown(f"""
-            <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">🎯 {t('score_distribution')}</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">{t('lead_quality_by_score')}</p>
+            <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+                <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+                    🎯 {t('score_distribution').upper()}
+                </h3>
+                <p style="color: #4A7080; font-size: 13px; margin: 0;">{t('lead_quality_by_score')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -4008,26 +4123,56 @@ def show_analytics():
                 else:
                     score_ranges['❄️ Cold (0-39)'] += 1
 
-            # Score distribution cards
+            # Holographic Score distribution cards
             st.markdown(f"""
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #EF4444;">
+                <!-- Hot Leads -->
+                <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(40, 10, 20, 0.4) 100%);
+                            border: 1px solid rgba(255, 51, 102, 0.4);
+                            border-radius: 12px;
+                            padding: 20px;
+                            text-align: center;
+                            backdrop-filter: blur(5px);
+                            box-shadow: 0 0 20px rgba(255, 51, 102, 0.15);
+                            position: relative;
+                            overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
                     <div style="font-size: 32px; margin-bottom: 8px;">🔥</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #EF4444;">{score_ranges['🔥 Hot (70-100)']}</div>
-                    <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Hot Leads (70-100)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">{t('ready_to_contact')}</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{score_ranges['🔥 Hot (70-100)']}</div>
+                    <div style="font-size: 13px; color: #E0F7FF; margin-top: 4px;">Hot Leads (70-100)</div>
+                    <div style="font-size: 12px; color: #4A7080;">{t('ready_to_contact')}</div>
                 </div>
-                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #F59E0B;">
+                <!-- Warm Leads -->
+                <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(40, 30, 0, 0.4) 100%);
+                            border: 1px solid rgba(255, 184, 0, 0.4);
+                            border-radius: 12px;
+                            padding: 20px;
+                            text-align: center;
+                            backdrop-filter: blur(5px);
+                            box-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
+                            position: relative;
+                            overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
                     <div style="font-size: 32px; margin-bottom: 8px;">🟡</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #F59E0B;">{score_ranges['🟡 Warm (40-69)']}</div>
-                    <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Warm Leads (40-69)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">{t('need_more_nurturing')}</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{score_ranges['🟡 Warm (40-69)']}</div>
+                    <div style="font-size: 13px; color: #E0F7FF; margin-top: 4px;">Warm Leads (40-69)</div>
+                    <div style="font-size: 12px; color: #4A7080;">{t('need_more_nurturing')}</div>
                 </div>
-                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #3B82F6;">
+                <!-- Cold Leads -->
+                <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 20, 40, 0.4) 100%);
+                            border: 1px solid rgba(0, 128, 255, 0.4);
+                            border-radius: 12px;
+                            padding: 20px;
+                            text-align: center;
+                            backdrop-filter: blur(5px);
+                            box-shadow: 0 0 20px rgba(0, 128, 255, 0.15);
+                            position: relative;
+                            overflow: hidden;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
                     <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #3B82F6;">{score_ranges['❄️ Cold (0-39)']}</div>
-                    <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Cold Leads (0-39)</div>
-                    <div style="font-size: 12px; color: #9CA3AF;">{t('low_priority')}</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #0080FF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 128, 255, 0.5);">{score_ranges['❄️ Cold (0-39)']}</div>
+                    <div style="font-size: 13px; color: #E0F7FF; margin-top: 4px;">Cold Leads (0-39)</div>
+                    <div style="font-size: 12px; color: #4A7080;">{t('low_priority')}</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -4141,32 +4286,36 @@ def show_analytics():
 def show_crm():
     """Professional CRM with complete pipeline management, deals, tasks, and HubSpot sync."""
 
-    # Enhanced CRM-specific CSS
+    # Holographic CRM-specific CSS
     st.markdown("""
     <style>
-        /* CRM Dashboard Cards */
+        /* CRM Dashboard Cards - Holographic */
         .crm-kpi-card {
-            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-            border: 1px solid #E2E8F0;
+            background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 16px;
             padding: 20px;
             text-align: center;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
         .crm-kpi-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.4);
         }
         .crm-kpi-value {
             font-size: 32px;
             font-weight: 700;
-            color: #1E293B;
+            color: #00FFFF;
             margin: 8px 0;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
         }
         .crm-kpi-label {
             font-size: 13px;
-            color: #64748B;
+            color: #80C4D4;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -4176,56 +4325,66 @@ def show_crm():
             margin-bottom: 8px;
         }
 
-        /* Revenue Card */
+        /* Revenue Card - Holographic */
         .revenue-card {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 40, 40, 0.4) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.4);
             border-radius: 16px;
             padding: 24px;
             color: white;
             text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
         }
         .revenue-value {
             font-size: 36px;
             font-weight: 800;
             margin: 8px 0;
+            color: #00FF88;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
         }
         .revenue-label {
             font-size: 14px;
-            opacity: 0.9;
+            color: #80C4D4;
         }
 
-        /* Pipeline Stage Header */
+        /* Pipeline Stage Header - Holographic */
         .pipeline-stage {
-            background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+            background: linear-gradient(180deg, rgba(0, 40, 80, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
             border-radius: 12px;
             padding: 16px 12px;
             text-align: center;
             margin-bottom: 12px;
-            border: 1px solid #E2E8F0;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
         }
         .pipeline-stage-title {
             font-weight: 700;
             font-size: 14px;
             margin: 6px 0 2px 0;
+            color: #00FFFF;
+            font-family: 'Orbitron', sans-serif;
         }
         .pipeline-stage-count {
             font-size: 11px;
-            color: #64748B;
+            color: #4A7080;
         }
 
-        /* Lead Card */
+        /* Lead Card - Holographic */
         .lead-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.15);
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 10px;
             transition: all 0.2s ease;
             cursor: pointer;
+            backdrop-filter: blur(5px);
         }
         .lead-card:hover {
-            border-color: #3B82F6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            border-color: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
         }
         .lead-card-header {
             display: flex;
@@ -4236,22 +4395,24 @@ def show_crm():
         .lead-card-title {
             font-weight: 600;
             font-size: 13px;
-            color: #1E293B;
+            color: #E0F7FF;
             margin: 0;
             line-height: 1.3;
         }
         .lead-card-company {
             font-size: 11px;
-            color: #64748B;
+            color: #4A7080;
             margin: 4px 0 0 0;
         }
         .lead-card-score {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            color: white;
+            background: linear-gradient(135deg, rgba(0, 128, 255, 0.3) 0%, rgba(0, 40, 80, 0.5) 100%);
+            border: 1px solid rgba(0, 128, 255, 0.4);
+            color: #0080FF;
             font-size: 10px;
             font-weight: 600;
             padding: 3px 8px;
             border-radius: 12px;
+            text-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
         }
         .lead-card-info {
             display: flex;
@@ -4260,43 +4421,46 @@ def show_crm():
             margin-top: 10px;
         }
         .lead-card-tag {
-            background: #F1F5F9;
-            color: #475569;
+            background: rgba(0, 255, 255, 0.1);
+            color: #80C4D4;
             font-size: 10px;
             padding: 3px 8px;
             border-radius: 6px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
         }
         .lead-card-actions {
             display: flex;
             gap: 4px;
             margin-top: 12px;
             padding-top: 10px;
-            border-top: 1px solid #F1F5F9;
+            border-top: 1px solid rgba(0, 255, 255, 0.1);
         }
         .lead-action-btn {
             flex: 1;
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 40, 80, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 6px;
             padding: 6px;
             font-size: 12px;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s ease;
+            color: #80C4D4;
         }
         .lead-action-btn:hover {
-            background: #3B82F6;
-            color: white;
-            border-color: #3B82F6;
+            background: rgba(0, 255, 255, 0.2);
+            color: #00FFFF;
+            border-color: rgba(0, 255, 255, 0.5);
         }
 
-        /* Contact Detail Card */
+        /* Contact Detail Card - Holographic */
         .contact-detail-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 16px;
+            backdrop-filter: blur(10px);
         }
         .contact-header {
             display: flex;
@@ -4304,43 +4468,47 @@ def show_crm():
             gap: 16px;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 1px solid #F1F5F9;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
         }
         .contact-avatar {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 128, 255, 0.3) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.4);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #00FFFF;
             font-size: 24px;
             font-weight: 700;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
         }
         .contact-name {
             font-size: 20px;
             font-weight: 700;
-            color: #1E293B;
+            color: #E0F7FF;
             margin: 0;
+            font-family: 'Orbitron', sans-serif;
         }
         .contact-company {
             font-size: 14px;
-            color: #64748B;
+            color: #4A7080;
             margin: 4px 0 0 0;
         }
 
-        /* Activity Timeline */
+        /* Activity Timeline - Holographic */
         .activity-item {
             display: flex;
             gap: 12px;
             padding: 12px 0;
-            border-bottom: 1px solid #F1F5F9;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
         }
         .activity-icon {
             width: 32px;
             height: 32px;
-            background: #F1F5F9;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -4353,16 +4521,16 @@ def show_crm():
         }
         .activity-text {
             font-size: 13px;
-            color: #1E293B;
+            color: #E0F7FF;
             margin: 0;
         }
         .activity-time {
             font-size: 11px;
-            color: #94A3B8;
+            color: #4A7080;
             margin-top: 4px;
         }
 
-        /* Quick Action Buttons */
+        /* Quick Action Buttons - Holographic */
         .quick-action-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -4370,17 +4538,19 @@ def show_crm():
             margin-top: 16px;
         }
         .quick-action-btn {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 12px;
             padding: 16px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
         }
         .quick-action-btn:hover {
-            border-color: #3B82F6;
-            background: #EFF6FF;
+            border-color: rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
         }
         .quick-action-icon {
             font-size: 24px;
@@ -4389,17 +4559,18 @@ def show_crm():
         .quick-action-label {
             font-size: 12px;
             font-weight: 500;
-            color: #475569;
+            color: #80C4D4;
         }
 
-        /* Deal Card */
+        /* Deal Card - Holographic */
         .deal-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.15);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
             transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
         }
         .deal-card:hover {
             border-color: #10B981;
@@ -6028,16 +6199,32 @@ Best regards'''
 
 
 def show_config():
-    # Modern Settings Header
+    # Holographic Settings Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1E293B 0%, #334155 100%); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: center;">
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
+                        border: 1px solid rgba(0, 255, 255, 0.4);
+                        border-radius: 16px;
+                        padding: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);">
                 <span style="font-size: 36px;">⚙️</span>
             </div>
             <div>
-                <h1 style="margin: 0 0 8px 0; color: white; font-size: 28px; font-weight: 700;">Settings</h1>
-                <p style="margin: 0; color: #94A3B8; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
+                <h1 style="margin: 0 0 8px 0; color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">SETTINGS</h1>
+                <p style="margin: 0; color: #80C4D4; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
             </div>
         </div>
     </div>
@@ -6045,11 +6232,11 @@ def show_config():
 
     # API Integrations Section
     st.markdown("""
-    <div style="margin-bottom: 24px;">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h2 style="margin: 0; color: #1E293B; font-size: 20px; font-weight: 700;">🔗 API Integrations</h2>
-        </div>
-        <p style="margin: 0; color: #64748B; font-size: 14px;">Connect your external services to unlock full platform functionality</p>
+    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+        <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+            🔗 API INTEGRATIONS
+        </h3>
+        <p style="color: #4A7080; font-size: 13px; margin: 0;">Connect your external services to unlock full platform functionality</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -6058,71 +6245,95 @@ def show_config():
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
     """, unsafe_allow_html=True)
 
-    # HubSpot
-    hubspot_status = "connected" if settings.hubspot_api_key else "disconnected"
+    # HubSpot - Holographic status colors
     hubspot_icon = "✓" if settings.hubspot_api_key else "○"
-    hubspot_color = "#10B981" if settings.hubspot_api_key else "#F59E0B"
-    hubspot_bg = "#D1FAE5" if settings.hubspot_api_key else "#FEF3C7"
+    hubspot_color = "#00FF88" if settings.hubspot_api_key else "#FFB800"
+    hubspot_border = "rgba(0, 255, 136, 0.4)" if settings.hubspot_api_key else "rgba(255, 184, 0, 0.4)"
+    hubspot_bg = "rgba(0, 255, 136, 0.15)" if settings.hubspot_api_key else "rgba(255, 184, 0, 0.15)"
     hubspot_text = "Connected" if settings.hubspot_api_key else "Not configured"
 
     # Google
-    google_status = "connected" if settings.google_api_key else "disconnected"
     google_icon = "✓" if settings.google_api_key else "○"
-    google_color = "#10B981" if settings.google_api_key else "#F59E0B"
-    google_bg = "#D1FAE5" if settings.google_api_key else "#FEF3C7"
+    google_color = "#00FF88" if settings.google_api_key else "#FFB800"
+    google_border = "rgba(0, 255, 136, 0.4)" if settings.google_api_key else "rgba(255, 184, 0, 0.4)"
+    google_bg = "rgba(0, 255, 136, 0.15)" if settings.google_api_key else "rgba(255, 184, 0, 0.15)"
     google_text = "Connected" if settings.google_api_key else "Not configured"
 
     # OpenAI
-    openai_status = "connected" if settings.openai_api_key else "disconnected"
     openai_icon = "✓" if settings.openai_api_key else "○"
-    openai_color = "#10B981" if settings.openai_api_key else "#F59E0B"
-    openai_bg = "#D1FAE5" if settings.openai_api_key else "#FEF3C7"
+    openai_color = "#00FF88" if settings.openai_api_key else "#FFB800"
+    openai_border = "rgba(0, 255, 136, 0.4)" if settings.openai_api_key else "rgba(255, 184, 0, 0.4)"
+    openai_bg = "rgba(0, 255, 136, 0.15)" if settings.openai_api_key else "rgba(255, 184, 0, 0.15)"
     openai_text = "Connected" if settings.openai_api_key else "Not configured"
 
     # Anthropic
-    anthropic_status = "connected" if settings.anthropic_api_key else "disconnected"
     anthropic_icon = "✓" if settings.anthropic_api_key else "○"
-    anthropic_color = "#10B981" if settings.anthropic_api_key else "#F59E0B"
-    anthropic_bg = "#D1FAE5" if settings.anthropic_api_key else "#FEF3C7"
+    anthropic_color = "#00FF88" if settings.anthropic_api_key else "#FFB800"
+    anthropic_border = "rgba(0, 255, 136, 0.4)" if settings.anthropic_api_key else "rgba(255, 184, 0, 0.4)"
+    anthropic_bg = "rgba(0, 255, 136, 0.15)" if settings.anthropic_api_key else "rgba(255, 184, 0, 0.15)"
     anthropic_text = "Connected" if settings.anthropic_api_key else "Not configured"
 
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
         <!-- HubSpot -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                    border: 1px solid rgba(0, 255, 255, 0.2);
+                    border-radius: 16px;
+                    padding: 20px;
+                    text-align: center;
+                    backdrop-filter: blur(5px);
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">HubSpot CRM</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hubspot_bg}; color: {hubspot_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">HubSpot CRM</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hubspot_bg}; border: 1px solid {hubspot_border}; color: {hubspot_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hubspot_icon}</span> {hubspot_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Sync leads & contacts</p>
+            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">Sync leads & contacts</p>
         </div>
         <!-- Google -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                    border: 1px solid rgba(0, 255, 255, 0.2);
+                    border-radius: 16px;
+                    padding: 20px;
+                    text-align: center;
+                    backdrop-filter: blur(5px);
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Google Search</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {google_bg}; color: {google_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">Google Search</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {google_bg}; border: 1px solid {google_border}; color: {google_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{google_icon}</span> {google_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Web search for leads</p>
+            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">Web search for leads</p>
         </div>
         <!-- OpenAI -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                    border: 1px solid rgba(0, 255, 255, 0.2);
+                    border-radius: 16px;
+                    padding: 20px;
+                    text-align: center;
+                    backdrop-filter: blur(5px);
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">🤖</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">OpenAI</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {openai_bg}; color: {openai_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">OpenAI</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {openai_bg}; border: 1px solid {openai_border}; color: {openai_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{openai_icon}</span> {openai_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">AI lead qualification</p>
+            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">AI lead qualification</p>
         </div>
         <!-- Anthropic -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                    border: 1px solid rgba(0, 255, 255, 0.2);
+                    border-radius: 16px;
+                    padding: 20px;
+                    text-align: center;
+                    backdrop-filter: blur(5px);
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">🧠</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Anthropic Claude</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {anthropic_bg}; color: {anthropic_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">Anthropic Claude</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {anthropic_bg}; border: 1px solid {anthropic_border}; color: {anthropic_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{anthropic_icon}</span> {anthropic_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">AI assistant</p>
+            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">AI assistant</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -6315,24 +6526,40 @@ def show_config():
 def show_ai_assistant():
     """AI Lead Generation Assistant - Expert advisor for lead generation."""
 
-    # Custom CSS for chat interface
+    # Holographic CSS for chat interface
     st.markdown("""
     <style>
         .assistant-header {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%);
+            background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.3);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
-            color: white;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .assistant-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);
         }
         .assistant-title {
             font-size: 28px;
             font-weight: 700;
             margin: 0 0 8px 0;
+            color: #00FFFF;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         }
         .assistant-subtitle {
             font-size: 14px;
-            opacity: 0.9;
+            color: #80C4D4;
             margin: 0;
         }
         .chat-message {
@@ -6340,19 +6567,22 @@ def show_ai_assistant():
             border-radius: 12px;
             margin-bottom: 12px;
             animation: fadeIn 0.3s ease;
+            backdrop-filter: blur(5px);
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .user-message {
-            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-            border-left: 4px solid #4F46E5;
+            background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 40, 80, 0.3) 100%);
+            border: 1px solid rgba(0, 128, 255, 0.3);
+            border-left: 3px solid #0080FF;
             margin-left: 40px;
         }
         .assistant-message {
-            background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
-            border-left: 4px solid #10B981;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 40, 40, 0.3) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-left: 3px solid #00FF88;
             margin-right: 40px;
         }
         .message-header {
@@ -6362,43 +6592,49 @@ def show_ai_assistant():
             margin-bottom: 8px;
             font-weight: 600;
             font-size: 13px;
+            color: #E0F7FF;
         }
         .message-content {
             font-size: 14px;
             line-height: 1.6;
-            color: #1E293B;
+            color: #E0F7FF;
         }
         .quick-action-chip {
             display: inline-block;
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 20px;
             padding: 8px 16px;
             margin: 4px;
             font-size: 13px;
             cursor: pointer;
             transition: all 0.2s ease;
+            color: #80C4D4;
         }
         .quick-action-chip:hover {
-            background: #4F46E5;
-            color: white;
-            border-color: #4F46E5;
+            background: rgba(0, 255, 255, 0.15);
+            color: #00FFFF;
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
         }
         .stats-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 12px;
             padding: 16px;
             text-align: center;
+            backdrop-filter: blur(5px);
         }
         .stats-value {
             font-size: 24px;
             font-weight: 700;
-            color: #4F46E5;
+            color: #00FFFF;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
         }
         .stats-label {
             font-size: 12px;
-            color: #64748B;
+            color: #4A7080;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -6916,52 +7152,60 @@ def render_floating_assistant():
 def show_lead_warming():
     """Lead Warming System - Warm up leads before cold outreach for higher conversion rates."""
 
-    # Lead Warming CSS
+    # Holographic Lead Warming CSS
     st.markdown("""
     <style>
-        /* Temperature Indicators */
+        /* Temperature Indicators - Holographic */
         .temp-cold {
-            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
-            color: white;
+            background: linear-gradient(135deg, rgba(0, 128, 255, 0.3) 0%, rgba(0, 40, 80, 0.5) 100%);
+            border: 1px solid rgba(0, 128, 255, 0.4);
+            color: #0080FF;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
         }
         .temp-warm {
-            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
-            color: white;
+            background: linear-gradient(135deg, rgba(255, 184, 0, 0.3) 0%, rgba(40, 30, 0, 0.5) 100%);
+            border: 1px solid rgba(255, 184, 0, 0.4);
+            color: #FFB800;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 184, 0, 0.5);
         }
         .temp-hot {
-            background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
-            color: white;
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.3) 0%, rgba(40, 10, 20, 0.5) 100%);
+            border: 1px solid rgba(255, 51, 102, 0.4);
+            color: #FF3366;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
         }
 
-        /* Warming Card */
+        /* Warming Card - Holographic */
         .warming-card {
-            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-            border: 1px solid #E2E8F0;
+            background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 16px;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
         .warming-card:hover {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
             transform: translateY(-2px);
+            border-color: rgba(0, 255, 255, 0.4);
         }
 
-        /* Activity Timeline */
+        /* Activity Timeline - Holographic */
         .activity-timeline {
-            border-left: 3px solid #E2E8F0;
+            border-left: 3px solid rgba(0, 255, 255, 0.3);
             padding-left: 20px;
             margin-left: 10px;
         }
@@ -6976,33 +7220,38 @@ def show_lead_warming():
             top: 4px;
             width: 12px;
             height: 12px;
-            background: #3B82F6;
+            background: #0080FF;
             border-radius: 50%;
-            border: 2px solid white;
+            border: 2px solid rgba(0, 20, 40, 0.8);
+            box-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
         }
         .activity-completed::before {
-            background: #10B981;
+            background: #00FF88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
         .activity-pending::before {
-            background: #94A3B8;
+            background: #4A7080;
         }
 
-        /* Warming Stats */
+        /* Warming Stats - Holographic */
         .warming-stat-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: rgba(0, 20, 40, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 12px;
             padding: 16px;
             text-align: center;
+            backdrop-filter: blur(5px);
         }
         .warming-stat-value {
             font-size: 28px;
             font-weight: 700;
-            color: #1E293B;
+            color: #00FFFF;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
         }
         .warming-stat-label {
             font-size: 12px;
-            color: #64748B;
+            color: #4A7080;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -7014,31 +7263,44 @@ def show_lead_warming():
             margin: 0 auto;
         }
 
-        /* Warming Actions */
+        /* Warming Actions - Holographic */
         .warming-action-btn {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            color: white;
-            border: none;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 40, 80, 0.4) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            color: #00FFFF;
             padding: 10px 16px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
         .warming-action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.25);
         }
     </style>
     """, unsafe_allow_html=True)
 
-    # Header
+    # Holographic Header
     st.markdown("""
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-        <div>
-            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1E293B;">🔥 Lead Warming</h1>
-            <p style="margin: 8px 0 0 0; color: #64748B;">Warm up leads before cold outreach for +300% higher response rates</p>
-        </div>
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            🔥 LEAD WARMING
+        </h1>
+        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+            Warm up leads before cold outreach for +300% higher response rates
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
