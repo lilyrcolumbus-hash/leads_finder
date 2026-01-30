@@ -1326,16 +1326,21 @@ st.markdown("""
     /* ========== RESULTS ========== */
     .results-box {
         display: flex;
-        gap: 32px;
-        padding: 24px 28px;
-        background: linear-gradient(135deg, var(--accent-50) 0%, #D1FAE5 100%);
-        border: 1px solid var(--accent-500);
-        border-radius: var(--radius-xl);
+        gap: 24px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
         margin: 20px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     .result-item {
         text-align: center;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border-radius: 12px;
+        min-width: 100px;
     }
 
     .result-value {
@@ -1345,17 +1350,275 @@ st.markdown("""
         letter-spacing: -0.03em;
     }
 
-    .result-value.green { color: var(--accent-600); }
-    .result-value.blue { color: var(--primary-600); }
-    .result-value.orange { color: var(--warm-600); }
+    .result-value.green { color: #059669; }
+    .result-value.blue { color: #2563EB; }
+    .result-value.orange { color: #EA580C; }
 
     .result-label {
-        color: var(--slate-600);
-        font-size: 12px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 6px;
+    }
+
+    /* ========== MODERN LEAD CARDS ========== */
+    .lead-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 0;
+        margin: 16px 0;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+    }
+
+    .lead-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .lead-card-header {
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        padding: 16px 20px;
+        border-bottom: 1px solid #E2E8F0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .lead-card-grade {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        font-size: 24px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .lead-card-title-area {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .lead-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0 0 4px 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .lead-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .lead-source-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
         font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .lead-source-badge.reddit { background: #FF45000D; color: #FF4500; border: 1px solid #FF450033; }
+    .lead-source-badge.hackernews { background: #FF66000D; color: #FF6600; border: 1px solid #FF660033; }
+    .lead-source-badge.google { background: #4285F40D; color: #4285F4; border: 1px solid #4285F433; }
+    .lead-source-badge.indeed { background: #2164F30D; color: #2164F3; border: 1px solid #2164F333; }
+    .lead-source-badge.yelp { background: #D324150D; color: #D32415; border: 1px solid #D3241533; }
+    .lead-source-badge.maps { background: #34A8530D; color: #34A853; border: 1px solid #34A85333; }
+
+    .lead-industry-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: #8B5CF60D;
+        color: #7C3AED;
+        border: 1px solid #8B5CF633;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .lead-card-body {
+        padding: 20px;
+    }
+
+    .lead-scores-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .lead-score-mini {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .lead-score-mini.pain { background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); }
+    .lead-score-mini.intent { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
+    .lead-score-mini.fit { background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); }
+
+    .lead-score-mini-icon {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+
+    .lead-score-mini-value {
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .lead-score-mini.pain .lead-score-mini-value { color: #DC2626; }
+    .lead-score-mini.intent .lead-score-mini-value { color: #D97706; }
+    .lead-score-mini.fit .lead-score-mini-value { color: #2563EB; }
+
+    .lead-score-mini-label {
+        font-size: 9px;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-top: 6px;
+        margin-top: 4px;
+    }
+
+    .lead-score-mini.pain .lead-score-mini-label { color: #991B1B; }
+    .lead-score-mini.intent .lead-score-mini-label { color: #92400E; }
+    .lead-score-mini.fit .lead-score-mini-label { color: #1E40AF; }
+
+    .lead-keywords-section {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #E2E8F0;
+    }
+
+    .lead-keywords-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .lead-keyword-tag {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #F1F5F9;
+        color: #475569;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        margin: 2px 4px 2px 0;
+    }
+
+    .lead-content-preview {
+        margin-top: 16px;
+        padding: 16px;
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+        border-radius: 10px;
+        border-left: 3px solid #3B82F6;
+    }
+
+    .lead-content-text {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #334155;
+        margin: 0;
+    }
+
+    .lead-card-footer {
+        padding: 16px 20px;
+        background: #F8FAFC;
+        border-top: 1px solid #E2E8F0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .lead-action-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .lead-view-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white !important;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+    }
+
+    .lead-view-btn:hover {
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Results Section Header */
+    .results-section-header {
+        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        padding: 20px 24px;
+        margin: 32px 0 16px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .results-section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .results-section-title h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1E293B;
+    }
+
+    .results-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
     }
 
     /* ========== STATS BAR ========== */
@@ -2736,15 +2999,14 @@ def show_search():
                     else:
                         st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True)
 
-    # Preview
+    # Preview - Modern Lead Cards
     if st.session_state.scraping_done and st.session_state.filtered_leads:
+        # Results section header
         st.markdown(f"""
-        <div class="section" style="margin-top: 32px;">
-            <div class="section-header">
-                <div class="section-title">
-                    <h2>Results</h2>
-                    <span class="section-badge">{len(st.session_state.filtered_leads)} leads</span>
-                </div>
+        <div class="results-section-header">
+            <div class="results-section-title">
+                <h2>Qualified Leads</h2>
+                <span class="results-count-badge">{len(st.session_state.filtered_leads)} leads found</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -2762,66 +3024,98 @@ def show_search():
             grade_color = grade["color"]
             grade_bg = grade["bg_color"]
 
-            with st.expander(f"{grade_emoji} [{total_score}] {lead.title[:55]}..."):
-                # Triple Score Display
-                st.markdown(f"""
-                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                    <!-- Total Score (Large) -->
-                    <div style="flex: 1; text-align: center; padding: 16px; background: {grade_bg}; border-radius: 12px; border: 2px solid {grade_color};">
-                        <div style="font-size: 36px; font-weight: 800; color: {grade_color};">{total_score}</div>
-                        <div style="font-size: 11px; font-weight: 700; color: {grade_color}; letter-spacing: 0.5px;">{grade_emoji} {grade_label}</div>
-                        <div style="font-size: 10px; color: #64748B; margin-top: 4px;">TOTAL SCORE</div>
+            # Determine source badge class
+            source_value = lead.source.value.lower()
+            source_class = "reddit" if "reddit" in source_value else \
+                          "hackernews" if "hacker" in source_value else \
+                          "google" if "google" in source_value else \
+                          "indeed" if "indeed" in source_value else \
+                          "yelp" if "yelp" in source_value else \
+                          "maps" if "maps" in source_value else "google"
+
+            # Source icons
+            source_icons = {
+                "reddit": "🔴",
+                "hackernews": "🟠",
+                "google": "🔵",
+                "indeed": "💼",
+                "yelp": "⭐",
+                "maps": "📍"
+            }
+            source_icon = source_icons.get(source_class, "🌐")
+
+            # Keywords tags HTML
+            keywords_html = ""
+            if lead.keywords_matched:
+                keywords_html = "".join([f'<span class="lead-keyword-tag">{kw}</span>' for kw in lead.keywords_matched[:5]])
+
+            # Clean content for preview
+            content_preview = lead.content[:300].replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+            if len(lead.content) > 300:
+                content_preview += "..."
+
+            # Build the modern lead card HTML
+            st.markdown(f"""
+            <div class="lead-card">
+                <!-- Card Header -->
+                <div class="lead-card-header">
+                    <div class="lead-card-grade" style="background: {grade_bg}; border: 2px solid {grade_color}; color: {grade_color};">
+                        {total_score}
                     </div>
-                    <!-- Individual Scores -->
-                    <div style="flex: 2; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FEE2E2; border-radius: 8px;">
-                            <span style="font-size: 16px;">😣</span>
-                            <div style="flex: 1;">
-                                <div style="font-size: 10px; color: #991B1B; font-weight: 600;">PAIN</div>
-                                <div style="height: 6px; background: #FECACA; border-radius: 3px; overflow: hidden;">
-                                    <div style="width: {pain_score}%; height: 100%; background: #EF4444;"></div>
-                                </div>
-                            </div>
-                            <span style="font-size: 14px; font-weight: 700; color: #DC2626;">{pain_score}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #FEF3C7; border-radius: 8px;">
-                            <span style="font-size: 16px;">🎯</span>
-                            <div style="flex: 1;">
-                                <div style="font-size: 10px; color: #92400E; font-weight: 600;">INTENT</div>
-                                <div style="height: 6px; background: #FDE68A; border-radius: 3px; overflow: hidden;">
-                                    <div style="width: {intent_score}%; height: 100%; background: #F59E0B;"></div>
-                                </div>
-                            </div>
-                            <span style="font-size: 14px; font-weight: 700; color: #D97706;">{intent_score}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #DBEAFE; border-radius: 8px;">
-                            <span style="font-size: 16px;">✅</span>
-                            <div style="flex: 1;">
-                                <div style="font-size: 10px; color: #1E40AF; font-weight: 600;">FIT</div>
-                                <div style="height: 6px; background: #BFDBFE; border-radius: 3px; overflow: hidden;">
-                                    <div style="width: {fit_score}%; height: 100%; background: #3B82F6;"></div>
-                                </div>
-                            </div>
-                            <span style="font-size: 14px; font-weight: 700; color: #2563EB;">{fit_score}</span>
+                    <div class="lead-card-title-area">
+                        <h3 class="lead-card-title">{lead.title[:80]}{'...' if len(lead.title) > 80 else ''}</h3>
+                        <div class="lead-card-meta">
+                            <span class="lead-source-badge {source_class}">{source_icon} {lead.source.value}</span>
+                            {f'<span class="lead-industry-tag">🏭 {lead.industry}</span>' if lead.industry else ''}
                         </div>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
 
-                # Lead Details
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write(f"**Source:** {lead.source.value}")
-                    st.write(f"**Industry:** {lead.industry or 'Unknown'}")
-                with col2:
-                    st.write(f"**Action:** {grade['action']}")
-                    st.write(f"**Keywords:** {len(lead.keywords_matched)}")
+                <!-- Card Body -->
+                <div class="lead-card-body">
+                    <!-- Triple Score Row -->
+                    <div class="lead-scores-row">
+                        <div class="lead-score-mini pain">
+                            <div class="lead-score-mini-icon">😣</div>
+                            <div class="lead-score-mini-value">{pain_score}</div>
+                            <div class="lead-score-mini-label">Pain</div>
+                        </div>
+                        <div class="lead-score-mini intent">
+                            <div class="lead-score-mini-icon">🎯</div>
+                            <div class="lead-score-mini-value">{intent_score}</div>
+                            <div class="lead-score-mini-label">Intent</div>
+                        </div>
+                        <div class="lead-score-mini fit">
+                            <div class="lead-score-mini-icon">✅</div>
+                            <div class="lead-score-mini-value">{fit_score}</div>
+                            <div class="lead-score-mini-label">Fit</div>
+                        </div>
+                    </div>
 
-                if lead.keywords_matched:
-                    st.write(f"**Matched:** {', '.join(lead.keywords_matched[:5])}")
-                st.link_button("View Original", lead.url)
-                st.write("---")
-                st.caption(lead.content[:350] + "...")
+                    <!-- Keywords Section -->
+                    {f'''<div class="lead-keywords-section">
+                        <div class="lead-keywords-title">Matched Keywords</div>
+                        <div>{keywords_html}</div>
+                    </div>''' if keywords_html else ''}
+
+                    <!-- Content Preview -->
+                    <div class="lead-content-preview">
+                        <p class="lead-content-text">{content_preview}</p>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="lead-card-footer">
+                    <div class="lead-action-text" style="color: {grade_color};">
+                        <span>{grade_emoji}</span>
+                        <span>{grade['action']}</span>
+                    </div>
+                    <a href="{lead.url}" target="_blank" class="lead-view-btn">
+                        View Original ↗
+                    </a>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Section to review ALL raw leads (before AI filter)
     if st.session_state.scraping_done and st.session_state.raw_leads:
