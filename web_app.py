@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Lead Generation App - Web Interface (Streamlit)
+Optimized for mobile and desktop
 
 Run with: streamlit run web_app.py
 """
@@ -21,45 +22,170 @@ from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, Produc
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
-# Page config
+# Page config - centered layout works better on mobile
 st.set_page_config(
-    page_title="Lead Generation App",
+    page_title="Lead Generation",
     page_icon="🎯",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered",
+    initial_sidebar_state="collapsed"  # Collapsed by default for mobile
 )
 
-# Custom CSS
+# Mobile-optimized CSS
 st.markdown("""
 <style>
+    /* Base styles */
+    .stApp {
+        max-width: 100%;
+    }
+
+    /* Mobile-first responsive design */
+    @media (max-width: 768px) {
+        .stApp {
+            padding: 0.5rem;
+        }
+
+        /* Make buttons full width and larger */
+        .stButton > button {
+            width: 100% !important;
+            min-height: 3rem !important;
+            font-size: 1.1rem !important;
+            margin: 0.5rem 0 !important;
+        }
+
+        /* Larger touch targets for checkboxes */
+        .stCheckbox {
+            padding: 0.75rem 0 !important;
+        }
+
+        .stCheckbox label {
+            font-size: 1.1rem !important;
+        }
+
+        /* Better spacing for metrics */
+        [data-testid="metric-container"] {
+            padding: 0.75rem !important;
+            margin: 0.25rem 0 !important;
+        }
+
+        /* Larger text in metrics */
+        [data-testid="stMetricValue"] {
+            font-size: 1.5rem !important;
+        }
+
+        /* Make expanders easier to tap */
+        .streamlit-expanderHeader {
+            font-size: 1rem !important;
+            padding: 1rem !important;
+        }
+
+        /* Sidebar adjustments */
+        [data-testid="stSidebar"] {
+            min-width: 280px !important;
+        }
+
+        /* Tab styling */
+        .stTabs [data-baseweb="tab"] {
+            padding: 0.75rem 1rem !important;
+            font-size: 1rem !important;
+        }
+
+        /* Select box */
+        .stSelectbox {
+            margin: 0.5rem 0 !important;
+        }
+
+        /* Progress bar */
+        .stProgress {
+            margin: 1rem 0 !important;
+        }
+
+        /* Info/Warning/Success boxes */
+        .stAlert {
+            padding: 1rem !important;
+            font-size: 1rem !important;
+        }
+
+        /* Headers */
+        h1 {
+            font-size: 1.75rem !important;
+        }
+
+        h2 {
+            font-size: 1.5rem !important;
+        }
+
+        h3 {
+            font-size: 1.25rem !important;
+        }
+    }
+
+    /* Main header styling */
     .main-header {
-        font-size: 2.5rem;
+        font-size: 1.75rem;
         font-weight: bold;
         color: #1f77b4;
         text-align: center;
-        margin-bottom: 2rem;
-    }
-    .metric-card {
-        background-color: #f0f2f6;
-        border-radius: 10px;
+        margin-bottom: 1.5rem;
         padding: 1rem;
-        margin: 0.5rem 0;
     }
+
+    /* Card styling */
     .lead-card {
         background-color: #ffffff;
         border: 1px solid #e0e0e0;
-        border-radius: 8px;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 0.75rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Navigation menu styling */
+    .nav-link {
+        display: block;
         padding: 1rem;
         margin: 0.5rem 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        text-decoration: none;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 1.1rem;
     }
-    .success-msg {
-        color: #28a745;
-        font-weight: bold;
+
+    /* Mobile table scroll */
+    .dataframe-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
-    .error-msg {
-        color: #dc3545;
-        font-weight: bold;
+
+    /* Fix for iOS input zoom */
+    input, select, textarea {
+        font-size: 16px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -71,28 +197,53 @@ if 'filtered_leads' not in st.session_state:
     st.session_state.filtered_leads = []
 if 'scraping_done' not in st.session_state:
     st.session_state.scraping_done = False
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "inicio"
 
 
 def main():
     """Main app entry point."""
 
-    # Sidebar navigation
-    st.sidebar.title("🎯 Lead Generation")
+    # Mobile-friendly navigation in sidebar
+    with st.sidebar:
+        st.markdown("## 🎯 Lead Generation")
+        st.markdown("---")
 
-    page = st.sidebar.radio(
-        "Navegación",
-        ["🏠 Inicio", "🔍 Buscar Leads", "📋 Mis Leads", "📊 Estadísticas", "⚙️ Configuración"]
-    )
+        if st.button("🏠 Inicio", use_container_width=True):
+            st.session_state.current_page = "inicio"
+            st.rerun()
 
-    if page == "🏠 Inicio":
+        if st.button("🔍 Buscar Leads", use_container_width=True):
+            st.session_state.current_page = "buscar"
+            st.rerun()
+
+        if st.button("📋 Mis Leads", use_container_width=True):
+            st.session_state.current_page = "leads"
+            st.rerun()
+
+        if st.button("📊 Estadísticas", use_container_width=True):
+            st.session_state.current_page = "stats"
+            st.rerun()
+
+        if st.button("⚙️ Configuración", use_container_width=True):
+            st.session_state.current_page = "config"
+            st.rerun()
+
+        st.markdown("---")
+        st.caption("v1.0 | Mobile Ready 📱")
+
+    # Route to pages
+    page = st.session_state.current_page
+
+    if page == "inicio":
         show_home()
-    elif page == "🔍 Buscar Leads":
+    elif page == "buscar":
         show_search()
-    elif page == "📋 Mis Leads":
+    elif page == "leads":
         show_leads()
-    elif page == "📊 Estadísticas":
+    elif page == "stats":
         show_statistics()
-    elif page == "⚙️ Configuración":
+    elif page == "config":
         show_config()
 
 
@@ -101,55 +252,75 @@ def show_home():
     st.markdown('<h1 class="main-header">🎯 Lead Generation App</h1>', unsafe_allow_html=True)
 
     st.markdown("""
-    ### Encuentra dueños de negocios con problemas de comunicación
+    ### Encuentra leads con problemas de comunicación
 
-    Esta app busca leads en múltiples fuentes:
-    - **Reddit** - Subreddits de pequeños negocios
-    - **Hacker News** - Discusiones de startups
-    - **Google Search** - Búsquedas específicas
-    - **Product Hunt** - Founders con problemas
-
-    ---
-
-    #### 🚀 Comenzar
-    1. Ve a **Buscar Leads** para encontrar nuevos prospectos
-    2. Revisa los resultados en **Mis Leads**
-    3. Envía los leads calificados a **HubSpot CRM**
+    Busca en múltiples fuentes:
     """)
 
-    # Quick stats
-    col1, col2, col3 = st.columns(3)
+    # Sources as cards - stacked for mobile
+    sources = [
+        ("📱 Reddit", "Subreddits de negocios"),
+        ("💻 Hacker News", "Discusiones de startups"),
+        ("🔍 Google", "Búsquedas específicas"),
+        ("🚀 Product Hunt", "Founders activos")
+    ]
+
+    for icon_name, desc in sources:
+        st.markdown(f"""
+        <div class="lead-card">
+            <strong>{icon_name}</strong><br>
+            <small>{desc}</small>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Quick stats - 2 columns max for mobile
+    st.subheader("📊 Resumen Rápido")
+
+    col1, col2 = st.columns(2)
     with col1:
-        st.metric("Leads Encontrados", len(st.session_state.leads))
+        st.metric("Leads", len(st.session_state.leads))
     with col2:
-        st.metric("Leads Calificados", len(st.session_state.filtered_leads))
-    with col3:
-        st.metric("Keywords Activos", len(settings.pain_keywords))
+        st.metric("Calificados", len(st.session_state.filtered_leads))
+
+    st.markdown("---")
+
+    # Quick action button
+    if st.button("🚀 Comenzar Búsqueda", type="primary", use_container_width=True):
+        st.session_state.current_page = "buscar"
+        st.rerun()
 
 
 def show_search():
     """Search for new leads."""
-    st.header("🔍 Buscar Nuevos Leads")
+    st.header("🔍 Buscar Leads")
 
-    # Source selection
-    st.subheader("Selecciona las fuentes")
+    st.markdown("### Selecciona fuentes")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        use_reddit = st.checkbox("Reddit", value=True)
-        use_hn = st.checkbox("Hacker News", value=True)
-    with col2:
-        use_google = st.checkbox("Google Search", value=bool(settings.google_api_key))
-        use_ph = st.checkbox("Product Hunt", value=True)
+    # Stacked checkboxes for mobile (easier to tap)
+    use_reddit = st.checkbox("📱 Reddit", value=True)
+    use_hn = st.checkbox("💻 Hacker News", value=True)
+    use_google = st.checkbox("🔍 Google Search", value=bool(settings.google_api_key))
+    use_ph = st.checkbox("🚀 Product Hunt", value=True)
+
+    st.markdown("---")
 
     # AI filtering option
-    use_ai = st.checkbox("🤖 Filtrar con AI", value=bool(settings.openai_api_key or settings.anthropic_api_key))
+    use_ai = st.checkbox(
+        "🤖 Filtrar con AI",
+        value=bool(settings.openai_api_key or settings.anthropic_api_key),
+        help="Usa inteligencia artificial para calificar leads"
+    )
 
-    if st.button("🚀 Iniciar Búsqueda", type="primary", use_container_width=True):
+    st.markdown("")
+
+    if st.button("🚀 INICIAR BÚSQUEDA", type="primary", use_container_width=True):
         all_leads = []
 
         progress_bar = st.progress(0)
         status_text = st.empty()
+        results_container = st.container()
 
         scrapers = []
         if use_reddit:
@@ -161,101 +332,113 @@ def show_search():
         if use_ph:
             scrapers.append(("Product Hunt", ProductHuntScraper))
 
+        if not scrapers:
+            st.warning("⚠️ Selecciona al menos una fuente")
+            return
+
         for i, (name, ScraperClass) in enumerate(scrapers):
-            status_text.text(f"Buscando en {name}...")
+            status_text.text(f"🔄 Buscando en {name}...")
             try:
                 with ScraperClass() as scraper:
                     batch = scraper.scrape()
                     all_leads.extend(batch.leads)
-                    st.success(f"✅ {name}: {len(batch.leads)} leads encontrados")
+                    with results_container:
+                        st.success(f"✅ {name}: {len(batch.leads)} leads")
             except Exception as e:
-                st.warning(f"⚠️ {name}: Error - {str(e)[:50]}")
+                with results_container:
+                    st.warning(f"⚠️ {name}: Error")
 
             progress_bar.progress((i + 1) / len(scrapers))
 
         st.session_state.leads = all_leads
-        status_text.text(f"Total: {len(all_leads)} leads encontrados")
 
         # AI Filtering
         if use_ai and all_leads:
-            status_text.text("Filtrando con AI...")
+            status_text.text("🤖 Filtrando con AI...")
             try:
                 ai_filter = AILeadFilter()
                 filtered = ai_filter.filter_leads(all_leads)
                 qualified = [l for l in filtered if l.is_qualified]
                 st.session_state.filtered_leads = qualified
-                st.success(f"🤖 AI calificó {len(qualified)}/{len(all_leads)} leads")
+                with results_container:
+                    st.success(f"🤖 AI: {len(qualified)}/{len(all_leads)} calificados")
             except Exception as e:
-                st.warning(f"⚠️ AI filtering failed: {e}")
                 st.session_state.filtered_leads = all_leads
         else:
             st.session_state.filtered_leads = all_leads
 
         st.session_state.scraping_done = True
         progress_bar.progress(1.0)
-        status_text.text("✅ Búsqueda completada")
+        status_text.text(f"✅ ¡Listo! {len(all_leads)} leads encontrados")
 
-    # Show results preview
+    # Show results
     if st.session_state.scraping_done and st.session_state.filtered_leads:
-        st.subheader(f"📋 Preview ({len(st.session_state.filtered_leads)} leads)")
+        st.markdown("---")
+        st.subheader(f"📋 Resultados ({len(st.session_state.filtered_leads)})")
 
-        for lead in st.session_state.filtered_leads[:5]:
-            with st.expander(f"**{lead.title[:60]}...** - {lead.source.value}"):
-                st.write(f"**Keywords:** {', '.join(lead.keywords_matched[:5])}")
-                st.write(f"**URL:** {lead.url}")
+        for lead in st.session_state.filtered_leads[:10]:
+            title_short = lead.title[:50] + "..." if len(lead.title) > 50 else lead.title
+            with st.expander(f"📌 {title_short}"):
+                st.markdown(f"**Fuente:** {lead.source.value}")
+                st.markdown(f"**Keywords:** {', '.join(lead.keywords_matched[:3])}")
                 if lead.ai_score:
-                    st.write(f"**AI Score:** {lead.ai_score:.2f}")
-                st.write(f"**Contenido:** {lead.content[:300]}...")
+                    score_pct = int(lead.ai_score * 100)
+                    st.markdown(f"**Score AI:** {score_pct}%")
+                st.markdown(f"**URL:** [{lead.url[:40]}...]({lead.url})")
+                st.markdown(f"**Contenido:**\n{lead.content[:200]}...")
 
 
 def show_leads():
     """Show and manage leads."""
     st.header("📋 Mis Leads")
 
-    tab1, tab2 = st.tabs(["Leads Locales", "Leads en HubSpot"])
+    tab1, tab2 = st.tabs(["📱 Locales", "☁️ HubSpot"])
 
     with tab1:
         if not st.session_state.filtered_leads:
-            st.info("No hay leads. Ve a 'Buscar Leads' para encontrar nuevos prospectos.")
-        else:
-            # Convert to DataFrame
-            leads_data = []
-            for lead in st.session_state.filtered_leads:
-                leads_data.append({
-                    "ID": lead.id[:8],
-                    "Título": lead.title[:50],
-                    "Fuente": lead.source.value,
-                    "Keywords": ", ".join(lead.keywords_matched[:3]),
-                    "Score": f"{lead.ai_score:.2f}" if lead.ai_score else "-",
-                    "URL": lead.url
-                })
+            st.info("📭 No hay leads.\n\nVe a 'Buscar Leads' para encontrar prospectos.")
 
-            df = pd.DataFrame(leads_data)
-            st.dataframe(df, use_container_width=True)
+            if st.button("🔍 Ir a Buscar", use_container_width=True):
+                st.session_state.current_page = "buscar"
+                st.rerun()
+        else:
+            st.markdown(f"**Total:** {len(st.session_state.filtered_leads)} leads")
+
+            # Mobile-friendly card view instead of table
+            for i, lead in enumerate(st.session_state.filtered_leads[:20]):
+                with st.container():
+                    st.markdown(f"""
+                    <div class="lead-card">
+                        <strong>#{i+1}</strong> {lead.title[:40]}...<br>
+                        <small>📍 {lead.source.value} | 🏷️ {', '.join(lead.keywords_matched[:2])}</small>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            st.markdown("---")
 
             # Send to HubSpot
-            st.subheader("Enviar a HubSpot")
-            if st.button("📤 Enviar leads a HubSpot", type="primary"):
+            if st.button("📤 ENVIAR A HUBSPOT", type="primary", use_container_width=True):
                 with HubSpotCRM() as crm:
                     if not crm.is_configured():
-                        st.error("❌ HubSpot no está configurado. Agrega HUBSPOT_API_KEY en .env")
+                        st.error("❌ HubSpot no configurado")
                     else:
-                        with st.spinner("Enviando leads..."):
+                        with st.spinner("Enviando..."):
                             results = crm.send_leads_to_crm(st.session_state.filtered_leads)
-                        st.success(f"✅ Creados: {results['created']} | Existentes: {results['existing']} | Fallidos: {results['failed']}")
+                        st.success(f"✅ Enviados: {results['created']}")
+                        if results['failed'] > 0:
+                            st.warning(f"⚠️ Fallidos: {results['failed']}")
 
     with tab2:
         with HubSpotCRM() as crm:
             if not crm.is_configured():
-                st.warning("⚠️ HubSpot no está configurado")
+                st.warning("⚠️ Configura HUBSPOT_API_KEY en .env")
             else:
-                # Stage filter
                 stage_filter = st.selectbox(
                     "Filtrar por etapa",
                     ["Todos"] + [s.value for s in LeadStage]
                 )
 
-                if st.button("🔄 Cargar leads de HubSpot"):
+                if st.button("🔄 Cargar de HubSpot", use_container_width=True):
                     with st.spinner("Cargando..."):
                         if stage_filter == "Todos":
                             contacts = crm.get_all_contacts()
@@ -263,19 +446,18 @@ def show_leads():
                             contacts = crm.get_contacts_by_stage(LeadStage(stage_filter))
 
                     if contacts:
-                        contacts_data = []
-                        for c in contacts:
-                            contacts_data.append({
-                                "ID": c.id,
-                                "Nombre": f"{c.firstname or ''} {c.lastname or ''}".strip() or "-",
-                                "Email": c.email or "-",
-                                "Empresa": c.company or "-",
-                                "Etapa": c.lead_stage.value,
-                                "Fuente": c.source or "-"
-                            })
-                        st.dataframe(pd.DataFrame(contacts_data), use_container_width=True)
+                        for c in contacts[:15]:
+                            name = f"{c.firstname or ''} {c.lastname or ''}".strip() or "Sin nombre"
+                            st.markdown(f"""
+                            <div class="lead-card">
+                                <strong>{name}</strong><br>
+                                📧 {c.email or '-'}<br>
+                                🏢 {c.company or '-'}<br>
+                                <span class="status-badge status-success">{c.lead_stage.value}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
                     else:
-                        st.info("No se encontraron contactos")
+                        st.info("No hay contactos")
 
 
 def show_statistics():
@@ -284,50 +466,62 @@ def show_statistics():
 
     with HubSpotCRM() as crm:
         if not crm.is_configured():
-            st.warning("⚠️ HubSpot no está configurado. Mostrando estadísticas locales.")
+            st.info("📊 Estadísticas locales")
 
-            # Local stats
             col1, col2 = st.columns(2)
             with col1:
-                st.metric("Leads encontrados", len(st.session_state.leads))
+                st.metric("📥 Encontrados", len(st.session_state.leads))
             with col2:
-                st.metric("Leads calificados", len(st.session_state.filtered_leads))
+                st.metric("✅ Calificados", len(st.session_state.filtered_leads))
 
             # By source
             if st.session_state.leads:
+                st.markdown("---")
+                st.subheader("Por Fuente")
+
                 source_counts = {}
                 for lead in st.session_state.leads:
                     source_counts[lead.source.value] = source_counts.get(lead.source.value, 0) + 1
 
-                st.subheader("Por fuente")
-                st.bar_chart(source_counts)
+                for source, count in source_counts.items():
+                    st.markdown(f"""
+                    <div class="lead-card">
+                        <strong>{source}</strong>: {count} leads
+                    </div>
+                    """, unsafe_allow_html=True)
         else:
-            with st.spinner("Cargando estadísticas..."):
-                stats = crm.get_statistics()
+            if st.button("🔄 Cargar Estadísticas", use_container_width=True):
+                with st.spinner("Cargando..."):
+                    stats = crm.get_statistics()
 
-            if "error" in stats:
-                st.error(stats["error"])
-            else:
-                # Main metrics
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Total Leads", stats["total_leads"])
-                with col2:
-                    st.metric("Tasa de Conversión", f"{stats['conversion_rate']}%")
-                with col3:
-                    st.metric("Tasa de Cierre", f"{stats['win_rate']}%")
-                with col4:
-                    st.metric("Ganados", stats["by_stage"].get("closed_won", 0))
+                if "error" in stats:
+                    st.error(stats["error"])
+                else:
+                    # Main metrics - 2 columns for mobile
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("📊 Total", stats["total_leads"])
+                        st.metric("📈 Conversión", f"{stats['conversion_rate']}%")
+                    with col2:
+                        st.metric("🏆 Ganados", stats["by_stage"].get("closed_won", 0))
+                        st.metric("📉 Win Rate", f"{stats['win_rate']}%")
 
-                # By stage chart
-                st.subheader("Leads por Etapa")
-                if stats["by_stage"]:
-                    st.bar_chart(stats["by_stage"])
+                    # Pipeline
+                    st.markdown("---")
+                    st.subheader("Pipeline")
 
-                # By source chart
-                st.subheader("Leads por Fuente")
-                if stats["by_source"]:
-                    st.bar_chart(stats["by_source"])
+                    stages = [
+                        ("🆕 Nuevo", "new"),
+                        ("📞 Contactado", "contacted"),
+                        ("🎯 Demo", "demo"),
+                        ("📝 Propuesta", "proposal"),
+                        ("✅ Ganado", "closed_won"),
+                        ("❌ Perdido", "closed_lost")
+                    ]
+
+                    for label, key in stages:
+                        count = stats["by_stage"].get(key, 0)
+                        st.markdown(f"{label}: **{count}**")
 
 
 def show_config():
@@ -336,39 +530,50 @@ def show_config():
 
     st.subheader("Estado de APIs")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if settings.hubspot_api_key:
-            st.success("✅ HubSpot configurado")
+    # API Status cards
+    apis = [
+        ("HubSpot", settings.hubspot_api_key, "CRM"),
+        ("Google", settings.google_api_key, "Búsquedas"),
+        ("OpenAI", settings.openai_api_key, "AI Filter"),
+        ("Anthropic", settings.anthropic_api_key, "AI Filter"),
+    ]
+
+    for name, key, purpose in apis:
+        if key:
+            st.markdown(f"""
+            <div class="lead-card">
+                <span class="status-badge status-success">✅ Activo</span>
+                <strong> {name}</strong><br>
+                <small>{purpose}</small>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.error("❌ HubSpot no configurado")
+            st.markdown(f"""
+            <div class="lead-card">
+                <span class="status-badge status-warning">⚠️ No configurado</span>
+                <strong> {name}</strong><br>
+                <small>{purpose}</small>
+            </div>
+            """, unsafe_allow_html=True)
 
-        if settings.google_api_key:
-            st.success("✅ Google configurado")
-        else:
-            st.warning("⚠️ Google no configurado")
+    st.markdown("---")
 
-    with col2:
-        if settings.openai_api_key:
-            st.success("✅ OpenAI configurado")
-        else:
-            st.warning("⚠️ OpenAI no configurado")
+    # Subreddits
+    st.subheader("📱 Subreddits")
+    subreddits_text = ", ".join(settings.subreddits)
+    st.markdown(f"<small>{subreddits_text}</small>", unsafe_allow_html=True)
 
-        if settings.anthropic_api_key:
-            st.success("✅ Anthropic configurado")
-        else:
-            st.warning("⚠️ Anthropic no configurado")
+    st.markdown("---")
 
-    st.subheader("Subreddits monitoreados")
-    st.write(", ".join(settings.subreddits))
+    # Keywords
+    st.subheader("🔑 Keywords de Dolor")
+    for kw in settings.pain_keywords[:8]:
+        st.markdown(f"• {kw}")
+    if len(settings.pain_keywords) > 8:
+        st.markdown(f"*... y {len(settings.pain_keywords) - 8} más*")
 
-    st.subheader("Keywords de dolor")
-    cols = st.columns(3)
-    for i, kw in enumerate(settings.pain_keywords):
-        with cols[i % 3]:
-            st.write(f"• {kw}")
-
-    st.info("💡 Edita el archivo `.env` para cambiar la configuración")
+    st.markdown("---")
+    st.info("💡 Edita `.env` para cambiar la configuración")
 
 
 if __name__ == "__main__":
