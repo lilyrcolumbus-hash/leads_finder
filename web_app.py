@@ -2555,18 +2555,117 @@ def show_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # Holographic Metric Cards
+    # Holographic Metric Cards with Modern Tooltips
     st.markdown(f"""
+    <style>
+        .holo-metric-card {{
+            background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%);
+            border: 1px solid rgba(0, 139, 139, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: visible;
+            box-shadow: 0 0 20px rgba(0, 139, 139, 0.2), inset 0 0 30px rgba(0, 139, 139, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+        .holo-metric-card:hover {{
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 40px rgba(0, 255, 255, 0.1);
+        }}
+        .holo-tooltip {{
+            position: absolute;
+            bottom: calc(100% + 15px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: linear-gradient(135deg, rgba(28, 28, 46, 0.98) 0%, rgba(45, 55, 72, 0.98) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 220px;
+            max-width: 280px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);
+        }}
+        .holo-tooltip::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);
+        }}
+        .holo-tooltip::after {{
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(0, 255, 255, 0.5);
+        }}
+        .holo-metric-card:hover .holo-tooltip {{
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }}
+        .tooltip-header {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }}
+        .tooltip-icon {{
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }}
+        .tooltip-title {{
+            color: #00FFFF;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }}
+        .tooltip-content {{
+            color: #C0C0C0;
+            font-size: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            line-height: 1.5;
+        }}
+        .tooltip-highlight {{
+            color: #00FFFF;
+            font-weight: 600;
+        }}
+    </style>
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Leads Found -->
-        <div style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%);
-                    border: 1px solid rgba(0, 139, 139, 0.4);
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 139, 139, 0.2), inset 0 0 30px rgba(0, 139, 139, 0.05);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%); border-color: rgba(0, 139, 139, 0.4);">
+            <div class="holo-tooltip">
+                <div class="tooltip-header">
+                    <div class="tooltip-icon" style="background: rgba(0, 139, 139, 0.3); border: 1px solid #008B8B;">👥</div>
+                    <div class="tooltip-title">LEADS FOUND</div>
+                </div>
+                <div class="tooltip-content">
+                    Total de <span class="tooltip-highlight">prospectos descubiertos</span> en esta sesión desde todas las fuentes configuradas (Reddit, Indeed, Yelp, Google Maps).
+                </div>
+            </div>
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #008B8B 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #008B8B);">👥</div>
             <div style="font-size: 36px; font-weight: 700; color: #008B8B; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 139, 139, 0.5);">{leads_count}</div>
@@ -2574,14 +2673,17 @@ def show_dashboard():
             <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
         </div>
         <!-- Hot Leads -->
-        <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(828, 28, 46, 0.3) 100%);
-                    border: 1px solid rgba(255, 51, 102, 0.4);
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(255, 51, 102, 0.2), inset 0 0 30px rgba(255, 51, 102, 0.05);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(28, 28, 46, 0.3) 100%); border-color: rgba(255, 51, 102, 0.4); box-shadow: 0 0 20px rgba(255, 51, 102, 0.2), inset 0 0 30px rgba(255, 51, 102, 0.05);">
+            <div class="holo-tooltip" style="border-color: rgba(255, 51, 102, 0.5); box-shadow: 0 0 30px rgba(255, 51, 102, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
+                <div class="tooltip-header" style="border-color: rgba(255, 51, 102, 0.2);">
+                    <div class="tooltip-icon" style="background: rgba(255, 51, 102, 0.3); border: 1px solid #FF3366;">🔥</div>
+                    <div class="tooltip-title" style="color: #FF3366; text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);">HOT LEADS</div>
+                </div>
+                <div class="tooltip-content">
+                    Leads con <span class="tooltip-highlight" style="color: #FF3366;">Score 80+</span>. Son prospectos de alta prioridad listos para contactar inmediatamente.
+                </div>
+            </div>
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
             <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
@@ -2589,14 +2691,17 @@ def show_dashboard():
             <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
         </div>
         <!-- Qualified -->
-        <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 80, 50, 0.3) 100%);
-                    border: 1px solid rgba(0, 255, 136, 0.4);
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.05);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 80, 50, 0.3) 100%); border-color: rgba(0, 255, 136, 0.4); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.05);">
+            <div class="holo-tooltip" style="border-color: rgba(0, 255, 136, 0.5); box-shadow: 0 0 30px rgba(0, 255, 136, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
+                <div class="tooltip-header" style="border-color: rgba(0, 255, 136, 0.2);">
+                    <div class="tooltip-icon" style="background: rgba(0, 255, 136, 0.3); border: 1px solid #00FF88;">✅</div>
+                    <div class="tooltip-title" style="color: #00FF88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);">QUALIFIED</div>
+                </div>
+                <div class="tooltip-content">
+                    Leads <span class="tooltip-highlight" style="color: #00FF88;">verificados por AI</span> que pasaron los filtros de calificación. Listos para exportar a tu CRM.
+                </div>
+            </div>
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
             <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
@@ -2604,14 +2709,17 @@ def show_dashboard():
             <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
         </div>
         <!-- Keywords -->
-        <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(80, 60, 0, 0.3) 100%);
-                    border: 1px solid rgba(255, 184, 0, 0.4);
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(255, 184, 0, 0.2), inset 0 0 30px rgba(255, 184, 0, 0.05);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(80, 60, 0, 0.3) 100%); border-color: rgba(255, 184, 0, 0.4); box-shadow: 0 0 20px rgba(255, 184, 0, 0.2), inset 0 0 30px rgba(255, 184, 0, 0.05);">
+            <div class="holo-tooltip" style="border-color: rgba(255, 184, 0, 0.5); box-shadow: 0 0 30px rgba(255, 184, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
+                <div class="tooltip-header" style="border-color: rgba(255, 184, 0, 0.2);">
+                    <div class="tooltip-icon" style="background: rgba(255, 184, 0, 0.3); border: 1px solid #FFB800;">🔑</div>
+                    <div class="tooltip-title" style="color: #FFB800; text-shadow: 0 0 10px rgba(255, 184, 0, 0.5);">KEYWORDS</div>
+                </div>
+                <div class="tooltip-content">
+                    <span class="tooltip-highlight" style="color: #FFB800;">Palabras clave de dolor</span> activas que detectan necesidades en los prospectos (ej: "need help", "looking for").
+                </div>
+            </div>
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
             <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
@@ -2619,14 +2727,16 @@ def show_dashboard():
             <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
         </div>
         <!-- Sources -->
-        <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%);
-                    border: 1px solid rgba(0, 255, 255, 0.4);
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%); border-color: rgba(0, 255, 255, 0.4); box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);">
+            <div class="holo-tooltip">
+                <div class="tooltip-header">
+                    <div class="tooltip-icon" style="background: rgba(0, 255, 255, 0.3); border: 1px solid #00FFFF;">🔗</div>
+                    <div class="tooltip-title">SOURCES</div>
+                </div>
+                <div class="tooltip-content">
+                    <span class="tooltip-highlight">Fuentes de datos conectadas</span>: Reddit, Indeed, Yelp, Google Maps. Configura las APIs en Settings para activar más.
+                </div>
+            </div>
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FFFF);">🔗</div>
             <div style="font-size: 36px; font-weight: 700; color: #00FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);">{sources_count}/4</div>
@@ -2636,26 +2746,6 @@ def show_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # Holographic Info Panel
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.4) 0%, rgba(28, 28, 46, 0.6) 100%);
-                border: 1px solid rgba(0, 255, 255, 0.2);
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 32px;
-                position: relative;
-                backdrop-filter: blur(10px);">
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 30%, #008B8B 70%, transparent 100%); opacity: 0.5;"></div>
-        <h4 style="margin: 0 0 12px 0; color: #00FFFF; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #C0C0C0; font-family: 'Rajdhani', sans-serif;">
-            <div><span style="color: #008B8B;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
-            <div><span style="color: #FF3366;">▸</span> <strong>HOT LEADS:</strong> Priority targets (Score 80+)</div>
-            <div><span style="color: #00FF88;">▸</span> <strong>QUALIFIED:</strong> AI-verified prospects</div>
-            <div><span style="color: #FFB800;">▸</span> <strong>KEYWORDS:</strong> Active pain indicators</div>
-            <div><span style="color: #00FFFF;">▸</span> <strong>SOURCES:</strong> Connected data streams</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
     # Data Sources Section - Holographic
     st.markdown("""
