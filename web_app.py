@@ -1236,67 +1236,93 @@ st.markdown("""
         box-shadow: var(--shadow-sm) !important;
     }
 
-    /* ========== DATA TABLE ========== */
+    /* ========== DATA TABLE - HOLOGRAPHIC ========== */
     .stDataFrame {
-        border: 1px solid var(--border-light) !important;
+        border: 2px solid rgba(0, 255, 255, 0.4) !important;
         border-radius: var(--radius-lg) !important;
         overflow: hidden !important;
+        background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15) !important;
     }
 
-    /* ========== PROGRESS ========== */
+    .stDataFrame [data-testid="stDataFrameResizable"] {
+        background: transparent !important;
+    }
+
+    /* ========== PROGRESS - HOLOGRAPHIC ========== */
     .stProgress > div > div > div {
-        background: linear-gradient(90deg, var(--primary-500) 0%, var(--primary-400) 100%) !important;
+        background: linear-gradient(90deg, #00FFFF 0%, #008B8B 100%) !important;
         border-radius: 10px !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4) !important;
     }
 
-    /* ========== ALERTS ========== */
+    .stProgress > div > div {
+        background: rgba(28, 28, 46, 0.8) !important;
+    }
+
+    /* ========== ALERTS - HOLOGRAPHIC ========== */
     .stSuccess, .stInfo, .stWarning, .stError {
         border-radius: var(--radius-md) !important;
         font-size: 14px !important;
         border-left-width: 4px !important;
         padding: 16px 20px !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        color: #E5E5E5 !important;
     }
 
     .stSuccess {
-        background: linear-gradient(135deg, var(--accent-50) 0%, #D1FAE5 100%) !important;
-        border-left-color: var(--success) !important;
+        background: linear-gradient(135deg, rgba(0, 80, 50, 0.5) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left-color: #00FF88 !important;
     }
 
     .stInfo {
-        background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%) !important;
-        border-left-color: var(--info) !important;
+        background: linear-gradient(135deg, rgba(0, 70, 90, 0.5) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left-color: #00FFFF !important;
     }
 
-    /* ========== EMPTY STATE ========== */
+    .stWarning {
+        background: linear-gradient(135deg, rgba(80, 60, 0, 0.5) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left-color: #FFB800 !important;
+    }
+
+    .stError {
+        background: linear-gradient(135deg, rgba(80, 30, 30, 0.5) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left-color: #FF6B6B !important;
+    }
+
+    /* ========== EMPTY STATE - HOLOGRAPHIC ========== */
     .empty-state {
         text-align: center;
         padding: 60px 48px;
-        background: linear-gradient(180deg, var(--slate-50) 0%, var(--white) 100%);
-        border: 2px dashed var(--border-medium);
+        background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%);
+        border: 2px dashed rgba(0, 255, 255, 0.4);
         border-radius: var(--radius-xl);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
     }
 
     .empty-icon {
         font-size: 56px;
         margin-bottom: 20px;
-        opacity: 0.6;
+        opacity: 0.8;
+        filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
     }
 
     .empty-title {
-        color: var(--slate-900);
+        color: #FFFFFF;
         font-size: 20px;
         font-weight: 700;
         margin: 0 0 8px 0;
         letter-spacing: -0.02em;
+        text-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     }
 
     .empty-desc {
-        color: var(--slate-500);
+        color: #C0C0C0;
         font-size: 15px;
         margin: 0 0 24px 0;
     }
 
-    /* ========== API CARDS - EXECUTIVE ========== */
+    /* ========== API CARDS - HIGH CONTRAST HOLOGRAPHIC ========== */
     .api-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1304,26 +1330,27 @@ st.markdown("""
     }
 
     .api-card {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.4) !important;
         border-radius: var(--radius-xl) !important;
         padding: 28px 24px !important;
         text-align: center !important;
         transition: all 0.3s ease !important;
         display: block !important;
         min-height: 140px !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
         position: relative !important;
     }
 
     .api-card:hover {
-        box-shadow: var(--shadow-md) !important;
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4) !important;
         transform: translateY(-3px) !important;
-        border-color: var(--primary-200) !important;
+        border-color: #00FFFF !important;
     }
 
     .api-card.connected {
-        border-color: var(--accent-500) !important;
-        background: linear-gradient(180deg, #FFFFFF 0%, var(--accent-50) 100%) !important;
+        border-color: #00FF88 !important;
+        background: linear-gradient(135deg, rgba(0, 80, 50, 0.4) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
     }
 
     .api-card.connected::after {
@@ -1333,32 +1360,34 @@ st.markdown("""
         left: 0;
         right: 0;
         height: 3px;
-        background: linear-gradient(90deg, var(--accent-500), var(--accent-600));
+        background: linear-gradient(90deg, #00FF88, #00CC66);
         border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     }
 
     .api-card.disconnected {
-        border-color: var(--border-light) !important;
-        background: var(--white) !important;
+        border-color: rgba(0, 255, 255, 0.3) !important;
+        background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%) !important;
     }
 
     .api-icon {
         font-size: 36px !important;
         margin-bottom: 14px !important;
         display: block !important;
+        filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.3)) !important;
     }
 
     .api-name {
-        color: var(--slate-900) !important;
+        color: #FFFFFF !important;
         font-size: 16px !important;
         font-weight: 700 !important;
         margin: 0 0 12px 0 !important;
         letter-spacing: -0.01em !important;
         display: block !important;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.2) !important;
     }
 
     h4.api-name {
-        color: var(--slate-900) !important;
+        color: #FFFFFF !important;
         font-size: 16px !important;
         font-weight: 700 !important;
     }
@@ -1374,16 +1403,19 @@ st.markdown("""
     }
 
     .api-status.connected {
-        background: linear-gradient(135deg, var(--accent-50) 0%, #D1FAE5 100%) !important;
-        color: var(--accent-600) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 139, 139, 0.3) 100%) !important;
+        color: #00FF88 !important;
+        border: 1px solid rgba(0, 255, 136, 0.5) !important;
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.3) !important;
     }
 
     .api-status.disconnected {
-        background: var(--slate-100) !important;
-        color: var(--slate-500) !important;
+        background: rgba(60, 70, 90, 0.8) !important;
+        color: #A0A0A0 !important;
+        border: 1px solid rgba(160, 160, 160, 0.3) !important;
     }
 
-    /* ========== TAGS ========== */
+    /* ========== TAGS - HOLOGRAPHIC ========== */
     .tags-container {
         display: flex;
         flex-wrap: wrap;
@@ -1391,22 +1423,23 @@ st.markdown("""
     }
 
     .tag {
-        background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
-        color: var(--primary-700);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.3) 100%);
+        color: #00FFFF;
         font-size: 13px;
         font-weight: 600;
         padding: 8px 14px;
         border-radius: 20px;
-        border: 1px solid var(--primary-200);
+        border: 1px solid rgba(0, 255, 255, 0.4);
         transition: all 0.2s ease;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
     }
 
     .tag:hover {
-        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
-        color: white;
-        border-color: var(--primary-600);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4) 0%, rgba(0, 139, 139, 0.5) 100%);
+        color: #FFFFFF;
+        border-color: #00FFFF;
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
     }
 
     /* ========== LOADING ========== */
@@ -1766,23 +1799,25 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* ========== EXPANDER - HOLOGRAPHIC ========== */
+    /* ========== EXPANDER - HIGH CONTRAST HOLOGRAPHIC ========== */
     .streamlit-expanderHeader {
         font-size: 15px !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
         border-radius: var(--radius-md) !important;
         transition: all 0.2s ease !important;
         padding: 14px 18px !important;
-        color: #C0C0C0 !important;
+        color: #E5E5E5 !important;
         backdrop-filter: blur(10px) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
     }
 
     .streamlit-expanderHeader:hover {
-        border-color: rgba(0, 255, 255, 0.4) !important;
-        background: linear-gradient(135deg, rgba(0, 139, 139, 0.2) 0%, rgba(28, 28, 46, 0.9) 100%) !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
+        border-color: #00FFFF !important;
+        background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        color: #00FFFF !important;
     }
 
     [data-testid="stExpander"] {
@@ -1791,184 +1826,213 @@ st.markdown("""
     }
 
     [data-testid="stExpander"] > div:first-child {
-        background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
         border-radius: 12px !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
     }
 
     [data-testid="stExpander"] > div > div {
-        background: rgba(28, 28, 46, 0.6) !important;
-        border-color: rgba(0, 255, 255, 0.1) !important;
-    }
-
-    /* ========== SELECT BOX - HOLOGRAPHIC ========== */
-    .stSelectbox > div > div {
-        background: rgba(28, 28, 46, 0.8) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
-        border-radius: var(--radius-md) !important;
-        font-size: 15px !important;
-        color: #E5E5E5 !important;
-        padding: 4px 8px !important;
-    }
-
-    .stSelectbox > div > div:hover {
-        border-color: rgba(0, 255, 255, 0.4) !important;
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.1) !important;
-    }
-
-    .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label {
-        color: #C0C0C0 !important;
-        font-weight: 600 !important;
-        font-size: 14px !important;
-        margin-bottom: 6px !important;
-    }
-
-    /* Text Input - Holographic */
-    .stTextInput > div > div > input {
-        background: rgba(28, 28, 46, 0.8) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
-        color: #E5E5E5 !important;
-        border-radius: var(--radius-md) !important;
-    }
-
-    .stTextInput > div > div > input:focus {
-        border-color: rgba(0, 255, 255, 0.5) !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
-    }
-
-    /* Text Area - Holographic */
-    .stTextArea > div > div > textarea {
-        background: rgba(28, 28, 46, 0.8) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
-        color: #E5E5E5 !important;
-        border-radius: var(--radius-md) !important;
-    }
-
-    .stTextArea > div > div > textarea:focus {
-        border-color: rgba(0, 255, 255, 0.5) !important;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
-    }
-
-    /* Multiselect - Holographic */
-    .stMultiSelect > div > div {
-        background: rgba(28, 28, 46, 0.8) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
-        color: #E5E5E5 !important;
-    }
-
-    .stMultiSelect [data-baseweb="tag"] {
-        background: rgba(0, 139, 139, 0.3) !important;
-        color: #00FFFF !important;
-        border: 1px solid rgba(0, 255, 255, 0.3) !important;
-    }
-
-    /* Checkbox - Holographic */
-    .stCheckbox > label {
-        color: #C0C0C0 !important;
-    }
-
-    .stCheckbox > label > div[data-testid="stCheckbox"] > div {
-        background: rgba(28, 28, 46, 0.8) !important;
+        background: linear-gradient(135deg, rgba(50, 60, 80, 0.95) 0%, rgba(35, 45, 65, 0.95) 100%) !important;
         border-color: rgba(0, 255, 255, 0.3) !important;
     }
 
-    /* Radio - Holographic */
+    /* ========== FORM INPUTS - HIGH CONTRAST HOLOGRAPHIC ========== */
+    /* These inputs need to STAND OUT from the dark background */
+
+    /* Labels - Bright and clear */
+    .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label, .stMultiSelect label {
+        color: #00FFFF !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.1em !important;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.3) !important;
+    }
+
+    /* SELECT BOX - Light background for contrast */
+    .stSelectbox > div > div {
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        border-radius: var(--radius-md) !important;
+        font-size: 15px !important;
+        color: #FFFFFF !important;
+        padding: 6px 10px !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .stSelectbox > div > div:hover {
+        border-color: #00FFFF !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    }
+
+    /* Text Input - High visibility */
+    .stTextInput > div > div > input {
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        color: #FFFFFF !important;
+        border-radius: var(--radius-md) !important;
+        padding: 12px 14px !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .stTextInput > div > div > input:focus {
+        border-color: #00FFFF !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        outline: none !important;
+    }
+
+    .stTextInput > div > div > input::placeholder {
+        color: rgba(192, 192, 192, 0.7) !important;
+    }
+
+    /* Text Area - High visibility */
+    .stTextArea > div > div > textarea {
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        color: #FFFFFF !important;
+        border-radius: var(--radius-md) !important;
+        padding: 12px 14px !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .stTextArea > div > div > textarea:focus {
+        border-color: #00FFFF !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .stTextArea > div > div > textarea::placeholder {
+        color: rgba(192, 192, 192, 0.7) !important;
+    }
+
+    /* Number Input - High visibility */
+    .stNumberInput > div > div > input {
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        color: #FFFFFF !important;
+        border-radius: var(--radius-md) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
+    }
+
+    .stNumberInput > div > div > input:focus {
+        border-color: #00FFFF !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
+    }
+
+    /* Multiselect - High visibility */
+    .stMultiSelect > div > div {
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
+    }
+
+    .stMultiSelect [data-baseweb="tag"] {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 139, 139, 0.4) 100%) !important;
+        color: #FFFFFF !important;
+        border: 1px solid #00FFFF !important;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3) !important;
+    }
+
+    /* Checkbox - High visibility */
+    .stCheckbox > label {
+        color: #E5E5E5 !important;
+        font-weight: 500 !important;
+    }
+
+    .stCheckbox > label > div[data-testid="stCheckbox"] > div {
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+    }
+
+    .stCheckbox > label > div[data-testid="stCheckbox"] > div:hover {
+        border-color: #00FFFF !important;
+    }
+
+    /* Radio - High visibility */
     .stRadio > div {
         background: transparent !important;
     }
 
     .stRadio > div > label {
-        color: #C0C0C0 !important;
-        background: rgba(28, 28, 46, 0.4) !important;
-        border: 1px solid rgba(0, 255, 255, 0.1) !important;
+        color: #E5E5E5 !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.9) 0%, rgba(45, 55, 75, 0.9) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.4) !important;
         border-radius: 8px !important;
-        padding: 8px 12px !important;
+        padding: 10px 14px !important;
         margin: 4px 0 !important;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.1) !important;
     }
 
     .stRadio > div > label:hover {
-        border-color: rgba(0, 255, 255, 0.3) !important;
-        background: rgba(0, 139, 139, 0.1) !important;
+        border-color: #00FFFF !important;
+        background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2) !important;
     }
 
-    /* Date Input - Holographic */
+    .stRadio > div > label[data-checked="true"] {
+        border-color: #00FFFF !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.3) 100%) !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important;
+    }
+
+    /* Date Input - High visibility */
     .stDateInput > div > div > input {
-        background: rgba(28, 28, 46, 0.8) !important;
-        border: 1px solid rgba(0, 255, 255, 0.2) !important;
-        color: #E5E5E5 !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px solid rgba(0, 255, 255, 0.5) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15) !important;
     }
 
-    /* ========== TEXT INPUTS ========== */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea,
-    .stNumberInput > div > div > input {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
-        border-radius: var(--radius-md) !important;
-        color: var(--slate-800) !important;
-        font-size: 15px !important;
-        padding: 12px 14px !important;
+    .stDateInput > div > div > input:focus {
+        border-color: #00FFFF !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
     }
 
-    .stTextInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus,
-    .stNumberInput > div > div > input:focus {
-        border-color: var(--primary-400) !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    /* Slider - High visibility */
+    .stSlider > div > div > div {
+        background: rgba(0, 255, 255, 0.3) !important;
     }
 
-    .stTextInput > div > div > input::placeholder,
-    .stTextArea > div > div > textarea::placeholder {
-        color: var(--slate-400) !important;
+    .stSlider > div > div > div > div {
+        background: #00FFFF !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.5) !important;
     }
 
-    /* ========== MULTISELECT ========== */
-    .stMultiSelect > div > div {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
-        border-radius: var(--radius-md) !important;
-        color: var(--slate-800) !important;
-    }
-
-    .stMultiSelect span {
-        color: var(--slate-800) !important;
-    }
-
-    /* ========== RADIO BUTTONS (main area) ========== */
-    .main .stRadio label {
-        color: var(--slate-700) !important;
-        font-weight: 500 !important;
-    }
-
-    /* ========== ALL LABELS AND TEXT ========== */
-    .main p, .main span, .main label, .main div {
-        color: var(--slate-700);
-    }
-
-    .main h1, .main h2, .main h3, .main h4 {
-        color: var(--slate-900) !important;
-    }
-
-    /* ========== SELECTBOX DROPDOWN ========== */
+    /* ========== SELECTBOX DROPDOWN - HOLOGRAPHIC ========== */
     [data-baseweb="select"] span,
     [data-baseweb="select"] div {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
     }
 
     [data-baseweb="menu"] {
-        background: var(--white) !important;
+        background: linear-gradient(135deg, rgba(45, 55, 75, 0.98) 0%, rgba(28, 28, 46, 0.98) 100%) !important;
         border-radius: var(--radius-md) !important;
-        border: 1px solid var(--border-light) !important;
-        box-shadow: var(--shadow-lg) !important;
+        border: 2px solid rgba(0, 255, 255, 0.4) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 255, 0.2) !important;
+        backdrop-filter: blur(20px) !important;
     }
 
     [data-baseweb="menu"] li {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         padding: 12px 16px !important;
+        transition: all 0.2s ease !important;
     }
 
     [data-baseweb="menu"] li:hover {
-        background: var(--primary-50) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.3) 100%) !important;
+        color: #00FFFF !important;
+    }
+
+    /* ========== MAIN AREA TEXT - HOLOGRAPHIC ========== */
+    .main p, .main span, .main label, .main div {
+        color: #C0C0C0;
+    }
+
+    .main h1, .main h2, .main h3, .main h4 {
+        color: #FFFFFF !important;
+        text-shadow: 0 0 15px rgba(0, 255, 255, 0.3) !important;
     }
 
     /* ========== SPINNER ========== */
@@ -1976,146 +2040,154 @@ st.markdown("""
         border-top-color: var(--primary-500) !important;
     }
 
-    /* ========== SCROLLBAR ========== */
+    /* ========== SCROLLBAR - HOLOGRAPHIC ========== */
     ::-webkit-scrollbar {
         width: 10px;
         height: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        background: var(--slate-100);
+        background: rgba(28, 28, 46, 0.8);
         border-radius: 5px;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: var(--slate-300);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.4) 0%, rgba(0, 139, 139, 0.4) 100%);
         border-radius: 5px;
+        border: 1px solid rgba(0, 255, 255, 0.3);
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: var(--slate-400);
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.6) 0%, rgba(0, 139, 139, 0.6) 100%);
     }
 
-    /* ========== ENHANCED CHECKBOX STYLING ========== */
+    /* ========== ENHANCED CHECKBOX STYLING - HOLOGRAPHIC ========== */
     .stCheckbox > label {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         font-weight: 500 !important;
     }
 
     .stCheckbox > label > div {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
     }
 
     .stCheckbox > label > div > p,
     .stCheckbox > label > div > span {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         font-weight: 500 !important;
     }
 
     .stCheckbox [data-testid="stMarkdownContainer"] p {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
     }
 
-    /* ========== ENHANCED ALERTS ========== */
+    /* ========== ENHANCED ALERTS - HOLOGRAPHIC ========== */
     .stAlert {
         border-radius: var(--radius-lg) !important;
         padding: 18px 22px !important;
-        border: none !important;
-        box-shadow: var(--shadow-sm) !important;
+        border: 2px solid rgba(0, 255, 255, 0.4) !important;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15) !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
     }
 
     .stAlert > div {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         font-size: 14px !important;
     }
 
     [data-testid="stAlert"] {
         border-radius: var(--radius-lg) !important;
-        border-left: 4px solid !important;
+        border-left: 4px solid #00FFFF !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
     }
 
     [data-baseweb="notification"] {
         border-radius: var(--radius-lg) !important;
-        background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%) !important;
-        border-left: 4px solid var(--primary-500) !important;
+        background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left: 4px solid #00FFFF !important;
     }
 
     [data-baseweb="notification"] [data-testid="stMarkdownContainer"] p {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         font-weight: 500 !important;
     }
 
     /* Info alert styling */
     .element-container:has([data-testid="stAlert"]) [role="alert"] {
-        background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%) !important;
-        border-left-color: var(--primary-500) !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border-left-color: #00FFFF !important;
         border-radius: var(--radius-lg) !important;
         padding: 18px 22px !important;
     }
 
-    /* ========== CONTAINERS & CARDS ========== */
+    /* ========== CONTAINERS & CARDS - HIGH CONTRAST ========== */
     [data-testid="stVerticalBlock"] > div:has(> [data-testid="stHorizontalBlock"]) {
-        background: var(--white);
+        background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%);
         border-radius: var(--radius-xl);
         padding: 24px;
-        border: 1px solid var(--border-light);
+        border: 2px solid rgba(0, 255, 255, 0.4);
         margin: 16px 0;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
     }
 
     /* File uploader styling */
     .stFileUploader {
-        background: var(--white) !important;
-        border: 2px dashed var(--border-medium) !important;
+        background: linear-gradient(135deg, rgba(60, 70, 90, 0.95) 0%, rgba(45, 55, 75, 0.95) 100%) !important;
+        border: 2px dashed rgba(0, 255, 255, 0.5) !important;
         border-radius: var(--radius-lg) !important;
         padding: 32px !important;
         transition: all 0.2s ease !important;
     }
 
     .stFileUploader:hover {
-        border-color: var(--primary-400) !important;
-        background: var(--primary-50) !important;
+        border-color: #00FFFF !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(60, 70, 90, 0.95) 100%) !important;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.2) !important;
     }
 
     /* Divider styling */
     hr {
         border: none !important;
-        border-top: 1px solid var(--border-light) !important;
+        border-top: 1px solid rgba(0, 255, 255, 0.3) !important;
         margin: 24px 0 !important;
     }
 
-    /* ========== STREAMLIT NATIVE TITLES ========== */
+    /* ========== STREAMLIT NATIVE TITLES - HOLOGRAPHIC ========== */
     .main h1 {
-        color: var(--slate-900) !important;
+        color: #FFFFFF !important;
         font-size: 32px !important;
         font-weight: 800 !important;
         letter-spacing: -0.03em !important;
         margin-bottom: 8px !important;
+        text-shadow: 0 0 20px rgba(0, 255, 255, 0.3) !important;
     }
 
     .main h2 {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         font-size: 24px !important;
         font-weight: 700 !important;
         letter-spacing: -0.02em !important;
+        text-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
     }
 
     .main h3 {
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         font-size: 20px !important;
         font-weight: 700 !important;
         letter-spacing: -0.02em !important;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.2) !important;
     }
 
     /* Caption styling */
     .stCaption, [data-testid="stCaptionContainer"] {
-        color: var(--slate-500) !important;
+        color: #A0A0A0 !important;
         font-size: 15px !important;
         font-weight: 500 !important;
     }
 
-    /* ========== FINAL POLISH ========== */
+    /* ========== FINAL POLISH - HOLOGRAPHIC ========== */
     .stMarkdown {
-        color: var(--slate-700) !important;
+        color: #C0C0C0 !important;
     }
 
     /* Smooth transitions for all interactive elements */
@@ -3128,20 +3200,22 @@ def show_dashboard():
     st.markdown(f"""
     <style>
         .holo-metric-card {{
-            background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%);
-            border: 1px solid rgba(0, 139, 139, 0.4);
+            background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(40, 50, 70, 0.95) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
             border-radius: 12px;
             padding: 20px;
             text-align: center;
             position: relative;
             overflow: visible;
-            box-shadow: 0 0 20px rgba(0, 139, 139, 0.2), inset 0 0 30px rgba(0, 139, 139, 0.05);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.25), 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             cursor: pointer;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }}
         .holo-metric-card:hover {{
             transform: translateY(-4px);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 40px rgba(0, 255, 255, 0.1);
+            border-color: #00FFFF;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.4), 0 12px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }}
         .holo-tooltip {{
             position: absolute;
@@ -3225,92 +3299,92 @@ def show_dashboard():
     </style>
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Leads Found -->
-        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%); border-color: rgba(0, 139, 139, 0.4);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(55, 70, 85, 0.95) 0%, rgba(0, 70, 70, 0.6) 100%); border-color: #008B8B;">
             <div class="holo-tooltip">
                 <div class="tooltip-header">
-                    <div class="tooltip-icon" style="background: rgba(0, 139, 139, 0.3); border: 1px solid #008B8B;">👥</div>
+                    <div class="tooltip-icon" style="background: rgba(0, 139, 139, 0.5); border: 2px solid #008B8B;">👥</div>
                     <div class="tooltip-title">LEADS FOUND</div>
                 </div>
                 <div class="tooltip-content">
                     Total de <span class="tooltip-highlight">prospectos descubiertos</span> en esta sesión desde todas las fuentes configuradas (Reddit, Indeed, Yelp, Google Maps).
                 </div>
             </div>
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #008B8B 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #008B8B);">👥</div>
-            <div style="font-size: 36px; font-weight: 700; color: #008B8B; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 139, 139, 0.5);">{leads_count}</div>
-            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
-            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #008B8B 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 8px #008B8B);">👥</div>
+            <div style="font-size: 36px; font-weight: 700; color: #20B2AA; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(0, 139, 139, 0.6);">{leads_count}</div>
+            <div style="font-size: 12px; color: #E5E5E5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
+            <div style="font-size: 10px; color: #A0A0A0; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
         </div>
         <!-- Hot Leads -->
-        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(28, 28, 46, 0.3) 100%); border-color: rgba(255, 51, 102, 0.4); box-shadow: 0 0 20px rgba(255, 51, 102, 0.2), inset 0 0 30px rgba(255, 51, 102, 0.05);">
-            <div class="holo-tooltip" style="border-color: rgba(255, 51, 102, 0.5); box-shadow: 0 0 30px rgba(255, 51, 102, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(100, 30, 50, 0.5) 100%); border-color: #FF3366;">
+            <div class="holo-tooltip" style="border-color: #FF3366; box-shadow: 0 0 30px rgba(255, 51, 102, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
-                <div class="tooltip-header" style="border-color: rgba(255, 51, 102, 0.2);">
-                    <div class="tooltip-icon" style="background: rgba(255, 51, 102, 0.3); border: 1px solid #FF3366;">🔥</div>
+                <div class="tooltip-header" style="border-color: rgba(255, 51, 102, 0.3);">
+                    <div class="tooltip-icon" style="background: rgba(255, 51, 102, 0.5); border: 2px solid #FF3366;">🔥</div>
                     <div class="tooltip-title" style="color: #FF3366; text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);">HOT LEADS</div>
                 </div>
                 <div class="tooltip-content">
                     Leads con <span class="tooltip-highlight" style="color: #FF3366;">Score 80+</span>. Son prospectos de alta prioridad listos para contactar inmediatamente.
                 </div>
             </div>
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
-            <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
-            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
-            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 8px #FF3366);">🔥</div>
+            <div style="font-size: 36px; font-weight: 700; color: #FF6B8A; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(255, 51, 102, 0.6);">{hot_leads_count}</div>
+            <div style="font-size: 12px; color: #E5E5E5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
+            <div style="font-size: 10px; color: #A0A0A0; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
         </div>
         <!-- Qualified -->
-        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 80, 50, 0.3) 100%); border-color: rgba(0, 255, 136, 0.4); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.05);">
-            <div class="holo-tooltip" style="border-color: rgba(0, 255, 136, 0.5); box-shadow: 0 0 30px rgba(0, 255, 136, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(0, 80, 50, 0.5) 100%); border-color: #00FF88;">
+            <div class="holo-tooltip" style="border-color: #00FF88; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
-                <div class="tooltip-header" style="border-color: rgba(0, 255, 136, 0.2);">
-                    <div class="tooltip-icon" style="background: rgba(0, 255, 136, 0.3); border: 1px solid #00FF88;">✅</div>
+                <div class="tooltip-header" style="border-color: rgba(0, 255, 136, 0.3);">
+                    <div class="tooltip-icon" style="background: rgba(0, 255, 136, 0.5); border: 2px solid #00FF88;">✅</div>
                     <div class="tooltip-title" style="color: #00FF88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);">QUALIFIED</div>
                 </div>
                 <div class="tooltip-content">
                     Leads <span class="tooltip-highlight" style="color: #00FF88;">verificados por AI</span> que pasaron los filtros de calificación. Listos para exportar a tu CRM.
                 </div>
             </div>
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
-            <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
-            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
-            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 8px #00FF88);">✅</div>
+            <div style="font-size: 36px; font-weight: 700; color: #50FFB0; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);">{qualified_count}</div>
+            <div style="font-size: 12px; color: #E5E5E5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
+            <div style="font-size: 10px; color: #A0A0A0; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
         </div>
         <!-- Keywords -->
-        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(80, 60, 0, 0.3) 100%); border-color: rgba(255, 184, 0, 0.4); box-shadow: 0 0 20px rgba(255, 184, 0, 0.2), inset 0 0 30px rgba(255, 184, 0, 0.05);">
-            <div class="holo-tooltip" style="border-color: rgba(255, 184, 0, 0.5); box-shadow: 0 0 30px rgba(255, 184, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(80, 60, 0, 0.5) 100%); border-color: #FFB800;">
+            <div class="holo-tooltip" style="border-color: #FFB800; box-shadow: 0 0 30px rgba(255, 184, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.5);">
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
-                <div class="tooltip-header" style="border-color: rgba(255, 184, 0, 0.2);">
-                    <div class="tooltip-icon" style="background: rgba(255, 184, 0, 0.3); border: 1px solid #FFB800;">🔑</div>
+                <div class="tooltip-header" style="border-color: rgba(255, 184, 0, 0.3);">
+                    <div class="tooltip-icon" style="background: rgba(255, 184, 0, 0.5); border: 2px solid #FFB800;">🔑</div>
                     <div class="tooltip-title" style="color: #FFB800; text-shadow: 0 0 10px rgba(255, 184, 0, 0.5);">KEYWORDS</div>
                 </div>
                 <div class="tooltip-content">
                     <span class="tooltip-highlight" style="color: #FFB800;">Palabras clave de dolor</span> activas que detectan necesidades en los prospectos (ej: "need help", "looking for").
                 </div>
             </div>
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
-            <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
-            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
-            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 8px #FFB800);">🔑</div>
+            <div style="font-size: 36px; font-weight: 700; color: #FFD040; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(255, 184, 0, 0.6);">{keywords_count}</div>
+            <div style="font-size: 12px; color: #E5E5E5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
+            <div style="font-size: 10px; color: #A0A0A0; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
         </div>
         <!-- Sources -->
-        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%); border-color: rgba(0, 255, 255, 0.4); box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);">
+        <div class="holo-metric-card" style="background: linear-gradient(135deg, rgba(55, 65, 85, 0.95) 0%, rgba(0, 60, 80, 0.5) 100%); border-color: #00FFFF;">
             <div class="holo-tooltip">
                 <div class="tooltip-header">
-                    <div class="tooltip-icon" style="background: rgba(0, 255, 255, 0.3); border: 1px solid #00FFFF;">🔗</div>
+                    <div class="tooltip-icon" style="background: rgba(0, 255, 255, 0.5); border: 2px solid #00FFFF;">🔗</div>
                     <div class="tooltip-title">SOURCES</div>
                 </div>
                 <div class="tooltip-content">
                     <span class="tooltip-highlight">Fuentes de datos conectadas</span>: Reddit, Indeed, Yelp, Google Maps. Configura las APIs en Settings para activar más.
                 </div>
             </div>
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FFFF);">🔗</div>
-            <div style="font-size: 36px; font-weight: 700; color: #00FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);">{sources_count}/4</div>
-            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
-            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 8px #00FFFF);">🔗</div>
+            <div style="font-size: 36px; font-weight: 700; color: #60FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);">{sources_count}/4</div>
+            <div style="font-size: 12px; color: #E5E5E5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
+            <div style="font-size: 10px; color: #A0A0A0; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
