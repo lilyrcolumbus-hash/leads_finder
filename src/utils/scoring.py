@@ -122,6 +122,16 @@ BUSINESS_INDICATORS = {
     "local_business": 15,   # Local SMB = perfect fit
 }
 
+# Email quality indicators (from email verification)
+EMAIL_QUALITY_SCORES = {
+    "verified_valid": 15,       # Verified deliverable email
+    "catch_all": 5,             # Catch-all domain (uncertain)
+    "role_based": 0,            # info@, support@ - reduce priority
+    "free_email": -5,           # gmail, yahoo - less professional
+    "disposable": -15,          # Temp email - bad signal
+    "invalid": -20,             # Invalid email - remove from scoring
+}
+
 
 # =============================================================================
 # SCORING FUNCTIONS
@@ -294,6 +304,38 @@ def calculate_fit_score(lead: Lead) -> int:
     if lead.email:
         score += BUSINESS_INDICATORS["has_email"]
         breakdown["criteria"].append({"factor": "Has email", "score": 10})
+
+        # Email quality scoring (if verified)
+        if lead.extra_data and lead.extra_data.get("email_verified"):
+            email_data = lead.extra_data.get("email_verification", {})
+            email_status = email_data.get("status", "")
+            email_flags = email_data.get("flags", [])
+
+            # Apply email quality adjustments
+            if email_status == "valid" and "undeliverable" not in email_flags:
+                email_bonus = EMAIL_QUALITY_SCORES["verified_valid"]
+                score += email_bonus
+                breakdown["criteria"].append({"factor": "Verified valid email", "score": email_bonus})
+            elif "catch_all" in email_flags:
+                email_bonus = EMAIL_QUALITY_SCORES["catch_all"]
+                score += email_bonus
+                breakdown["criteria"].append({"factor": "Catch-all domain", "score": email_bonus})
+
+            # Penalties for low-quality emails
+            if "free_email" in email_flags:
+                penalty = EMAIL_QUALITY_SCORES["free_email"]
+                score += penalty
+                breakdown["criteria"].append({"factor": "Free email provider", "score": penalty})
+            if "role_based" in email_flags:
+                breakdown["criteria"].append({"factor": "Role-based email (info@, etc.)", "score": 0})
+            if "disposable" in email_flags:
+                penalty = EMAIL_QUALITY_SCORES["disposable"]
+                score += penalty
+                breakdown["criteria"].append({"factor": "Disposable email", "score": penalty})
+            if email_status == "invalid":
+                penalty = EMAIL_QUALITY_SCORES["invalid"]
+                score += penalty
+                breakdown["criteria"].append({"factor": "Invalid email", "score": penalty})
 
     if lead.linkedin:
         score += BUSINESS_INDICATORS["has_linkedin"]

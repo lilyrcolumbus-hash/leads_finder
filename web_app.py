@@ -22,6 +22,7 @@ from src.utils.scoring import enrich_leads, calculate_pain_score, get_lead_grade
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.enrichment.apollo_enricher import enrich_leads_with_apollo
+from src.enrichment.email_verifier import EmailVerifier, get_email_quality_for_scoring
 from src.utils.background_tasks import task_manager, TaskStatus
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper
 from src.filters import AILeadFilter
@@ -3896,6 +3897,40 @@ def show_search():
                     with results:
                         st.warning(f"Apollo.io: Could not enrich leads")
 
+        # Email Verification with ZeroBounce (if configured)
+        if (settings.zerobounce_api_key or settings.hunter_api_key) and all_leads:
+            leads_with_email = [l for l in all_leads if l.email and not (l.extra_data and l.extra_data.get('email_verified'))]
+            if leads_with_email:
+                status.markdown("""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Verifying email deliverability...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                try:
+                    verifier = EmailVerifier(
+                        zerobounce_key=settings.zerobounce_api_key,
+                        hunter_key=settings.hunter_api_key
+                    )
+                    verified_count = 0
+                    for lead in leads_with_email[:15]:  # Limit to 15 verifications per run
+                        if lead.email:
+                            quality_data = get_email_quality_for_scoring(lead.email, verifier)
+                            if not lead.extra_data:
+                                lead.extra_data = {}
+                            lead.extra_data['email_verified'] = True
+                            lead.extra_data['email_verification'] = quality_data
+                            verified_count += 1
+
+                    if verified_count > 0:
+                        with results:
+                            st.success(f"Verified {verified_count} email addresses")
+                        lead_manager.save_leads(all_leads)
+                except Exception as e:
+                    with results:
+                        st.warning(f"Email verification: Could not verify emails")
+
         st.session_state.scraping_done = True
         progress.progress(1.0)
 
@@ -7093,8 +7128,12 @@ def show_config():
     apollo_bg = "#D1FAE5" if settings.apollo_api_key else "#FEF3C7"
     apollo_text = "Connected" if settings.apollo_api_key else "Not configured"
 
+    # ZeroBounce status
+    zerobounce_icon = "✓" if settings.zerobounce_api_key else "○"
+    zerobounce_text = "Connected" if settings.zerobounce_api_key else "Optional"
+
     st.markdown(f"""
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Hunter.io -->
         <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
             <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 0 5px #00FFFF);">📧</div>
@@ -7112,6 +7151,15 @@ def show_config():
                 <span>{apollo_icon}</span> {apollo_text}
             </div>
             <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Email + Phone + Company</p>
+        </div>
+        <!-- ZeroBounce - Email Verification -->
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 0 5px #00FFFF);">✅</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">ZeroBounce</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {'rgba(0, 255, 136, 0.2)' if settings.zerobounce_api_key else 'rgba(255, 184, 0, 0.2)'}; color: {'#00FF88' if settings.zerobounce_api_key else '#FFB800'}; border: 1px solid {'rgba(0, 255, 136, 0.4)' if settings.zerobounce_api_key else 'rgba(255, 184, 0, 0.4)'}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <span>{zerobounce_icon}</span> {zerobounce_text}
+            </div>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Email verification</p>
         </div>
         <!-- Deduplication -->
         <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
