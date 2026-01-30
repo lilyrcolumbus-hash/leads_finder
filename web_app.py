@@ -2027,6 +2027,446 @@ st.markdown("""
     button, input, select, textarea, a {
         transition: all 0.2s ease !important;
     }
+
+    /* ========================================================================
+       MOBILE RESPONSIVE DESIGN - Premium Mobile Experience
+       ======================================================================== */
+
+    /* ===== TABLET (768px - 1024px) ===== */
+    @media screen and (max-width: 1024px) {
+        .main .block-container {
+            padding: 1.5rem 2rem 2rem 2rem !important;
+            max-width: 100% !important;
+        }
+
+        /* Adjust grid to 2 columns on tablet */
+        [style*="grid-template-columns: repeat(5"] {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+
+        [style*="grid-template-columns: repeat(4"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    /* ===== MOBILE (max-width: 768px) ===== */
+    @media screen and (max-width: 768px) {
+        /* Hide Streamlit hamburger and deploy button */
+        #MainMenu, footer, header, .stDeployButton,
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+
+        /* Main container - full width, optimized padding */
+        .main .block-container {
+            padding: 1rem 1rem 2rem 1rem !important;
+            max-width: 100% !important;
+        }
+
+        /* Sidebar - Mobile Drawer Style */
+        [data-testid="stSidebar"] {
+            width: 85vw !important;
+            max-width: 320px !important;
+            background: linear-gradient(180deg, rgba(28, 28, 46, 0.98) 0%, rgba(5, 10, 25, 0.99) 100%) !important;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.8) !important;
+        }
+
+        [data-testid="stSidebar"] > div:first-child {
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        /* Sidebar Navigation - Larger touch targets */
+        [data-testid="stSidebar"] .stRadio > div > label {
+            padding: 16px 20px !important;
+            font-size: 15px !important;
+            min-height: 54px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        /* Typography - Mobile optimized */
+        h1 {
+            font-size: 22px !important;
+            line-height: 1.3 !important;
+        }
+
+        h2 {
+            font-size: 18px !important;
+        }
+
+        h3 {
+            font-size: 16px !important;
+        }
+
+        p, span, div, label {
+            font-size: 14px !important;
+        }
+
+        /* Metric Cards - Stack vertically */
+        [style*="grid-template-columns: repeat(5"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+        }
+
+        [style*="grid-template-columns: repeat(4"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+        }
+
+        [style*="grid-template-columns: repeat(3"] {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+        }
+
+        /* Holographic metric cards - Mobile */
+        .holo-metric-card {
+            padding: 16px 12px !important;
+            border-radius: 10px !important;
+        }
+
+        .holo-metric-card [style*="font-size: 36px"] {
+            font-size: 28px !important;
+        }
+
+        .holo-metric-card [style*="font-size: 28px"] {
+            font-size: 22px !important;
+        }
+
+        /* Tooltips - Full width on mobile */
+        .holo-tooltip {
+            position: fixed !important;
+            bottom: auto !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) scale(0.95) !important;
+            width: 90vw !important;
+            max-width: 320px !important;
+            min-width: auto !important;
+            z-index: 99999 !important;
+        }
+
+        .holo-metric-card:hover .holo-tooltip {
+            transform: translate(-50%, -50%) scale(1) !important;
+        }
+
+        .holo-tooltip::after {
+            display: none !important;
+        }
+
+        /* Buttons - Full width, larger touch targets */
+        .stButton > button {
+            width: 100% !important;
+            min-height: 48px !important;
+            font-size: 14px !important;
+            padding: 12px 16px !important;
+            border-radius: 10px !important;
+        }
+
+        /* Columns - Stack on mobile */
+        [data-testid="column"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+
+        .stHorizontalBlock {
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
+
+        /* Input fields - Mobile optimized */
+        .stTextInput > div > div > input,
+        .stSelectbox > div > div,
+        .stMultiSelect > div > div,
+        .stTextArea > div > div > textarea {
+            min-height: 48px !important;
+            font-size: 16px !important; /* Prevents iOS zoom */
+            padding: 12px 16px !important;
+            border-radius: 10px !important;
+        }
+
+        /* Expanders - Mobile friendly */
+        .streamlit-expanderHeader {
+            padding: 16px !important;
+            font-size: 15px !important;
+        }
+
+        /* Tables - Horizontal scroll */
+        .stDataFrame {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        .stDataFrame > div {
+            min-width: 600px !important;
+        }
+
+        /* Tabs - Scrollable on mobile */
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            padding-bottom: 4px !important;
+        }
+
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            padding: 12px 16px !important;
+            font-size: 13px !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Dashboard Header - Mobile */
+        [style*="display: flex"][style*="align-items: center"][style*="gap: 24px"] {
+            flex-direction: column !important;
+            gap: 16px !important;
+            text-align: center !important;
+        }
+
+        /* Lead cards - Full width */
+        .lead-card, [class*="lead-card"] {
+            padding: 16px !important;
+            margin-bottom: 12px !important;
+        }
+
+        /* Score badges - Larger on mobile */
+        [style*="border-radius"][style*="padding: 4px 12px"] {
+            padding: 8px 14px !important;
+            font-size: 13px !important;
+        }
+
+        /* Modal/Dialog adjustments */
+        [data-testid="stModal"] > div {
+            width: 95vw !important;
+            max-width: 95vw !important;
+            margin: 2.5vw !important;
+            padding: 20px !important;
+        }
+
+        /* Form elements spacing */
+        .stForm {
+            padding: 16px !important;
+        }
+
+        /* Checkboxes and radio - Larger touch targets */
+        .stCheckbox > label,
+        .stRadio > div > label {
+            padding: 12px 0 !important;
+            min-height: 44px !important;
+        }
+
+        /* Alert/Info boxes */
+        .stAlert {
+            padding: 14px 16px !important;
+            font-size: 14px !important;
+            border-radius: 10px !important;
+        }
+
+        /* Progress bars */
+        .stProgress > div {
+            height: 8px !important;
+            border-radius: 4px !important;
+        }
+
+        /* Metrics native Streamlit */
+        [data-testid="stMetric"] {
+            padding: 16px !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 24px !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+            font-size: 12px !important;
+        }
+    }
+
+    /* ===== SMALL MOBILE (max-width: 480px) ===== */
+    @media screen and (max-width: 480px) {
+        .main .block-container {
+            padding: 0.75rem 0.75rem 1.5rem 0.75rem !important;
+        }
+
+        /* Single column everything */
+        [style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+
+        /* Even more compact cards */
+        .holo-metric-card {
+            padding: 14px 10px !important;
+        }
+
+        .holo-metric-card [style*="font-size: 36px"],
+        .holo-metric-card [style*="font-size: 28px"] {
+            font-size: 24px !important;
+        }
+
+        /* Typography - Smaller */
+        h1 {
+            font-size: 20px !important;
+        }
+
+        h2 {
+            font-size: 17px !important;
+        }
+
+        h3 {
+            font-size: 15px !important;
+        }
+
+        /* Sidebar narrower */
+        [data-testid="stSidebar"] {
+            width: 90vw !important;
+        }
+
+        /* Buttons - Compact but touchable */
+        .stButton > button {
+            min-height: 44px !important;
+            font-size: 13px !important;
+            padding: 10px 14px !important;
+        }
+
+        /* Tabs - More compact */
+        .stTabs [data-baseweb="tab"] {
+            padding: 10px 12px !important;
+            font-size: 12px !important;
+        }
+    }
+
+    /* ===== TOUCH DEVICE ENHANCEMENTS ===== */
+    @media (hover: none) and (pointer: coarse) {
+        /* Larger touch targets for all interactive elements */
+        button, a, input, select, textarea,
+        .stCheckbox, .stRadio label,
+        [role="button"], [role="tab"] {
+            min-height: 44px !important;
+        }
+
+        /* Remove hover effects that don't work on touch */
+        .holo-metric-card:hover {
+            transform: none !important;
+        }
+
+        /* Add active states instead */
+        .holo-metric-card:active {
+            transform: scale(0.98) !important;
+            opacity: 0.9 !important;
+        }
+
+        .stButton > button:active {
+            transform: scale(0.98) !important;
+        }
+
+        /* Tooltips on tap (requires JS but CSS fallback) */
+        .holo-metric-card:focus-within .holo-tooltip,
+        .holo-metric-card:active .holo-tooltip {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    }
+
+    /* ===== LANDSCAPE MOBILE ===== */
+    @media screen and (max-height: 500px) and (orientation: landscape) {
+        .main .block-container {
+            padding: 0.5rem 1rem !important;
+        }
+
+        /* Sidebar - Narrower in landscape */
+        [data-testid="stSidebar"] {
+            width: 250px !important;
+        }
+
+        /* Compact vertical spacing */
+        h1, h2, h3 {
+            margin-bottom: 8px !important;
+        }
+
+        .holo-metric-card {
+            padding: 12px !important;
+        }
+    }
+
+    /* ===== SAFE AREA INSETS (iPhone X+, etc) ===== */
+    @supports (padding: env(safe-area-inset-bottom)) {
+        .main .block-container {
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+            padding-left: calc(1rem + env(safe-area-inset-left)) !important;
+            padding-right: calc(1rem + env(safe-area-inset-right)) !important;
+        }
+
+        [data-testid="stSidebar"] {
+            padding-top: env(safe-area-inset-top) !important;
+            padding-bottom: env(safe-area-inset-bottom) !important;
+        }
+    }
+
+    /* ===== DARK MODE PREFERENCE ===== */
+    @media (prefers-color-scheme: dark) {
+        /* Already dark theme, just ensure contrast */
+        .stTextInput > div > div > input,
+        .stSelectbox > div > div,
+        .stTextArea > div > div > textarea {
+            background: rgba(28, 28, 46, 0.9) !important;
+            color: #E5E5E5 !important;
+        }
+    }
+
+    /* ===== REDUCED MOTION ===== */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        .holo-metric-card:hover {
+            transform: none !important;
+        }
+    }
+
+    /* ===== HIGH CONTRAST MODE ===== */
+    @media (prefers-contrast: high) {
+        .holo-metric-card,
+        .holo-tooltip,
+        [data-testid="stSidebar"] {
+            border-width: 2px !important;
+        }
+
+        .tooltip-content,
+        p, span {
+            color: #FFFFFF !important;
+        }
+    }
+
+    /* ===== PRINT STYLES ===== */
+    @media print {
+        [data-testid="stSidebar"],
+        .stButton,
+        .stTabs [data-baseweb="tab-list"] {
+            display: none !important;
+        }
+
+        .main .block-container {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+
+        .holo-metric-card {
+            border: 1px solid #000 !important;
+            background: #fff !important;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+    }
 </style>
 
 <script>
@@ -2078,6 +2518,111 @@ function styleButtons() {
 styleButtons();
 const observer = new MutationObserver(styleButtons);
 observer.observe(document.body, { childList: true, subtree: true });
+
+// ========== MOBILE ENHANCEMENTS ==========
+
+// Add viewport meta if not present
+if (!document.querySelector('meta[name="viewport"]')) {
+    const viewport = document.createElement('meta');
+    viewport.name = 'viewport';
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+    document.head.appendChild(viewport);
+}
+
+// Add theme-color meta for mobile browsers
+if (!document.querySelector('meta[name="theme-color"]')) {
+    const themeColor = document.createElement('meta');
+    themeColor.name = 'theme-color';
+    themeColor.content = '#1C1C2E';
+    document.head.appendChild(themeColor);
+}
+
+// Add apple-mobile-web-app-capable for iOS
+if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+    const appleMeta = document.createElement('meta');
+    appleMeta.name = 'apple-mobile-web-app-capable';
+    appleMeta.content = 'yes';
+    document.head.appendChild(appleMeta);
+
+    const appleStatus = document.createElement('meta');
+    appleStatus.name = 'apple-mobile-web-app-status-bar-style';
+    appleStatus.content = 'black-translucent';
+    document.head.appendChild(appleStatus);
+}
+
+// Touch handling for metric cards
+function setupTouchTooltips() {
+    const cards = document.querySelectorAll('.holo-metric-card');
+
+    cards.forEach(card => {
+        // Prevent double-tap zoom on cards
+        card.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            // Toggle tooltip visibility
+            const tooltip = this.querySelector('.holo-tooltip');
+            if (tooltip) {
+                const isVisible = tooltip.style.opacity === '1';
+                // Hide all other tooltips first
+                document.querySelectorAll('.holo-tooltip').forEach(t => {
+                    t.style.opacity = '0';
+                    t.style.visibility = 'hidden';
+                });
+                // Toggle this one
+                if (!isVisible) {
+                    tooltip.style.opacity = '1';
+                    tooltip.style.visibility = 'visible';
+                }
+            }
+        });
+    });
+
+    // Close tooltips when tapping elsewhere
+    document.addEventListener('touchstart', function(e) {
+        if (!e.target.closest('.holo-metric-card')) {
+            document.querySelectorAll('.holo-tooltip').forEach(t => {
+                t.style.opacity = '0';
+                t.style.visibility = 'hidden';
+            });
+        }
+    });
+}
+
+// Smooth scroll for mobile
+function enableSmoothScroll() {
+    document.documentElement.style.scrollBehavior = 'smooth';
+}
+
+// Prevent pull-to-refresh on mobile (optional, can be annoying)
+function preventOverscroll() {
+    document.body.style.overscrollBehavior = 'none';
+}
+
+// Initialize mobile enhancements
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    setupTouchTooltips();
+    enableSmoothScroll();
+    preventOverscroll();
+
+    // Re-setup on DOM changes
+    const mobileObserver = new MutationObserver(() => {
+        setupTouchTooltips();
+    });
+    mobileObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+// Fix for iOS 100vh issue
+function fixIOSViewport() {
+    const setVH = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', vh + 'px');
+    };
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(setVH, 100);
+    });
+}
+fixIOSViewport();
 </script>
 """, unsafe_allow_html=True)
 
