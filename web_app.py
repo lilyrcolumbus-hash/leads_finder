@@ -119,7 +119,7 @@ st.set_page_config(
 )
 
 # ============================================
-# PREMIUM CSS - Executive Business Design
+# FUTURISTIC HOLOGRAPHIC UI - Sci-Fi Design
 # ============================================
 st.markdown("""
 <style>
@@ -132,99 +132,112 @@ st.markdown("""
     }
 
     /* ========== FONTS ========== */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
-    /* ========== EXECUTIVE COLOR PALETTE ========== */
+    /* ========== FUTURISTIC COLOR PALETTE ========== */
     :root {
-        /* Primary - Corporate Blue */
-        --primary-50: #EFF6FF;
-        --primary-100: #DBEAFE;
-        --primary-200: #BFDBFE;
-        --primary-400: #60A5FA;
-        --primary-500: #3B82F6;
-        --primary-600: #2563EB;
-        --primary-700: #1D4ED8;
+        /* Primary - Cyan Neon */
+        --cyan: #00FFFF;
+        --cyan-glow: rgba(0, 255, 255, 0.5);
+        --cyan-dim: rgba(0, 255, 255, 0.2);
+        --cyan-subtle: rgba(0, 255, 255, 0.1);
 
-        /* Accent - Emerald Success */
-        --accent-50: #ECFDF5;
-        --accent-500: #10B981;
-        --accent-600: #059669;
+        /* Secondary - Electric Blue */
+        --electric-blue: #0080FF;
+        --electric-glow: rgba(0, 128, 255, 0.5);
+        --electric-dim: rgba(0, 128, 255, 0.2);
 
-        /* Warm Accent - Amber */
-        --warm-50: #FFFBEB;
-        --warm-500: #F59E0B;
-        --warm-600: #D97706;
+        /* Accent - Teal */
+        --teal: #00CED1;
+        --teal-glow: rgba(0, 206, 209, 0.5);
+        --teal-dim: rgba(0, 206, 209, 0.2);
 
-        /* Neutral - Slate Gray (Professional) */
-        --slate-50: #F8FAFC;
-        --slate-100: #F1F5F9;
-        --slate-200: #E2E8F0;
-        --slate-300: #CBD5E1;
-        --slate-400: #94A3B8;
-        --slate-500: #64748B;
-        --slate-600: #475569;
-        --slate-700: #334155;
-        --slate-800: #1E293B;
-        --slate-900: #0F172A;
+        /* Background */
+        --bg-dark: #0A0A1A;
+        --bg-darker: #050510;
+        --bg-panel: rgba(10, 15, 30, 0.85);
+        --bg-glass: rgba(0, 20, 40, 0.6);
+        --bg-glass-light: rgba(0, 40, 80, 0.3);
 
-        /* Status Colors */
-        --success: #22C55E;
-        --warning: #EAB308;
-        --error: #EF4444;
-        --info: #3B82F6;
+        /* Text */
+        --text-bright: #FFFFFF;
+        --text-primary: #E0F7FF;
+        --text-secondary: #80C4D4;
+        --text-dim: #4A7080;
 
-        /* Base */
-        --white: #FFFFFF;
-        --black: #000000;
+        /* Status */
+        --success: #00FF88;
+        --success-glow: rgba(0, 255, 136, 0.4);
+        --warning: #FFB800;
+        --warning-glow: rgba(255, 184, 0, 0.4);
+        --error: #FF3366;
+        --error-glow: rgba(255, 51, 102, 0.4);
 
-        /* Borders & Shadows */
-        --border-light: #E2E8F0;
-        --border-medium: #CBD5E1;
+        /* Glass & Borders */
+        --glass-border: rgba(0, 255, 255, 0.15);
+        --glass-border-bright: rgba(0, 255, 255, 0.4);
 
         /* Border Radius */
-        --radius-xs: 6px;
         --radius-sm: 8px;
         --radius-md: 12px;
         --radius-lg: 16px;
         --radius-xl: 20px;
-        --radius-2xl: 24px;
 
-        /* Shadows - Soft & Professional */
-        --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-        --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
-        --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
-        --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
-        --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+        /* Shadows & Glows */
+        --glow-cyan: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1);
+        --glow-blue: 0 0 20px rgba(0, 128, 255, 0.3), 0 0 40px rgba(0, 128, 255, 0.1);
+        --glow-intense: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2);
+        --shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
 
     /* ========== GLOBAL TYPOGRAPHY ========== */
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-family: 'Rajdhani', 'Segoe UI', sans-serif !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.02em !important;
+        font-family: 'Orbitron', sans-serif !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.05em !important;
         line-height: 1.3 !important;
-        color: var(--slate-900) !important;
+        color: var(--text-bright) !important;
+        text-shadow: 0 0 10px var(--cyan-dim);
     }
 
     p, span, div, label {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: 'Rajdhani', sans-serif !important;
         line-height: 1.6 !important;
+        color: var(--text-primary) !important;
     }
 
     /* ========== MAIN APP BACKGROUND ========== */
     .stApp, [data-testid="stAppViewContainer"] {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 40%, #F1F5F9 100%) !important;
+        background: radial-gradient(ellipse at top, #0A1628 0%, var(--bg-dark) 50%, var(--bg-darker) 100%) !important;
+        background-attachment: fixed !important;
+    }
+
+    /* Animated grid background */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image:
+            linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: 0;
     }
 
     .main, [data-testid="stMain"] {
         background: transparent !important;
+        position: relative;
+        z-index: 1;
     }
 
     .main .block-container {
@@ -233,11 +246,22 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* ========== SIDEBAR - EXECUTIVE STYLE ========== */
+    /* ========== SIDEBAR - HOLOGRAPHIC PANEL ========== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%) !important;
-        border-right: 1px solid var(--border-light) !important;
-        box-shadow: 2px 0 8px rgba(15, 23, 42, 0.03) !important;
+        background: linear-gradient(180deg, rgba(0, 20, 40, 0.95) 0%, rgba(5, 10, 25, 0.98) 100%) !important;
+        border-right: 1px solid var(--glass-border) !important;
+        box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5), inset -1px 0 0 var(--cyan-dim) !important;
+    }
+
+    [data-testid="stSidebar"]::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(180deg, transparent 0%, var(--cyan) 20%, var(--cyan) 80%, transparent 100%);
+        opacity: 0.3;
     }
 
     [data-testid="stSidebar"] > div:first-child {
@@ -245,51 +269,69 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-        color: var(--slate-600) !important;
+        color: var(--text-secondary) !important;
     }
 
-    /* Sidebar Radio Navigation */
+    /* Sidebar Radio Navigation - Holographic Buttons */
     [data-testid="stSidebar"] .stRadio > label {
         display: none !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div {
-        gap: 4px !important;
+        gap: 6px !important;
         padding: 0 16px !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div > label {
-        background: transparent !important;
+        background: var(--bg-glass) !important;
         border-radius: var(--radius-md) !important;
         padding: 14px 16px !important;
         margin: 0 !important;
-        color: var(--slate-600) !important;
+        color: var(--text-secondary) !important;
         font-weight: 500 !important;
         font-size: 14px !important;
-        transition: all 0.2s ease !important;
-        border: 1px solid transparent !important;
+        font-family: 'Rajdhani', sans-serif !important;
+        transition: all 0.3s ease !important;
+        border: 1px solid var(--glass-border) !important;
+        backdrop-filter: blur(10px) !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
     }
 
     [data-testid="stSidebar"] .stRadio > div > label:hover {
-        background: var(--slate-50) !important;
-        color: var(--slate-800) !important;
-        border-color: var(--border-light) !important;
+        background: var(--bg-glass-light) !important;
+        color: var(--cyan) !important;
+        border-color: var(--cyan-dim) !important;
+        box-shadow: var(--glow-cyan), inset 0 0 20px var(--cyan-subtle) !important;
+        text-shadow: 0 0 10px var(--cyan-glow);
     }
 
     [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%) !important;
-        color: var(--white) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 128, 255, 0.15) 100%) !important;
+        color: var(--cyan) !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25), 0 2px 4px rgba(37, 99, 235, 0.1) !important;
-        border-color: transparent !important;
+        border-color: var(--cyan) !important;
+        box-shadow: var(--glow-intense), inset 0 0 30px var(--cyan-dim) !important;
+        text-shadow: 0 0 15px var(--cyan);
     }
 
-    /* ========== LOGO SECTION ========== */
+    /* ========== LOGO SECTION - HOLOGRAPHIC ========== */
     .logo-section {
         padding: 28px 24px 24px 24px;
-        border-bottom: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--glass-border);
         margin-bottom: 8px;
-        background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFC 100%);
+        background: linear-gradient(180deg, rgba(0, 40, 60, 0.3) 0%, transparent 100%);
+        position: relative;
+    }
+
+    .logo-section::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--cyan) 50%, transparent 100%);
     }
 
     .logo-container {
@@ -301,17 +343,31 @@ st.markdown("""
     .logo-icon {
         width: 46px;
         height: 46px;
-        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
+        background: linear-gradient(135deg, var(--cyan-dim) 0%, var(--electric-dim) 100%);
+        border: 1px solid var(--cyan);
         border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3), 0 2px 4px rgba(37, 99, 235, 0.1);
+        box-shadow: var(--glow-cyan);
+        position: relative;
+    }
+
+    .logo-icon::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--cyan), var(--electric-blue));
+        opacity: 0.3;
+        z-index: -1;
+        filter: blur(4px);
     }
 
     .logo-icon svg {
         width: 24px;
         height: 24px;
+        filter: drop-shadow(0 0 5px var(--cyan));
     }
 
     .logo-text {
@@ -319,36 +375,53 @@ st.markdown("""
     }
 
     .logo-title {
-        color: var(--slate-900);
+        color: var(--cyan);
         font-size: 20px;
-        font-weight: 800;
-        letter-spacing: -0.03em;
+        font-weight: 700;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 0.1em;
         margin: 0;
         line-height: 1.2;
+        text-shadow: 0 0 15px var(--cyan-glow);
     }
 
     .logo-subtitle {
-        color: var(--slate-400);
+        color: var(--text-secondary);
         font-size: 11px;
         font-weight: 600;
         margin: 4px 0 0 0;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.15em;
+        font-family: 'Share Tech Mono', monospace;
     }
 
-    /* ========== USER CARD ========== */
+    /* ========== USER CARD - HOLOGRAPHIC ========== */
     .user-card {
         margin: 16px;
         padding: 16px;
-        background: linear-gradient(135deg, var(--slate-50) 0%, #FFFFFF 100%);
+        background: var(--bg-glass);
         border-radius: var(--radius-md);
-        border: 1px solid var(--border-light);
-        transition: all 0.2s ease;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .user-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--cyan) 50%, transparent 100%);
+        opacity: 0.5;
     }
 
     .user-card:hover {
-        border-color: var(--primary-200);
-        box-shadow: var(--shadow-sm);
+        border-color: var(--cyan-dim);
+        box-shadow: var(--glow-cyan);
     }
 
     .user-info {
@@ -360,100 +433,142 @@ st.markdown("""
     .user-avatar {
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-400) 100%);
+        background: linear-gradient(135deg, var(--cyan-dim) 0%, var(--electric-dim) 100%);
+        border: 1px solid var(--cyan);
         border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 15px;
         font-weight: 700;
-        color: white;
-        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.25);
+        color: var(--cyan);
+        box-shadow: var(--glow-cyan);
+        font-family: 'Orbitron', sans-serif;
     }
 
     .user-details h4 {
-        color: var(--slate-800);
+        color: var(--text-bright);
         font-size: 14px;
         font-weight: 600;
         margin: 0 0 4px 0;
+        font-family: 'Rajdhani', sans-serif;
     }
 
     .user-badge {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
-        color: white;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 206, 209, 0.2) 100%);
+        color: var(--success);
         font-size: 10px;
         font-weight: 700;
         padding: 3px 10px;
         border-radius: 20px;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+        letter-spacing: 0.1em;
+        border: 1px solid var(--success);
+        box-shadow: 0 0 10px var(--success-glow);
+        font-family: 'Share Tech Mono', monospace;
     }
 
-    /* ========== NAV LABEL ========== */
+    /* ========== NAV LABEL - HOLOGRAPHIC ========== */
     .nav-label {
         padding: 24px 24px 10px 24px;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
-        color: var(--slate-400);
+        color: var(--text-dim);
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.2em;
+        font-family: 'Share Tech Mono', monospace;
     }
 
-    /* ========== SIDEBAR FOOTER ========== */
+    /* ========== SIDEBAR FOOTER - HOLOGRAPHIC ========== */
     .sidebar-footer {
         padding: 20px 24px;
-        border-top: 1px solid var(--border-light);
+        border-top: 1px solid var(--glass-border);
         margin-top: auto;
-        background: linear-gradient(180deg, #FAFBFC 0%, #FFFFFF 100%);
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 40, 60, 0.3) 100%);
+        position: relative;
+    }
+
+    .sidebar-footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--cyan) 50%, transparent 100%);
+        opacity: 0.3;
     }
 
     .sidebar-stats {
         display: flex;
         align-items: center;
         gap: 10px;
-        color: var(--slate-500);
-        font-size: 13px;
+        color: var(--text-secondary);
+        font-size: 12px;
         font-weight: 500;
+        font-family: 'Share Tech Mono', monospace;
+        letter-spacing: 0.05em;
     }
 
     .status-dot {
         width: 8px;
         height: 8px;
-        background: var(--success);
+        background: var(--cyan);
         border-radius: 50%;
-        box-shadow: 0 0 8px var(--success);
-        animation: pulse 2s infinite;
+        box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan-glow);
+        animation: holo-pulse 2s infinite;
     }
 
-    @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(0.95); }
+    @keyframes holo-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan-glow); }
+        50% { opacity: 0.7; transform: scale(0.9); box-shadow: 0 0 15px var(--cyan), 0 0 30px var(--cyan-glow); }
     }
 
-    /* ========== PAGE HEADER ========== */
+    /* Scan line animation */
+    @keyframes scanline {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100vh); }
+    }
+
+    /* ========== PAGE HEADER - HOLOGRAPHIC ========== */
     .page-header {
         margin-bottom: 32px;
         padding-bottom: 20px;
-        border-bottom: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--glass-border);
+        position: relative;
+    }
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, var(--cyan) 0%, var(--electric-blue) 50%, transparent 100%);
+        opacity: 0.5;
     }
 
     .page-header h1 {
-        color: var(--slate-900);
+        color: var(--text-bright);
         font-size: 32px;
-        font-weight: 800;
+        font-weight: 700;
         margin: 0 0 8px 0;
-        letter-spacing: -0.03em;
+        letter-spacing: 0.05em;
+        font-family: 'Orbitron', sans-serif;
+        text-shadow: 0 0 20px var(--cyan-dim);
     }
 
     .page-header p {
-        color: var(--slate-500);
+        color: var(--text-secondary);
         font-size: 16px;
         margin: 0;
         font-weight: 500;
+        font-family: 'Rajdhani', sans-serif;
+        letter-spacing: 0.03em;
     }
 
     /* ========== METRIC CARDS - EXECUTIVE STYLE ========== */
@@ -788,146 +903,138 @@ st.markdown("""
         margin: 0;
     }
 
-    /* ========== BUTTONS - MODERN PREMIUM DESIGN ========== */
+    /* ========== BUTTONS - HOLOGRAPHIC NEON DESIGN ========== */
 
     /* Base button reset and foundation */
     .stButton > button {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: 'Rajdhani', sans-serif !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        letter-spacing: 0.02em !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
         padding: 12px 24px !important;
-        border-radius: 10px !important;
+        border-radius: 8px !important;
         cursor: pointer !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         position: relative !important;
         overflow: hidden !important;
-        border: none !important;
+        border: 1px solid var(--cyan) !important;
         outline: none !important;
     }
 
-    /* Primary Button - Vibrant Blue Gradient */
+    /* Primary Button - Cyan Neon Glow */
     .stButton > button[kind="primary"],
     .stButton > button:not([kind]) {
-        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #6366F1 100%) !important;
-        color: white !important;
-        box-shadow:
-            0 4px 15px rgba(79, 70, 229, 0.4),
-            0 2px 6px rgba(79, 70, 229, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 128, 255, 0.15) 100%) !important;
+        color: var(--cyan) !important;
+        border: 1px solid var(--cyan) !important;
+        box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0, 255, 255, 0.1) !important;
+        text-shadow: 0 0 10px var(--cyan-glow) !important;
     }
 
     .stButton > button[kind="primary"]:hover,
     .stButton > button:not([kind]):hover {
-        background: linear-gradient(135deg, #4338CA 0%, #6D28D9 50%, #4F46E5 100%) !important;
-        transform: translateY(-3px) scale(1.02) !important;
-        box-shadow:
-            0 8px 25px rgba(79, 70, 229, 0.5),
-            0 4px 12px rgba(79, 70, 229, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 128, 255, 0.25) 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: var(--glow-intense), inset 0 0 30px rgba(0, 255, 255, 0.2) !important;
+        text-shadow: 0 0 15px var(--cyan) !important;
     }
 
     .stButton > button[kind="primary"]:active,
     .stButton > button:not([kind]):active {
-        transform: translateY(-1px) scale(1) !important;
-        box-shadow:
-            0 4px 12px rgba(79, 70, 229, 0.4),
-            0 2px 4px rgba(79, 70, 229, 0.2) !important;
+        transform: translateY(0) !important;
+        box-shadow: var(--glow-cyan) !important;
     }
 
-    /* Secondary Button - Elegant Glass Effect */
+    /* Secondary Button - Glass Effect */
     .stButton > button[kind="secondary"] {
-        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%) !important;
-        color: #334155 !important;
-        border: 1.5px solid #E2E8F0 !important;
-        box-shadow:
-            0 2px 8px rgba(15, 23, 42, 0.06),
-            0 1px 3px rgba(15, 23, 42, 0.04),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-        backdrop-filter: blur(8px) !important;
+        background: var(--bg-glass) !important;
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--glass-border) !important;
+        box-shadow: none !important;
+        backdrop-filter: blur(10px) !important;
     }
 
     .stButton > button[kind="secondary"]:hover {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
-        color: #4F46E5 !important;
-        border-color: #C7D2FE !important;
-        transform: translateY(-2px) !important;
-        box-shadow:
-            0 6px 20px rgba(79, 70, 229, 0.15),
-            0 3px 8px rgba(79, 70, 229, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        background: var(--bg-glass-light) !important;
+        color: var(--cyan) !important;
+        border-color: var(--cyan-dim) !important;
+        box-shadow: var(--glow-cyan) !important;
+        text-shadow: 0 0 10px var(--cyan-glow) !important;
     }
 
     .stButton > button[kind="secondary"]:active {
         transform: translateY(0) !important;
     }
 
-    /* Tertiary/Ghost Button - Minimal Style */
+    /* Tertiary/Ghost Button - Minimal Holographic */
     .stButton > button[kind="tertiary"] {
         background: transparent !important;
-        color: #64748B !important;
-        border: none !important;
+        color: var(--text-secondary) !important;
+        border: 1px solid transparent !important;
         box-shadow: none !important;
         padding: 10px 16px !important;
     }
 
     .stButton > button[kind="tertiary"]:hover {
-        background: rgba(79, 70, 229, 0.08) !important;
-        color: #4F46E5 !important;
+        background: rgba(0, 255, 255, 0.05) !important;
+        color: var(--cyan) !important;
+        border-color: var(--cyan-dim) !important;
     }
 
-    /* Icon-only buttons (small square buttons) */
+    /* Icon-only buttons */
     .stButton > button:has(span:only-child) {
         padding: 10px 12px !important;
         min-width: 40px !important;
     }
 
-    /* Download buttons - Special Style */
+    /* Download buttons - Success Neon */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 206, 209, 0.15) 100%) !important;
+        color: var(--success) !important;
+        border: 1px solid var(--success) !important;
+        border-radius: 8px !important;
         padding: 12px 24px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: 'Rajdhani', sans-serif !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        box-shadow:
-            0 4px 15px rgba(16, 185, 129, 0.35),
-            0 2px 6px rgba(16, 185, 129, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        box-shadow: 0 0 20px var(--success-glow), inset 0 0 20px rgba(0, 255, 136, 0.1) !important;
+        text-shadow: 0 0 10px var(--success-glow) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
 
     .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, #047857 0%, #059669 50%, #10B981 100%) !important;
-        transform: translateY(-2px) scale(1.02) !important;
-        box-shadow:
-            0 8px 25px rgba(16, 185, 129, 0.45),
-            0 4px 12px rgba(16, 185, 129, 0.25) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 206, 209, 0.25) 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 0 30px var(--success-glow), 0 0 60px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.2) !important;
     }
 
-    /* Link buttons */
+    /* Link buttons - Holographic */
     .stLinkButton > a {
-        background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%) !important;
-        color: #4F46E5 !important;
-        border: 1.5px solid #C7D2FE !important;
-        border-radius: 10px !important;
+        background: var(--bg-glass) !important;
+        color: var(--electric-blue) !important;
+        border: 1px solid var(--electric-blue) !important;
+        border-radius: 8px !important;
         padding: 10px 20px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: 'Rajdhani', sans-serif !important;
         font-size: 13px !important;
         font-weight: 600 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
         text-decoration: none !important;
-        transition: all 0.25s ease !important;
-        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1) !important;
+        transition: all 0.3s ease !important;
+        box-shadow: var(--glow-blue) !important;
+        text-shadow: 0 0 10px var(--electric-glow) !important;
     }
 
     .stLinkButton > a:hover {
-        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important;
-        color: white !important;
-        border-color: #4F46E5 !important;
+        background: linear-gradient(135deg, rgba(0, 128, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%) !important;
+        color: var(--cyan) !important;
+        border-color: var(--cyan) !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3) !important;
+        box-shadow: var(--glow-intense) !important;
     }
 
     /* Button with emoji icon - better alignment */
@@ -940,12 +1047,14 @@ st.markdown("""
 
     /* Disabled button state */
     .stButton > button:disabled {
-        background: linear-gradient(135deg, #CBD5E1 0%, #E2E8F0 100%) !important;
-        color: #94A3B8 !important;
+        background: rgba(30, 40, 60, 0.5) !important;
+        color: var(--text-dim) !important;
+        border-color: rgba(100, 120, 140, 0.3) !important;
         cursor: not-allowed !important;
         transform: none !important;
         box-shadow: none !important;
-        opacity: 0.7 !important;
+        opacity: 0.5 !important;
+        text-shadow: none !important;
     }
 
     /* Full width button refinement */
@@ -954,32 +1063,31 @@ st.markdown("""
         width: 100% !important;
     }
 
-    /* Button ripple effect on click */
-    .stButton > button::after {
+    /* Button scan line effect */
+    .stButton > button::before {
         content: '' !important;
         position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        width: 0 !important;
-        height: 0 !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        border-radius: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        transition: width 0.4s ease, height 0.4s ease !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.1) 50%, transparent 100%) !important;
+        transition: left 0.5s ease !important;
     }
 
-    .stButton > button:active::after {
-        width: 200px !important;
-        height: 200px !important;
+    .stButton > button:hover::before {
+        left: 100% !important;
     }
 
     /* ========== BUTTON TYPE CLASSES ========== */
 
-    /* Success buttons - Green */
+    /* Success buttons - Green Neon */
     .btn-success button,
     [data-testid*="success"] button {
-        background: linear-gradient(135deg, #059669 0%, #10B981 50%, #34D399 100%) !important;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 206, 209, 0.15) 100%) !important;
+        color: var(--success) !important;
+        border-color: var(--success) !important;
+        box-shadow: 0 0 20px var(--success-glow) !important;
     }
 
     .btn-success button:hover,
@@ -2365,16 +2473,32 @@ def render_sidebar():
 # PAGES
 # ============================================
 def show_dashboard():
-    # Modern Dashboard Header
+    # Futuristic Holographic Dashboard Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1E293B 0%, #334155 100%); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 16px;">
-                <span style="font-size: 36px;">📊</span>
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.2);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 32px;
+                position: relative;
+                overflow: hidden;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);">
+        <!-- Scan line effect -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.5;"></div>
+
+        <div style="display: flex; align-items: center; gap: 24px; position: relative; z-index: 1;">
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
+                        border: 1px solid #00FFFF;
+                        border-radius: 12px;
+                        padding: 16px;
+                        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);">
+                <span style="font-size: 36px; filter: drop-shadow(0 0 10px #00FFFF);">📊</span>
             </div>
             <div>
-                <h1 style="margin: 0 0 8px 0; color: white; font-size: 28px; font-weight: 700;">Dashboard</h1>
-                <p style="margin: 0; color: #94A3B8; font-size: 15px;">Overview of your prospecting activity and lead generation metrics</p>
+                <h1 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 28px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">DASHBOARD</h1>
+                <p style="margin: 0; color: #80C4D4; font-size: 15px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">SYSTEM OVERVIEW • LEAD GENERATION METRICS • REAL-TIME DATA</p>
             </div>
         </div>
     </div>
@@ -2383,7 +2507,7 @@ def show_dashboard():
     # Quick Actions
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 16px 0; color: #1E293B; font-size: 18px; font-weight: 700;">⚡ Quick Actions</h3>
+        <h3 style="margin: 0 0 16px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">⚡ QUICK ACTIONS</h3>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2414,110 +2538,193 @@ def show_dashboard():
     sources_count = sum([1 for x in [True, True, bool(settings.google_api_key), True] if x])
     conv_rate = int((qualified_count / leads_count * 100)) if leads_count > 0 else 0
 
-    # Metrics Section Header
+    # Metrics Section Header - Holographic
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">📈 Key Metrics</h3>
-        <p style="margin: 0; color: #64748B; font-size: 13px;">Your lead generation performance at a glance</p>
+        <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">📈 KEY METRICS</h3>
+        <p style="margin: 0; color: #80C4D4; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Modern Metric Cards
+    # Holographic Metric Cards
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Leads Found -->
-        <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 8px;">👥</div>
-            <div style="font-size: 32px; font-weight: 700;">{leads_count}</div>
-            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Leads Found</div>
-            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">This session</div>
+        <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 40, 80, 0.3) 100%);
+                    border: 1px solid rgba(0, 128, 255, 0.4);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 128, 255, 0.2), inset 0 0 30px rgba(0, 128, 255, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #0080FF);">👥</div>
+            <div style="font-size: 36px; font-weight: 700; color: #0080FF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 128, 255, 0.5);">{leads_count}</div>
+            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
+            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
         </div>
         <!-- Hot Leads -->
-        <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔥</div>
-            <div style="font-size: 32px; font-weight: 700;">{hot_leads_count}</div>
-            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Hot Leads</div>
-            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Score 80+</div>
+        <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(80, 20, 40, 0.3) 100%);
+                    border: 1px solid rgba(255, 51, 102, 0.4);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(255, 51, 102, 0.2), inset 0 0 30px rgba(255, 51, 102, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
+            <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
+            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
+            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
         </div>
         <!-- Qualified -->
-        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 8px;">✅</div>
-            <div style="font-size: 32px; font-weight: 700;">{qualified_count}</div>
-            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Qualified</div>
-            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Ready for CRM</div>
+        <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 80, 50, 0.3) 100%);
+                    border: 1px solid rgba(0, 255, 136, 0.4);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
+            <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
+            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
+            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
         </div>
         <!-- Keywords -->
-        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔑</div>
-            <div style="font-size: 32px; font-weight: 700;">{keywords_count}</div>
-            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Keywords</div>
-            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Active</div>
+        <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(80, 60, 0, 0.3) 100%);
+                    border: 1px solid rgba(255, 184, 0, 0.4);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(255, 184, 0, 0.2), inset 0 0 30px rgba(255, 184, 0, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
+            <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
+            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
+            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
         </div>
         <!-- Sources -->
-        <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 8px;">🔗</div>
-            <div style="font-size: 32px; font-weight: 700;">{sources_count}/4</div>
-            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Sources</div>
-            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Connected</div>
+        <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%);
+                    border: 1px solid rgba(0, 255, 255, 0.4);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FFFF);">🔗</div>
+            <div style="font-size: 36px; font-weight: 700; color: #00FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);">{sources_count}/4</div>
+            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
+            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Metric Explanations
+    # Holographic Info Panel
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 20px; margin-bottom: 32px;">
-        <h4 style="margin: 0 0 12px 0; color: #0369A1; font-size: 14px; font-weight: 700;">📖 What do these metrics mean?</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #0284C7;">
-            <div><strong>👥 Leads Found:</strong> Total prospects discovered during search</div>
-            <div><strong>🔥 Hot Leads:</strong> High priority leads with Total Score 80+ (contact NOW)</div>
-            <div><strong>✅ Qualified:</strong> Leads that passed AI filter, relevant for your product</div>
-            <div><strong>🔑 Keywords:</strong> Pain keywords the system searches for</div>
-            <div><strong>🔗 Sources:</strong> Data sources connected (Reddit, HackerNews, Google, etc.)</div>
+    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.4) 0%, rgba(0, 20, 40, 0.6) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.2);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 32px;
+                position: relative;
+                backdrop-filter: blur(10px);">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 30%, #0080FF 70%, transparent 100%); opacity: 0.5;"></div>
+        <h4 style="margin: 0 0 12px 0; color: #00FFFF; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #80C4D4; font-family: 'Rajdhani', sans-serif;">
+            <div><span style="color: #0080FF;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
+            <div><span style="color: #FF3366;">▸</span> <strong>HOT LEADS:</strong> Priority targets (Score 80+)</div>
+            <div><span style="color: #00FF88;">▸</span> <strong>QUALIFIED:</strong> AI-verified prospects</div>
+            <div><span style="color: #FFB800;">▸</span> <strong>KEYWORDS:</strong> Active pain indicators</div>
+            <div><span style="color: #00FFFF;">▸</span> <strong>SOURCES:</strong> Connected data streams</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Data Sources Section
+    # Data Sources Section - Holographic
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🌐 Data Sources</h3>
-        <p style="margin: 0; color: #64748B; font-size: 13px;">Platforms where we search for leads</p>
+        <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">🌐 DATA SOURCES</h3>
+        <p style="margin: 0; color: #80C4D4; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Reddit -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #FF4500 0%, #FF6B35 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-                <span style="font-size: 24px;">🔴</span>
+        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
+                    border: 1px solid rgba(255, 69, 0, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);">
+            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, rgba(255, 69, 0, 0.2) 0%, rgba(255, 69, 0, 0.1) 100%);
+                        border: 1px solid rgba(255, 69, 0, 0.5);
+                        box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF4500);">🔴</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Reddit</h4>
-            <p style="margin: 0; color: #64748B; font-size: 12px;">Business subreddits</p>
+            <h4 style="margin: 0 0 4px 0; color: #FF4500; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);">REDDIT</h4>
+            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
         </div>
         <!-- Hacker News -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-                <span style="font-size: 24px;">🟠</span>
+        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
+                    border: 1px solid rgba(255, 102, 0, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);">
+            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, rgba(255, 102, 0, 0.2) 0%, rgba(255, 102, 0, 0.1) 100%);
+                        border: 1px solid rgba(255, 102, 0, 0.5);
+                        box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF6600);">🟠</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Hacker News</h4>
-            <p style="margin: 0; color: #64748B; font-size: 12px;">Tech startups</p>
+            <h4 style="margin: 0 0 4px 0; color: #FF6600; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 102, 0, 0.3);">HACKER NEWS</h4>
+            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
         </div>
         <!-- Google -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #4285F4 0%, #5B9BF6 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-                <span style="font-size: 24px;">🔵</span>
+        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
+                    border: 1px solid rgba(66, 133, 244, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);">
+            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, rgba(66, 133, 244, 0.2) 0%, rgba(66, 133, 244, 0.1) 100%);
+                        border: 1px solid rgba(66, 133, 244, 0.5);
+                        box-shadow: 0 0 15px rgba(66, 133, 244, 0.3);">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #4285F4);">🔵</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Google Search</h4>
-            <p style="margin: 0; color: #64748B; font-size: 12px;">Web results</p>
+            <h4 style="margin: 0 0 4px 0; color: #4285F4; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(66, 133, 244, 0.3);">GOOGLE</h4>
+            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
         </div>
         <!-- Indeed -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #2164F3 0%, #4B83F5 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-                <span style="font-size: 24px;">💼</span>
+        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
+                    border: 1px solid rgba(0, 206, 209, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);">
+            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, rgba(0, 206, 209, 0.2) 0%, rgba(0, 206, 209, 0.1) 100%);
+                        border: 1px solid rgba(0, 206, 209, 0.5);
+                        box-shadow: 0 0 15px rgba(0, 206, 209, 0.3);">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #00CED1);">💼</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Indeed</h4>
-            <p style="margin: 0; color: #64748B; font-size: 12px;">Job postings</p>
+            <h4 style="margin: 0 0 4px 0; color: #00CED1; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(0, 206, 209, 0.3);">INDEED</h4>
+            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
