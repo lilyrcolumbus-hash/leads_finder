@@ -135,47 +135,52 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
     /* ========== FUTURISTIC COLOR PALETTE ========== */
+    /* Paleta: Cian, Plateado, Teal, Gris Metálico, Blanco */
+    /* SIN: morado, violeta, magenta, azul eléctrico */
     :root {
-        /* Primary - Cyan Neon */
+        /* Primary - Cyan */
         --cyan: #00FFFF;
         --cyan-glow: rgba(0, 255, 255, 0.5);
         --cyan-dim: rgba(0, 255, 255, 0.2);
         --cyan-subtle: rgba(0, 255, 255, 0.1);
 
-        /* Secondary - Electric Blue */
-        --electric-blue: #0080FF;
-        --electric-glow: rgba(0, 128, 255, 0.5);
-        --electric-dim: rgba(0, 128, 255, 0.2);
+        /* Secondary - Teal (NOT electric blue) */
+        --teal: #008B8B;
+        --teal-glow: rgba(0, 139, 139, 0.5);
+        --teal-dim: rgba(0, 139, 139, 0.2);
+        --teal-light: #20B2AA;
 
-        /* Accent - Teal */
-        --teal: #00CED1;
-        --teal-glow: rgba(0, 206, 209, 0.5);
-        --teal-dim: rgba(0, 206, 209, 0.2);
+        /* Accent - Silver/Metallic */
+        --silver: #C0C0C0;
+        --silver-light: #E5E5E5;
+        --silver-glow: rgba(192, 192, 192, 0.4);
+        --metallic-gray: #2C3539;
 
-        /* Background */
-        --bg-dark: #0A0A1A;
-        --bg-darker: #050510;
-        --bg-panel: rgba(10, 15, 30, 0.85);
-        --bg-glass: rgba(0, 20, 40, 0.6);
-        --bg-glass-light: rgba(0, 40, 80, 0.3);
+        /* Background - Graphite/Slate Gradient */
+        --bg-dark: #1C1C2E;
+        --bg-darker: #2D3748;
+        --bg-panel: rgba(28, 28, 46, 0.9);
+        --bg-glass: rgba(44, 53, 57, 0.6);
+        --bg-glass-light: rgba(45, 55, 72, 0.4);
 
         /* Text */
         --text-bright: #FFFFFF;
-        --text-primary: #E0F7FF;
-        --text-secondary: #80C4D4;
-        --text-dim: #4A7080;
+        --text-primary: #E5E5E5;
+        --text-secondary: #C0C0C0;
+        --text-dim: #708090;
 
         /* Status */
         --success: #00FF88;
         --success-glow: rgba(0, 255, 136, 0.4);
         --warning: #FFB800;
         --warning-glow: rgba(255, 184, 0, 0.4);
-        --error: #FF3366;
-        --error-glow: rgba(255, 51, 102, 0.4);
+        --error: #FF6B6B;
+        --error-glow: rgba(255, 107, 107, 0.4);
 
         /* Glass & Borders */
         --glass-border: rgba(0, 255, 255, 0.15);
         --glass-border-bright: rgba(0, 255, 255, 0.4);
+        --silver-border: rgba(192, 192, 192, 0.3);
 
         /* Border Radius */
         --radius-sm: 8px;
@@ -185,7 +190,8 @@ st.markdown("""
 
         /* Shadows & Glows */
         --glow-cyan: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1);
-        --glow-blue: 0 0 20px rgba(0, 128, 255, 0.3), 0 0 40px rgba(0, 128, 255, 0.1);
+        --glow-teal: 0 0 20px rgba(0, 139, 139, 0.3), 0 0 40px rgba(0, 139, 139, 0.1);
+        --glow-silver: 0 0 15px rgba(192, 192, 192, 0.3);
         --glow-intense: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2);
         --shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
@@ -213,12 +219,13 @@ st.markdown("""
     }
 
     /* ========== MAIN APP BACKGROUND ========== */
+    /* Graphite/Slate gradient: #1C1C2E → #2D3748 */
     .stApp, [data-testid="stAppViewContainer"] {
-        background: radial-gradient(ellipse at top, #0A1628 0%, var(--bg-dark) 50%, var(--bg-darker) 100%) !important;
+        background: linear-gradient(135deg, #1C1C2E 0%, #2D3748 100%) !important;
         background-attachment: fixed !important;
     }
 
-    /* Animated grid background */
+    /* Subtle grid pattern - data flow visualization */
     .stApp::before {
         content: '';
         position: fixed;
@@ -227,9 +234,11 @@ st.markdown("""
         right: 0;
         bottom: 0;
         background-image:
-            linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
+            linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+            radial-gradient(ellipse at 20% 30%, rgba(0, 139, 139, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 70%, rgba(0, 255, 255, 0.05) 0%, transparent 50%);
+        background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
         pointer-events: none;
         z-index: 0;
     }
@@ -248,7 +257,7 @@ st.markdown("""
 
     /* ========== SIDEBAR - HOLOGRAPHIC PANEL ========== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(0, 20, 40, 0.95) 0%, rgba(5, 10, 25, 0.98) 100%) !important;
+        background: linear-gradient(180deg, rgba(28, 28, 46, 0.95) 0%, rgba(5, 10, 25, 0.98) 100%) !important;
         border-right: 1px solid var(--glass-border) !important;
         box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5), inset -1px 0 0 var(--cyan-dim) !important;
     }
@@ -307,7 +316,7 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 128, 255, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 139, 139, 0.15) 100%) !important;
         color: var(--cyan) !important;
         font-weight: 600 !important;
         border-color: var(--cyan) !important;
@@ -458,7 +467,7 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 206, 209, 0.2) 100%);
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 139, 139, 0.2) 100%);
         color: var(--success);
         font-size: 10px;
         font-weight: 700;
@@ -925,7 +934,7 @@ st.markdown("""
     /* Primary Button - Cyan Neon Glow */
     .stButton > button[kind="primary"],
     .stButton > button:not([kind]) {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 128, 255, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 139, 139, 0.15) 100%) !important;
         color: var(--cyan) !important;
         border: 1px solid var(--cyan) !important;
         box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0, 255, 255, 0.1) !important;
@@ -934,7 +943,7 @@ st.markdown("""
 
     .stButton > button[kind="primary"]:hover,
     .stButton > button:not([kind]):hover {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 128, 255, 0.25) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 139, 139, 0.25) 100%) !important;
         transform: translateY(-2px) !important;
         box-shadow: var(--glow-intense), inset 0 0 30px rgba(0, 255, 255, 0.2) !important;
         text-shadow: 0 0 15px var(--cyan) !important;
@@ -990,7 +999,7 @@ st.markdown("""
 
     /* Download buttons - Success Neon */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 206, 209, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 139, 139, 0.15) 100%) !important;
         color: var(--success) !important;
         border: 1px solid var(--success) !important;
         border-radius: 8px !important;
@@ -1006,7 +1015,7 @@ st.markdown("""
     }
 
     .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 206, 209, 0.25) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 139, 139, 0.25) 100%) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 0 30px var(--success-glow), 0 0 60px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.2) !important;
     }
@@ -1030,7 +1039,7 @@ st.markdown("""
     }
 
     .stLinkButton > a:hover {
-        background: linear-gradient(135deg, rgba(0, 128, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 139, 139, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%) !important;
         color: var(--cyan) !important;
         border-color: var(--cyan) !important;
         transform: translateY(-2px) !important;
@@ -1084,7 +1093,7 @@ st.markdown("""
     /* Success buttons - Green Neon */
     .btn-success button,
     [data-testid*="success"] button {
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 206, 209, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 139, 139, 0.15) 100%) !important;
         color: var(--success) !important;
         border-color: var(--success) !important;
         box-shadow: 0 0 20px var(--success-glow) !important;
@@ -2475,7 +2484,7 @@ def render_sidebar():
 def show_dashboard():
     # Futuristic Holographic Dashboard Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.2);
                 border-radius: 16px;
                 padding: 32px;
@@ -2489,7 +2498,7 @@ def show_dashboard():
         <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.5;"></div>
 
         <div style="display: flex; align-items: center; gap: 24px; position: relative; z-index: 1;">
-            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.2) 100%);
                         border: 1px solid #00FFFF;
                         border-radius: 12px;
                         padding: 16px;
@@ -2498,7 +2507,7 @@ def show_dashboard():
             </div>
             <div>
                 <h1 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 28px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">DASHBOARD</h1>
-                <p style="margin: 0; color: #80C4D4; font-size: 15px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">SYSTEM OVERVIEW • LEAD GENERATION METRICS • REAL-TIME DATA</p>
+                <p style="margin: 0; color: #C0C0C0; font-size: 15px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">SYSTEM OVERVIEW • LEAD GENERATION METRICS • REAL-TIME DATA</p>
             </div>
         </div>
     </div>
@@ -2542,7 +2551,7 @@ def show_dashboard():
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">📈 KEY METRICS</h3>
-        <p style="margin: 0; color: #80C4D4; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
+        <p style="margin: 0; color: #C0C0C0; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2550,22 +2559,22 @@ def show_dashboard():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Leads Found -->
-        <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 40, 80, 0.3) 100%);
-                    border: 1px solid rgba(0, 128, 255, 0.4);
+        <div style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%);
+                    border: 1px solid rgba(0, 139, 139, 0.4);
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
                     position: relative;
                     overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 128, 255, 0.2), inset 0 0 30px rgba(0, 128, 255, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #0080FF);">👥</div>
-            <div style="font-size: 36px; font-weight: 700; color: #0080FF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 128, 255, 0.5);">{leads_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
+                    box-shadow: 0 0 20px rgba(0, 139, 139, 0.2), inset 0 0 30px rgba(0, 139, 139, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #008B8B 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #008B8B);">👥</div>
+            <div style="font-size: 36px; font-weight: 700; color: #008B8B; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 139, 139, 0.5);">{leads_count}</div>
+            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
+            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
         </div>
         <!-- Hot Leads -->
-        <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(80, 20, 40, 0.3) 100%);
+        <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(828, 28, 46, 0.3) 100%);
                     border: 1px solid rgba(255, 51, 102, 0.4);
                     border-radius: 12px;
                     padding: 20px;
@@ -2576,8 +2585,8 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
             <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
+            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
+            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
         </div>
         <!-- Qualified -->
         <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 80, 50, 0.3) 100%);
@@ -2591,8 +2600,8 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
             <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
+            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
+            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
         </div>
         <!-- Keywords -->
         <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(80, 60, 0, 0.3) 100%);
@@ -2606,8 +2615,8 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
             <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
+            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
+            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
         </div>
         <!-- Sources -->
         <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%);
@@ -2621,25 +2630,25 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FFFF);">🔗</div>
             <div style="font-size: 36px; font-weight: 700; color: #00FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);">{sources_count}/4</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
+            <div style="font-size: 11px; color: #C0C0C0; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
+            <div style="font-size: 10px; color: #708090; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # Holographic Info Panel
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.4) 0%, rgba(0, 20, 40, 0.6) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.4) 0%, rgba(28, 28, 46, 0.6) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.2);
                 border-radius: 12px;
                 padding: 20px;
                 margin-bottom: 32px;
                 position: relative;
                 backdrop-filter: blur(10px);">
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 30%, #0080FF 70%, transparent 100%); opacity: 0.5;"></div>
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 30%, #008B8B 70%, transparent 100%); opacity: 0.5;"></div>
         <h4 style="margin: 0 0 12px 0; color: #00FFFF; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #80C4D4; font-family: 'Rajdhani', sans-serif;">
-            <div><span style="color: #0080FF;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #C0C0C0; font-family: 'Rajdhani', sans-serif;">
+            <div><span style="color: #008B8B;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
             <div><span style="color: #FF3366;">▸</span> <strong>HOT LEADS:</strong> Priority targets (Score 80+)</div>
             <div><span style="color: #00FF88;">▸</span> <strong>QUALIFIED:</strong> AI-verified prospects</div>
             <div><span style="color: #FFB800;">▸</span> <strong>KEYWORDS:</strong> Active pain indicators</div>
@@ -2652,7 +2661,7 @@ def show_dashboard():
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">🌐 DATA SOURCES</h3>
-        <p style="margin: 0; color: #80C4D4; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
+        <p style="margin: 0; color: #C0C0C0; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2673,7 +2682,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF4500);">🔴</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #FF4500; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);">REDDIT</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
+            <p style="margin: 0; color: #C0C0C0; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
         </div>
         <!-- Hacker News -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -2690,7 +2699,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF6600);">🟠</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #FF6600; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 102, 0, 0.3);">HACKER NEWS</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
+            <p style="margin: 0; color: #C0C0C0; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
         </div>
         <!-- Google -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -2707,24 +2716,24 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #4285F4);">🔵</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #4285F4; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(66, 133, 244, 0.3);">GOOGLE</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
+            <p style="margin: 0; color: #C0C0C0; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
         </div>
         <!-- Indeed -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
-                    border: 1px solid rgba(0, 206, 209, 0.3);
+                    border: 1px solid rgba(0, 139, 139, 0.3);
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
                     transition: all 0.3s ease;
                     backdrop-filter: blur(10px);">
             <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
-                        background: linear-gradient(135deg, rgba(0, 206, 209, 0.2) 0%, rgba(0, 206, 209, 0.1) 100%);
-                        border: 1px solid rgba(0, 206, 209, 0.5);
-                        box-shadow: 0 0 15px rgba(0, 206, 209, 0.3);">
-                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #00CED1);">💼</span>
+                        background: linear-gradient(135deg, rgba(0, 139, 139, 0.2) 0%, rgba(0, 139, 139, 0.1) 100%);
+                        border: 1px solid rgba(0, 139, 139, 0.5);
+                        box-shadow: 0 0 15px rgba(0, 139, 139, 0.3);">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #008B8B);">💼</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #00CED1; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(0, 206, 209, 0.3);">INDEED</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
+            <h4 style="margin: 0 0 4px 0; color: #008B8B; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(0, 139, 139, 0.3);">INDEED</h4>
+            <p style="margin: 0; color: #C0C0C0; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -2764,7 +2773,7 @@ def show_dashboard():
 def show_search():
     # Holographic Page Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.3);
                 border-radius: 16px;
                 padding: 32px;
@@ -2777,7 +2786,7 @@ def show_search():
         <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
             🔎 FIND LEADS
         </h1>
-        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+        <p style="color: #C0C0C0; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
             Discover prospects with communication problems
         </p>
     </div>
@@ -2785,11 +2794,11 @@ def show_search():
 
     # Active Sources Section
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
         <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             📡 ACTIVE SOURCES
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">8 data sources available for lead discovery</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">8 data sources available for lead discovery</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2807,19 +2816,19 @@ def show_search():
         use_gmaps = st.checkbox("📍 Google Maps - Local Businesses", value=True, key="gmaps_check")
 
     st.markdown("""
-    <div style="background: rgba(0, 128, 255, 0.1); border: 1px solid rgba(0, 128, 255, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
-        <span style="color: #0080FF; font-weight: 600;">💡 TIP:</span>
-        <span style="color: #80C4D4;"> Google Maps busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. GRATIS - no usa API.</span>
+    <div style="background: rgba(0, 139, 139, 0.1); border: 1px solid rgba(0, 139, 139, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+        <span style="color: #008B8B; font-weight: 600;">💡 TIP:</span>
+        <span style="color: #C0C0C0;"> Google Maps busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. GRATIS - no usa API.</span>
     </div>
     """, unsafe_allow_html=True)
 
     # Coming Soon Sources
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 206, 209, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
-        <h3 style="color: #00CED1; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 139, 139, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #008B8B; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             🚀 COMING SOON
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">2 more sources in development</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">2 more sources in development</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2831,15 +2840,15 @@ def show_search():
     for i, (icon, name) in enumerate(coming_sources):
         with coming_cols[i]:
             st.markdown(f"<span style='color: #00FFFF; font-size: 24px;'>{icon}</span>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: #80C4D4;'>{name}</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #C0C0C0;'>{name}</span>", unsafe_allow_html=True)
 
     # Time Filter
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
         <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             📅 TIME RANGE
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">Filter results by post date</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">Filter results by post date</p>
     </div>
     """, unsafe_allow_html=True)
     time_options = {
@@ -2855,11 +2864,11 @@ def show_search():
 
     # Location Filter
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
         <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             📍 LOCATION FILTER
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">Target specific geographic areas (for Indeed, Yelp & Google Maps)</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">Target specific geographic areas (for Indeed, Yelp & Google Maps)</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2902,11 +2911,11 @@ def show_search():
 
     # Industry Filter
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
         <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             🏢 INDUSTRY FILTER
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">Optional - Focus on specific business verticals</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">Optional - Focus on specific business verticals</p>
     </div>
     """, unsafe_allow_html=True)
     industries = ["All Industries"] + list(settings.industries.keys())
@@ -2915,11 +2924,11 @@ def show_search():
     # AI Option
     ai_available = bool(settings.openai_api_key or settings.anthropic_api_key)
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 206, 209, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
-        <h3 style="color: #00CED1; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 139, 139, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; backdrop-filter: blur(5px);">
+        <h3 style="color: #008B8B; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             🤖 AI QUALIFICATION
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">Recommended - Let AI automatically score and qualify leads</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">Recommended - Let AI automatically score and qualify leads</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2927,8 +2936,8 @@ def show_search():
 
     if not ai_available:
         st.markdown("""
-        <div style="background: rgba(0, 128, 255, 0.1); border: 1px solid rgba(0, 128, 255, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
-            <span style="color: #0080FF;">ℹ️ Configure OpenAI or Anthropic API key in Settings to enable AI qualification</span>
+        <div style="background: rgba(0, 139, 139, 0.1); border: 1px solid rgba(0, 139, 139, 0.3); border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+            <span style="color: #008B8B;">ℹ️ Configure OpenAI or Anthropic API key in Settings to enable AI qualification</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -3387,7 +3396,7 @@ def show_search():
 def show_leads():
     # Holographic Page Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.3);
                 border-radius: 16px;
                 padding: 32px;
@@ -3400,7 +3409,7 @@ def show_leads():
         <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
             📋 MY LEADS
         </h1>
-        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+        <p style="color: #C0C0C0; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
             Manage and export your prospects
         </p>
     </div>
@@ -3408,11 +3417,11 @@ def show_leads():
 
     # Import Section with Field Mapping
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
         <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             📤 IMPORT LEADS
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">Upload CSV or Excel files to import leads</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">Upload CSV or Excel files to import leads</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -3951,7 +3960,7 @@ def show_analytics():
 
     # Holographic Page Header
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.3);
                 border-radius: 16px;
                 padding: 32px;
@@ -3964,7 +3973,7 @@ def show_analytics():
         <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
             📊 {t('analytics_title').upper()}
         </h1>
-        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+        <p style="color: #C0C0C0; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
             {t('analytics_subtitle')}
         </p>
     </div>
@@ -3983,18 +3992,18 @@ def show_analytics():
         st.markdown(f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
             <!-- Leads Found -->
-            <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.2) 0%, rgba(0, 40, 80, 0.4) 100%);
-                        border: 1px solid rgba(0, 128, 255, 0.4);
+            <div style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.2) 0%, rgba(45, 55, 72, 0.4) 100%);
+                        border: 1px solid rgba(0, 139, 139, 0.4);
                         border-radius: 16px;
                         padding: 24px;
                         backdrop-filter: blur(10px);
-                        box-shadow: 0 0 30px rgba(0, 128, 255, 0.2), inset 0 0 30px rgba(0, 128, 255, 0.05);
+                        box-shadow: 0 0 30px rgba(0, 139, 139, 0.2), inset 0 0 30px rgba(0, 139, 139, 0.05);
                         position: relative;
                         overflow: hidden;">
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
-                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
-                <div style="color: #0080FF; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(0, 128, 255, 0.5);">{total_leads}</div>
-                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">{t('total_discovered')}</div>
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #008B8B 50%, transparent 100%);"></div>
+                <div style="color: #C0C0C0; font-size: 14px; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
+                <div style="color: #008B8B; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(0, 139, 139, 0.5);">{total_leads}</div>
+                <div style="color: #708090; font-size: 12px; margin-top: 8px;">{t('total_discovered')}</div>
             </div>
             <!-- Qualified Leads -->
             <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 40, 40, 0.4) 100%);
@@ -4006,9 +4015,9 @@ def show_analytics():
                         position: relative;
                         overflow: hidden;">
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
-                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
+                <div style="color: #C0C0C0; font-size: 14px; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
                 <div style="color: #00FF88; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);">{qualified_leads}</div>
-                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">{t('passed_filters')}</div>
+                <div style="color: #708090; font-size: 12px; margin-top: 8px;">{t('passed_filters')}</div>
             </div>
             <!-- Conversion Rate -->
             <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.2) 0%, rgba(40, 30, 0, 0.4) 100%);
@@ -4020,9 +4029,9 @@ def show_analytics():
                         position: relative;
                         overflow: hidden;">
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
-                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
+                <div style="color: #C0C0C0; font-size: 14px; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
                 <div style="color: #FFB800; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(255, 184, 0, 0.5);">{rate:.1f}%</div>
-                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">{t('qualified_total')}</div>
+                <div style="color: #708090; font-size: 12px; margin-top: 8px;">{t('qualified_total')}</div>
             </div>
             <!-- Hot Leads -->
             <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.2) 0%, rgba(40, 10, 20, 0.4) 100%);
@@ -4034,9 +4043,9 @@ def show_analytics():
                         position: relative;
                         overflow: hidden;">
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
-                <div style="color: #80C4D4; font-size: 14px; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
+                <div style="color: #C0C0C0; font-size: 14px; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
                 <div style="color: #FF3366; font-family: 'Orbitron', sans-serif; font-size: 36px; font-weight: 700; text-shadow: 0 0 20px rgba(255, 51, 102, 0.5);">{hot_leads}</div>
-                <div style="color: #4A7080; font-size: 12px; margin-top: 8px;">Score 70+</div>
+                <div style="color: #708090; font-size: 12px; margin-top: 8px;">Score 70+</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -4044,11 +4053,11 @@ def show_analytics():
         if st.session_state.leads:
             # Source distribution with holographic visualization
             st.markdown(f"""
-            <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+            <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
                 <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
                     📊 {t('leads_by_source').upper()}
                 </h3>
-                <p style="color: #4A7080; font-size: 13px; margin: 0;">{t('leads_by_source_desc')}</p>
+                <p style="color: #708090; font-size: 13px; margin: 0;">{t('leads_by_source_desc')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -4061,18 +4070,18 @@ def show_analytics():
             # Source styling with neon colors
             source_colors = {
                 'reddit': ('#FF4500', '🔴'),
-                'google': ('#0080FF', '🔵'),
+                'google': ('#008B8B', '🔵'),
                 'hackernews': ('#FF6600', '🟠'),
-                'apollo': ('#00CED1', '🚀'),
+                'apollo': ('#008B8B', '🚀'),
                 'hunter': ('#FFB800', '🎯'),
-                'manual': ('#80C4D4', '✏️'),
+                'manual': ('#C0C0C0', '✏️'),
                 'producthunt': ('#FF3366', '🟤'),
-                'linkedin': ('#0080FF', '🔷')
+                'linkedin': ('#008B8B', '🔷')
             }
 
             # Build holographic bar chart
             max_count = max(source_counts.values()) if source_counts else 1
-            chart_html = '<div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 24px; backdrop-filter: blur(5px);">'
+            chart_html = '<div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 24px; backdrop-filter: blur(5px);">'
 
             for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
                 color, icon = source_colors.get(source.lower(), ('#00FFFF', '📊'))
@@ -4083,10 +4092,10 @@ def show_analytics():
                 <div style="display: flex; align-items: center; margin-bottom: 16px;">
                     <div style="width: 120px; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 20px;">{icon}</span>
-                        <span style="font-size: 14px; font-weight: 600; color: #E0F7FF; text-transform: capitalize;">{source}</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #E5E5E5; text-transform: capitalize;">{source}</span>
                     </div>
                     <div style="flex: 1; margin: 0 20px;">
-                        <div style="background: rgba(0, 40, 80, 0.5); border: 1px solid rgba(0, 255, 255, 0.1); border-radius: 8px; height: 28px; overflow: hidden;">
+                        <div style="background: rgba(45, 55, 72, 0.5); border: 1px solid rgba(0, 255, 255, 0.1); border-radius: 8px; height: 28px; overflow: hidden;">
                             <div style="background: linear-gradient(90deg, {color} 0%, {color}99 100%); width: {width_pct}%; height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 12px; transition: width 0.5s ease; box-shadow: 0 0 15px {color}40;">
                                 <span style="color: white; font-weight: 700; font-size: 13px; text-shadow: 0 0 10px rgba(255,255,255,0.5);">{count}</span>
                             </div>
@@ -4104,11 +4113,11 @@ def show_analytics():
             # Score Distribution
             st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
             st.markdown(f"""
-            <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+            <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
                 <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
                     🎯 {t('score_distribution').upper()}
                 </h3>
-                <p style="color: #4A7080; font-size: 13px; margin: 0;">{t('lead_quality_by_score')}</p>
+                <p style="color: #708090; font-size: 13px; margin: 0;">{t('lead_quality_by_score')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -4139,8 +4148,8 @@ def show_analytics():
                     <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
                     <div style="font-size: 32px; margin-bottom: 8px;">🔥</div>
                     <div style="font-size: 28px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{score_ranges['🔥 Hot (70-100)']}</div>
-                    <div style="font-size: 13px; color: #E0F7FF; margin-top: 4px;">Hot Leads (70-100)</div>
-                    <div style="font-size: 12px; color: #4A7080;">{t('ready_to_contact')}</div>
+                    <div style="font-size: 13px; color: #E5E5E5; margin-top: 4px;">Hot Leads (70-100)</div>
+                    <div style="font-size: 12px; color: #708090;">{t('ready_to_contact')}</div>
                 </div>
                 <!-- Warm Leads -->
                 <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(40, 30, 0, 0.4) 100%);
@@ -4155,24 +4164,24 @@ def show_analytics():
                     <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
                     <div style="font-size: 32px; margin-bottom: 8px;">🟡</div>
                     <div style="font-size: 28px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{score_ranges['🟡 Warm (40-69)']}</div>
-                    <div style="font-size: 13px; color: #E0F7FF; margin-top: 4px;">Warm Leads (40-69)</div>
-                    <div style="font-size: 12px; color: #4A7080;">{t('need_more_nurturing')}</div>
+                    <div style="font-size: 13px; color: #E5E5E5; margin-top: 4px;">Warm Leads (40-69)</div>
+                    <div style="font-size: 12px; color: #708090;">{t('need_more_nurturing')}</div>
                 </div>
                 <!-- Cold Leads -->
-                <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 20, 40, 0.4) 100%);
-                            border: 1px solid rgba(0, 128, 255, 0.4);
+                <div style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(28, 28, 46, 0.4) 100%);
+                            border: 1px solid rgba(0, 139, 139, 0.4);
                             border-radius: 12px;
                             padding: 20px;
                             text-align: center;
                             backdrop-filter: blur(5px);
-                            box-shadow: 0 0 20px rgba(0, 128, 255, 0.15);
+                            box-shadow: 0 0 20px rgba(0, 139, 139, 0.15);
                             position: relative;
                             overflow: hidden;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, #008B8B 50%, transparent 100%);"></div>
                     <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #0080FF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 128, 255, 0.5);">{score_ranges['❄️ Cold (0-39)']}</div>
-                    <div style="font-size: 13px; color: #E0F7FF; margin-top: 4px;">Cold Leads (0-39)</div>
-                    <div style="font-size: 12px; color: #4A7080;">{t('low_priority')}</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #008B8B; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 139, 139, 0.5);">{score_ranges['❄️ Cold (0-39)']}</div>
+                    <div style="font-size: 13px; color: #E5E5E5; margin-top: 4px;">Cold Leads (0-39)</div>
+                    <div style="font-size: 12px; color: #708090;">{t('low_priority')}</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -4291,7 +4300,7 @@ def show_crm():
     <style>
         /* CRM Dashboard Cards - Holographic */
         .crm-kpi-card {
-            background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 16px;
             padding: 20px;
@@ -4315,7 +4324,7 @@ def show_crm():
         }
         .crm-kpi-label {
             font-size: 13px;
-            color: #80C4D4;
+            color: #C0C0C0;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -4346,12 +4355,12 @@ def show_crm():
         }
         .revenue-label {
             font-size: 14px;
-            color: #80C4D4;
+            color: #C0C0C0;
         }
 
         /* Pipeline Stage Header - Holographic */
         .pipeline-stage {
-            background: linear-gradient(180deg, rgba(0, 40, 80, 0.5) 0%, rgba(0, 20, 40, 0.7) 100%);
+            background: linear-gradient(180deg, rgba(45, 55, 72, 0.5) 0%, rgba(28, 28, 46, 0.7) 100%);
             border-radius: 12px;
             padding: 16px 12px;
             text-align: center;
@@ -4368,12 +4377,12 @@ def show_crm():
         }
         .pipeline-stage-count {
             font-size: 11px;
-            color: #4A7080;
+            color: #708090;
         }
 
         /* Lead Card - Holographic */
         .lead-card {
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.15);
             border-radius: 10px;
             padding: 14px;
@@ -4395,24 +4404,24 @@ def show_crm():
         .lead-card-title {
             font-weight: 600;
             font-size: 13px;
-            color: #E0F7FF;
+            color: #E5E5E5;
             margin: 0;
             line-height: 1.3;
         }
         .lead-card-company {
             font-size: 11px;
-            color: #4A7080;
+            color: #708090;
             margin: 4px 0 0 0;
         }
         .lead-card-score {
-            background: linear-gradient(135deg, rgba(0, 128, 255, 0.3) 0%, rgba(0, 40, 80, 0.5) 100%);
-            border: 1px solid rgba(0, 128, 255, 0.4);
-            color: #0080FF;
+            background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 72, 0.5) 100%);
+            border: 1px solid rgba(0, 139, 139, 0.4);
+            color: #008B8B;
             font-size: 10px;
             font-weight: 600;
             padding: 3px 8px;
             border-radius: 12px;
-            text-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 139, 139, 0.5);
         }
         .lead-card-info {
             display: flex;
@@ -4422,7 +4431,7 @@ def show_crm():
         }
         .lead-card-tag {
             background: rgba(0, 255, 255, 0.1);
-            color: #80C4D4;
+            color: #C0C0C0;
             font-size: 10px;
             padding: 3px 8px;
             border-radius: 6px;
@@ -4437,7 +4446,7 @@ def show_crm():
         }
         .lead-action-btn {
             flex: 1;
-            background: rgba(0, 40, 80, 0.5);
+            background: rgba(45, 55, 72, 0.5);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 6px;
             padding: 6px;
@@ -4445,7 +4454,7 @@ def show_crm():
             cursor: pointer;
             text-align: center;
             transition: all 0.2s ease;
-            color: #80C4D4;
+            color: #C0C0C0;
         }
         .lead-action-btn:hover {
             background: rgba(0, 255, 255, 0.2);
@@ -4455,7 +4464,7 @@ def show_crm():
 
         /* Contact Detail Card - Holographic */
         .contact-detail-card {
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 16px;
             padding: 24px;
@@ -4473,7 +4482,7 @@ def show_crm():
         .contact-avatar {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 128, 255, 0.3) 100%);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 139, 139, 0.3) 100%);
             border: 1px solid rgba(0, 255, 255, 0.4);
             border-radius: 50%;
             display: flex;
@@ -4487,13 +4496,13 @@ def show_crm():
         .contact-name {
             font-size: 20px;
             font-weight: 700;
-            color: #E0F7FF;
+            color: #E5E5E5;
             margin: 0;
             font-family: 'Orbitron', sans-serif;
         }
         .contact-company {
             font-size: 14px;
-            color: #4A7080;
+            color: #708090;
             margin: 4px 0 0 0;
         }
 
@@ -4521,12 +4530,12 @@ def show_crm():
         }
         .activity-text {
             font-size: 13px;
-            color: #E0F7FF;
+            color: #E5E5E5;
             margin: 0;
         }
         .activity-time {
             font-size: 11px;
-            color: #4A7080;
+            color: #708090;
             margin-top: 4px;
         }
 
@@ -4538,7 +4547,7 @@ def show_crm():
             margin-top: 16px;
         }
         .quick-action-btn {
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 12px;
             padding: 16px;
@@ -4559,12 +4568,12 @@ def show_crm():
         .quick-action-label {
             font-size: 12px;
             font-weight: 500;
-            color: #80C4D4;
+            color: #C0C0C0;
         }
 
         /* Deal Card - Holographic */
         .deal-card {
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.15);
             border-radius: 12px;
             padding: 16px;
@@ -6201,7 +6210,7 @@ Best regards'''
 def show_config():
     # Holographic Settings Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.3);
                 border-radius: 16px;
                 padding: 32px;
@@ -6212,7 +6221,7 @@ def show_config():
                 overflow: hidden;">
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
+            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 139, 139, 0.2) 100%);
                         border: 1px solid rgba(0, 255, 255, 0.4);
                         border-radius: 16px;
                         padding: 16px;
@@ -6224,7 +6233,7 @@ def show_config():
             </div>
             <div>
                 <h1 style="margin: 0 0 8px 0; color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">SETTINGS</h1>
-                <p style="margin: 0; color: #80C4D4; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
+                <p style="margin: 0; color: #C0C0C0; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
             </div>
         </div>
     </div>
@@ -6232,11 +6241,11 @@ def show_config():
 
     # API Integrations Section
     st.markdown("""
-    <div style="background: rgba(0, 20, 40, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+    <div style="background: rgba(28, 28, 46, 0.6); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(5px);">
         <h3 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 18px; margin: 0 0 8px 0; letter-spacing: 0.05em;">
             🔗 API INTEGRATIONS
         </h3>
-        <p style="color: #4A7080; font-size: 13px; margin: 0;">Connect your external services to unlock full platform functionality</p>
+        <p style="color: #708090; font-size: 13px; margin: 0;">Connect your external services to unlock full platform functionality</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -6276,7 +6285,7 @@ def show_config():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
         <!-- HubSpot -->
-        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                     border: 1px solid rgba(0, 255, 255, 0.2);
                     border-radius: 16px;
                     padding: 20px;
@@ -6284,14 +6293,14 @@ def show_config():
                     backdrop-filter: blur(5px);
                     box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
-            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">HubSpot CRM</h4>
+            <h4 style="margin: 0 0 8px 0; color: #E5E5E5; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">HubSpot CRM</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hubspot_bg}; border: 1px solid {hubspot_border}; color: {hubspot_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hubspot_icon}</span> {hubspot_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">Sync leads & contacts</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Sync leads & contacts</p>
         </div>
         <!-- Google -->
-        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                     border: 1px solid rgba(0, 255, 255, 0.2);
                     border-radius: 16px;
                     padding: 20px;
@@ -6299,14 +6308,14 @@ def show_config():
                     backdrop-filter: blur(5px);
                     box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
-            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">Google Search</h4>
+            <h4 style="margin: 0 0 8px 0; color: #E5E5E5; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">Google Search</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {google_bg}; border: 1px solid {google_border}; color: {google_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{google_icon}</span> {google_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">Web search for leads</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Web search for leads</p>
         </div>
         <!-- OpenAI -->
-        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                     border: 1px solid rgba(0, 255, 255, 0.2);
                     border-radius: 16px;
                     padding: 20px;
@@ -6314,14 +6323,14 @@ def show_config():
                     backdrop-filter: blur(5px);
                     box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">🤖</div>
-            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">OpenAI</h4>
+            <h4 style="margin: 0 0 8px 0; color: #E5E5E5; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">OpenAI</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {openai_bg}; border: 1px solid {openai_border}; color: {openai_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{openai_icon}</span> {openai_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">AI lead qualification</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">AI lead qualification</p>
         </div>
         <!-- Anthropic -->
-        <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                     border: 1px solid rgba(0, 255, 255, 0.2);
                     border-radius: 16px;
                     padding: 20px;
@@ -6329,11 +6338,11 @@ def show_config():
                     backdrop-filter: blur(5px);
                     box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);">
             <div style="font-size: 32px; margin-bottom: 12px;">🧠</div>
-            <h4 style="margin: 0 0 8px 0; color: #E0F7FF; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">Anthropic Claude</h4>
+            <h4 style="margin: 0 0 8px 0; color: #E5E5E5; font-size: 16px; font-weight: 600; font-family: 'Rajdhani', sans-serif;">Anthropic Claude</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {anthropic_bg}; border: 1px solid {anthropic_border}; color: {anthropic_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{anthropic_icon}</span> {anthropic_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #4A7080; font-size: 11px;">AI assistant</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">AI assistant</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -6530,7 +6539,7 @@ def show_ai_assistant():
     st.markdown("""
     <style>
         .assistant-header {
-            background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
             border: 1px solid rgba(0, 255, 255, 0.3);
             border-radius: 16px;
             padding: 24px;
@@ -6559,7 +6568,7 @@ def show_ai_assistant():
         }
         .assistant-subtitle {
             font-size: 14px;
-            color: #80C4D4;
+            color: #C0C0C0;
             margin: 0;
         }
         .chat-message {
@@ -6574,9 +6583,9 @@ def show_ai_assistant():
             to { opacity: 1; transform: translateY(0); }
         }
         .user-message {
-            background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 40, 80, 0.3) 100%);
-            border: 1px solid rgba(0, 128, 255, 0.3);
-            border-left: 3px solid #0080FF;
+            background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%);
+            border: 1px solid rgba(0, 139, 139, 0.3);
+            border-left: 3px solid #008B8B;
             margin-left: 40px;
         }
         .assistant-message {
@@ -6592,16 +6601,16 @@ def show_ai_assistant():
             margin-bottom: 8px;
             font-weight: 600;
             font-size: 13px;
-            color: #E0F7FF;
+            color: #E5E5E5;
         }
         .message-content {
             font-size: 14px;
             line-height: 1.6;
-            color: #E0F7FF;
+            color: #E5E5E5;
         }
         .quick-action-chip {
             display: inline-block;
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 20px;
             padding: 8px 16px;
@@ -6609,7 +6618,7 @@ def show_ai_assistant():
             font-size: 13px;
             cursor: pointer;
             transition: all 0.2s ease;
-            color: #80C4D4;
+            color: #C0C0C0;
         }
         .quick-action-chip:hover {
             background: rgba(0, 255, 255, 0.15);
@@ -6618,7 +6627,7 @@ def show_ai_assistant():
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
         }
         .stats-card {
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 12px;
             padding: 16px;
@@ -6634,7 +6643,7 @@ def show_ai_assistant():
         }
         .stats-label {
             font-size: 12px;
-            color: #4A7080;
+            color: #708090;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -7157,14 +7166,14 @@ def show_lead_warming():
     <style>
         /* Temperature Indicators - Holographic */
         .temp-cold {
-            background: linear-gradient(135deg, rgba(0, 128, 255, 0.3) 0%, rgba(0, 40, 80, 0.5) 100%);
-            border: 1px solid rgba(0, 128, 255, 0.4);
-            color: #0080FF;
+            background: linear-gradient(135deg, rgba(0, 139, 139, 0.3) 0%, rgba(45, 55, 72, 0.5) 100%);
+            border: 1px solid rgba(0, 139, 139, 0.4);
+            color: #008B8B;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            text-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 139, 139, 0.5);
         }
         .temp-warm {
             background: linear-gradient(135deg, rgba(255, 184, 0, 0.3) 0%, rgba(40, 30, 0, 0.5) 100%);
@@ -7189,7 +7198,7 @@ def show_lead_warming():
 
         /* Warming Card - Holographic */
         .warming-card {
-            background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 16px;
             padding: 20px;
@@ -7220,22 +7229,22 @@ def show_lead_warming():
             top: 4px;
             width: 12px;
             height: 12px;
-            background: #0080FF;
+            background: #008B8B;
             border-radius: 50%;
-            border: 2px solid rgba(0, 20, 40, 0.8);
-            box-shadow: 0 0 10px rgba(0, 128, 255, 0.5);
+            border: 2px solid rgba(28, 28, 46, 0.8);
+            box-shadow: 0 0 10px rgba(0, 139, 139, 0.5);
         }
         .activity-completed::before {
             background: #00FF88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
         .activity-pending::before {
-            background: #4A7080;
+            background: #708090;
         }
 
         /* Warming Stats - Holographic */
         .warming-stat-card {
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(28, 28, 46, 0.6);
             border: 1px solid rgba(0, 255, 255, 0.2);
             border-radius: 12px;
             padding: 16px;
@@ -7251,7 +7260,7 @@ def show_lead_warming():
         }
         .warming-stat-label {
             font-size: 12px;
-            color: #4A7080;
+            color: #708090;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -7265,7 +7274,7 @@ def show_lead_warming():
 
         /* Warming Actions - Holographic */
         .warming-action-btn {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 40, 80, 0.4) 100%);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(45, 55, 72, 0.4) 100%);
             border: 1px solid rgba(0, 255, 255, 0.4);
             color: #00FFFF;
             padding: 10px 16px;
@@ -7285,7 +7294,7 @@ def show_lead_warming():
 
     # Holographic Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
                 border: 1px solid rgba(0, 255, 255, 0.3);
                 border-radius: 16px;
                 padding: 32px;
@@ -7298,7 +7307,7 @@ def show_lead_warming():
         <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
             🔥 LEAD WARMING
         </h1>
-        <p style="color: #80C4D4; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+        <p style="color: #C0C0C0; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
             Warm up leads before cold outreach for +300% higher response rates
         </p>
     </div>
