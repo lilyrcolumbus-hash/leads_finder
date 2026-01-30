@@ -2365,14 +2365,27 @@ def render_sidebar():
 # PAGES
 # ============================================
 def show_dashboard():
-    # Header
-    st.title("📊 Dashboard")
-    st.caption("Overview of your prospecting activity")
-
-    st.divider()
+    # Modern Dashboard Header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1E293B 0%, #334155 100%); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 16px;">
+                <span style="font-size: 36px;">📊</span>
+            </div>
+            <div>
+                <h1 style="margin: 0 0 8px 0; color: white; font-size: 28px; font-weight: 700;">Dashboard</h1>
+                <p style="margin: 0; color: #94A3B8; font-size: 15px;">Overview of your prospecting activity and lead generation metrics</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Quick Actions
-    st.subheader("⚡ Quick Actions")
+    st.markdown("""
+    <div style="margin-bottom: 24px;">
+        <h3 style="margin: 0 0 16px 0; color: #1E293B; font-size: 18px; font-weight: 700;">⚡ Quick Actions</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
@@ -2391,7 +2404,7 @@ def show_dashboard():
             st.session_state.nav_page = "Settings"
             st.rerun()
 
-    st.divider()
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
     # Metrics
     leads_count = len(st.session_state.leads)
@@ -2400,213 +2413,142 @@ def show_dashboard():
     keywords_count = len(settings.pain_keywords)
     sources_count = sum([1 for x in [True, True, bool(settings.google_api_key), True] if x])
     conv_rate = int((qualified_count / leads_count * 100)) if leads_count > 0 else 0
-    avg_total_score = sum(getattr(l, 'total_score', l.pain_score) for l in st.session_state.filtered_leads) / len(st.session_state.filtered_leads) if st.session_state.filtered_leads else 0
 
+    # Metrics Section Header
+    st.markdown("""
+    <div style="margin-bottom: 24px;">
+        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">📈 Key Metrics</h3>
+        <p style="margin: 0; color: #64748B; font-size: 13px;">Your lead generation performance at a glance</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Modern Metric Cards
     st.markdown(f"""
-    <div class="metrics-grid">
-        <!-- LEADS FOUND -->
-        <div class="metric-card">
-            <div class="metric-tooltip">
-                <div class="metric-tooltip-title">👥 Leads Found</div>
-                <div class="metric-tooltip-text">Total de prospectos encontrados en esta sesión de búsqueda. Incluye todos los resultados de los scrapers antes del filtro de AI.</div>
-            </div>
-            <div class="metric-help-icon">?</div>
-            <div class="metric-header">
-                <div class="metric-icon primary">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="metric-content">
-                <div class="metric-label">Leads Found</div>
-                <div class="metric-value">{leads_count}</div>
-            </div>
-            <div class="metric-footer">
-                <span class="metric-tag">This session</span>
-            </div>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
+        <!-- Leads Found -->
+        <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
+            <div style="font-size: 28px; margin-bottom: 8px;">👥</div>
+            <div style="font-size: 32px; font-weight: 700;">{leads_count}</div>
+            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Leads Found</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">This session</div>
         </div>
-
-        <!-- HOT LEADS -->
-        <div class="metric-card">
-            <div class="metric-tooltip">
-                <div class="metric-tooltip-title">🔥 Hot Leads</div>
-                <div class="metric-tooltip-text"><strong>Contactar AHORA.</strong> Leads con Total Score 80+. Tienen alto dolor (Pain), señales de compra activas (Intent), y son tu cliente ideal (Fit). Máxima prioridad.</div>
-            </div>
-            <div class="metric-help-icon">?</div>
-            <div class="metric-header">
-                <div class="metric-icon" style="background: var(--error-50);">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
-                        <path d="M12 2L2 22h20L12 2z"/>
-                        <path d="M12 9v4"/>
-                        <path d="M12 17h.01"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="metric-content">
-                <div class="metric-label">Hot Leads</div>
-                <div class="metric-value" style="color: var(--error-500);">{hot_leads_count}</div>
-            </div>
-            <div class="metric-footer">
-                <span class="metric-tag" style="background: var(--error-50); color: var(--error-500);">Total Score 80+</span>
-            </div>
+        <!-- Hot Leads -->
+        <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔥</div>
+            <div style="font-size: 32px; font-weight: 700;">{hot_leads_count}</div>
+            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Hot Leads</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Score 80+</div>
         </div>
-
-        <!-- QUALIFIED -->
-        <div class="metric-card">
-            <div class="metric-tooltip">
-                <div class="metric-tooltip-title">✅ Qualified</div>
-                <div class="metric-tooltip-text">Leads que pasaron el filtro de AI. El sistema detectó que son relevantes para tu producto (AI Receptionist). Listos para agregar al CRM.</div>
-            </div>
-            <div class="metric-help-icon">?</div>
-            <div class="metric-header">
-                <div class="metric-icon success">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                </div>
-                <span class="metric-trend">+{conv_rate}%</span>
-            </div>
-            <div class="metric-content">
-                <div class="metric-label">Qualified</div>
-                <div class="metric-value">{qualified_count}</div>
-            </div>
-            <div class="metric-footer">
-                <span class="metric-tag">Ready for CRM</span>
-            </div>
+        <!-- Qualified -->
+        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
+            <div style="font-size: 28px; margin-bottom: 8px;">✅</div>
+            <div style="font-size: 32px; font-weight: 700;">{qualified_count}</div>
+            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Qualified</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Ready for CRM</div>
         </div>
-
-        <!-- KEYWORDS -->
-        <div class="metric-card">
-            <div class="metric-tooltip">
-                <div class="metric-tooltip-title">🔑 Keywords</div>
-                <div class="metric-tooltip-text">Palabras clave de dolor que el sistema busca: "missed calls", "need receptionist", "voicemail full", etc. Más keywords = mejor detección de leads con problemas reales.</div>
-            </div>
-            <div class="metric-help-icon">?</div>
-            <div class="metric-header">
-                <div class="metric-icon accent">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="metric-content">
-                <div class="metric-label">Keywords</div>
-                <div class="metric-value">{keywords_count}</div>
-            </div>
-            <div class="metric-footer">
-                <span class="metric-tag">Active</span>
-            </div>
+        <!-- Keywords -->
+        <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔑</div>
+            <div style="font-size: 32px; font-weight: 700;">{keywords_count}</div>
+            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Keywords</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Active</div>
         </div>
-
-        <!-- SOURCES -->
-        <div class="metric-card">
-            <div class="metric-tooltip">
-                <div class="metric-tooltip-title">🔗 Sources</div>
-                <div class="metric-tooltip-text">Fuentes de datos conectadas: Google Maps, Yelp, Indeed, LinkedIn, Reddit, etc. Cada fuente busca leads de diferente manera. Más sources = más cobertura.</div>
-            </div>
-            <div class="metric-help-icon">?</div>
-            <div class="metric-header">
-                <div class="metric-icon primary">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2">
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="metric-content">
-                <div class="metric-label">Sources</div>
-                <div class="metric-value">{sources_count}/4</div>
-            </div>
-            <div class="metric-footer">
-                <span class="metric-tag">Connected</span>
-            </div>
+        <!-- Sources -->
+        <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); border-radius: 16px; padding: 20px; color: white; text-align: center;">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔗</div>
+            <div style="font-size: 32px; font-weight: 700;">{sources_count}/4</div>
+            <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;">Sources</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 8px;">Connected</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Features
+    # Metric Explanations
     st.markdown("""
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>Data Sources</h2>
-                <span class="section-badge">4 Platforms</span>
-            </div>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon reddit">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                        <circle cx="9" cy="12" r="1.5"/>
-                        <circle cx="15" cy="12" r="1.5"/>
-                        <path d="M12 16c-1.5 0-3-.5-3-1.5s1.5-1 3-1 3 .5 3 1.5-1.5 1-3 1z"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Reddit</h3>
-                <p class="feature-desc">Business and entrepreneur subreddits</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon hn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                        <text x="6" y="18" font-size="16" font-weight="bold">Y</text>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Hacker News</h3>
-                <p class="feature-desc">Tech startups and founders</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon google">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Google</h3>
-                <p class="feature-desc">Targeted search queries</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon ph">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h4c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2v4z"/>
-                    </svg>
-                </div>
-                <h3 class="feature-title">Product Hunt</h3>
-                <p class="feature-desc">Product community</p>
-            </div>
+    <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 20px; margin-bottom: 32px;">
+        <h4 style="margin: 0 0 12px 0; color: #0369A1; font-size: 14px; font-weight: 700;">📖 What do these metrics mean?</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #0284C7;">
+            <div><strong>👥 Leads Found:</strong> Total prospects discovered during search</div>
+            <div><strong>🔥 Hot Leads:</strong> High priority leads with Total Score 80+ (contact NOW)</div>
+            <div><strong>✅ Qualified:</strong> Leads that passed AI filter, relevant for your product</div>
+            <div><strong>🔑 Keywords:</strong> Pain keywords the system searches for</div>
+            <div><strong>🔗 Sources:</strong> Data sources connected (Reddit, HackerNews, Google, etc.)</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Steps
+    # Data Sources Section
     st.markdown("""
-    <div class="section">
-        <div class="section-header">
-            <div class="section-title">
-                <h2>How It Works</h2>
-                <span class="section-badge">3 Steps</span>
+    <div style="margin-bottom: 24px;">
+        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🌐 Data Sources</h3>
+        <p style="margin: 0; color: #64748B; font-size: 13px;">Platforms where we search for leads</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+        <!-- Reddit -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #FF4500 0%, #FF6B35 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                <span style="font-size: 24px;">🔴</span>
             </div>
+            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Reddit</h4>
+            <p style="margin: 0; color: #64748B; font-size: 12px;">Business subreddits</p>
         </div>
-        <div class="steps-grid">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <h3 class="step-title">Search</h3>
-                <p class="step-desc">Select sources and find prospects automatically</p>
+        <!-- Hacker News -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                <span style="font-size: 24px;">🟠</span>
             </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <h3 class="step-title">Qualify</h3>
-                <p class="step-desc">AI evaluates and scores each lead by relevance</p>
+            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Hacker News</h4>
+            <p style="margin: 0; color: #64748B; font-size: 12px;">Tech startups</p>
+        </div>
+        <!-- Google -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #4285F4 0%, #5B9BF6 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                <span style="font-size: 24px;">🔵</span>
             </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <h3 class="step-title">Export</h3>
-                <p class="step-desc">Send the best leads directly to HubSpot</p>
+            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Google Search</h4>
+            <p style="margin: 0; color: #64748B; font-size: 12px;">Web results</p>
+        </div>
+        <!-- Indeed -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #2164F3 0%, #4B83F5 100%); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                <span style="font-size: 24px;">💼</span>
             </div>
+            <h4 style="margin: 0 0 4px 0; color: #1E293B; font-size: 15px; font-weight: 600;">Indeed</h4>
+            <p style="margin: 0; color: #64748B; font-size: 12px;">Job postings</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # How It Works Section
+    st.markdown("""
+    <div style="margin-bottom: 24px;">
+        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
+        <p style="margin: 0; color: #64748B; font-size: 13px;">Three simple steps to find qualified leads</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <!-- Step 1 -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">1</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Search</h4>
+            <p style="margin: 0; color: #64748B; font-size: 13px;">Select sources and find prospects automatically</p>
+        </div>
+        <!-- Step 2 -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">2</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Qualify</h4>
+            <p style="margin: 0; color: #64748B; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
+        </div>
+        <!-- Step 3 -->
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">3</div>
+            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Export</h4>
+            <p style="margin: 0; color: #64748B; font-size: 13px;">Send the best leads directly to HubSpot</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
