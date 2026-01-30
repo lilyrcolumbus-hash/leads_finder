@@ -4539,16 +4539,23 @@ def show_leads():
 
             st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
 
-            data = [{
-                "Pain": l.pain_score,
-                "Title": l.title[:40] + "..." if len(l.title) > 40 else l.title,
-                "Industry": l.industry or "-",
-                "Source": l.source.value,
-                "Keywords": len(l.keywords_matched),
-                "AI": f"{l.ai_score:.2f}" if l.ai_score else "-"
-            } for l in filtered]
+            # Build data with proper None handling
+            data = []
+            for l in filtered:
+                title = l.title or "No title"
+                data.append({
+                    "Pain": l.pain_score or 0,
+                    "Title": title[:40] + "..." if len(title) > 40 else title,
+                    "Industry": l.industry or "-",
+                    "Source": l.source.value if l.source else "-",
+                    "Keywords": len(l.keywords_matched) if l.keywords_matched else 0,
+                    "AI": f"{l.ai_score:.2f}" if l.ai_score else "-"
+                })
 
-            st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+            if data:
+                st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+            else:
+                st.info("No leads match the current filters")
 
             st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -4587,16 +4594,23 @@ def show_leads():
         else:
             st.success(f"Found {len(saved_leads)} saved leads in database")
 
-            # Display saved leads
-            data = [{
-                "Pain": l.get('pain_score', 0),
-                "Title": str(l.get('title', ''))[:40] + "..." if len(str(l.get('title', ''))) > 40 else l.get('title', ''),
-                "Industry": l.get('industry', '-') or '-',
-                "Source": l.get('source', '-'),
-                "Saved": l.get('saved_at', '-')[:10] if l.get('saved_at') else '-'
-            } for l in saved_leads[:100]]  # Limit to 100 for performance
+            # Display saved leads with proper None handling
+            data = []
+            for l in saved_leads[:100]:  # Limit to 100 for performance
+                title = str(l.get('title', '') or 'No title')
+                saved_at = l.get('saved_at', '')
+                data.append({
+                    "Pain": l.get('pain_score', 0) or 0,
+                    "Title": title[:40] + "..." if len(title) > 40 else title,
+                    "Industry": l.get('industry', '-') or '-',
+                    "Source": l.get('source', '-') or '-',
+                    "Saved": saved_at[:10] if saved_at else '-'
+                })
 
-            st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+            if data:
+                st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+            else:
+                st.info("No saved leads to display")
 
             st.divider()
 
@@ -4712,13 +4726,16 @@ def show_leads():
 
                     if contacts:
                         st.success(f"Found {len(contacts)} contacts in HubSpot")
-                        data = [{
-                            "Name": f"{c.firstname or ''} {c.lastname or ''}".strip() or "-",
-                            "Email": c.email or "-",
-                            "Company": c.company or "-",
-                            "Stage": c.lead_stage.value
-                        } for c in contacts]
-                        st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+                        data = []
+                        for c in contacts:
+                            data.append({
+                                "Name": f"{c.firstname or ''} {c.lastname or ''}".strip() or "-",
+                                "Email": c.email or "-",
+                                "Company": c.company or "-",
+                                "Stage": c.lead_stage.value if c.lead_stage else "-"
+                            })
+                        if data:
+                            st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
                     else:
                         st.info("No contacts found in HubSpot for this filter")
 
