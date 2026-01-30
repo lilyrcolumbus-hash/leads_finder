@@ -1766,41 +1766,136 @@ st.markdown("""
         font-weight: 500;
     }
 
-    /* ========== EXPANDER ========== */
+    /* ========== EXPANDER - HOLOGRAPHIC ========== */
     .streamlit-expanderHeader {
         font-size: 15px !important;
         font-weight: 600 !important;
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
         border-radius: var(--radius-md) !important;
         transition: all 0.2s ease !important;
         padding: 14px 18px !important;
+        color: #C0C0C0 !important;
+        backdrop-filter: blur(10px) !important;
     }
 
     .streamlit-expanderHeader:hover {
-        border-color: var(--primary-300) !important;
-        background: var(--primary-50) !important;
+        border-color: rgba(0, 255, 255, 0.4) !important;
+        background: linear-gradient(135deg, rgba(0, 139, 139, 0.2) 0%, rgba(28, 28, 46, 0.9) 100%) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
     }
 
-    /* ========== SELECT BOX ========== */
+    [data-testid="stExpander"] {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    [data-testid="stExpander"] > div:first-child {
+        background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        border-radius: 12px !important;
+    }
+
+    [data-testid="stExpander"] > div > div {
+        background: rgba(28, 28, 46, 0.6) !important;
+        border-color: rgba(0, 255, 255, 0.1) !important;
+    }
+
+    /* ========== SELECT BOX - HOLOGRAPHIC ========== */
     .stSelectbox > div > div {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: rgba(28, 28, 46, 0.8) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
         border-radius: var(--radius-md) !important;
         font-size: 15px !important;
-        color: var(--slate-800) !important;
+        color: #E5E5E5 !important;
         padding: 4px 8px !important;
     }
 
     .stSelectbox > div > div:hover {
-        border-color: var(--primary-300) !important;
+        border-color: rgba(0, 255, 255, 0.4) !important;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.1) !important;
     }
 
     .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label {
-        color: var(--slate-700) !important;
+        color: #C0C0C0 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
         margin-bottom: 6px !important;
+    }
+
+    /* Text Input - Holographic */
+    .stTextInput > div > div > input {
+        background: rgba(28, 28, 46, 0.8) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        color: #E5E5E5 !important;
+        border-radius: var(--radius-md) !important;
+    }
+
+    .stTextInput > div > div > input:focus {
+        border-color: rgba(0, 255, 255, 0.5) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
+    }
+
+    /* Text Area - Holographic */
+    .stTextArea > div > div > textarea {
+        background: rgba(28, 28, 46, 0.8) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        color: #E5E5E5 !important;
+        border-radius: var(--radius-md) !important;
+    }
+
+    .stTextArea > div > div > textarea:focus {
+        border-color: rgba(0, 255, 255, 0.5) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) !important;
+    }
+
+    /* Multiselect - Holographic */
+    .stMultiSelect > div > div {
+        background: rgba(28, 28, 46, 0.8) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        color: #E5E5E5 !important;
+    }
+
+    .stMultiSelect [data-baseweb="tag"] {
+        background: rgba(0, 139, 139, 0.3) !important;
+        color: #00FFFF !important;
+        border: 1px solid rgba(0, 255, 255, 0.3) !important;
+    }
+
+    /* Checkbox - Holographic */
+    .stCheckbox > label {
+        color: #C0C0C0 !important;
+    }
+
+    .stCheckbox > label > div[data-testid="stCheckbox"] > div {
+        background: rgba(28, 28, 46, 0.8) !important;
+        border-color: rgba(0, 255, 255, 0.3) !important;
+    }
+
+    /* Radio - Holographic */
+    .stRadio > div {
+        background: transparent !important;
+    }
+
+    .stRadio > div > label {
+        color: #C0C0C0 !important;
+        background: rgba(28, 28, 46, 0.4) !important;
+        border: 1px solid rgba(0, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        margin: 4px 0 !important;
+    }
+
+    .stRadio > div > label:hover {
+        border-color: rgba(0, 255, 255, 0.3) !important;
+        background: rgba(0, 139, 139, 0.1) !important;
+    }
+
+    /* Date Input - Holographic */
+    .stDateInput > div > div > input {
+        background: rgba(28, 28, 46, 0.8) !important;
+        border: 1px solid rgba(0, 255, 255, 0.2) !important;
+        color: #E5E5E5 !important;
     }
 
     /* ========== TEXT INPUTS ========== */
@@ -3373,33 +3468,33 @@ def show_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # How It Works Section
+    # How It Works Section - Holographic
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
-        <p style="margin: 0; color: #64748B; font-size: 13px;">Three simple steps to find qualified leads</p>
+        <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 18px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">🚀 HOW IT WORKS</h3>
+        <p style="margin: 0; color: #C0C0C0; font-size: 13px;">Three simple steps to find qualified leads</p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
         <!-- Step 1 -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">1</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Search</h4>
-            <p style="margin: 0; color: #64748B; font-size: 13px;">Select sources and find prospects automatically</p>
+        <div style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(45, 55, 72, 0.3) 100%); border: 1px solid rgba(0, 139, 139, 0.4); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(0, 139, 139, 0.1);">
+            <div style="background: linear-gradient(135deg, #008B8B 0%, #006666 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #00FFFF; font-weight: 700; font-size: 18px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);">1</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">Search</h4>
+            <p style="margin: 0; color: #C0C0C0; font-size: 13px;">Select sources and find prospects automatically</p>
         </div>
         <!-- Step 2 -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">2</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Qualify</h4>
-            <p style="margin: 0; color: #64748B; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
+        <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(45, 55, 72, 0.3) 100%); border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);">
+            <div style="background: linear-gradient(135deg, #00AA66 0%, #008844 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #00FF88; font-weight: 700; font-size: 18px; box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);">2</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FF88; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">Qualify</h4>
+            <p style="margin: 0; color: #C0C0C0; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
         </div>
         <!-- Step 3 -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">3</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Export</h4>
-            <p style="margin: 0; color: #64748B; font-size: 13px;">Send the best leads directly to HubSpot</p>
+        <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.1) 0%, rgba(45, 55, 72, 0.3) 100%); border: 1px solid rgba(255, 184, 0, 0.4); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(255, 184, 0, 0.1);">
+            <div style="background: linear-gradient(135deg, #CC9300 0%, #AA7700 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #FFB800; font-weight: 700; font-size: 18px; box-shadow: 0 0 15px rgba(255, 184, 0, 0.3);">3</div>
+            <h4 style="margin: 0 0 8px 0; color: #FFB800; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">Export</h4>
+            <p style="margin: 0; color: #C0C0C0; font-size: 13px;">Send the best leads directly to HubSpot</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -6097,27 +6192,27 @@ Best regards'''
         </div>
         """, unsafe_allow_html=True)
 
-        # Create new task - Modern Design
+        # Create new task - Holographic Design
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid #E2E8F0;">
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid rgba(0, 255, 255, 0.2); backdrop-filter: blur(10px);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 8px; padding: 8px 12px;">
-                    <span style="color: white; font-size: 16px;">+</span>
+                <div style="background: rgba(0, 139, 139, 0.3); border: 1px solid #008B8B; border-radius: 8px; padding: 8px 12px;">
+                    <span style="color: #00FFFF; font-size: 16px; filter: drop-shadow(0 0 5px #00FFFF);">+</span>
                 </div>
                 <div>
-                    <h4 style="margin: 0; color: #1E293B; font-size: 16px; font-weight: 700;">Create New Task</h4>
-                    <p style="margin: 0; color: #64748B; font-size: 12px;">Schedule a follow-up activity for a lead</p>
+                    <h4 style="margin: 0; color: #00FFFF; font-size: 16px; font-weight: 700; font-family: 'Orbitron', sans-serif;">CREATE NEW TASK</h4>
+                    <p style="margin: 0; color: #C0C0C0; font-size: 12px;">Schedule a follow-up activity for a lead</p>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         with st.expander("Click here to add a new task", expanded=False):
-            # Explanation inside the form
+            # Explanation inside the form - Holographic
             st.markdown("""
-            <div style="background: #F0F9FF; border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 3px solid #3B82F6;">
-                <p style="margin: 0; color: #1E40AF; font-size: 13px;">
-                    <strong>How to create a task:</strong> Fill in the title, select task type (call, email, meeting, etc.), set a due date, and optionally link it to a contact.
+            <div style="background: rgba(0, 139, 139, 0.1); border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 3px solid #008B8B;">
+                <p style="margin: 0; color: #C0C0C0; font-size: 13px;">
+                    <strong style="color: #00FFFF;">How to create a task:</strong> Fill in the title, select task type (call, email, meeting, etc.), set a due date, and optionally link it to a contact.
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -6159,23 +6254,23 @@ Best regards'''
                 else:
                     st.warning("Please enter a task title")
 
-        # Task list with modern header and filter explanation
+        # Task list with holographic header
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #E2E8F0;">
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid rgba(0, 255, 255, 0.2); backdrop-filter: blur(10px);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                 <div>
-                    <h4 style="margin: 0; color: #1E293B; font-size: 16px; font-weight: 700;">Your Task List</h4>
-                    <p style="margin: 4px 0 0 0; color: #64748B; font-size: 12px;">Check the box to mark a task as complete</p>
+                    <h4 style="margin: 0; color: #00FFFF; font-size: 16px; font-weight: 700; font-family: 'Orbitron', sans-serif;">YOUR TASK LIST</h4>
+                    <p style="margin: 4px 0 0 0; color: #C0C0C0; font-size: 12px;">Check the box to mark a task as complete</p>
                 </div>
             </div>
-            <div style="background: #F1F5F9; border-radius: 8px; padding: 12px; margin-top: 12px;">
-                <p style="margin: 0; color: #475569; font-size: 12px;">
-                    <strong>Filter Options:</strong>
-                    <span style="color: #DC2626;">All</span> = View all tasks |
-                    <span style="color: #DC2626;">Overdue</span> = Past due date |
-                    <span style="color: #D97706;">Today</span> = Due today |
-                    <span style="color: #2563EB;">Upcoming</span> = Future tasks |
-                    <span style="color: #059669;">Completed</span> = Done tasks
+            <div style="background: rgba(0, 139, 139, 0.1); border-radius: 8px; padding: 12px; margin-top: 12px; border: 1px solid rgba(0, 139, 139, 0.2);">
+                <p style="margin: 0; color: #C0C0C0; font-size: 12px;">
+                    <strong style="color: #00FFFF;">Filter Options:</strong>
+                    <span style="color: #FF6B6B;">All</span> = View all tasks |
+                    <span style="color: #FF6B6B;">Overdue</span> = Past due date |
+                    <span style="color: #FFB800;">Today</span> = Due today |
+                    <span style="color: #00FFFF;">Upcoming</span> = Future tasks |
+                    <span style="color: #00FF88;">Completed</span> = Done tasks
                 </p>
             </div>
         </div>
@@ -6998,51 +7093,51 @@ def show_config():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Hunter.io -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="font-size: 32px; margin-bottom: 12px;">📧</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Hunter.io</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hunter_bg}; color: {hunter_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 0 5px #00FFFF);">📧</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">Hunter.io</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {'rgba(0, 255, 136, 0.2)' if settings.hunter_api_key else 'rgba(255, 184, 0, 0.2)'}; color: {'#00FF88' if settings.hunter_api_key else '#FFB800'}; border: 1px solid {'rgba(0, 255, 136, 0.4)' if settings.hunter_api_key else 'rgba(255, 184, 0, 0.4)'}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hunter_icon}</span> {hunter_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Email finder service</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Email finder service</p>
         </div>
         <!-- Apollo.io -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="font-size: 32px; margin-bottom: 12px;">🚀</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Apollo.io</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {apollo_bg}; color: {apollo_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 0 5px #00FFFF);">🚀</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">Apollo.io</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {'rgba(0, 255, 136, 0.2)' if settings.apollo_api_key else 'rgba(255, 184, 0, 0.2)'}; color: {'#00FF88' if settings.apollo_api_key else '#FFB800'}; border: 1px solid {'rgba(0, 255, 136, 0.4)' if settings.apollo_api_key else 'rgba(255, 184, 0, 0.4)'}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{apollo_icon}</span> {apollo_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Email + Phone + Company</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Email + Phone + Company</p>
         </div>
         <!-- Deduplication -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="font-size: 32px; margin-bottom: 12px;">🔄</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Deduplication</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 0 5px #00FF88);">🔄</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">Deduplication</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(0, 255, 136, 0.2); color: #00FF88; border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>✓</span> Active
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Remove duplicate leads</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Remove duplicate leads</p>
         </div>
         <!-- CSV Export -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
-            <div style="font-size: 32px; margin-bottom: 12px;">📥</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">CSV Export</h4>
-            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
+        <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 0 5px #00FFFF);">📥</div>
+            <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif;">CSV Export</h4>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(0, 255, 136, 0.2); color: #00FF88; border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>✓</span> Available
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Export leads to CSV</p>
+            <p style="margin: 12px 0 0 0; color: #708090; font-size: 11px;">Export leads to CSV</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # System Status Section
+    # System Status Section - Holographic
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h2 style="margin: 0; color: #1E293B; font-size: 20px; font-weight: 700;">📈 System Status</h2>
+            <h2 style="margin: 0; color: #00FFFF; font-size: 20px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">📈 SYSTEM STATUS</h2>
         </div>
-        <p style="margin: 0; color: #64748B; font-size: 14px;">Current system features and data statistics</p>
+        <p style="margin: 0; color: #C0C0C0; font-size: 14px;">Current system features and data statistics</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -7078,15 +7173,15 @@ def show_config():
     </div>
     """, unsafe_allow_html=True)
 
-    # Industries Section
+    # Industries Section - Holographic
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 16px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(10px);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <div>
-                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🏢 Industries Configured</h3>
-                <p style="margin: 0; color: #64748B; font-size: 13px;">Target industries for lead generation</p>
+                <h3 style="margin: 0 0 4px 0; color: #00FFFF; font-size: 18px; font-weight: 700; font-family: 'Orbitron', sans-serif;">🏢 INDUSTRIES CONFIGURED</h3>
+                <p style="margin: 0; color: #C0C0C0; font-size: 13px;">Target industries for lead generation</p>
             </div>
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+            <div style="background: rgba(0, 139, 139, 0.3); color: #00FFFF; border: 1px solid rgba(0, 255, 255, 0.4); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
                 {len(settings.industries)} industries
             </div>
         </div>
@@ -7095,7 +7190,7 @@ def show_config():
 
     industry_tags = ""
     for ind in list(settings.industries.keys()):
-        industry_tags += f'<span style="background: #F1F5F9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;">{ind}</span>'
+        industry_tags += f'<span style="background: rgba(0, 139, 139, 0.2); color: #C0C0C0; border: 1px solid rgba(0, 139, 139, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;">{ind}</span>'
 
     st.markdown(f"""
             {industry_tags}
@@ -7103,15 +7198,15 @@ def show_config():
     </div>
     """, unsafe_allow_html=True)
 
-    # Subreddits Section
+    # Subreddits Section - Holographic
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(255, 69, 0, 0.3); border-radius: 16px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(10px);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <div>
-                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">📱 Reddit Sources</h3>
-                <p style="margin: 0; color: #64748B; font-size: 13px;">Subreddits monitored for leads</p>
+                <h3 style="margin: 0 0 4px 0; color: #FF4500; font-size: 18px; font-weight: 700; font-family: 'Orbitron', sans-serif;">📱 REDDIT SOURCES</h3>
+                <p style="margin: 0; color: #C0C0C0; font-size: 13px;">Subreddits monitored for leads</p>
             </div>
-            <div style="background: linear-gradient(135deg, #FF4500 0%, #FF6B35 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+            <div style="background: rgba(255, 69, 0, 0.2); color: #FF4500; border: 1px solid rgba(255, 69, 0, 0.4); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
                 {len(settings.subreddits)} subreddits
             </div>
         </div>
@@ -7124,15 +7219,15 @@ def show_config():
             with sub_cols[i % 5]:
                 st.markdown(f"• r/{s}")
 
-    # Keywords Section
+    # Keywords Section - Holographic
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(255, 184, 0, 0.3); border-radius: 16px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(10px);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <div>
-                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🔑 Pain Keywords</h3>
-                <p style="margin: 0; color: #64748B; font-size: 13px;">Keywords that indicate buying intent or pain points</p>
+                <h3 style="margin: 0 0 4px 0; color: #FFB800; font-size: 18px; font-weight: 700; font-family: 'Orbitron', sans-serif;">🔑 PAIN KEYWORDS</h3>
+                <p style="margin: 0; color: #C0C0C0; font-size: 13px;">Keywords that indicate buying intent or pain points</p>
             </div>
-            <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+            <div style="background: rgba(255, 184, 0, 0.2); color: #FFB800; border: 1px solid rgba(255, 184, 0, 0.4); padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
                 {len(settings.pain_keywords)} keywords
             </div>
         </div>
@@ -7145,16 +7240,16 @@ def show_config():
             with kw_cols[i % 4]:
                 st.markdown(f"• {kw}")
 
-    # Configuration Help
+    # Configuration Help - Holographic
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE; border-radius: 16px; padding: 24px; margin-top: 24px;">
+    <div style="background: linear-gradient(135deg, rgba(0, 139, 139, 0.15) 0%, rgba(28, 28, 46, 0.8) 100%); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 16px; padding: 24px; margin-top: 24px; backdrop-filter: blur(10px);">
         <div style="display: flex; align-items: flex-start; gap: 16px;">
-            <div style="background: #4F46E5; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
-                <span style="font-size: 24px;">💡</span>
+            <div style="background: rgba(0, 139, 139, 0.3); border: 1px solid #008B8B; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #00FFFF);">💡</span>
             </div>
             <div>
-                <h4 style="margin: 0 0 8px 0; color: #3730A3; font-size: 16px; font-weight: 700;">How to Configure API Keys</h4>
-                <p style="margin: 0; color: #4338CA; font-size: 14px; line-height: 1.6;">
+                <h4 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 700; font-family: 'Orbitron', sans-serif;">HOW TO CONFIGURE API KEYS</h4>
+                <p style="margin: 0; color: #C0C0C0; font-size: 14px; line-height: 1.6;">
                     Go to your Streamlit Cloud dashboard → Settings → Secrets to add or update your API credentials securely.
                     Each API key should be added as an environment variable (e.g., HUBSPOT_API_KEY, OPENAI_API_KEY).
                 </p>
