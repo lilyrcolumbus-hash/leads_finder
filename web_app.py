@@ -10,6 +10,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import sys
+import html
 from pathlib import Path
 
 # Add src to path
@@ -688,18 +689,25 @@ def show_search():
     # Show results
     if st.session_state.scraping_done and st.session_state.filtered_leads:
         st.markdown("---")
-        st.subheader(f"📋 Resultados ({len(st.session_state.filtered_leads)})")
 
-        for lead in st.session_state.filtered_leads[:10]:
-            title_short = lead.title[:50] + "..." if len(lead.title) > 50 else lead.title
-            with st.expander(f"📌 {title_short}"):
-                st.markdown(f"**Fuente:** {lead.source.value}")
-                st.markdown(f"**Keywords:** {', '.join(lead.keywords_matched[:3])}")
-                if lead.ai_score:
-                    score_pct = int(lead.ai_score * 100)
-                    st.markdown(f"**Score AI:** {score_pct}%")
-                st.markdown(f"**URL:** [{lead.url[:40]}...]({lead.url})")
-                st.markdown(f"**Contenido:**\n{lead.content[:200]}...")
+        # Results header with count
+        results_count = len(st.session_state.filtered_leads)
+        qualified_count = len([l for l in st.session_state.filtered_leads if l.is_qualified])
+
+        st.markdown(f'''
+        <div style="display: flex; justify-content: space-between; align-items: center;
+                    margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <h3 style="margin: 0; color: var(--text-primary);">📋 Resultados</h3>
+            <div style="display: flex; gap: 10px;">
+                <span class="status-badge status-info">{results_count} encontrados</span>
+                <span class="status-badge status-success">{qualified_count} calificados</span>
+            </div>
+        </div>
+        ''', unsafe_allow_html=True)
+
+        # Render lead cards
+        for i, lead in enumerate(st.session_state.filtered_leads[:10]):
+            render_lead_card(lead, i)
 
 
 def show_leads():
@@ -710,23 +718,42 @@ def show_leads():
 
     with tab1:
         if not st.session_state.filtered_leads:
-            st.info("📭 No hay leads.\n\nVe a 'Buscar Leads' para encontrar prospectos.")
+            st.markdown('''
+            <div class="lead-card" style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+                <h3 style="margin: 0 0 8px 0; color: var(--text-primary);">No hay leads</h3>
+                <p style="margin: 0; color: var(--text-secondary);">Ve a "Buscar Leads" para encontrar prospectos.</p>
+            </div>
+            ''', unsafe_allow_html=True)
 
             if st.button("🔍 Ir a Buscar", use_container_width=True):
                 st.session_state.current_page = "buscar"
                 st.rerun()
         else:
-            st.markdown(f"**Total:** {len(st.session_state.filtered_leads)} leads")
+            # Stats header
+            total = len(st.session_state.filtered_leads)
+            qualified = len([l for l in st.session_state.filtered_leads if l.is_qualified])
 
-            # Mobile-friendly card view instead of table
+            st.markdown(f'''
+            <div style="display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div class="lead-card" style="flex: 1; min-width: 120px; text-align: center; padding: 16px;">
+                    <div style="font-size: 28px; font-weight: 700; color: var(--primary);">{total}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Total Leads</div>
+                </div>
+                <div class="lead-card" style="flex: 1; min-width: 120px; text-align: center; padding: 16px;">
+                    <div style="font-size: 28px; font-weight: 700; color: var(--success);">{qualified}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Calificados</div>
+                </div>
+                <div class="lead-card" style="flex: 1; min-width: 120px; text-align: center; padding: 16px;">
+                    <div style="font-size: 28px; font-weight: 700; color: var(--info);">{int(qualified/total*100) if total > 0 else 0}%</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Conversión</div>
+                </div>
+            </div>
+            ''', unsafe_allow_html=True)
+
+            # Render professional lead cards
             for i, lead in enumerate(st.session_state.filtered_leads[:20]):
-                with st.container():
-                    st.markdown(f"""
-                    <div class="lead-card">
-                        <strong>#{i+1}</strong> {lead.title[:40]}...<br>
-                        <small>📍 {lead.source.value} | 🏷️ {', '.join(lead.keywords_matched[:2])}</small>
-                    </div>
-                    """, unsafe_allow_html=True)
+                render_lead_card(lead, i)
 
             st.markdown("---")
 
@@ -888,6 +915,118 @@ def show_config():
 
     st.markdown("---")
     st.info("💡 Edita `.env` para cambiar la configuración")
+
+
+def render_lead_card(lead, index: int = 0):
+    """
+    Render a professional lead card with scores, keywords, and actions.
+    Uses st.markdown with unsafe_allow_html=True to properly render HTML.
+    """
+    # Calculate scores (use ai_score or defaults)
+    pain_score = int((lead.ai_score or 0.3) * 100) if hasattr(lead, 'ai_score') else 30
+    intent_score = int(len(lead.keywords_matched) * 10) if lead.keywords_matched else 0
+    fit_score = 65 if lead.is_qualified else 35
+
+    # Determine priority based on scores
+    total_score = pain_score + intent_score + fit_score
+    if total_score >= 150:
+        priority = ("🔥 Alta prioridad", "#FF6B6B", "hot")
+    elif total_score >= 100:
+        priority = ("⚡ Media prioridad", "#FFB347", "medium")
+    else:
+        priority = ("🧊 Baja prioridad", "#74B9FF", "low")
+
+    # Truncate title and content (escape HTML for security)
+    title_raw = lead.title[:60] + "..." if len(lead.title) > 60 else lead.title
+    content_raw = lead.content[:180] + "..." if len(lead.content) > 180 else lead.content
+    title_display = html.escape(title_raw)
+    content_preview = html.escape(content_raw)
+
+    # Build keywords HTML (escape for security)
+    keywords_html = ""
+    for kw in lead.keywords_matched[:4]:
+        kw_escaped = html.escape(kw)
+        keywords_html += f'''<span style="background: rgba(102, 126, 234, 0.1); color: var(--primary);
+            padding: 3px 10px; border-radius: 12px; font-size: 11px; margin-right: 6px;
+            border: 1px solid rgba(102, 126, 234, 0.2); font-weight: 500;">{kw_escaped}</span>'''
+
+    # Source badge color
+    source_colors = {
+        "reddit": ("#FF4500", "Reddit"),
+        "hackernews": ("#FF6600", "HN"),
+        "google": ("#4285F4", "Google"),
+        "producthunt": ("#DA552F", "PH"),
+    }
+    source_key = lead.source.value.lower().replace(" ", "")
+    source_color, source_label = source_colors.get(source_key, ("#6B7280", lead.source.value))
+
+    card_html = f'''
+    <div class="lead-card" style="animation-delay: {index * 0.05}s;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px;">
+            <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <span style="background: {source_color}; color: white; padding: 2px 8px;
+                        border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase;">{source_label}</span>
+                    <span style="color: var(--text-secondary); font-size: 12px;">#{index + 1}</span>
+                </div>
+                <h4 style="margin: 0; color: var(--text-primary); font-size: 15px; font-weight: 600; line-height: 1.4;">
+                    {title_display}
+                </h4>
+            </div>
+        </div>
+
+        <!-- Scores Row -->
+        <div style="display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;">
+            <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+                        border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 14px; border-radius: 10px;
+                        text-align: center; flex: 1; min-width: 70px;">
+                <div style="font-size: 18px; font-weight: 700; color: #EF4444;">{pain_score}</div>
+                <div style="font-size: 10px; color: #EF4444; text-transform: uppercase; font-weight: 600;">😣 Pain</div>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+                        border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px 14px; border-radius: 10px;
+                        text-align: center; flex: 1; min-width: 70px;">
+                <div style="font-size: 18px; font-weight: 700; color: #3B82F6;">{intent_score}</div>
+                <div style="font-size: 10px; color: #3B82F6; text-transform: uppercase; font-weight: 600;">🎯 Intent</div>
+            </div>
+            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+                        border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 14px; border-radius: 10px;
+                        text-align: center; flex: 1; min-width: 70px;">
+                <div style="font-size: 18px; font-weight: 700; color: #10B981;">{fit_score}</div>
+                <div style="font-size: 10px; color: #10B981; text-transform: uppercase; font-weight: 600;">✅ Fit</div>
+            </div>
+        </div>
+
+        <!-- Keywords -->
+        <div style="margin-bottom: 12px; min-height: 24px;">
+            {keywords_html if keywords_html else '<span style="color: var(--text-secondary); font-size: 12px;">Sin keywords</span>'}
+        </div>
+
+        <!-- Content Preview -->
+        <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); border-radius: 10px;
+                    padding: 12px; margin-bottom: 14px; border-left: 3px solid var(--primary);">
+            <p style="margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5;">
+                {content_preview}
+            </p>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="color: {priority[1]}; font-size: 13px; font-weight: 600;">{priority[0]}</span>
+            </div>
+            <a href="{lead.url}" target="_blank" rel="noopener noreferrer"
+               style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;
+                      padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px;
+                      font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;">
+                Ver Original ↗
+            </a>
+        </div>
+    </div>
+    '''
+
+    st.markdown(card_html, unsafe_allow_html=True)
 
 
 def render_mobile_bottom_nav():
