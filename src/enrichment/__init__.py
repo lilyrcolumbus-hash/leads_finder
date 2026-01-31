@@ -1,5 +1,5 @@
-"""Email enrichment modules."""
+"""Enrichment modules for lead data enhancement."""
 
-from .hunter import HunterClient
+from .apollo_enricher import ApolloEnricher, enrich_leads_with_apollo
 
-__all__ = ["HunterClient"]
+__all__ = ["ApolloEnricher", "enrich_leads_with_apollo"]
