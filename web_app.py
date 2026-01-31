@@ -2222,8 +2222,13 @@ st.markdown("""
     /* ===== TABLET (max-width: 1024px) ===== */
     @media screen and (max-width: 1024px) {
         .main .block-container {
-            padding: 1rem 1.5rem !important;
+            padding: 1rem 1rem !important;
             max-width: 100% !important;
+        }
+
+        /* Force 2 columns max on tablet */
+        div[style*="grid-template-columns"] {
+            grid-template-columns: repeat(2, 1fr) !important;
         }
     }
 
@@ -2237,110 +2242,125 @@ st.markdown("""
             visibility: hidden !important;
         }
 
-        /* MAIN CONTAINER - Stable layout */
+        /* MAIN CONTAINER - Full width, no overflow */
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+        }
+
         .main, [data-testid="stMain"] {
             width: 100% !important;
             max-width: 100vw !important;
             overflow-x: hidden !important;
+            padding: 0 !important;
         }
 
         .main .block-container {
-            padding: 12px !important;
+            padding: 10px 12px !important;
             max-width: 100% !important;
             width: 100% !important;
             overflow-x: hidden !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Remove grid pattern on mobile for performance */
+        .stApp::before {
+            display: none !important;
         }
 
         /* SIDEBAR - Clean mobile drawer */
         [data-testid="stSidebar"] {
-            width: 280px !important;
+            width: 85vw !important;
             min-width: 280px !important;
-            max-width: 280px !important;
+            max-width: 320px !important;
             background: linear-gradient(180deg, #1C1C2E 0%, #0A0A14 100%) !important;
             border-right: 1px solid rgba(0, 255, 255, 0.2) !important;
         }
 
         [data-testid="stSidebar"] > div {
             width: 100% !important;
-            padding: 16px 12px !important;
+            padding: 12px 10px !important;
         }
 
-        /* TYPOGRAPHY - Readable on mobile */
-        h1, .stMarkdown h1 {
+        /* TYPOGRAPHY - Mobile optimized */
+        h1, .stMarkdown h1, [data-testid="stMarkdownContainer"] h1 {
             font-size: 20px !important;
             line-height: 1.3 !important;
             word-wrap: break-word !important;
+            margin-bottom: 8px !important;
         }
 
-        h2, .stMarkdown h2 {
-            font-size: 18px !important;
+        h2, .stMarkdown h2, [data-testid="stMarkdownContainer"] h2 {
+            font-size: 17px !important;
+            margin-bottom: 6px !important;
         }
 
-        h3, .stMarkdown h3 {
-            font-size: 16px !important;
+        h3, .stMarkdown h3, [data-testid="stMarkdownContainer"] h3 {
+            font-size: 15px !important;
+            margin-bottom: 4px !important;
         }
 
-        p, span, label, div {
+        p, span, label, div, li {
             font-size: 14px !important;
             line-height: 1.5 !important;
         }
 
-        /* GRID LAYOUTS - Force single/double column */
-        div[style*="grid-template-columns: repeat(5"],
-        div[style*="grid-template-columns: repeat(4"],
-        div[style*="grid-template-columns: repeat(3"] {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 12px !important;
-        }
-
+        /* FORCE ALL GRIDS TO STACK - Critical for mobile */
+        div[style*="grid-template-columns"],
         div[style*="display: grid"] {
             display: flex !important;
             flex-direction: column !important;
-            gap: 12px !important;
+            gap: 10px !important;
+            width: 100% !important;
         }
 
-        /* METRIC CARDS - Full width, stable */
-        .holo-metric-card {
+        /* ALL COLUMNS STACK */
+        [data-testid="column"],
+        .stColumn,
+        div[data-testid="stHorizontalBlock"] > div {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .stHorizontalBlock,
+        [data-testid="stHorizontalBlock"],
+        div[data-testid="stHorizontalBlock"] {
+            flex-direction: column !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+
+        /* METRIC CARDS - Full width */
+        .holo-metric-card,
+        div[style*="background: rgba"][style*="border-radius"] {
             width: 100% !important;
             min-width: 0 !important;
             max-width: 100% !important;
-            padding: 16px !important;
-            margin: 0 !important;
+            padding: 14px !important;
+            margin: 0 0 10px 0 !important;
             box-sizing: border-box !important;
             transform: none !important;
             transition: none !important;
         }
 
-        .holo-metric-card:hover,
-        .holo-metric-card:active {
-            transform: none !important;
+        /* HOLOGRAPHIC HEADERS - Mobile optimized */
+        div[style*="padding: 32px"] {
+            padding: 16px !important;
         }
 
-        /* TOOLTIPS - Disable on mobile (cause issues) */
-        .holo-tooltip {
+        div[style*="font-size: 32px"],
+        div[style*="font-size: 28px"] {
+            font-size: 20px !important;
+        }
+
+        /* TOOLTIPS - Hide on mobile */
+        .holo-tooltip,
+        div[style*="position: absolute"][style*="opacity"] {
             display: none !important;
             visibility: hidden !important;
-            opacity: 0 !important;
-        }
-
-        /* COLUMNS - Stack vertically */
-        [data-testid="column"] {
-            width: 100% !important;
-            flex: none !important;
-            min-width: 0 !important;
-        }
-
-        .stHorizontalBlock,
-        [data-testid="stHorizontalBlock"] {
-            flex-direction: column !important;
-            gap: 12px !important;
-            width: 100% !important;
-        }
-
-        div[data-testid="stHorizontalBlock"] > div {
-            width: 100% !important;
-            flex: none !important;
         }
 
         /* BUTTONS - Full width, touch friendly */
@@ -2348,27 +2368,58 @@ st.markdown("""
             width: 100% !important;
         }
 
-        .stButton > button {
+        .stButton > button,
+        .stDownloadButton > button,
+        button[kind="primary"],
+        button[kind="secondary"] {
             width: 100% !important;
             min-height: 48px !important;
             font-size: 14px !important;
             padding: 12px 16px !important;
             border-radius: 10px !important;
             touch-action: manipulation !important;
+            -webkit-tap-highlight-color: transparent !important;
         }
 
-        /* INPUT FIELDS - Mobile optimized */
+        /* Link buttons */
+        .stLinkButton > a {
+            width: 100% !important;
+            min-height: 48px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* INPUT FIELDS - Mobile optimized, prevent zoom */
         .stTextInput > div > div > input,
         .stSelectbox > div > div,
+        .stSelectbox > div > div > div,
         .stMultiSelect > div > div,
         .stTextArea > div > div > textarea,
-        .stNumberInput > div > div > input {
+        .stNumberInput > div > div > input,
+        input, select, textarea {
             min-height: 48px !important;
             font-size: 16px !important;
             padding: 12px !important;
             border-radius: 10px !important;
             width: 100% !important;
             box-sizing: border-box !important;
+            -webkit-appearance: none !important;
+        }
+
+        /* Select box dropdown */
+        .stSelectbox > div,
+        .stMultiSelect > div {
+            width: 100% !important;
+        }
+
+        /* SLIDER - Touch friendly */
+        .stSlider > div {
+            padding: 10px 0 !important;
+        }
+
+        .stSlider [data-baseweb="slider"] {
+            height: 40px !important;
         }
 
         /* TABS - Horizontal scroll */
@@ -2380,6 +2431,7 @@ st.markdown("""
             scrollbar-width: none !important;
             flex-wrap: nowrap !important;
             gap: 4px !important;
+            padding-bottom: 8px !important;
         }
 
         .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
@@ -2391,9 +2443,22 @@ st.markdown("""
             padding: 10px 14px !important;
             font-size: 12px !important;
             white-space: nowrap !important;
+            min-height: 44px !important;
         }
 
-        /* EXPANDERS - Clean mobile style */
+        /* RADIO buttons horizontal - scroll */
+        .stRadio > div[role="radiogroup"] {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding-bottom: 8px !important;
+        }
+
+        .stRadio > div[role="radiogroup"]::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        /* EXPANDERS */
         .streamlit-expanderHeader {
             padding: 14px !important;
             font-size: 14px !important;
@@ -2403,8 +2468,9 @@ st.markdown("""
             width: 100% !important;
         }
 
-        /* DATA FRAMES/TABLES - Scroll horizontal */
-        .stDataFrame {
+        /* DATA FRAMES/TABLES */
+        .stDataFrame,
+        [data-testid="stDataFrame"] {
             width: 100% !important;
             overflow-x: auto !important;
             -webkit-overflow-scrolling: touch !important;
@@ -2414,7 +2480,7 @@ st.markdown("""
         .stCheckbox > label,
         .stRadio > div > label {
             min-height: 44px !important;
-            padding: 10px 0 !important;
+            padding: 10px 8px !important;
             display: flex !important;
             align-items: center !important;
         }
@@ -2427,58 +2493,120 @@ st.markdown("""
             box-sizing: border-box !important;
         }
 
-        /* CUSTOM CARDS - Ensure they fit */
+        /* ALL INLINE STYLE CARDS */
         div[style*="border-radius: 16px"],
-        div[style*="border-radius: 12px"] {
+        div[style*="border-radius: 12px"],
+        div[style*="border-radius: 20px"] {
             width: 100% !important;
             max-width: 100% !important;
             box-sizing: border-box !important;
             overflow: hidden !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
 
-        /* HEADER SECTIONS - Stack content */
+        /* FLEX CONTAINERS - Force column */
+        div[style*="display: flex"][style*="justify-content: space-between"],
         div[style*="display: flex"][style*="gap: 24px"],
-        div[style*="display: flex"][style*="gap: 16px"] {
+        div[style*="display: flex"][style*="gap: 16px"],
+        div[style*="display: flex"][style*="gap: 12px"] {
             flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 12px !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            width: 100% !important;
         }
 
-        /* BADGES/TAGS - Wrap properly */
-        div[style*="display: flex"][style*="flex-wrap: wrap"] {
-            gap: 8px !important;
+        /* Job Changes cards specific */
+        .job-change-card,
+        div[class*="job-change"] {
+            width: 100% !important;
+            padding: 14px !important;
         }
 
-        div[style*="display: flex"][style*="flex-wrap: wrap"] > span {
+        .job-change-card div[style*="grid-template-columns"] {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        /* Opportunity badges */
+        .opp-gold, .opp-silver, .opp-bronze,
+        .days-badge {
             font-size: 11px !important;
             padding: 4px 10px !important;
         }
 
-        /* METRICS DISPLAY */
-        [data-testid="stMetric"] {
+        /* STAT CARDS */
+        div[style*="text-align: center"][style*="border-radius"] {
             padding: 12px !important;
         }
 
-        [data-testid="stMetricValue"] {
+        div[style*="font-family: 'Orbitron'"][style*="font-size: 28px"] {
             font-size: 22px !important;
+        }
+
+        /* METRICS DISPLAY */
+        [data-testid="stMetric"] {
+            padding: 10px !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 20px !important;
         }
 
         [data-testid="stMetricLabel"] {
             font-size: 11px !important;
         }
 
-        /* IMAGES - Responsive */
+        /* IMAGES */
         img {
             max-width: 100% !important;
             height: auto !important;
         }
 
-        /* PREVENT OVERFLOW */
+        /* CODE BLOCKS */
         pre, code {
             white-space: pre-wrap !important;
             word-break: break-word !important;
             max-width: 100% !important;
             overflow-x: auto !important;
+            font-size: 12px !important;
+        }
+
+        /* DIVIDERS */
+        hr, .stDivider {
+            margin: 12px 0 !important;
+        }
+
+        /* LOGO in sidebar - smaller */
+        .logo-section {
+            padding: 16px !important;
+        }
+
+        .logo-title {
+            font-size: 16px !important;
+        }
+
+        .logo-icon {
+            width: 36px !important;
+            height: 36px !important;
+        }
+
+        /* User card smaller */
+        .user-card {
+            margin: 10px !important;
+            padding: 12px !important;
+        }
+
+        /* Nav label */
+        .nav-label {
+            padding: 16px 16px 8px 16px !important;
+            font-size: 9px !important;
+        }
+
+        /* Sidebar navigation items */
+        [data-testid="stSidebar"] .stRadio > div > label {
+            padding: 12px 14px !important;
+            font-size: 13px !important;
         }
     }
 
@@ -2493,11 +2621,15 @@ st.markdown("""
         }
 
         h2, .stMarkdown h2 {
-            font-size: 16px !important;
+            font-size: 15px !important;
         }
 
         h3, .stMarkdown h3 {
-            font-size: 14px !important;
+            font-size: 13px !important;
+        }
+
+        p, span, label, div {
+            font-size: 13px !important;
         }
 
         .stButton > button {
@@ -2512,32 +2644,58 @@ st.markdown("""
         }
 
         [data-testid="stSidebar"] {
-            width: 260px !important;
-            min-width: 260px !important;
-            max-width: 260px !important;
+            width: 100vw !important;
+            min-width: 100vw !important;
+            max-width: 100vw !important;
+        }
+
+        /* Even smaller fonts for stats */
+        div[style*="font-family: 'Orbitron'"][style*="font-size"] {
+            font-size: 18px !important;
+        }
+
+        /* Holographic headers */
+        div[style*="padding: 32px"],
+        div[style*="padding: 24px"] {
+            padding: 12px !important;
         }
     }
 
     /* ===== TOUCH DEVICES ===== */
     @media (hover: none) and (pointer: coarse) {
-        /* Disable all hover effects */
+        /* Disable all hover transforms */
         *:hover {
             transform: none !important;
         }
 
-        /* Remove animations that cause jank */
+        /* Remove animations */
         .holo-metric-card,
         .stButton > button,
-        [data-testid="stExpander"] {
+        [data-testid="stExpander"],
+        .job-change-card,
+        .warming-card {
             transition: none !important;
             transform: none !important;
         }
 
+        /* Disable glow animations */
+        @keyframes gold-pulse { }
+        @keyframes urgent-pulse { }
+        @keyframes scanline { }
+
         /* Larger touch targets */
         button, a, input, select, textarea,
-        [role="button"], [role="tab"], [role="checkbox"] {
+        [role="button"], [role="tab"], [role="checkbox"],
+        [role="radio"], [role="link"] {
             min-height: 44px !important;
             min-width: 44px !important;
+        }
+
+        /* No sticky hover states */
+        .stButton > button:hover,
+        .stButton > button:focus {
+            transform: none !important;
+            box-shadow: none !important;
         }
     }
 
@@ -2552,9 +2710,18 @@ st.markdown("""
             min-width: 220px !important;
         }
 
-        div[style*="display: grid"] {
+        /* Allow 2 columns in landscape */
+        div[style*="display: grid"],
+        [data-testid="stHorizontalBlock"] {
             display: grid !important;
             grid-template-columns: repeat(2, 1fr) !important;
+            flex-direction: row !important;
+        }
+
+        [data-testid="column"] {
+            width: auto !important;
+            min-width: 0 !important;
+            max-width: none !important;
         }
     }
 
@@ -2568,6 +2735,7 @@ st.markdown("""
 
         [data-testid="stSidebar"] {
             padding-top: env(safe-area-inset-top) !important;
+            padding-left: env(safe-area-inset-left) !important;
         }
     }
 
@@ -2575,6 +2743,11 @@ st.markdown("""
     @media screen and (max-width: 768px) {
         input, select, textarea {
             font-size: 16px !important;
+        }
+
+        /* Prevent double-tap zoom */
+        * {
+            touch-action: manipulation !important;
         }
     }
 
