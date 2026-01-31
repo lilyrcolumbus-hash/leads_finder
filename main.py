@@ -15,8 +15,10 @@ Usage:
 
 import argparse
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from rich.console import Console
 from rich.panel import Panel
@@ -70,12 +72,23 @@ def display_main_menu() -> str:
 
 # ==================== 1. SCRAPING ====================
 
+def _run_single_scraper(name: str, ScraperClass) -> Tuple[str, LeadBatch, Optional[str]]:
+    """Run a single scraper and return results. Used for concurrent execution."""
+    try:
+        with ScraperClass() as scraper:
+            batch = scraper.scrape()
+            return (name, batch, None)
+    except Exception as e:
+        empty_batch = LeadBatch(source=ScraperClass.source)
+        return (name, empty_batch, str(e))
+
+
 def run_scraping() -> List[Lead]:
-    """Run all scrapers and collect leads."""
+    """Run all scrapers concurrently and collect leads."""
     all_leads: List[Lead] = []
     errors: List[str] = []
 
-    console.print("\n[bold green]Iniciando busqueda de leads...[/bold green]\n")
+    console.print("\n[bold green]Iniciando busqueda de leads (modo paralelo)...[/bold green]\n")
 
     scrapers = [
         ("Reddit", RedditScraper),
@@ -88,23 +101,40 @@ def run_scraping() -> List[Lead]:
     source_names = [name for name, _ in scrapers]
     run_id = db.start_scrape_run(source_names)
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console
-    ) as progress:
-        for name, ScraperClass in scrapers:
-            task = progress.add_task(f"Buscando en {name}...", total=None)
-            try:
-                with ScraperClass() as scraper:
-                    batch = scraper.scrape()
-                    all_leads.extend(batch.leads)
-                    errors.extend(batch.errors)
-                    progress.update(task, description=f"[green]{name}: {len(batch.leads)} leads encontrados")
-            except Exception as e:
-                progress.update(task, description=f"[red]{name}: Error - {e}")
-                errors.append(f"{name}: {str(e)}")
-            progress.remove_task(task)
+    # Track timing
+    start_time = time.time()
+
+    # Show initial status
+    console.print("[cyan]Ejecutando 4 scrapers en paralelo...[/cyan]")
+    for name, _ in scrapers:
+        console.print(f"  [dim]- {name}[/dim]")
+    console.print()
+
+    # Run all scrapers concurrently
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        # Submit all scraping tasks
+        futures = {
+            executor.submit(_run_single_scraper, name, ScraperClass): name
+            for name, ScraperClass in scrapers
+        }
+
+        # Collect results as they complete
+        completed = 0
+        for future in as_completed(futures):
+            name, batch, error = future.result()
+            completed += 1
+
+            if error:
+                console.print(f"  [red][{completed}/4] {name}: Error - {error}[/red]")
+                errors.append(f"{name}: {error}")
+            else:
+                all_leads.extend(batch.leads)
+                errors.extend(batch.errors)
+                console.print(f"  [green][{completed}/4] {name}: {len(batch.leads)} leads encontrados[/green]")
+
+    # Calculate time taken
+    elapsed = time.time() - start_time
+    console.print(f"\n[cyan]Tiempo total: {elapsed:.1f} segundos[/cyan]")
 
     # Save leads to local database
     if all_leads:
