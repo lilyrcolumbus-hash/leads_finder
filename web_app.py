@@ -190,6 +190,39 @@ st.markdown("""
         --radius-lg: 16px;
         --radius-xl: 20px;
 
+        /* ========== RESPONSIVE FONT SIZES ========== */
+        /* Base font sizes - Desktop */
+        --font-xs: 11px;
+        --font-sm: 13px;
+        --font-base: 15px;
+        --font-md: 16px;
+        --font-lg: 18px;
+        --font-xl: 22px;
+        --font-2xl: 28px;
+        --font-3xl: 32px;
+        --font-4xl: 40px;
+
+        /* Heading sizes */
+        --h1-size: var(--font-3xl);
+        --h2-size: var(--font-2xl);
+        --h3-size: var(--font-xl);
+        --h4-size: var(--font-lg);
+        --h5-size: var(--font-md);
+        --h6-size: var(--font-base);
+
+        /* Component sizes */
+        --metric-value-size: var(--font-2xl);
+        --metric-label-size: var(--font-sm);
+        --button-text-size: var(--font-base);
+        --input-text-size: var(--font-base);
+        --card-title-size: var(--font-lg);
+        --card-text-size: var(--font-base);
+
+        /* Spacing variables */
+        --grid-gap: 20px;
+        --card-padding: 24px;
+        --section-margin: 32px;
+
         /* Shadows & Glows */
         --glow-cyan: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1);
         --glow-teal: 0 0 20px rgba(0, 139, 139, 0.3), 0 0 40px rgba(0, 139, 139, 0.1);
@@ -2198,6 +2231,188 @@ st.markdown("""
     }
 
     /* ========================================================================
+       RESPONSIVE GRID SYSTEM - Auto-fit CSS Grid Classes
+       Use these classes for automatic responsive column adjustment
+       ======================================================================== */
+
+    /* Base responsive grid with auto-fit */
+    .responsive-grid {
+        display: grid !important;
+        gap: var(--grid-gap) !important;
+        width: 100% !important;
+    }
+
+    /* Auto-fit grids - columns adjust automatically based on content */
+    .grid-auto-2 {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-auto-3 {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-auto-4 {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-auto-5 {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-auto-6 {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    /* Fixed column grids with responsive fallback */
+    .grid-cols-2 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-cols-3 {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-cols-4 {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-cols-5 {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    .grid-cols-6 {
+        display: grid !important;
+        grid-template-columns: repeat(6, 1fr) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    /* Metric cards grid - optimized for KPI displays */
+    .metrics-responsive {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    /* Card grid - for lead cards, deal cards, etc */
+    .cards-responsive {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    /* Button grid - for action buttons */
+    .buttons-responsive {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    /* Form layout grid */
+    .form-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    /* Stats/KPI inline grid */
+    .stats-inline {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+        gap: 12px !important;
+        text-align: center !important;
+    }
+
+    /* Pipeline stages grid */
+    .pipeline-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    /* Calendar week grid - special case for 7 columns */
+    .calendar-week-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 4px !important;
+    }
+
+    /* Toolbar grid - auto-fit for action toolbars */
+    .toolbar-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(80px, auto)) !important;
+        gap: 8px !important;
+        align-items: center !important;
+    }
+
+    /* Search layout grid */
+    .search-grid {
+        display: grid !important;
+        grid-template-columns: 1fr auto auto !important;
+        gap: 12px !important;
+        align-items: end !important;
+    }
+
+    /* Detail view - sidebar layout */
+    .detail-layout {
+        display: grid !important;
+        grid-template-columns: 1fr 300px !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    /* Flex utilities for inline elements */
+    .flex-responsive {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    .flex-between {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    .flex-center {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    /* Streamlit column overrides for responsive behavior */
+    [data-testid="stHorizontalBlock"].responsive-cols {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: var(--grid-gap) !important;
+    }
+
+    [data-testid="stHorizontalBlock"].responsive-cols > div {
+        width: 100% !important;
+        flex: none !important;
+    }
+
+    /* ========================================================================
        MOBILE RESPONSIVE DESIGN - Premium Mobile Experience
        Complete rewrite for stability and visual perfection
        ======================================================================== */
@@ -2221,19 +2436,93 @@ st.markdown("""
 
     /* ===== TABLET (max-width: 1024px) ===== */
     @media screen and (max-width: 1024px) {
+        /* Update CSS variables for tablet */
+        :root {
+            --font-3xl: 28px;
+            --font-2xl: 24px;
+            --font-xl: 20px;
+            --font-lg: 17px;
+            --grid-gap: 16px;
+            --card-padding: 20px;
+            --section-margin: 24px;
+        }
+
         .main .block-container {
             padding: 1rem 1rem !important;
             max-width: 100% !important;
         }
 
-        /* Force 2 columns max on tablet */
-        div[style*="grid-template-columns"] {
+        /* Force responsive grids to 2 columns max on tablet */
+        .grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6 {
             grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        /* Auto-fit grids adapt naturally - just adjust min-width */
+        .grid-auto-6, .grid-auto-5, .grid-auto-4 {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+        }
+
+        /* Pipeline and calendar grids - overflow scroll */
+        .pipeline-grid {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+            overflow-x: auto !important;
+        }
+
+        .calendar-week-grid {
+            grid-template-columns: repeat(7, minmax(80px, 1fr)) !important;
+            overflow-x: auto !important;
+        }
+
+        /* Detail layout becomes single column */
+        .detail-layout {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* Search grid stacks */
+        .search-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* Streamlit columns - force 2 max */
+        [data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap !important;
+        }
+
+        [data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            min-width: 48% !important;
+            flex: 1 1 48% !important;
+        }
+
+        /* Force 6-column st.columns to 3 columns */
+        [data-testid="stHorizontalBlock"]:has(> div:nth-child(6)) > div {
+            min-width: 30% !important;
+            flex: 1 1 30% !important;
         }
     }
 
     /* ===== MOBILE (max-width: 768px) ===== */
     @media screen and (max-width: 768px) {
+        /* Update CSS variables for mobile */
+        :root {
+            --font-xs: 10px;
+            --font-sm: 12px;
+            --font-base: 14px;
+            --font-md: 15px;
+            --font-lg: 16px;
+            --font-xl: 18px;
+            --font-2xl: 20px;
+            --font-3xl: 22px;
+            --font-4xl: 26px;
+            --h1-size: 20px;
+            --h2-size: 17px;
+            --h3-size: 15px;
+            --metric-value-size: 20px;
+            --metric-label-size: 11px;
+            --grid-gap: 10px;
+            --card-padding: 14px;
+            --section-margin: 16px;
+        }
+
         /* Hide unnecessary Streamlit elements */
         #MainMenu, footer, header, .stDeployButton,
         [data-testid="collapsedControl"],
@@ -2283,30 +2572,75 @@ st.markdown("""
             padding: 12px 10px !important;
         }
 
-        /* TYPOGRAPHY - Mobile optimized */
+        /* TYPOGRAPHY - Mobile optimized using CSS variables */
         h1, .stMarkdown h1, [data-testid="stMarkdownContainer"] h1 {
-            font-size: 20px !important;
+            font-size: var(--h1-size) !important;
             line-height: 1.3 !important;
             word-wrap: break-word !important;
             margin-bottom: 8px !important;
         }
 
         h2, .stMarkdown h2, [data-testid="stMarkdownContainer"] h2 {
-            font-size: 17px !important;
+            font-size: var(--h2-size) !important;
             margin-bottom: 6px !important;
         }
 
         h3, .stMarkdown h3, [data-testid="stMarkdownContainer"] h3 {
-            font-size: 15px !important;
+            font-size: var(--h3-size) !important;
             margin-bottom: 4px !important;
         }
 
         p, span, label, div, li {
-            font-size: 14px !important;
+            font-size: var(--font-base) !important;
             line-height: 1.5 !important;
         }
 
-        /* FORCE ALL GRIDS TO STACK - Critical for mobile */
+        /* ALL RESPONSIVE GRIDS - Stack on mobile */
+        .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6,
+        .grid-auto-2, .grid-auto-3, .grid-auto-4, .grid-auto-5, .grid-auto-6,
+        .metrics-responsive, .cards-responsive, .form-grid, .stats-inline,
+        .detail-layout, .search-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* Button grid - keep 2 columns for compact buttons */
+        .buttons-responsive {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        /* Toolbar - horizontal scroll */
+        .toolbar-grid {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        /* Pipeline grid - horizontal scroll */
+        .pipeline-grid {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            gap: 8px !important;
+            padding-bottom: 8px !important;
+        }
+
+        .pipeline-grid > * {
+            flex: 0 0 auto !important;
+            min-width: 120px !important;
+        }
+
+        /* Calendar grid - horizontal scroll */
+        .calendar-week-grid {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        .calendar-week-grid > * {
+            min-width: 40px !important;
+        }
+
+        /* FORCE ALL INLINE GRIDS TO STACK - Critical for mobile */
         div[style*="grid-template-columns"],
         div[style*="display: grid"] {
             display: flex !important;
@@ -2612,35 +2946,56 @@ st.markdown("""
 
     /* ===== SMALL MOBILE (max-width: 480px) ===== */
     @media screen and (max-width: 480px) {
+        /* Update CSS variables for small mobile */
+        :root {
+            --font-xs: 9px;
+            --font-sm: 11px;
+            --font-base: 13px;
+            --font-md: 14px;
+            --font-lg: 15px;
+            --font-xl: 16px;
+            --font-2xl: 18px;
+            --font-3xl: 20px;
+            --font-4xl: 22px;
+            --h1-size: 18px;
+            --h2-size: 15px;
+            --h3-size: 13px;
+            --metric-value-size: 18px;
+            --metric-label-size: 10px;
+            --grid-gap: 8px;
+            --card-padding: 12px;
+            --section-margin: 12px;
+        }
+
         .main .block-container {
             padding: 8px !important;
         }
 
         h1, .stMarkdown h1 {
-            font-size: 18px !important;
+            font-size: var(--h1-size) !important;
         }
 
         h2, .stMarkdown h2 {
-            font-size: 15px !important;
+            font-size: var(--h2-size) !important;
         }
 
         h3, .stMarkdown h3 {
-            font-size: 13px !important;
+            font-size: var(--h3-size) !important;
         }
 
         p, span, label, div {
-            font-size: 13px !important;
+            font-size: var(--font-base) !important;
         }
 
         .stButton > button {
             min-height: 44px !important;
-            font-size: 13px !important;
+            font-size: var(--font-base) !important;
             padding: 10px 12px !important;
         }
 
         .stTabs [data-baseweb="tab"] {
             padding: 8px 10px !important;
-            font-size: 11px !important;
+            font-size: var(--font-sm) !important;
         }
 
         [data-testid="stSidebar"] {
@@ -2649,15 +3004,35 @@ st.markdown("""
             max-width: 100vw !important;
         }
 
-        /* Even smaller fonts for stats */
-        div[style*="font-family: 'Orbitron'"][style*="font-size"] {
-            font-size: 18px !important;
+        /* Metrics use CSS variables */
+        [data-testid="stMetricValue"] {
+            font-size: var(--metric-value-size) !important;
         }
 
-        /* Holographic headers */
+        [data-testid="stMetricLabel"] {
+            font-size: var(--metric-label-size) !important;
+        }
+
+        /* Even smaller fonts for stats */
+        div[style*="font-family: 'Orbitron'"][style*="font-size"] {
+            font-size: var(--font-2xl) !important;
+        }
+
+        /* Holographic headers - use variable padding */
         div[style*="padding: 32px"],
         div[style*="padding: 24px"] {
-            padding: 12px !important;
+            padding: var(--card-padding) !important;
+        }
+
+        /* Button grid - stack on very small screens */
+        .buttons-responsive {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* Force all grids to single column */
+        .flex-responsive, .flex-between, .flex-center {
+            flex-direction: column !important;
+            align-items: stretch !important;
         }
     }
 
@@ -2701,6 +3076,12 @@ st.markdown("""
 
     /* ===== LANDSCAPE MOBILE ===== */
     @media screen and (max-width: 900px) and (orientation: landscape) {
+        /* Update CSS variables for landscape */
+        :root {
+            --grid-gap: 12px;
+            --card-padding: 16px;
+        }
+
         .main .block-container {
             padding: 8px 16px !important;
         }
@@ -2708,6 +3089,22 @@ st.markdown("""
         [data-testid="stSidebar"] {
             width: 220px !important;
             min-width: 220px !important;
+        }
+
+        /* Allow 2 columns in landscape for responsive grids */
+        .grid-cols-2, .grid-cols-3, .grid-cols-4, .grid-cols-5, .grid-cols-6,
+        .grid-auto-2, .grid-auto-3, .grid-auto-4, .grid-auto-5, .grid-auto-6 {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        /* Metrics can be 3 columns in landscape */
+        .metrics-responsive, .stats-inline {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+        }
+
+        /* Flex layouts go horizontal */
+        .flex-responsive, .flex-between, .flex-center {
+            flex-direction: row !important;
         }
 
         /* Allow 2 columns in landscape */
@@ -2793,6 +3190,166 @@ st.markdown("""
             color: #000 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+        }
+    }
+
+    /* ========================================================================
+       SPECIFIC FIXES FOR PROBLEMATIC ELEMENTS
+       Target common Streamlit layout issues on responsive viewports
+       ======================================================================== */
+
+    /* Fix for st.columns() that don't stack properly */
+    @media screen and (max-width: 768px) {
+        /* KPI Metric columns - common 3-6 column layouts */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) > div {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+        }
+
+        /* Button rows - keep 2 columns for action buttons */
+        [data-testid="stHorizontalBlock"]:has(.stButton) {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+        }
+
+        /* Single button rows - full width */
+        [data-testid="stHorizontalBlock"]:has(.stButton:only-child) {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* Form input rows */
+        [data-testid="stHorizontalBlock"]:has(.stTextInput),
+        [data-testid="stHorizontalBlock"]:has(.stSelectbox),
+        [data-testid="stHorizontalBlock"]:has(.stNumberInput) {
+            flex-direction: column !important;
+        }
+
+        /* Search/Filter layouts */
+        [data-testid="stHorizontalBlock"]:has(.stTextInput):has(.stButton) {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+
+        /* Holographic metric cards in columns */
+        [data-testid="stHorizontalBlock"] .holo-metric-card {
+            width: 100% !important;
+            margin-bottom: 10px !important;
+        }
+
+        /* CRM Pipeline stages - horizontal scroll */
+        [data-testid="stHorizontalBlock"]:has(div[style*="pipeline"]),
+        [data-testid="stHorizontalBlock"]:has(div[style*="border-left: 3px"]) {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding-bottom: 10px !important;
+        }
+
+        /* Job Change cards grid */
+        [data-testid="stHorizontalBlock"]:has(.job-change-card) {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        /* Lead warming cards */
+        [data-testid="stHorizontalBlock"]:has(.warming-card) {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        /* Calendar day columns - keep horizontal with scroll */
+        [data-testid="stHorizontalBlock"]:has(div[style*="calendar"]),
+        [data-testid="stHorizontalBlock"]:has(div[style*="day"]) {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+        }
+
+        /* Charts and graphs - full width */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stVegaLiteChart"]),
+        [data-testid="stHorizontalBlock"]:has([data-testid="stPlotlyChart"]) {
+            flex-direction: column !important;
+        }
+
+        [data-testid="stVegaLiteChart"],
+        [data-testid="stPlotlyChart"] {
+            width: 100% !important;
+            max-width: 100vw !important;
+        }
+
+        /* Tab content panels */
+        .stTabs [data-baseweb="tab-panel"] {
+            padding: 10px 0 !important;
+        }
+
+        /* Expander content */
+        [data-testid="stExpander"] [data-testid="stVerticalBlock"] {
+            padding: 8px !important;
+        }
+
+        /* Data editor/table containers */
+        [data-testid="stDataFrame"],
+        [data-testid="data-grid"] {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+        }
+
+        /* Sidebar radio navigation - ensure proper sizing */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+        }
+
+        /* Progress bars */
+        .stProgress {
+            width: 100% !important;
+        }
+
+        /* Spinner/loading states */
+        .stSpinner {
+            width: 100% !important;
+            text-align: center !important;
+        }
+    }
+
+    /* Tablet-specific fixes */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        /* Allow 2 metrics per row on tablet */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        /* 3-column button layouts */
+        [data-testid="stHorizontalBlock"]:has(.stButton) {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+
+        /* Charts side by side */
+        [data-testid="stHorizontalBlock"]:has([data-testid="stVegaLiteChart"]) {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    /* Large desktop - restore full layouts */
+    @media screen and (min-width: 1200px) {
+        /* Restore original column behavior */
+        [data-testid="stHorizontalBlock"] {
+            flex-wrap: nowrap !important;
+        }
+
+        /* Full width charts on large screens */
+        [data-testid="stVegaLiteChart"],
+        [data-testid="stPlotlyChart"] {
+            min-width: 400px !important;
         }
     }
 </style>
