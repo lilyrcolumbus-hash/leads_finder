@@ -24,6 +24,7 @@ class Lead(BaseModel):
     # Contact info (may be partial)
     username: Optional[str] = Field(default=None, description="Username on the platform")
     email: Optional[str] = Field(default=None, description="Email if available")
+    phone: Optional[str] = Field(default=None, description="Phone number if available")
     name: Optional[str] = Field(default=None, description="Real name if available")
     company: Optional[str] = Field(default=None, description="Company name if mentioned")
 

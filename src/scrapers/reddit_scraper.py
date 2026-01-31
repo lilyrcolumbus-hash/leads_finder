@@ -199,6 +199,7 @@ class RedditScraper(BaseScraper):
                 keywords_matched=keywords,
                 subreddit=subreddit,
                 email=self.extract_email(full_text),
+                phone=self.extract_phone(full_text),
                 company=self.extract_company(full_text)
             )
 

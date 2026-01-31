@@ -1,5 +1,6 @@
 """SQLite database for persisting leads locally."""
 
+import csv
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -38,6 +39,7 @@ class LeadDatabase:
                     source TEXT NOT NULL,
                     username TEXT,
                     email TEXT,
+                    phone TEXT,
                     name TEXT,
                     company TEXT,
                     title TEXT NOT NULL,
@@ -77,6 +79,14 @@ class LeadDatabase:
                 CREATE INDEX IF NOT EXISTS idx_leads_sent_crm ON leads(sent_to_crm);
                 CREATE INDEX IF NOT EXISTS idx_leads_found_at ON leads(found_at);
             """)
+
+            # Migration: Add phone column if it doesn't exist
+            try:
+                conn.execute("ALTER TABLE leads ADD COLUMN phone TEXT")
+                logger.info("Added phone column to leads table")
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+
             logger.info(f"Database initialized at {self.db_path}")
 
     @contextmanager
@@ -120,16 +130,17 @@ class LeadDatabase:
             now = datetime.utcnow().isoformat()
             conn.execute("""
                 INSERT INTO leads (
-                    id, source, username, email, name, company,
+                    id, source, username, email, phone, name, company,
                     title, content, url, subreddit,
                     ai_score, ai_reasoning, is_qualified,
                     sent_to_crm, hubspot_id, found_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 lead.id,
                 lead.source.value,
                 lead.username,
                 lead.email,
+                lead.phone,
                 lead.name,
                 lead.company,
                 lead.title,
@@ -192,6 +203,7 @@ class LeadDatabase:
             source=LeadSource(row["source"]),
             username=row["username"],
             email=row["email"],
+            phone=row["phone"] if "phone" in row.keys() else None,
             name=row["name"],
             company=row["company"],
             title=row["title"],
@@ -446,3 +458,64 @@ class LeadDatabase:
             ).fetchall()
 
             return [dict(row) for row in rows]
+
+    # ==================== EXPORT OPERATIONS ====================
+
+    def export_to_csv(self, filepath: Optional[Path] = None, qualified_only: bool = False) -> Path:
+        """Export leads to CSV file.
+
+        Args:
+            filepath: Output file path. Defaults to data/leads_export_TIMESTAMP.csv
+            qualified_only: If True, only export qualified leads
+
+        Returns:
+            Path to the exported CSV file
+        """
+        if filepath is None:
+            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            filepath = self.db_path.parent / f"leads_export_{timestamp}.csv"
+
+        with self._get_connection() as conn:
+            # Get all leads with keywords
+            query = "SELECT * FROM leads"
+            if qualified_only:
+                query += " WHERE is_qualified = 1"
+            query += " ORDER BY found_at DESC"
+
+            rows = conn.execute(query).fetchall()
+
+            # Get keywords for each lead
+            leads_data = []
+            for row in rows:
+                keywords = conn.execute(
+                    "SELECT keyword FROM lead_keywords WHERE lead_id = ?",
+                    (row["id"],)
+                ).fetchall()
+
+                lead_dict = dict(row)
+                lead_dict["keywords"] = ", ".join(k["keyword"] for k in keywords)
+                leads_data.append(lead_dict)
+
+        # Write to CSV
+        if leads_data:
+            fieldnames = [
+                "id", "source", "title", "url", "email", "phone", "company",
+                "username", "name", "keywords", "ai_score", "is_qualified",
+                "sent_to_crm", "hubspot_id", "found_at", "subreddit"
+            ]
+
+            with open(filepath, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+                writer.writeheader()
+                writer.writerows(leads_data)
+
+            logger.info(f"Exported {len(leads_data)} leads to {filepath}")
+        else:
+            # Create empty file with headers
+            with open(filepath, "w", newline="", encoding="utf-8") as f:
+                writer = csv.writer(f)
+                writer.writerow(["id", "source", "title", "url", "email", "phone",
+                                "company", "username", "name", "keywords"])
+            logger.info(f"No leads to export, created empty CSV at {filepath}")
+
+        return filepath

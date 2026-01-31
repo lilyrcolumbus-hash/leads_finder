@@ -266,9 +266,10 @@ def menu_view_local_leads():
     console.print("  [4] Por fuente")
     console.print("  [5] Estadisticas locales")
     console.print("  [6] Enviar pendientes a HubSpot")
+    console.print("  [7] Exportar a CSV")
     console.print("  [0] Volver")
 
-    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6"], default="1")
+    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7"], default="1")
 
     if choice == "0":
         return
@@ -344,6 +345,19 @@ Leads encontrados hoy: [green]{stats['leads_today']}[/green]
         for lead in leads:
             if lead.sent_to_crm:
                 db.mark_as_sent(lead.id, lead.hubspot_id or "")
+
+    elif choice == "7":
+        # Export to CSV
+        console.print("\n[bold]Exportar leads a CSV:[/bold]")
+        console.print("  [1] Todos los leads")
+        console.print("  [2] Solo calificados")
+
+        export_choice = Prompt.ask("Opcion", choices=["1", "2"], default="1")
+        qualified_only = export_choice == "2"
+
+        filepath = db.export_to_csv(qualified_only=qualified_only)
+        console.print(f"\n[green]Exportado exitosamente a:[/green]")
+        console.print(f"  [cyan]{filepath}[/cyan]")
 
 
 # ==================== 3. VIEW HUBSPOT LEADS ====================

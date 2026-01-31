@@ -261,6 +261,7 @@ class ProductHuntScraper(BaseScraper):
                 url=link,
                 keywords_matched=keywords,
                 email=self.extract_email(full_text),
+                phone=self.extract_phone(full_text),
                 company=self.extract_company(full_text)
             )
 

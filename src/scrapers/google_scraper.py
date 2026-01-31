@@ -166,6 +166,7 @@ class GoogleScraper(BaseScraper):
                 url=link,
                 keywords_matched=keywords,
                 email=self.extract_email(full_text),
+                phone=self.extract_phone(full_text),
                 company=self.extract_company(full_text) or metatags.get("og:site_name")
             )
 

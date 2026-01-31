@@ -161,9 +161,54 @@ class HubSpotCRM:
             self.logger.error(f"Failed to create contact: {e}")
             return None
 
+    def contact_exists(self, email: str = None, url: str = None) -> Optional[str]:
+        """
+        Check if a contact already exists in HubSpot.
+
+        Args:
+            email: Email to search for
+            url: Website URL to search for
+
+        Returns:
+            Contact ID if exists, None otherwise
+        """
+        if not self.is_configured():
+            return None
+
+        # Try email search first
+        if email and not email.endswith("@leadgen.placeholder"):
+            contact_id = self._get_existing_contact_id(email)
+            if contact_id:
+                return contact_id
+
+        # Try website URL search
+        if url:
+            search_url = f"{self.BASE_URL}/crm/v3/objects/contacts/search"
+            body = {
+                "filterGroups": [{
+                    "filters": [{
+                        "propertyName": "website",
+                        "operator": "EQ",
+                        "value": url
+                    }]
+                }],
+                "limit": 1
+            }
+            try:
+                response = self.client.post(search_url, json=body)
+                if response.status_code == 200:
+                    data = response.json()
+                    results = data.get("results", [])
+                    if results:
+                        return results[0]["id"]
+            except Exception:
+                pass
+
+        return None
+
     def send_leads_to_crm(self, leads: List[Lead]) -> Dict[str, int]:
         """
-        Send multiple leads to HubSpot.
+        Send multiple leads to HubSpot with deduplication.
 
         Args:
             leads: List of leads to send
@@ -173,10 +218,21 @@ class HubSpotCRM:
         """
         results = {"created": 0, "existing": 0, "failed": 0}
 
-        self.logger.info(f"Sending {len(leads)} leads to HubSpot")
+        self.logger.info(f"Sending {len(leads)} leads to HubSpot (with deduplication)")
 
         for lead in leads:
             try:
+                # Check for existing contact first (deduplication)
+                existing_id = self.contact_exists(email=lead.email, url=lead.url)
+
+                if existing_id:
+                    self.logger.info(f"Lead {lead.id[:8]} already exists in HubSpot (ID: {existing_id})")
+                    lead.hubspot_id = existing_id
+                    lead.sent_to_crm = True
+                    results["existing"] += 1
+                    continue
+
+                # Create new contact
                 result = self.create_contact(lead)
                 if result:
                     lead.hubspot_id = result
@@ -184,6 +240,7 @@ class HubSpotCRM:
                     results["created"] += 1
                 else:
                     results["failed"] += 1
+
             except Exception as e:
                 self.logger.error(f"Error sending lead {lead.id}: {e}")
                 results["failed"] += 1

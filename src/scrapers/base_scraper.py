@@ -87,6 +87,28 @@ class BaseScraper(ABC):
                 return match.group(1).strip()
         return None
 
+    def extract_phone(self, text: str) -> Optional[str]:
+        """Extract phone number from text if present."""
+        # Multiple phone patterns for different formats
+        patterns = [
+            # US formats: (123) 456-7890, 123-456-7890, 123.456.7890
+            r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',
+            # International: +1 123 456 7890, +44 20 7123 4567
+            r'\+\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}',
+            # Simple: 1234567890 (10 digits)
+            r'\b\d{10}\b',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text)
+            if match:
+                phone = match.group(0)
+                # Clean up the phone number
+                digits = re.sub(r'\D', '', phone)
+                # Validate: should have 10-15 digits
+                if 10 <= len(digits) <= 15:
+                    return phone
+        return None
+
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10)
