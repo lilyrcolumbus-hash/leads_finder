@@ -29,6 +29,15 @@ class LeadUrgency(str, Enum):
     LOW = "low"              # General interest
 
 
+class LeadType(str, Enum):
+    """Type of lead based on qualification."""
+    AI_QUALIFIED = "ai_qualified"      # AI detected pain signals - high priority
+    PROSPECT = "prospect"              # No clear pain signals but contactable
+    HOT = "hot"                        # Very high score (80+) - immediate action
+    WARM = "warm"                      # Medium score - follow up
+    COLD = "cold"                      # Low score - nurture campaign
+
+
 class Lead(BaseModel):
     """Represents a potential lead."""
 
@@ -84,6 +93,7 @@ class Lead(BaseModel):
     ai_score: Optional[float] = Field(default=None, description="AI relevance score 0-1")
     ai_reasoning: Optional[str] = Field(default=None, description="AI explanation")
     is_qualified: bool = Field(default=False, description="Whether AI qualified this lead")
+    lead_type: Optional[str] = Field(default="prospect", description="Lead type: ai_qualified, prospect, hot, warm, cold")
 
     # Tracking
     found_at: datetime = Field(default_factory=datetime.utcnow)

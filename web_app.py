@@ -4716,171 +4716,323 @@ def show_search():
                     else:
                         st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True)
 
-    # Preview - Modern Lead Cards
-    if st.session_state.scraping_done and st.session_state.filtered_leads:
-        # Results section header
+    # ========== DUAL-VIEW LEAD RESULTS ==========
+    # Separate AI Qualified leads from Prospect leads
+    if st.session_state.scraping_done and st.session_state.raw_leads:
+        raw_count = len(st.session_state.raw_leads)
+        filtered_leads = st.session_state.filtered_leads or []
+        filtered_count = len(filtered_leads)
+
+        # Separate leads into categories
+        ai_qualified_leads = []
+        prospect_leads = []
+
+        for lead in st.session_state.raw_leads:
+            is_qualified = lead in filtered_leads
+            # Set lead_type attribute
+            if is_qualified:
+                lead.lead_type = "ai_qualified"
+                if hasattr(lead, 'total_score') and lead.total_score >= 80:
+                    lead.lead_type = "hot"
+                ai_qualified_leads.append(lead)
+            else:
+                lead.lead_type = "prospect"
+                prospect_leads.append(lead)
+
+        # Summary Stats Header
+        hot_count = len([l for l in ai_qualified_leads if getattr(l, 'total_score', 0) >= 80])
+
         st.markdown(f"""
-        <div class="results-section-header">
-            <div class="results-section-title">
-                <h2>Qualified Leads</h2>
-                <span class="results-count-badge">{len(st.session_state.filtered_leads)} leads found</span>
+        <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 139, 139, 0.15) 100%);
+                    border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2 style="margin: 0; color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 24px;">
+                        📊 Search Results
+                    </h2>
+                    <p style="margin: 8px 0 0 0; color: #C0C0C0;">
+                        Found <strong style="color: #00FFFF;">{raw_count}</strong> total leads from your search
+                    </p>
+                </div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <div style="text-align: center; background: rgba(0, 255, 136, 0.15); padding: 12px 20px;
+                                border-radius: 12px; border: 1px solid rgba(0, 255, 136, 0.3);">
+                        <div style="font-size: 28px; font-weight: 700; color: #00FF88; font-family: 'Orbitron';">{filtered_count}</div>
+                        <div style="font-size: 11px; color: #00FF88; text-transform: uppercase;">AI Qualified</div>
+                    </div>
+                    <div style="text-align: center; background: rgba(255, 184, 0, 0.15); padding: 12px 20px;
+                                border-radius: 12px; border: 1px solid rgba(255, 184, 0, 0.3);">
+                        <div style="font-size: 28px; font-weight: 700; color: #FFB800; font-family: 'Orbitron';">{hot_count}</div>
+                        <div style="font-size: 11px; color: #FFB800; text-transform: uppercase;">Hot Leads</div>
+                    </div>
+                    <div style="text-align: center; background: rgba(192, 192, 192, 0.15); padding: 12px 20px;
+                                border-radius: 12px; border: 1px solid rgba(192, 192, 192, 0.3);">
+                        <div style="font-size: 28px; font-weight: 700; color: #C0C0C0; font-family: 'Orbitron';">{len(prospect_leads)}</div>
+                        <div style="font-size: 11px; color: #C0C0C0; text-transform: uppercase;">Prospects</div>
+                    </div>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        for lead in st.session_state.filtered_leads[:5]:
-            # Get lead grade based on total score
+        # Create Tabs for different lead categories
+        tab_qualified, tab_prospects, tab_all = st.tabs([
+            f"🎯 AI Qualified ({filtered_count})",
+            f"📋 Prospects ({len(prospect_leads)})",
+            f"📊 All Leads ({raw_count})"
+        ])
+
+        # Helper function to render lead card
+        def render_lead_card(lead, card_type="qualified"):
             total_score = getattr(lead, 'total_score', lead.pain_score) or lead.pain_score
             pain_score = lead.pain_score or 0
             intent_score = getattr(lead, 'intent_score', 0) or 0
             fit_score = getattr(lead, 'fit_score', 0) or 0
 
             grade = get_lead_grade(total_score)
-            grade_emoji = grade["emoji"]
-            grade_label = grade["label"]
             grade_color = grade["color"]
             grade_bg = grade["bg_color"]
 
-            # Determine source badge class
+            # Card styling based on type
+            if card_type == "qualified":
+                border_color = "rgba(0, 255, 136, 0.4)"
+                bg_gradient = "linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 139, 139, 0.1) 100%)"
+                badge_html = '<span style="background: linear-gradient(135deg, #00FF88 0%, #00CC6A 100%); color: #000; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase;">✨ AI QUALIFIED</span>'
+            elif card_type == "hot":
+                border_color = "rgba(255, 184, 0, 0.5)"
+                bg_gradient = "linear-gradient(135deg, rgba(255, 184, 0, 0.1) 0%, rgba(255, 140, 0, 0.15) 100%)"
+                badge_html = '<span style="background: linear-gradient(135deg, #FFB800 0%, #FF8C00 100%); color: #000; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; animation: pulse 2s infinite;">🔥 HOT LEAD</span>'
+            else:  # prospect
+                border_color = "rgba(192, 192, 192, 0.3)"
+                bg_gradient = "linear-gradient(135deg, rgba(45, 55, 72, 0.4) 0%, rgba(28, 28, 46, 0.6) 100%)"
+                badge_html = '<span style="background: rgba(192, 192, 192, 0.2); color: #C0C0C0; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 600; text-transform: uppercase; border: 1px solid rgba(192, 192, 192, 0.3);">📋 PROSPECT</span>'
+
+            # Source styling
             source_value = lead.source.value.lower()
-            source_class = "reddit" if "reddit" in source_value else \
-                          "hackernews" if "hacker" in source_value else \
-                          "google" if "google" in source_value else \
-                          "indeed" if "indeed" in source_value else \
-                          "yelp" if "yelp" in source_value else \
-                          "maps" if "maps" in source_value else "google"
+            source_icons = {"reddit": "🔴", "hackernews": "🟠", "google": "🔵", "indeed": "💼", "yelp": "⭐", "maps": "📍"}
+            source_icon = source_icons.get(source_value.split("_")[0], "🌐")
 
-            # Source icons
-            source_icons = {
-                "reddit": "🔴",
-                "hackernews": "🟠",
-                "google": "🔵",
-                "indeed": "💼",
-                "yelp": "⭐",
-                "maps": "📍"
-            }
-            source_icon = source_icons.get(source_class, "🌐")
-
-            # Keywords tags HTML
+            # Keywords
             keywords_html = ""
             if lead.keywords_matched:
-                keywords_html = "".join([f'<span class="lead-keyword-tag">{kw}</span>' for kw in lead.keywords_matched[:5]])
+                keywords_html = "".join([f'<span style="background: rgba(0, 255, 255, 0.1); color: #00FFFF; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 4px; border: 1px solid rgba(0, 255, 255, 0.2);">{kw}</span>' for kw in lead.keywords_matched[:4]])
 
-            # Clean content for preview
-            content_preview = lead.content[:300].replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
-            if len(lead.content) > 300:
+            # Content preview
+            content_preview = lead.content[:250].replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+            if len(lead.content) > 250:
                 content_preview += "..."
 
-            # Build the modern lead card HTML
-            st.markdown(f"""
-            <div class="lead-card">
-                <!-- Card Header -->
-                <div class="lead-card-header">
-                    <div class="lead-card-grade" style="background: {grade_bg}; border: 2px solid {grade_color}; color: {grade_color};">
+            return f"""
+            <div style="background: {bg_gradient}; border: 1px solid {border_color}; border-radius: 16px;
+                        padding: 20px; margin-bottom: 16px; transition: all 0.3s ease;">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                            {badge_html}
+                            <span style="background: rgba(45, 55, 72, 0.8); color: #E5E5E5; padding: 4px 10px;
+                                        border-radius: 8px; font-size: 11px;">{source_icon} {lead.source.value}</span>
+                            {f'<span style="color: #708090; font-size: 11px;">🏭 {lead.industry}</span>' if lead.industry else ''}
+                        </div>
+                        <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; line-height: 1.4;">
+                            {lead.title[:100]}{'...' if len(lead.title) > 100 else ''}
+                        </h3>
+                    </div>
+                    <div style="background: {grade_bg}; border: 2px solid {grade_color}; color: {grade_color};
+                                width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center;
+                                justify-content: center; font-size: 18px; font-weight: 700; font-family: 'Orbitron';">
                         {total_score}
                     </div>
-                    <div class="lead-card-title-area">
-                        <h3 class="lead-card-title">{lead.title[:80]}{'...' if len(lead.title) > 80 else ''}</h3>
-                        <div class="lead-card-meta">
-                            <span class="lead-source-badge {source_class}">{source_icon} {lead.source.value}</span>
-                            {f'<span class="lead-industry-tag">🏭 {lead.industry}</span>' if lead.industry else ''}
-                        </div>
+                </div>
+
+                <!-- Scores Row -->
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <div style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3);
+                                padding: 8px 16px; border-radius: 10px; text-align: center; flex: 1; min-width: 80px;">
+                        <div style="font-size: 18px; font-weight: 700; color: #FF6B6B;">{pain_score}</div>
+                        <div style="font-size: 10px; color: #FF6B6B; text-transform: uppercase;">😣 Pain</div>
+                    </div>
+                    <div style="background: rgba(0, 255, 255, 0.1); border: 1px solid rgba(0, 255, 255, 0.3);
+                                padding: 8px 16px; border-radius: 10px; text-align: center; flex: 1; min-width: 80px;">
+                        <div style="font-size: 18px; font-weight: 700; color: #00FFFF;">{intent_score}</div>
+                        <div style="font-size: 10px; color: #00FFFF; text-transform: uppercase;">🎯 Intent</div>
+                    </div>
+                    <div style="background: rgba(0, 255, 136, 0.1); border: 1px solid rgba(0, 255, 136, 0.3);
+                                padding: 8px 16px; border-radius: 10px; text-align: center; flex: 1; min-width: 80px;">
+                        <div style="font-size: 18px; font-weight: 700; color: #00FF88;">{fit_score}</div>
+                        <div style="font-size: 10px; color: #00FF88; text-transform: uppercase;">✅ Fit</div>
                     </div>
                 </div>
 
-                <!-- Card Body -->
-                <div class="lead-card-body">
-                    <!-- Triple Score Row -->
-                    <div class="lead-scores-row">
-                        <div class="lead-score-mini pain">
-                            <div class="lead-score-mini-icon">😣</div>
-                            <div class="lead-score-mini-value">{pain_score}</div>
-                            <div class="lead-score-mini-label">Pain</div>
-                        </div>
-                        <div class="lead-score-mini intent">
-                            <div class="lead-score-mini-icon">🎯</div>
-                            <div class="lead-score-mini-value">{intent_score}</div>
-                            <div class="lead-score-mini-label">Intent</div>
-                        </div>
-                        <div class="lead-score-mini fit">
-                            <div class="lead-score-mini-icon">✅</div>
-                            <div class="lead-score-mini-value">{fit_score}</div>
-                            <div class="lead-score-mini-label">Fit</div>
-                        </div>
-                    </div>
+                <!-- Keywords -->
+                {f'<div style="margin-bottom: 12px;">{keywords_html}</div>' if keywords_html else ''}
 
-                    <!-- Keywords Section -->
-                    {f'''<div class="lead-keywords-section">
-                        <div class="lead-keywords-title">Matched Keywords</div>
-                        <div>{keywords_html}</div>
-                    </div>''' if keywords_html else ''}
-
-                    <!-- Content Preview -->
-                    <div class="lead-content-preview">
-                        <p class="lead-content-text">{content_preview}</p>
-                    </div>
+                <!-- Content Preview -->
+                <div style="background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+                    <p style="margin: 0; color: #A0A0A0; font-size: 13px; line-height: 1.5;">{content_preview}</p>
                 </div>
 
-                <!-- Card Footer -->
-                <div class="lead-card-footer">
-                    <div class="lead-action-text" style="color: {grade_color};">
-                        <span>{grade_emoji}</span>
-                        <span>{grade['action']}</span>
+                <!-- Footer Actions -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div style="color: {grade_color}; font-size: 13px; font-weight: 600;">
+                        {grade['emoji']} {grade['action']}
                     </div>
-                    <a href="{lead.url}" target="_blank" class="lead-view-btn">
+                    <a href="{lead.url}" target="_blank" style="background: rgba(0, 255, 255, 0.1); color: #00FFFF;
+                              padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 13px;
+                              border: 1px solid rgba(0, 255, 255, 0.3); transition: all 0.2s;">
                         View Original ↗
                     </a>
                 </div>
             </div>
+            """
+
+        # TAB 1: AI Qualified Leads
+        with tab_qualified:
+            if ai_qualified_leads:
+                st.markdown("""
+                <div style="background: rgba(0, 255, 136, 0.1); border-left: 4px solid #00FF88;
+                            padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #00FF88; font-size: 14px;">
+                        <strong>🎯 AI-Identified Opportunities</strong> - These leads show clear pain signals and need for your services.
+                        Priority contacts for immediate outreach.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # Sort by score - hot leads first
+                sorted_qualified = sorted(ai_qualified_leads, key=lambda x: getattr(x, 'total_score', 0), reverse=True)
+
+                for lead in sorted_qualified[:10]:
+                    is_hot = getattr(lead, 'total_score', 0) >= 80
+                    st.markdown(render_lead_card(lead, "hot" if is_hot else "qualified"), unsafe_allow_html=True)
+
+                if len(sorted_qualified) > 10:
+                    with st.expander(f"View {len(sorted_qualified) - 10} more AI qualified leads"):
+                        for lead in sorted_qualified[10:]:
+                            is_hot = getattr(lead, 'total_score', 0) >= 80
+                            st.markdown(render_lead_card(lead, "hot" if is_hot else "qualified"), unsafe_allow_html=True)
+            else:
+                st.info("No AI-qualified leads found in this search. Check the Prospects tab for potential contacts.")
+
+        # TAB 2: Prospect Leads
+        with tab_prospects:
+            if prospect_leads:
+                st.markdown("""
+                <div style="background: rgba(192, 192, 192, 0.1); border-left: 4px solid #C0C0C0;
+                            padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #C0C0C0; font-size: 14px;">
+                        <strong>📋 Prospect Leads</strong> - These leads don't show immediate pain signals but are still
+                        valid contacts in your target market. Good for nurture campaigns and follow-up.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # Sort prospects by any available score
+                sorted_prospects = sorted(prospect_leads, key=lambda x: getattr(x, 'total_score', 0) or getattr(x, 'pain_score', 0), reverse=True)
+
+                for lead in sorted_prospects[:10]:
+                    st.markdown(render_lead_card(lead, "prospect"), unsafe_allow_html=True)
+
+                if len(sorted_prospects) > 10:
+                    with st.expander(f"View {len(sorted_prospects) - 10} more prospect leads"):
+                        for lead in sorted_prospects[10:]:
+                            st.markdown(render_lead_card(lead, "prospect"), unsafe_allow_html=True)
+            else:
+                st.success("All leads were AI-qualified! Check the AI Qualified tab.")
+
+        # TAB 3: All Leads (sortable table view)
+        with tab_all:
+            st.markdown("""
+            <div style="background: rgba(0, 255, 255, 0.1); border-left: 4px solid #00FFFF;
+                        padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+                <p style="margin: 0; color: #00FFFF; font-size: 14px;">
+                    <strong>📊 Complete Results</strong> - All leads from your search in one view.
+                    Filter by type to manage your pipeline.
+                </p>
+            </div>
             """, unsafe_allow_html=True)
 
-    # Section to review ALL raw leads (before AI filter)
-    if st.session_state.scraping_done and st.session_state.raw_leads:
-        st.divider()
+            # Filter options
+            filter_col1, filter_col2, filter_col3 = st.columns([2, 2, 2])
+            with filter_col1:
+                type_filter = st.selectbox("Filter by Type", ["All", "AI Qualified", "Hot Leads", "Prospects"], key="all_leads_type_filter")
+            with filter_col2:
+                sort_by = st.selectbox("Sort by", ["Score (High to Low)", "Score (Low to High)", "Pain Score", "Intent Score", "Fit Score"], key="all_leads_sort")
+            with filter_col3:
+                st.write("")  # Spacer
 
-        raw_count = len(st.session_state.raw_leads)
-        filtered_count = len(st.session_state.filtered_leads)
-        rejected_count = raw_count - filtered_count
+            # Apply filters
+            display_leads = st.session_state.raw_leads.copy()
 
-        st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
-                    border-radius: 12px; padding: 16px; margin: 16px 0; border-left: 4px solid #F59E0B;">
-            <h3 style="margin: 0 0 8px 0; color: #92400E;">📋 Review All Results</h3>
-            <p style="margin: 0; color: #78350F;">
-                Found <strong>{raw_count}</strong> total leads |
-                AI Qualified: <strong>{filtered_count}</strong> |
-                Rejected: <strong>{rejected_count}</strong>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+            if type_filter == "AI Qualified":
+                display_leads = ai_qualified_leads
+            elif type_filter == "Hot Leads":
+                display_leads = [l for l in ai_qualified_leads if getattr(l, 'total_score', 0) >= 80]
+            elif type_filter == "Prospects":
+                display_leads = prospect_leads
 
-        with st.expander(f"👁️ View ALL {raw_count} leads (before AI filter)", expanded=False):
-            st.info("These are ALL leads found, including those rejected by AI. Review manually to ensure nothing was missed.")
+            # Apply sorting
+            if sort_by == "Score (High to Low)":
+                display_leads = sorted(display_leads, key=lambda x: getattr(x, 'total_score', 0), reverse=True)
+            elif sort_by == "Score (Low to High)":
+                display_leads = sorted(display_leads, key=lambda x: getattr(x, 'total_score', 0))
+            elif sort_by == "Pain Score":
+                display_leads = sorted(display_leads, key=lambda x: getattr(x, 'pain_score', 0), reverse=True)
+            elif sort_by == "Intent Score":
+                display_leads = sorted(display_leads, key=lambda x: getattr(x, 'intent_score', 0), reverse=True)
+            elif sort_by == "Fit Score":
+                display_leads = sorted(display_leads, key=lambda x: getattr(x, 'fit_score', 0), reverse=True)
 
-            for i, lead in enumerate(st.session_state.raw_leads):
-                is_qualified = lead in st.session_state.filtered_leads
-                status_icon = "✅" if is_qualified else "❌"
-                status_text = "AI Qualified" if is_qualified else "AI Rejected"
+            # Display as compact list
+            for lead in display_leads:
+                is_qualified = lead in filtered_leads
+                is_hot = getattr(lead, 'total_score', 0) >= 80
 
-                with st.container():
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"""
-                        <div style="padding: 8px; margin: 4px 0; background: {'#D1FAE5' if is_qualified else '#FEE2E2'};
-                                    border-radius: 8px; border-left: 3px solid {'#10B981' if is_qualified else '#EF4444'};">
-                            <strong>{status_icon} {lead.title[:70]}{'...' if len(lead.title) > 70 else ''}</strong><br>
-                            <small style="color: #6B7280;">
-                                Source: {lead.source.value} | Score: {lead.pain_score} | {status_text}
-                            </small>
+                if is_hot:
+                    type_badge = '<span style="background: #FFB800; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;">🔥 HOT</span>'
+                    bg_color = "rgba(255, 184, 0, 0.1)"
+                    border_color = "#FFB800"
+                elif is_qualified:
+                    type_badge = '<span style="background: #00FF88; color: #000; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;">✨ QUALIFIED</span>'
+                    bg_color = "rgba(0, 255, 136, 0.1)"
+                    border_color = "#00FF88"
+                else:
+                    type_badge = '<span style="background: rgba(192, 192, 192, 0.3); color: #C0C0C0; padding: 2px 8px; border-radius: 10px; font-size: 10px;">📋 PROSPECT</span>'
+                    bg_color = "rgba(45, 55, 72, 0.3)"
+                    border_color = "#4A5568"
+
+                total_score = getattr(lead, 'total_score', lead.pain_score) or 0
+
+                st.markdown(f"""
+                <div style="background: {bg_color}; border-left: 3px solid {border_color};
+                            padding: 12px 16px; margin-bottom: 8px; border-radius: 0 8px 8px 0;
+                            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                            {type_badge}
+                            <span style="color: #708090; font-size: 11px;">{lead.source.value}</span>
                         </div>
-                        """, unsafe_allow_html=True)
-                    with col2:
-                        st.link_button("View", lead.url, use_container_width=True)
+                        <div style="color: #E5E5E5; font-size: 14px; font-weight: 500;">
+                            {lead.title[:80]}{'...' if len(lead.title) > 80 else ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 20px; font-weight: 700; color: {'#00FF88' if total_score >= 60 else '#C0C0C0'}; font-family: 'Orbitron';">{total_score}</div>
+                            <div style="font-size: 9px; color: #708090; text-transform: uppercase;">Score</div>
+                        </div>
+                        <a href="{lead.url}" target="_blank" style="background: rgba(0, 255, 255, 0.1); color: #00FFFF;
+                                  padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px;
+                                  border: 1px solid rgba(0, 255, 255, 0.3);">View ↗</a>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-        # Clear results button
-        col1, col2 = st.columns(2)
+        # Action buttons at the bottom
+        st.divider()
+        col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("🗑️ Clear Search Results", type="secondary", use_container_width=True):
+            if st.button("🗑️ Clear Results", type="secondary", use_container_width=True):
                 st.session_state.raw_leads = []
                 st.session_state.filtered_leads = []
                 st.session_state.leads = []
@@ -4888,8 +5040,31 @@ def show_search():
                 st.session_state.last_search_results = None
                 st.rerun()
         with col2:
-            if st.button("💾 Keep & Continue", type="primary", use_container_width=True):
-                st.success("Results saved! You can view them in My Leads or CRM anytime.")
+            if st.button("💾 Save All Leads", type="primary", use_container_width=True):
+                st.success(f"✅ All {raw_count} leads saved! View them in 'My Leads' section.")
+        with col3:
+            if st.button("📤 Export to CSV", use_container_width=True):
+                # Prepare data for export
+                import pandas as pd
+                export_data = []
+                for lead in st.session_state.raw_leads:
+                    is_qual = lead in filtered_leads
+                    export_data.append({
+                        "Type": "AI Qualified" if is_qual else "Prospect",
+                        "Title": lead.title,
+                        "Source": lead.source.value,
+                        "Total Score": getattr(lead, 'total_score', 0),
+                        "Pain Score": lead.pain_score,
+                        "Intent Score": getattr(lead, 'intent_score', 0),
+                        "Fit Score": getattr(lead, 'fit_score', 0),
+                        "Industry": lead.industry or "",
+                        "URL": lead.url,
+                        "Company": lead.company or "",
+                        "Email": lead.email or ""
+                    })
+                df = pd.DataFrame(export_data)
+                csv = df.to_csv(index=False)
+                st.download_button("📥 Download CSV", csv, "leads_export.csv", "text/csv", use_container_width=True)
 
 
 def show_leads():
