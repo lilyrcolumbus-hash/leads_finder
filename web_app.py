@@ -563,48 +563,127 @@ def main():
 
 
 def show_home():
-    """Home page."""
-    st.markdown('<h1 class="main-header">🎯 Lead Generation App</h1>', unsafe_allow_html=True)
+    """Home page with professional dashboard."""
 
-    st.markdown("""
-    ### Encuentra leads con problemas de comunicación
+    # Hero section
+    st.markdown('''
+    <div class="lead-card" style="text-align: center; padding: 30px 20px; margin-bottom: 24px;
+                background: linear-gradient(135deg, var(--bg-card) 0%, #f8fafc 100%);">
+        <div style="font-size: 48px; margin-bottom: 12px;">🎯</div>
+        <h1 style="margin: 0 0 8px 0; font-size: 1.75rem; font-weight: 700;
+                   background: linear-gradient(135deg, var(--primary), var(--secondary));
+                   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                   background-clip: text;">Lead Generation App</h1>
+        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+            Encuentra leads con problemas de comunicación
+        </p>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    Busca en múltiples fuentes:
-    """)
+    # Stats cards
+    total_leads = len(st.session_state.leads)
+    qualified_leads = len(st.session_state.filtered_leads)
+    conversion_rate = int((qualified_leads / total_leads * 100)) if total_leads > 0 else 0
 
-    # Sources as cards - stacked for mobile
+    st.markdown(f'''
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">
+        <div class="lead-card" style="text-align: center; padding: 20px 12px;">
+            <div style="font-size: 32px; font-weight: 700; color: var(--primary); line-height: 1;">{total_leads}</div>
+            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; font-weight: 600;">Total Leads</div>
+        </div>
+        <div class="lead-card" style="text-align: center; padding: 20px 12px;">
+            <div style="font-size: 32px; font-weight: 700; color: var(--success); line-height: 1;">{qualified_leads}</div>
+            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; font-weight: 600;">Calificados</div>
+        </div>
+        <div class="lead-card" style="text-align: center; padding: 20px 12px;">
+            <div style="font-size: 32px; font-weight: 700; color: var(--info); line-height: 1;">{conversion_rate}%</div>
+            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; font-weight: 600;">Conversión</div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    # Sources section
+    st.markdown('''
+    <div style="margin-bottom: 16px;">
+        <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 16px; font-weight: 600;">
+            📡 Fuentes de Datos
+        </h3>
+    </div>
+    ''', unsafe_allow_html=True)
+
     sources = [
-        ("📱 Reddit", "Subreddits de negocios"),
-        ("💻 Hacker News", "Discusiones de startups"),
-        ("🔍 Google", "Búsquedas específicas"),
-        ("🚀 Product Hunt", "Founders activos")
+        ("📱", "Reddit", "Subreddits de negocios y startups", "#FF4500"),
+        ("💻", "Hacker News", "Discusiones de tecnología", "#FF6600"),
+        ("🔍", "Google", "Búsquedas específicas por industria", "#4285F4"),
+        ("🚀", "Product Hunt", "Founders y productos nuevos", "#DA552F")
     ]
 
-    for icon_name, desc in sources:
-        st.markdown(f"""
-        <div class="lead-card">
-            <strong>{icon_name}</strong><br>
-            <small>{desc}</small>
+    # Sources grid
+    sources_html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px;">'
+    for icon, name, desc, color in sources:
+        sources_html += f'''
+        <div class="lead-card" style="padding: 16px; text-align: center;">
+            <div style="font-size: 28px; margin-bottom: 8px;">{icon}</div>
+            <div style="font-weight: 600; color: {color}; font-size: 14px; margin-bottom: 4px;">{name}</div>
+            <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.3;">{desc}</div>
         </div>
-        """, unsafe_allow_html=True)
+        '''
+    sources_html += '</div>'
+    st.markdown(sources_html, unsafe_allow_html=True)
 
-    st.markdown("---")
+    # API Status section
+    st.markdown('''
+    <div style="margin-bottom: 12px;">
+        <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 16px; font-weight: 600;">
+            ⚡ Estado del Sistema
+        </h3>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    # Quick stats - 2 columns max for mobile
-    st.subheader("📊 Resumen Rápido")
+    apis = [
+        ("HubSpot", settings.hubspot_api_key, "CRM"),
+        ("OpenAI", settings.openai_api_key, "AI"),
+        ("Google", settings.google_api_key, "Search"),
+    ]
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Leads", len(st.session_state.leads))
-    with col2:
-        st.metric("Calificados", len(st.session_state.filtered_leads))
+    status_html = '<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;">'
+    for name, key, label in apis:
+        if key:
+            status_html += f'''
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+                        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+                        border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px;">
+                <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%;
+                             box-shadow: 0 0 8px var(--success);"></span>
+                <span style="font-size: 12px; font-weight: 600; color: var(--success);">{name}</span>
+            </div>
+            '''
+        else:
+            status_html += f'''
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+                        background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3);
+                        border-radius: 20px;">
+                <span style="width: 8px; height: 8px; background: #94a3b8; border-radius: 50%;"></span>
+                <span style="font-size: 12px; font-weight: 500; color: #94a3b8;">{name}</span>
+            </div>
+            '''
+    status_html += '</div>'
+    st.markdown(status_html, unsafe_allow_html=True)
 
-    st.markdown("---")
-
-    # Quick action button
-    if st.button("🚀 Comenzar Búsqueda", type="primary", use_container_width=True):
+    # CTA Button
+    if st.button("🚀 COMENZAR BÚSQUEDA", type="primary", use_container_width=True):
         st.session_state.current_page = "buscar"
         st.rerun()
+
+    # Quick tips
+    st.markdown('''
+    <div class="lead-card" style="margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #f8fafc, #f1f5f9);">
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">💡 Consejo</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">
+            Configura tus API keys en el archivo <code style="background: rgba(102, 126, 234, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--primary);">.env</code> para activar todas las funcionalidades.
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 
 
 def show_search():
