@@ -33,10 +33,12 @@ from src.utils.models import Lead, LeadBatch
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
+from src.database import LeadDatabase
 
 # Initialize
 console = Console()
 logger = setup_logger("main")
+db = LeadDatabase()  # SQLite database for local persistence
 
 
 def display_banner():
@@ -54,15 +56,16 @@ def display_main_menu() -> str:
     """Display main menu and get user choice."""
     console.print("\n[bold cyan]═══ MENU PRINCIPAL ═══[/bold cyan]\n")
     console.print("  [1] Buscar nuevos leads")
-    console.print("  [2] Ver mis leads")
-    console.print("  [3] Actualizar lead")
-    console.print("  [4] Ver estadisticas")
-    console.print("  [5] Buscar lead")
-    console.print("  [6] Configuracion")
+    console.print("  [2] Ver leads locales (SQLite)")
+    console.print("  [3] Ver leads en HubSpot")
+    console.print("  [4] Actualizar lead")
+    console.print("  [5] Ver estadisticas")
+    console.print("  [6] Buscar lead")
+    console.print("  [7] Configuracion")
     console.print("  [0] Salir")
     console.print()
 
-    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6"], default="1")
+    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7"], default="1")
 
 
 # ==================== 1. SCRAPING ====================
@@ -81,6 +84,10 @@ def run_scraping() -> List[Lead]:
         ("Product Hunt", ProductHuntScraper),
     ]
 
+    # Record scrape run
+    source_names = [name for name, _ in scrapers]
+    run_id = db.start_scrape_run(source_names)
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -98,6 +105,12 @@ def run_scraping() -> List[Lead]:
                 progress.update(task, description=f"[red]{name}: Error - {e}")
                 errors.append(f"{name}: {str(e)}")
             progress.remove_task(task)
+
+    # Save leads to local database
+    if all_leads:
+        console.print("\n[cyan]Guardando leads en base de datos local...[/cyan]")
+        result = db.save_leads(all_leads)
+        console.print(f"[green]Guardados: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
 
     # Show summary
     console.print(f"\n[bold]Total leads encontrados: {len(all_leads)}[/bold]")
@@ -119,6 +132,15 @@ def filter_leads_with_ai(leads: List[Lead]) -> List[Lead]:
 
     ai_filter = AILeadFilter()
     filtered = ai_filter.filter_leads(leads)
+
+    # Update leads in database with AI scores
+    for lead in filtered:
+        db.update_lead(
+            lead.id,
+            ai_score=lead.ai_score,
+            ai_reasoning=lead.ai_reasoning,
+            is_qualified=lead.is_qualified
+        )
 
     qualified = [l for l in filtered if l.is_qualified]
     console.print(f"[green]Leads calificados: {len(qualified)}/{len(leads)}[/green]")
@@ -203,11 +225,102 @@ def run_single_source(source: str) -> List[Lead]:
         return []
 
 
-# ==================== 2. VIEW LEADS ====================
+# ==================== 2. VIEW LOCAL LEADS ====================
 
-def menu_view_leads():
-    """Main option 2: View leads in CRM."""
-    console.print("\n[bold]Ver leads:[/bold]")
+def menu_view_local_leads():
+    """Main option 2: View leads from local SQLite database."""
+    console.print("\n[bold]Ver leads locales (SQLite):[/bold]")
+    console.print("  [1] Todos los leads")
+    console.print("  [2] Solo calificados")
+    console.print("  [3] Pendientes de enviar a CRM")
+    console.print("  [4] Por fuente")
+    console.print("  [5] Estadisticas locales")
+    console.print("  [6] Enviar pendientes a HubSpot")
+    console.print("  [0] Volver")
+
+    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6"], default="1")
+
+    if choice == "0":
+        return
+
+    if choice == "1":
+        leads = db.get_all_leads(limit=50)
+        display_leads_table(leads, "Todos los leads locales")
+        console.print(f"\n[dim]Total en base de datos: {db.get_statistics()['total_leads']}[/dim]")
+
+    elif choice == "2":
+        leads = db.get_qualified_leads(limit=50)
+        display_leads_table(leads, "Leads calificados")
+
+    elif choice == "3":
+        leads = db.get_unsent_leads(limit=50)
+        if leads:
+            display_leads_table(leads, "Leads pendientes de enviar")
+            console.print(f"\n[cyan]Hay {len(leads)} leads listos para enviar a HubSpot[/cyan]")
+        else:
+            console.print("[yellow]No hay leads pendientes de enviar[/yellow]")
+
+    elif choice == "4":
+        # Select source
+        console.print("\n[bold]Selecciona fuente:[/bold]")
+        console.print("  [1] Reddit")
+        console.print("  [2] Hacker News")
+        console.print("  [3] Google Search")
+        console.print("  [4] Product Hunt")
+
+        source_choice = Prompt.ask("Fuente", choices=["1", "2", "3", "4"], default="1")
+        from src.utils.models import LeadSource
+        sources = {
+            "1": LeadSource.REDDIT,
+            "2": LeadSource.HACKER_NEWS,
+            "3": LeadSource.GOOGLE_SEARCH,
+            "4": LeadSource.PRODUCT_HUNT,
+        }
+        leads = db.get_leads_by_source(sources[source_choice])
+        display_leads_table(leads, f"Leads de {sources[source_choice].value}")
+
+    elif choice == "5":
+        # Show local statistics
+        stats = db.get_statistics()
+        console.print(Panel(f"""
+[bold]ESTADISTICAS LOCALES (SQLite)[/bold]
+
+Total de leads: [cyan]{stats['total_leads']}[/cyan]
+Leads calificados: [green]{stats['qualified_leads']}[/green]
+Enviados a CRM: [blue]{stats['sent_to_crm']}[/blue]
+Pendientes de enviar: [yellow]{stats['pending_send']}[/yellow]
+
+Score AI promedio: [cyan]{stats['avg_ai_score']}[/cyan]
+Leads encontrados hoy: [green]{stats['leads_today']}[/green]
+
+[bold]Por fuente:[/bold]
+""" + "\n".join([f"  - {k}: {v}" for k, v in stats['by_source'].items()]) + """
+
+[bold]Top keywords:[/bold]
+""" + "\n".join([f"  - {k}: {v}" for k, v in list(stats['top_keywords'].items())[:5]]),
+            title="Base de Datos Local", border_style="cyan"))
+
+    elif choice == "6":
+        # Send pending leads to HubSpot
+        leads = db.get_unsent_leads(limit=50)
+        if not leads:
+            console.print("[yellow]No hay leads pendientes de enviar[/yellow]")
+            return
+
+        console.print(f"\n[cyan]Hay {len(leads)} leads pendientes[/cyan]")
+        send_to_hubspot(leads)
+
+        # Mark as sent in local DB
+        for lead in leads:
+            if lead.sent_to_crm:
+                db.mark_as_sent(lead.id, lead.hubspot_id or "")
+
+
+# ==================== 3. VIEW HUBSPOT LEADS ====================
+
+def menu_view_hubspot_leads():
+    """Main option 3: View leads in HubSpot CRM."""
+    console.print("\n[bold]Ver leads en HubSpot:[/bold]")
     console.print("  [1] Todos los leads")
     console.print("  [2] Por etapa del pipeline")
     console.print("  [0] Volver")
@@ -414,7 +527,7 @@ def menu_search():
 # ==================== 6. CONFIGURATION ====================
 
 def menu_configuration():
-    """Main option 6: View/edit configuration."""
+    """Main option 7: View/edit configuration."""
     console.print("\n[bold cyan]═══ CONFIGURACION ═══[/bold cyan]\n")
 
     # Check API keys
@@ -423,6 +536,12 @@ def menu_configuration():
     console.print(f"  Google:    {'[green]Configurado[/green]' if settings.google_api_key else '[red]No configurado[/red]'}")
     console.print(f"  OpenAI:    {'[green]Configurado[/green]' if settings.openai_api_key else '[red]No configurado[/red]'}")
     console.print(f"  Anthropic: {'[green]Configurado[/green]' if settings.anthropic_api_key else '[red]No configurado[/red]'}")
+
+    # Database info
+    console.print(f"\n[bold]Base de datos local:[/bold]")
+    console.print(f"  Ubicacion: [cyan]{db.db_path}[/cyan]")
+    local_stats = db.get_statistics()
+    console.print(f"  Leads guardados: [green]{local_stats['total_leads']}[/green]")
 
     console.print(f"\n[bold]Subreddits configurados:[/bold]")
     console.print(f"  {', '.join(settings.subreddits)}")
@@ -475,14 +594,16 @@ def main():
             elif choice == "1":
                 menu_search_leads()
             elif choice == "2":
-                menu_view_leads()
+                menu_view_local_leads()
             elif choice == "3":
-                menu_update_lead()
+                menu_view_hubspot_leads()
             elif choice == "4":
-                menu_statistics()
+                menu_update_lead()
             elif choice == "5":
-                menu_search()
+                menu_statistics()
             elif choice == "6":
+                menu_search()
+            elif choice == "7":
                 menu_configuration()
 
         except KeyboardInterrupt:
