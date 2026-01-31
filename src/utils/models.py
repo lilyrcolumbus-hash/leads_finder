@@ -12,6 +12,10 @@ class LeadSource(str, Enum):
     HACKER_NEWS = "hacker_news"
     GOOGLE_SEARCH = "google_search"
     PRODUCT_HUNT = "product_hunt"
+    INDEED = "indeed"
+    YELP = "yelp"
+    LINKEDIN = "linkedin"
+    GOOGLE_MAPS = "google_maps"
 
 
 class LeadUrgency(str, Enum):
