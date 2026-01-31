@@ -23,6 +23,7 @@ from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.enrichment.apollo_enricher import enrich_leads_with_apollo
 from src.enrichment.email_verifier import EmailVerifier, get_email_quality_for_scoring
+from src.enrichment.job_change_monitor import JobChangeMonitor, JobChange, OpportunityLevel
 from src.utils.background_tasks import task_manager, TaskStatus
 from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper
 from src.filters import AILeadFilter
@@ -3051,7 +3052,7 @@ def render_sidebar():
         st.markdown(f'<div class="nav-label">{nav_label}</div>', unsafe_allow_html=True)
 
         # Navigation
-        pages = ["Dashboard", "Find Leads", "My Leads", "Lead Warming", "CRM", "Analytics", "AI Assistant", "Settings"]
+        pages = ["Dashboard", "Find Leads", "My Leads", "Lead Warming", "Job Changes", "CRM", "Analytics", "AI Assistant", "Settings"]
         current_index = pages.index(st.session_state.nav_page) if st.session_state.nav_page in pages else 0
 
         page = st.radio(
@@ -8828,6 +8829,465 @@ def show_lead_warming():
             st.rerun()
 
 
+def show_job_changes():
+    """Job Change Monitor - Detect leadership changes for sales opportunities."""
+
+    # Initialize session state for job changes
+    if 'job_changes' not in st.session_state:
+        st.session_state.job_changes = []
+    if 'job_change_monitor' not in st.session_state:
+        st.session_state.job_change_monitor = JobChangeMonitor()
+
+    # Holographic CSS for Job Changes
+    st.markdown("""
+    <style>
+        /* Opportunity Level Badges */
+        .opp-gold {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 184, 0, 0.2) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.6);
+            color: #FFD700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: gold-pulse 2s ease-in-out infinite;
+        }
+        @keyframes gold-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+        }
+        .opp-silver {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.3) 0%, rgba(169, 169, 169, 0.2) 100%);
+            border: 1px solid rgba(192, 192, 192, 0.5);
+            color: #C0C0C0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+        }
+        .opp-bronze {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.3) 0%, rgba(180, 100, 30, 0.2) 100%);
+            border: 1px solid rgba(205, 127, 50, 0.4);
+            color: #CD7F32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Job Change Card */
+        .job-change-card {
+            background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .job-change-card:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
+            transform: translateY(-2px);
+            border-color: rgba(0, 255, 255, 0.4);
+        }
+        .job-change-card.gold {
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+        .job-change-card.gold:hover {
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+
+        /* Days Badge */
+        .days-badge {
+            background: rgba(0, 255, 255, 0.15);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00FFFF;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .days-badge.urgent {
+            background: rgba(255, 107, 107, 0.15);
+            border-color: rgba(255, 107, 107, 0.4);
+            color: #FF6B6B;
+            animation: urgent-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes urgent-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Score Display */
+        .opportunity-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #00FFFF;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Industry Select */
+        .industry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(45, 55, 72, 0.6) 0%, rgba(28, 28, 46, 0.8) 100%);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 16px;
+                padding: 32px;
+                margin-bottom: 24px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);
+                position: relative;
+                overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
+        <h1 style="color: #00FFFF; font-family: 'Orbitron', sans-serif; font-size: 32px; margin: 0 0 8px 0; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            🚀 JOB CHANGES
+        </h1>
+        <p style="color: #C0C0C0; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin: 0;">
+            Detect when decision-makers change jobs = 3x higher conversion window
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Check if Apollo is configured
+    monitor = st.session_state.job_change_monitor
+    api_configured = monitor.is_configured()
+
+    if not api_configured:
+        st.warning("⚠️ Apollo API key not configured. Go to Settings to add your APOLLO_API_KEY.")
+
+    # Search Section
+    st.markdown("### 🔍 Find New Leaders")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Industry selection - Phase 1 industries
+        phase1_industries = {
+            "🔧 HVAC": "hvac heating cooling",
+            "🚿 Plumbing": "plumbing plumber",
+            "🏠 Roofing": "roofing contractor",
+            "⚡ Electrical": "electrical electrician contractor",
+            "🦷 Dental": "dental practice dentist",
+            "🏡 Real Estate": "real estate agency broker",
+            "⚖️ Legal": "law firm attorney legal",
+            "🏥 Medical": "medical practice clinic doctor"
+        }
+
+        selected_industry = st.selectbox(
+            "Select Industry",
+            options=list(phase1_industries.keys()),
+            index=0
+        )
+
+        industry_query = phase1_industries[selected_industry]
+
+    with col2:
+        # Title filters
+        title_options = st.multiselect(
+            "Target Titles",
+            options=["Owner", "Founder", "CEO", "President", "Director", "Manager", "VP", "Partner"],
+            default=["Owner", "Director", "Manager"]
+        )
+
+        max_days = st.slider(
+            "Max Days in New Role",
+            min_value=30,
+            max_value=180,
+            value=90,
+            step=30,
+            help="First 90 days = highest opportunity window"
+        )
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        location = st.text_input(
+            "Location (optional)",
+            value="United States",
+            placeholder="e.g., California, New York"
+        )
+
+    with col4:
+        company_size = st.select_slider(
+            "Company Size (employees)",
+            options=["1-10", "10-50", "50-200", "200-500"],
+            value="10-50"
+        )
+        size_map = {"1-10": (1, 10), "10-50": (10, 50), "50-200": (50, 200), "200-500": (200, 500)}
+        min_emp, max_emp = size_map[company_size]
+
+    # Search button
+    search_col1, search_col2, search_col3 = st.columns([1, 2, 1])
+    with search_col2:
+        search_clicked = st.button(
+            "🔍 Find Job Changes",
+            use_container_width=True,
+            disabled=not api_configured,
+            type="primary"
+        )
+
+    if search_clicked and api_configured:
+        with st.spinner(f"Searching for new leaders in {selected_industry}..."):
+            try:
+                changes = monitor.find_new_leaders_in_industry(
+                    industry=industry_query,
+                    titles=[t.lower() for t in title_options],
+                    max_days_in_role=max_days,
+                    location=location if location else None,
+                    company_size_min=min_emp,
+                    company_size_max=max_emp,
+                    limit=50
+                )
+                st.session_state.job_changes = changes
+
+                if changes:
+                    st.success(f"✅ Found {len(changes)} job changes!")
+                else:
+                    st.info("No job changes found with current filters. Try adjusting the criteria.")
+
+            except Exception as e:
+                st.error(f"Error searching: {str(e)}")
+
+    # Display Results
+    if st.session_state.job_changes:
+        changes = st.session_state.job_changes
+
+        # Summary stats
+        st.markdown("### 📊 Opportunities Found")
+
+        gold = [c for c in changes if c.opportunity_level == OpportunityLevel.GOLD]
+        silver = [c for c in changes if c.opportunity_level == OpportunityLevel.SILVER]
+        bronze = [c for c in changes if c.opportunity_level == OpportunityLevel.BRONZE]
+        urgent = [c for c in changes if c.days_in_role <= 30]
+
+        stat_cols = st.columns(4)
+        with stat_cols[0]:
+            st.markdown(f"""
+            <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3);
+                        border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 28px; font-weight: 700; color: #FFD700; font-family: 'Orbitron';">
+                    {len(gold)}
+                </div>
+                <div style="font-size: 12px; color: #C0C0C0;">🥇 GOLD</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with stat_cols[1]:
+            st.markdown(f"""
+            <div style="background: rgba(192, 192, 192, 0.1); border: 1px solid rgba(192, 192, 192, 0.3);
+                        border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 28px; font-weight: 700; color: #C0C0C0; font-family: 'Orbitron';">
+                    {len(silver)}
+                </div>
+                <div style="font-size: 12px; color: #C0C0C0;">🥈 SILVER</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with stat_cols[2]:
+            st.markdown(f"""
+            <div style="background: rgba(205, 127, 50, 0.1); border: 1px solid rgba(205, 127, 50, 0.3);
+                        border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 28px; font-weight: 700; color: #CD7F32; font-family: 'Orbitron';">
+                    {len(bronze)}
+                </div>
+                <div style="font-size: 12px; color: #C0C0C0;">🥉 BRONZE</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with stat_cols[3]:
+            st.markdown(f"""
+            <div style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3);
+                        border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 28px; font-weight: 700; color: #FF6B6B; font-family: 'Orbitron';">
+                    {len(urgent)}
+                </div>
+                <div style="font-size: 12px; color: #C0C0C0;">🔥 URGENT (&lt;30d)</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # Filter tabs
+        filter_tab = st.radio(
+            "Filter by level",
+            ["All", "🥇 Gold Only", "🥈 Silver Only", "🔥 Urgent (<30 days)"],
+            horizontal=True
+        )
+
+        if filter_tab == "🥇 Gold Only":
+            display_changes = gold
+        elif filter_tab == "🥈 Silver Only":
+            display_changes = silver
+        elif filter_tab == "🔥 Urgent (<30 days)":
+            display_changes = urgent
+        else:
+            display_changes = changes
+
+        # Display cards
+        for change in display_changes:
+            level_class = change.opportunity_level.value
+            level_badge = {
+                "gold": '<span class="opp-gold">🥇 GOLD</span>',
+                "silver": '<span class="opp-silver">🥈 SILVER</span>',
+                "bronze": '<span class="opp-bronze">🥉 BRONZE</span>'
+            }.get(level_class, '')
+
+            days_class = "urgent" if change.days_in_role <= 30 else ""
+
+            st.markdown(f"""
+            <div class="job-change-card {level_class}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="color: #FFFFFF; margin: 0 0 4px 0; font-size: 18px;">
+                            {change.full_name or 'Unknown'}
+                        </h3>
+                        <p style="color: #00FFFF; margin: 0; font-size: 14px; font-weight: 600;">
+                            {change.current_title or 'N/A'} @ {change.current_company or 'N/A'}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        {level_badge}
+                        <div style="margin-top: 8px;">
+                            <span class="days-badge {days_class}">{change.days_in_role} days in role</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                        <span style="color: #708090; font-size: 11px;">PREVIOUS</span>
+                        <p style="color: #C0C0C0; margin: 4px 0 0 0; font-size: 13px;">
+                            {change.previous_title or 'N/A'}<br/>
+                            <span style="color: #708090;">{change.previous_company or 'N/A'}</span>
+                        </p>
+                    </div>
+                    <div style="background: rgba(0,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.1);">
+                        <span style="color: #00FFFF; font-size: 11px;">CURRENT</span>
+                        <p style="color: #FFFFFF; margin: 4px 0 0 0; font-size: 13px;">
+                            {change.current_title or 'N/A'}<br/>
+                            <span style="color: #00FFFF;">{change.current_company or 'N/A'}</span>
+                        </p>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <span style="color: #708090; font-size: 12px;">💡 {change.opportunity_reason}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Action buttons
+            btn_cols = st.columns([1, 1, 1, 3])
+            with btn_cols[0]:
+                if change.linkedin_url:
+                    st.link_button("🔗 LinkedIn", change.linkedin_url, use_container_width=True)
+            with btn_cols[1]:
+                if st.button("📥 Add to Leads", key=f"add_{change.person_id}", use_container_width=True):
+                    lead = change.to_lead()
+                    st.session_state.filtered_leads.append(lead)
+                    st.success(f"Added {change.full_name} to leads!")
+            with btn_cols[2]:
+                if change.email:
+                    st.button(f"📧 {change.email[:20]}...", key=f"email_{change.person_id}", use_container_width=True)
+
+            st.markdown("<br/>", unsafe_allow_html=True)
+
+        # Export section
+        st.markdown("---")
+        st.markdown("### 📤 Export Options")
+
+        export_cols = st.columns(3)
+        with export_cols[0]:
+            if st.button("📥 Add All to Leads", use_container_width=True):
+                added = 0
+                for change in display_changes:
+                    lead = change.to_lead()
+                    if lead.id not in [l.id for l in st.session_state.filtered_leads]:
+                        st.session_state.filtered_leads.append(lead)
+                        added += 1
+                st.success(f"Added {added} leads to your pipeline!")
+
+        with export_cols[1]:
+            if st.button("📋 Export to CSV", use_container_width=True):
+                # Create DataFrame for export
+                export_data = []
+                for c in display_changes:
+                    export_data.append({
+                        "Name": c.full_name,
+                        "Current Title": c.current_title,
+                        "Current Company": c.current_company,
+                        "Previous Title": c.previous_title,
+                        "Previous Company": c.previous_company,
+                        "Days in Role": c.days_in_role,
+                        "Opportunity Level": c.opportunity_level.value.upper(),
+                        "Score": c.opportunity_score,
+                        "Email": c.email or "",
+                        "LinkedIn": c.linkedin_url or "",
+                        "Reason": c.opportunity_reason
+                    })
+                df = pd.DataFrame(export_data)
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    "⬇️ Download CSV",
+                    csv,
+                    "job_changes.csv",
+                    "text/csv",
+                    use_container_width=True
+                )
+
+        with export_cols[2]:
+            if st.button("🔄 Send to HubSpot", use_container_width=True):
+                st.info("Coming soon: Direct HubSpot integration")
+
+    else:
+        # Empty state
+        st.markdown("""
+        <div style="text-align: center; padding: 60px 20px; background: rgba(45, 55, 72, 0.3);
+                    border: 1px dashed rgba(0, 255, 255, 0.3); border-radius: 16px; margin-top: 24px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+            <h3 style="color: #C0C0C0; margin-bottom: 8px;">No Job Changes Found Yet</h3>
+            <p style="color: #708090;">Select an industry and search to find new decision-makers</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Info section
+    with st.expander("ℹ️ How Job Change Detection Works"):
+        st.markdown("""
+        ### Why Job Changes Matter
+
+        When someone takes a new leadership role, they're in a **90-day opportunity window**:
+
+        | Timeframe | Opportunity Level | Why |
+        |-----------|------------------|-----|
+        | **0-30 days** | 🔥 Critical | Evaluating all vendors, building processes |
+        | **31-60 days** | 🟡 High | Implementing changes, open to new solutions |
+        | **61-90 days** | 🟢 Medium | Still flexible, establishing relationships |
+        | **90+ days** | ⚪ Low | Settled into role, harder to change |
+
+        ### Opportunity Levels
+
+        - **🥇 GOLD**: C-level, VP, Owner in first 30 days = Contact immediately
+        - **🥈 SILVER**: Director/Manager or 31-60 days = Contact this week
+        - **🥉 BRONZE**: Other changes = Add to nurture sequence
+
+        ### Best Practices
+
+        1. **Personalize outreach** - Reference their new role
+        2. **Offer value first** - Share relevant industry insights
+        3. **Time it right** - Don't wait more than a week for GOLD opportunities
+        """)
+
+
 def main():
     render_sidebar()
 
@@ -8847,6 +9307,8 @@ def main():
         show_leads()
     elif page == "Lead Warming":
         show_lead_warming()
+    elif page == "Job Changes":
+        show_job_changes()
     elif page == "CRM":
         show_crm()
     elif page == "Analytics":
