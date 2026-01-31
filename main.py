@@ -36,6 +36,7 @@ from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, Produc
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 from src.database import LeadDatabase
+from src.enrichment import HunterClient
 
 # Initialize
 console = Console()
@@ -267,9 +268,10 @@ def menu_view_local_leads():
     console.print("  [5] Estadisticas locales")
     console.print("  [6] Enviar pendientes a HubSpot")
     console.print("  [7] Exportar a CSV")
+    console.print("  [8] Buscar emails (Hunter.io)")
     console.print("  [0] Volver")
 
-    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7"], default="1")
+    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8"], default="1")
 
     if choice == "0":
         return
@@ -358,6 +360,90 @@ Leads encontrados hoy: [green]{stats['leads_today']}[/green]
         filepath = db.export_to_csv(qualified_only=qualified_only)
         console.print(f"\n[green]Exportado exitosamente a:[/green]")
         console.print(f"  [cyan]{filepath}[/cyan]")
+
+    elif choice == "8":
+        # Enrich leads with Hunter.io
+        enrich_leads_with_hunter()
+
+
+def enrich_leads_with_hunter():
+    """Use Hunter.io to find emails for leads without email."""
+    with HunterClient() as hunter:
+        if not hunter.is_configured():
+            console.print("[red]Hunter.io no configurado. Agrega HUNTER_API_KEY en .env[/red]")
+            return
+
+        # Show account info
+        account = hunter.get_account_info()
+        if "error" not in account:
+            console.print(f"\n[cyan]Hunter.io - Requests disponibles: {account.get('requests_available', '?')}[/cyan]")
+
+        # Get leads without email (or with placeholder email)
+        leads = db.get_all_leads(limit=100)
+        leads_without_email = [
+            l for l in leads
+            if not l.email or l.email.endswith("@leadgen.placeholder")
+        ]
+
+        if not leads_without_email:
+            console.print("[yellow]Todos los leads ya tienen email[/yellow]")
+            return
+
+        console.print(f"\n[bold]Encontrados {len(leads_without_email)} leads sin email[/bold]")
+
+        # Ask how many to process
+        max_to_process = IntPrompt.ask(
+            "Cuantos leads procesar?",
+            default=min(10, len(leads_without_email))
+        )
+
+        leads_to_process = leads_without_email[:max_to_process]
+        found_count = 0
+        errors = 0
+
+        console.print(f"\n[cyan]Buscando emails para {len(leads_to_process)} leads...[/cyan]\n")
+
+        for i, lead in enumerate(leads_to_process, 1):
+            try:
+                result = hunter.find_email_for_lead(
+                    url=lead.url,
+                    company=lead.company,
+                    name=lead.name or lead.username
+                )
+
+                if result:
+                    # Update lead in database
+                    db.update_lead(lead.id, email=result.email)
+
+                    # Also update name if found
+                    if result.first_name and result.last_name:
+                        full_name = f"{result.first_name} {result.last_name}"
+                        db.update_lead(lead.id, name=full_name)
+
+                    console.print(
+                        f"  [{i}/{len(leads_to_process)}] [green]{lead.title[:30]}...[/green] "
+                        f"-> {result.email} (confianza: {result.confidence}%)"
+                    )
+                    found_count += 1
+                else:
+                    console.print(
+                        f"  [{i}/{len(leads_to_process)}] [yellow]{lead.title[:30]}...[/yellow] "
+                        f"-> No encontrado"
+                    )
+
+            except Exception as e:
+                console.print(
+                    f"  [{i}/{len(leads_to_process)}] [red]{lead.title[:30]}...[/red] "
+                    f"-> Error: {e}"
+                )
+                errors += 1
+
+        # Summary
+        console.print(f"\n[bold]Resumen:[/bold]")
+        console.print(f"  [green]Emails encontrados: {found_count}[/green]")
+        console.print(f"  [yellow]No encontrados: {len(leads_to_process) - found_count - errors}[/yellow]")
+        if errors:
+            console.print(f"  [red]Errores: {errors}[/red]")
 
 
 # ==================== 3. VIEW HUBSPOT LEADS ====================
@@ -580,6 +666,7 @@ def menu_configuration():
     console.print(f"  Google:    {'[green]Configurado[/green]' if settings.google_api_key else '[red]No configurado[/red]'}")
     console.print(f"  OpenAI:    {'[green]Configurado[/green]' if settings.openai_api_key else '[red]No configurado[/red]'}")
     console.print(f"  Anthropic: {'[green]Configurado[/green]' if settings.anthropic_api_key else '[red]No configurado[/red]'}")
+    console.print(f"  Hunter.io: {'[green]Configurado[/green]' if settings.hunter_api_key else '[red]No configurado[/red]'}")
 
     # Database info
     console.print(f"\n[bold]Base de datos local:[/bold]")
