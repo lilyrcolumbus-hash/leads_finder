@@ -30,29 +30,119 @@ st.set_page_config(
     initial_sidebar_state="collapsed"  # Collapsed by default for mobile
 )
 
-# Mobile-optimized CSS
+# Mobile-optimized CSS with enhanced animations
 st.markdown("""
 <style>
-    /* Base styles */
+    /* ========== CSS VARIABLES ========== */
+    :root {
+        --primary: #667eea;
+        --primary-dark: #5a67d8;
+        --secondary: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --info: #3b82f6;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --bg-card: #ffffff;
+        --bg-hover: #f8fafc;
+        --border: #e2e8f0;
+        --shadow: rgba(0,0,0,0.1);
+        --shadow-lg: rgba(0,0,0,0.15);
+    }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    @keyframes statusPulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+        }
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* ========== BASE STYLES ========== */
     .stApp {
         max-width: 100%;
     }
 
-    /* Mobile-first responsive design */
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, var(--primary), var(--secondary));
+        border-radius: 4px;
+    }
+
+    /* ========== MOBILE-FIRST RESPONSIVE ========== */
     @media (max-width: 768px) {
         .stApp {
             padding: 0.5rem;
+            padding-bottom: 80px !important; /* Space for bottom nav */
         }
 
-        /* Make buttons full width and larger */
         .stButton > button {
             width: 100% !important;
             min-height: 3rem !important;
             font-size: 1.1rem !important;
             margin: 0.5rem 0 !important;
+            transition: all 0.3s ease !important;
         }
 
-        /* Larger touch targets for checkboxes */
+        .stButton > button:active {
+            transform: scale(0.98) !important;
+        }
+
         .stCheckbox {
             padding: 0.75rem 0 !important;
         }
@@ -61,132 +151,356 @@ st.markdown("""
             font-size: 1.1rem !important;
         }
 
-        /* Better spacing for metrics */
         [data-testid="metric-container"] {
             padding: 0.75rem !important;
             margin: 0.25rem 0 !important;
+            animation: fadeInUp 0.4s ease-out;
         }
 
-        /* Larger text in metrics */
         [data-testid="stMetricValue"] {
             font-size: 1.5rem !important;
         }
 
-        /* Make expanders easier to tap */
         .streamlit-expanderHeader {
             font-size: 1rem !important;
             padding: 1rem !important;
         }
 
-        /* Sidebar adjustments */
         [data-testid="stSidebar"] {
             min-width: 280px !important;
         }
 
-        /* Tab styling */
         .stTabs [data-baseweb="tab"] {
             padding: 0.75rem 1rem !important;
             font-size: 1rem !important;
         }
 
-        /* Select box */
         .stSelectbox {
             margin: 0.5rem 0 !important;
         }
 
-        /* Progress bar */
         .stProgress {
             margin: 1rem 0 !important;
         }
 
-        /* Info/Warning/Success boxes */
         .stAlert {
             padding: 1rem !important;
             font-size: 1rem !important;
         }
 
-        /* Headers */
-        h1 {
-            font-size: 1.75rem !important;
-        }
+        h1 { font-size: 1.75rem !important; }
+        h2 { font-size: 1.5rem !important; }
+        h3 { font-size: 1.25rem !important; }
 
-        h2 {
-            font-size: 1.5rem !important;
-        }
-
-        h3 {
-            font-size: 1.25rem !important;
+        /* Show mobile bottom nav */
+        .mobile-bottom-nav {
+            display: flex !important;
         }
     }
 
-    /* Main header styling */
+    /* ========== MAIN HEADER ========== */
     .main-header {
         font-size: 1.75rem;
         font-weight: bold;
-        color: #1f77b4;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         text-align: center;
         margin-bottom: 1.5rem;
         padding: 1rem;
+        animation: fadeIn 0.6s ease-out;
     }
 
-    /* Card styling */
+    /* ========== CARD STYLING ========== */
     .lead-card {
-        background-color: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 1rem;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
         margin: 0.75rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px var(--shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeInUp 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
     }
 
-    /* Status badges */
+    .lead-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .lead-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px var(--shadow-lg);
+        border-color: var(--primary);
+    }
+
+    .lead-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    /* ========== STATUS BADGES ========== */
     .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.35rem 0.85rem;
         border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
     .status-success {
-        background-color: #d4edda;
-        color: #155724;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     .status-warning {
-        background-color: #fff3cd;
-        color: #856404;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15));
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
     }
 
     .status-error {
-        background-color: #f8d7da;
-        color: #721c24;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
-    /* Navigation menu styling */
+    .status-info {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.15));
+        color: var(--info);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    /* Status dot with pulse */
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .status-dot.active {
+        background: var(--success);
+        animation: statusPulse 2s infinite;
+    }
+
+    .status-dot.inactive {
+        background: #94a3b8;
+    }
+
+    /* ========== NAVIGATION ========== */
     .nav-link {
         display: block;
         padding: 1rem;
         margin: 0.5rem 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
         color: white !important;
         text-decoration: none;
-        border-radius: 10px;
+        border-radius: 12px;
         text-align: center;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 1.1rem;
+        transition: all 0.3s ease;
     }
 
-    /* Mobile table scroll */
+    .nav-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* ========== MOBILE BOTTOM NAVIGATION ========== */
+    .mobile-bottom-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 65px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        z-index: 99999;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 8px;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        min-width: 60px;
+    }
+
+    .mobile-nav-item:active {
+        transform: scale(0.95);
+    }
+
+    .mobile-nav-item.active {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    }
+
+    .mobile-nav-icon {
+        font-size: 22px;
+        margin-bottom: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav-item.active .mobile-nav-icon {
+        transform: scale(1.1);
+    }
+
+    .mobile-nav-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .mobile-nav-item.active .mobile-nav-label {
+        color: var(--primary);
+    }
+
+    /* ========== PROGRESS INDICATOR ========== */
+    .progress-container {
+        background: #e2e8f0;
+        border-radius: 10px;
+        height: 10px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        border-radius: 10px;
+        transition: width 0.5s ease;
+        position: relative;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 2s infinite;
+        background-size: 200% 100%;
+    }
+
+    /* ========== LOADING SKELETON ========== */
+    .skeleton {
+        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+
+    .skeleton-text {
+        height: 16px;
+        margin-bottom: 8px;
+    }
+
+    .skeleton-card {
+        height: 100px;
+        margin: 0.75rem 0;
+    }
+
+    /* ========== SCORE INDICATOR ========== */
+    .score-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .score-high {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+        color: var(--success);
+    }
+
+    .score-medium {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15));
+        color: var(--warning);
+    }
+
+    .score-low {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+        color: var(--error);
+    }
+
+    /* ========== SYNC STATUS ========== */
+    .sync-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    .sync-status.syncing .sync-icon {
+        animation: spin 1s linear infinite;
+    }
+
+    /* ========== UTILITIES ========== */
     .dataframe-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Fix for iOS input zoom */
     input, select, textarea {
         font-size: 16px !important;
     }
+
+    /* Animation classes */
+    .animate-in {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .animate-slide-left {
+        animation: slideInLeft 0.5s ease-out;
+    }
+
+    .hover-lift {
+        transition: all 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px var(--shadow-lg);
+    }
+
+    /* Staggered animation delays */
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.1s; }
+    .stagger-3 { animation-delay: 0.15s; }
+    .stagger-4 { animation-delay: 0.2s; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -576,5 +890,66 @@ def show_config():
     st.info("💡 Edita `.env` para cambiar la configuración")
 
 
+def render_mobile_bottom_nav():
+    """Render mobile bottom navigation bar."""
+    current_page = st.session_state.current_page
+
+    # Map pages to icons and labels
+    nav_items = [
+        ("inicio", "🏠", "Inicio"),
+        ("buscar", "🔍", "Buscar"),
+        ("leads", "📋", "Leads"),
+        ("stats", "📊", "Stats"),
+        ("config", "⚙️", "Config"),
+    ]
+
+    nav_html = '<div class="mobile-bottom-nav">'
+
+    for page, icon, label in nav_items:
+        is_active = "active" if current_page == page else ""
+        nav_html += f'''
+        <div class="mobile-nav-item {is_active}" onclick="navigateTo('{page}')" data-page="{page}">
+            <span class="mobile-nav-icon">{icon}</span>
+            <span class="mobile-nav-label">{label}</span>
+        </div>
+        '''
+
+    nav_html += '</div>'
+
+    # Add JavaScript for navigation
+    nav_html += '''
+    <script>
+    function navigateTo(page) {
+        // Find the sidebar buttons and click the matching one
+        const buttons = document.querySelectorAll('[data-testid="stSidebar"] button');
+        const pageMap = {
+            'inicio': '🏠 Inicio',
+            'buscar': '🔍 Buscar Leads',
+            'leads': '📋 Mis Leads',
+            'stats': '📊 Estadísticas',
+            'config': '⚙️ Configuración'
+        };
+        buttons.forEach(btn => {
+            if (btn.textContent.includes(pageMap[page].substring(2))) {
+                btn.click();
+            }
+        });
+    }
+
+    // Update active state for visual feedback
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    </script>
+    '''
+
+    st.markdown(nav_html, unsafe_allow_html=True)
+
+
 if __name__ == "__main__":
     main()
+    # Render mobile bottom navigation after main content
+    render_mobile_bottom_nav()
