@@ -14,6 +14,13 @@ class LeadSource(str, Enum):
     PRODUCT_HUNT = "product_hunt"
 
 
+class LeadUrgency(str, Enum):
+    """Urgency level of a lead."""
+    HOT = "hot"
+    WARM = "warm"
+    COLD = "cold"
+
+
 class Lead(BaseModel):
     """Represents a potential lead."""
 
