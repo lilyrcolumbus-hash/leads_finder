@@ -80,6 +80,24 @@ class Settings(BaseSettings):
         "Auto Repair": ["mechanic", "auto repair", "car service", "automotive"]
     }
 
+    # Urgency keywords for scoring
+    urgency_keywords: List[str] = [
+        "urgent", "asap", "immediately", "emergency", "critical",
+        "desperate", "help needed", "right away", "as soon as possible",
+        "can't wait", "time sensitive", "deadline", "losing money",
+        "losing customers", "frustrated", "fed up", "at my wits end"
+    ]
+
+    # Scoring weights for lead qualification
+    scoring_weights: dict = {
+        "keyword_match": 9,           # Points per pain keyword matched (max 45)
+        "urgency_keyword": 8,         # Points per urgency keyword (max 25)
+        "multiple_pain_points": 10,   # Bonus for 3+ pain keywords
+        "recent_post": 15,            # Bonus for posts < 24 hours old
+        "solution_seeking": 5,        # Bonus for solution-seeking language
+        "industry_match": 5,          # Bonus for matching target industry
+    }
+
     # Batch sizes
     max_leads_per_source: int = 50
     ai_filter_batch_size: int = 10
