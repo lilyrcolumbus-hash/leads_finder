@@ -700,7 +700,7 @@ st.markdown("""
 
     /* ========== MAIN APP BACKGROUND ========== */
     .stApp, [data-testid="stAppViewContainer"] {
-        background: radial-gradient(ellipse at top, #0A1628 0%, var(--bg-dark) 50%, var(--bg-darker) 100%) !important;
+        background: radial-gradient(ellipse at top, #2D2015 0%, #1A1A1A 50%, #0D0D0D 100%) !important;
         background-attachment: fixed !important;
     }
 
@@ -732,11 +732,11 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* ========== SIDEBAR - HOLOGRAPHIC PANEL ========== */
+    /* ========== SIDEBAR - CORPORATE ORANGE PANEL ========== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(30, 20, 15, 0.95) 0%, rgba(5, 10, 25, 0.98) 100%) !important;
-        border-right: 1px solid var(--glass-border) !important;
-        box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5), inset -1px 0 0 var(--cyan-dim) !important;
+        background: linear-gradient(180deg, rgba(45, 32, 21, 0.98) 0%, rgba(26, 26, 26, 0.99) 100%) !important;
+        border-right: 1px solid rgba(232, 93, 4, 0.3) !important;
+        box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5), inset -1px 0 0 rgba(232, 93, 4, 0.2) !important;
     }
 
     [data-testid="stSidebar"]::before {
