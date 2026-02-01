@@ -8564,12 +8564,97 @@ Is there anything specific about the platform or lead generation strategies I ca
 # MAIN
 # ============================================
 def render_floating_assistant():
-    """Render a floating AI assistant button accessible from any page."""
+    """Render a modern floating AI assistant button accessible from any page."""
     # Don't show floating button on AI Assistant page
     if st.session_state.get('nav_page') == "AI Assistant":
         return
-    # Button is now in sidebar menu, no floating button needed
-    pass
+
+    st.markdown("""
+    <style>
+        /* Floating AI Button - Modern Pill Design */
+        .floating-ai-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #E85D04 0%, #DC2F02 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(232, 93, 4, 0.4), 0 0 40px rgba(232, 93, 4, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .floating-ai-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(232, 93, 4, 0.5), 0 0 60px rgba(232, 93, 4, 0.3);
+            background: linear-gradient(135deg, #F48C06 0%, #E85D04 100%);
+            padding-right: 24px;
+        }
+
+        .floating-ai-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .floating-ai-icon {
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .floating-ai-text {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+            }
+        }
+
+        /* Ripple effect on click */
+        .floating-ai-btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .floating-ai-btn:active::after {
+            opacity: 1;
+        }
+    </style>
+
+    <a href="?nav=AI+Assistant" class="floating-ai-btn" onclick="window.location.href='?nav=AI+Assistant'; return false;">
+        <span class="floating-ai-icon">🤖</span>
+        <span class="floating-ai-text">AI Assistant</span>
+    </a>
+    """, unsafe_allow_html=True)
 
 
 def show_lead_warming():
