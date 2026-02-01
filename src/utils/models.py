@@ -29,6 +29,13 @@ class LeadUrgency(str, Enum):
     COLD = "cold"
 
 
+class LeadCategory(str, Enum):
+    """Category of lead based on pain detection."""
+    PAIN = "pain"           # Explicit pain/problem detected
+    OPPORTUNITY = "opportunity"  # No explicit pain but potential customer
+    COLD = "cold"           # Low potential
+
+
 class Lead(BaseModel):
     """Represents a potential lead."""
 
@@ -66,6 +73,8 @@ class Lead(BaseModel):
     ai_score: Optional[float] = Field(default=None, description="AI relevance score 0-1")
     ai_reasoning: Optional[str] = Field(default=None, description="AI explanation")
     is_qualified: bool = Field(default=False, description="Whether AI qualified this lead")
+    lead_category: Optional[LeadCategory] = Field(default=None, description="Category: pain, opportunity, or cold")
+    has_explicit_pain: bool = Field(default=False, description="Whether lead has explicit pain/problem")
 
     # Tracking
     found_at: datetime = Field(default_factory=datetime.utcnow)
