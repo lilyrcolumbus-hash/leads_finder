@@ -20,8 +20,12 @@ class LeadSource(str, Enum):
 
 class LeadUrgency(str, Enum):
     """Urgency level of a lead."""
+    CRITICAL = "critical"
+    HIGH = "high"
     HOT = "hot"
+    MEDIUM = "medium"
     WARM = "warm"
+    LOW = "low"
     COLD = "cold"
 
 
@@ -47,6 +51,16 @@ class Lead(BaseModel):
     # Metadata
     keywords_matched: List[str] = Field(default_factory=list, description="Pain keywords found")
     subreddit: Optional[str] = Field(default=None, description="Subreddit if from Reddit")
+    industry: Optional[str] = Field(default=None, description="Detected industry")
+
+    # Scoring
+    pain_score: Optional[float] = Field(default=None, description="Pain score 0-100")
+    intent_score: Optional[float] = Field(default=None, description="Intent score 0-100")
+    fit_score: Optional[float] = Field(default=None, description="Fit score 0-100")
+    total_score: Optional[float] = Field(default=None, description="Total combined score 0-100")
+    urgency: Optional[LeadUrgency] = Field(default=None, description="Lead urgency level")
+    urgency_keywords_matched: List[str] = Field(default_factory=list, description="Urgency keywords found")
+    score_breakdown: Optional[dict] = Field(default=None, description="Detailed score breakdown")
 
     # AI Analysis
     ai_score: Optional[float] = Field(default=None, description="AI relevance score 0-1")
