@@ -1,4 +1,4 @@
-"""AI-powered lead filtering using OpenAI or Anthropic."""
+"""AI-powered lead filtering using OpenAI, Anthropic, or Google Gemini."""
 
 import json
 from typing import List, Tuple
@@ -44,10 +44,21 @@ Return a JSON array of these objects. Example:
         self.logger = get_logger("AIFilter")
         self.openai_client = None
         self.anthropic_client = None
+        self.gemini_model = None
         self._init_clients()
 
     def _init_clients(self):
         """Initialize AI clients based on available API keys."""
+        # Try Gemini first (user's preferred)
+        if settings.gemini_api_key:
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=settings.gemini_api_key)
+                self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                self.logger.info("Initialized Google Gemini client")
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize Gemini: {e}")
+
         if settings.openai_api_key:
             try:
                 from openai import OpenAI
@@ -77,7 +88,7 @@ Return a JSON array of these objects. Example:
         if not leads:
             return []
 
-        if not self.openai_client and not self.anthropic_client:
+        if not self.openai_client and not self.anthropic_client and not self.gemini_model:
             self.logger.warning("No AI client available. Returning leads unfiltered.")
             return leads
 
@@ -124,9 +135,11 @@ Return a JSON array of these objects. Example:
 
         prompt = self.USER_PROMPT_TEMPLATE.format(leads_json=json.dumps(leads_data, indent=2))
 
-        # Try OpenAI first, then Anthropic
+        # Try Gemini first, then OpenAI, then Anthropic
         response_text = None
-        if self.openai_client:
+        if self.gemini_model:
+            response_text = self._call_gemini(prompt)
+        elif self.openai_client:
             response_text = self._call_openai(prompt)
         elif self.anthropic_client:
             response_text = self._call_anthropic(prompt)
@@ -136,6 +149,16 @@ Return a JSON array of these objects. Example:
 
         # Parse response and update leads
         return self._parse_ai_response(response_text, leads)
+
+    def _call_gemini(self, prompt: str) -> str | None:
+        """Call Google Gemini API."""
+        try:
+            full_prompt = f"{self.SYSTEM_PROMPT}\n\n{prompt}"
+            response = self.gemini_model.generate_content(full_prompt)
+            return response.text
+        except Exception as e:
+            self.logger.error(f"Gemini API error: {e}")
+            return None
 
     def _call_openai(self, prompt: str) -> str | None:
         """Call OpenAI API."""

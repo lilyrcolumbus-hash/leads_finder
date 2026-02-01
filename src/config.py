@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     google_search_engine_id: str = Field(default="", alias="GOOGLE_SEARCH_ENGINE_ID")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
+    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
     hunter_api_key: str = Field(default="", alias="HUNTER_API_KEY")
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
 
