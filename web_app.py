@@ -8,6 +8,8 @@ Run with: streamlit run web_app.py
 
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
 import sys
 from pathlib import Path
@@ -2018,6 +2020,559 @@ st.markdown("""
     button, input, select, textarea, a {
         transition: all 0.2s ease !important;
     }
+
+    /* ========== LIGHT MODE VARIABLES ========== */
+    .light-mode {
+        --bg-dark: #F8FAFC;
+        --bg-darker: #E2E8F0;
+        --bg-panel: rgba(255, 255, 255, 0.95);
+        --bg-glass: rgba(255, 255, 255, 0.8);
+        --bg-glass-light: rgba(241, 245, 249, 0.9);
+        --text-bright: #1E293B;
+        --text-primary: #334155;
+        --text-secondary: #64748B;
+        --text-dim: #94A3B8;
+        --cyan: #0EA5E9;
+        --cyan-glow: rgba(14, 165, 233, 0.3);
+        --cyan-dim: rgba(14, 165, 233, 0.15);
+        --glass-border: rgba(14, 165, 233, 0.2);
+        --glass-border-bright: rgba(14, 165, 233, 0.4);
+    }
+
+    .light-mode .stApp::before {
+        background-image:
+            linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+    }
+
+    /* ========== TOAST NOTIFICATIONS ========== */
+    .toast-container {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+    }
+
+    .toast-message {
+        padding: 16px 20px;
+        border-radius: var(--radius-md);
+        background: var(--bg-glass);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(20px);
+        box-shadow: var(--glow-cyan), 0 10px 40px rgba(0,0,0,0.3);
+        animation: toast-slide-in 0.4s ease-out, toast-fade-out 0.4s ease-in 4.6s;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error { border-left: 4px solid var(--error); }
+    .toast-warning { border-left: 4px solid var(--warning); }
+    .toast-info { border-left: 4px solid var(--cyan); }
+
+    .toast-icon {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text-bright);
+        margin-bottom: 4px;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    .toast-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-size: 18px;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.2s ease;
+    }
+
+    .toast-close:hover {
+        color: var(--text-bright);
+    }
+
+    @keyframes toast-slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toast-fade-out {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    /* ========== SKELETON LOADERS ========== */
+    .skeleton {
+        background: linear-gradient(90deg, var(--bg-glass) 25%, var(--bg-glass-light) 50%, var(--bg-glass) 75%);
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.5s infinite;
+        border-radius: var(--radius-md);
+    }
+
+    .skeleton-text {
+        height: 16px;
+        margin-bottom: 8px;
+        width: 100%;
+    }
+
+    .skeleton-text.short { width: 60%; }
+    .skeleton-text.medium { width: 80%; }
+
+    .skeleton-card {
+        height: 200px;
+        margin-bottom: 16px;
+    }
+
+    .skeleton-metric {
+        height: 120px;
+    }
+
+    .skeleton-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
+
+    @keyframes skeleton-shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* ========== ANIMATED COUNTERS ========== */
+    .animated-counter {
+        display: inline-block;
+        font-variant-numeric: tabular-nums;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .counter-animate {
+        animation: counter-pop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes counter-pop {
+        0% { transform: scale(0.8); opacity: 0; }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ========== PAGE TRANSITIONS ========== */
+    .page-transition-enter {
+        animation: page-fade-in 0.4s ease-out;
+    }
+
+    .page-transition-exit {
+        animation: page-fade-out 0.3s ease-in;
+    }
+
+    @keyframes page-fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes page-fade-out {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); }
+    }
+
+    /* ========== SWIPE GESTURES (Mobile) ========== */
+    .swipeable-card {
+        touch-action: pan-y;
+        transition: transform 0.3s ease;
+        position: relative;
+    }
+
+    .swipe-actions {
+        position: absolute;
+        top: 0;
+        right: -120px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px;
+    }
+
+    .swipe-action-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        transition: transform 0.2s ease;
+    }
+
+    .swipe-action-btn.delete {
+        background: var(--error);
+        color: white;
+    }
+
+    .swipe-action-btn.favorite {
+        background: var(--warning);
+        color: white;
+    }
+
+    .swipe-action-btn:active {
+        transform: scale(0.9);
+    }
+
+    /* ========== PULL TO REFRESH ========== */
+    .pull-to-refresh {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100%);
+        z-index: 99998;
+        padding: 16px 24px;
+        background: var(--bg-glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        backdrop-filter: blur(20px);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .pull-to-refresh.visible {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .pull-spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid var(--cyan-dim);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ========== COMPACT VIEW CARDS ========== */
+    .lead-card-compact {
+        padding: 12px 16px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .lead-card-compact .lead-header {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .lead-card-compact .lead-scores {
+        display: none;
+    }
+
+    .lead-card-compact .lead-content {
+        display: none;
+    }
+
+    .lead-card-compact .lead-mini-score {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+    }
+
+    /* ========== BADGE WITH COUNTER ========== */
+    .nav-badge {
+        position: relative;
+    }
+
+    .badge-counter {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        background: var(--error);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 10px var(--error-glow);
+        animation: badge-pulse 2s infinite;
+    }
+
+    @keyframes badge-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    /* ========== KANBAN BOARD ========== */
+    .kanban-container {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding-bottom: 16px;
+        scroll-snap-type: x mandatory;
+    }
+
+    .kanban-column {
+        min-width: 280px;
+        max-width: 320px;
+        flex-shrink: 0;
+        background: var(--bg-glass);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        scroll-snap-align: start;
+    }
+
+    .kanban-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .kanban-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-bright);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .kanban-count {
+        background: var(--cyan-dim);
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .kanban-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 200px;
+    }
+
+    .kanban-card {
+        background: var(--bg-panel);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: 14px;
+        cursor: grab;
+        transition: all 0.2s ease;
+    }
+
+    .kanban-card:hover {
+        border-color: var(--cyan-dim);
+        box-shadow: var(--glow-cyan);
+        transform: translateY(-2px);
+    }
+
+    .kanban-card:active {
+        cursor: grabbing;
+    }
+
+    .kanban-card.dragging {
+        opacity: 0.5;
+        transform: rotate(3deg);
+    }
+
+    .kanban-card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-bright);
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .kanban-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    /* ========== ACTIVITY TIMELINE ========== */
+    .timeline-container {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, var(--cyan) 0%, var(--electric-blue) 50%, var(--teal) 100%);
+    }
+
+    .timeline-item {
+        position: relative;
+        padding: 16px 20px;
+        background: var(--bg-glass);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        margin-bottom: 16px;
+        animation: timeline-fade-in 0.4s ease-out;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -24px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        background: var(--cyan);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan-glow);
+    }
+
+    .timeline-time {
+        font-size: 11px;
+        font-family: 'Share Tech Mono', monospace;
+        color: var(--cyan);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 6px;
+    }
+
+    .timeline-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-bright);
+        margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    @keyframes timeline-fade-in {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ========== VIEW TOGGLE BUTTON ========== */
+    .view-toggle {
+        display: inline-flex;
+        background: var(--bg-glass);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    .view-toggle-btn {
+        padding: 8px 16px;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .view-toggle-btn:hover {
+        color: var(--text-bright);
+        background: var(--bg-glass-light);
+    }
+
+    .view-toggle-btn.active {
+        background: linear-gradient(135deg, var(--cyan-dim) 0%, var(--electric-dim) 100%);
+        color: var(--cyan);
+        box-shadow: inset 0 0 20px var(--cyan-subtle);
+    }
+
+    /* ========== THEME TOGGLE ========== */
+    .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        background: var(--bg-glass);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+        border-color: var(--cyan-dim);
+        box-shadow: var(--glow-cyan);
+    }
+
+    .theme-toggle-track {
+        width: 44px;
+        height: 24px;
+        background: var(--bg-glass-light);
+        border-radius: 12px;
+        position: relative;
+        transition: background 0.3s ease;
+    }
+
+    .theme-toggle-thumb {
+        width: 20px;
+        height: 20px;
+        background: var(--cyan);
+        border-radius: 50%;
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s ease;
+        box-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    .theme-toggle.light .theme-toggle-thumb {
+        transform: translateX(20px);
+    }
+
+    .theme-toggle-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
 </style>
 
 <script>
@@ -2069,6 +2624,267 @@ function styleButtons() {
 styleButtons();
 const observer = new MutationObserver(styleButtons);
 observer.observe(document.body, { childList: true, subtree: true });
+
+// ========== THEME TOGGLE ==========
+function toggleTheme() {
+    const app = document.querySelector('.stApp');
+    const isDark = !app.classList.contains('light-mode');
+
+    if (isDark) {
+        app.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+    } else {
+        app.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Apply saved theme on load
+(function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.querySelector('.stApp')?.classList.add('light-mode');
+    }
+})();
+
+// ========== TOAST NOTIFICATIONS ==========
+function showToast(title, message, type = 'info') {
+    const container = document.querySelector('.toast-container') || createToastContainer();
+
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast-message toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type]}</span>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-text">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after 5s
+    setTimeout(() => toast.remove(), 5000);
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+// ========== ANIMATED COUNTERS ==========
+function animateCounter(element, target, duration = 1000) {
+    const start = 0;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (target - start) * easeOut);
+
+        element.textContent = current.toLocaleString();
+        element.classList.add('counter-animate');
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+
+    requestAnimationFrame(update);
+}
+
+// Auto-animate counters when they come into view
+const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const el = entry.target;
+            const target = parseInt(el.dataset.target || el.textContent);
+            if (!isNaN(target)) {
+                animateCounter(el, target);
+            }
+            counterObserver.unobserve(el);
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.animated-counter').forEach(el => {
+    counterObserver.observe(el);
+});
+
+// ========== KANBAN DRAG & DROP ==========
+let draggedCard = null;
+
+function initKanban() {
+    const cards = document.querySelectorAll('.kanban-card');
+    const columns = document.querySelectorAll('.kanban-cards');
+
+    cards.forEach(card => {
+        card.draggable = true;
+
+        card.addEventListener('dragstart', (e) => {
+            draggedCard = card;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            draggedCard = null;
+        });
+    });
+
+    columns.forEach(column => {
+        column.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            const afterElement = getDragAfterElement(column, e.clientY);
+            if (afterElement == null) {
+                column.appendChild(draggedCard);
+            } else {
+                column.insertBefore(draggedCard, afterElement);
+            }
+        });
+    });
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.kanban-card:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// ========== PULL TO REFRESH ==========
+let touchStartY = 0;
+let isPulling = false;
+
+function initPullToRefresh() {
+    const mainContent = document.querySelector('.main');
+    if (!mainContent) return;
+
+    mainContent.addEventListener('touchstart', (e) => {
+        if (window.scrollY === 0) {
+            touchStartY = e.touches[0].clientY;
+        }
+    });
+
+    mainContent.addEventListener('touchmove', (e) => {
+        if (window.scrollY === 0 && touchStartY) {
+            const touchY = e.touches[0].clientY;
+            const diff = touchY - touchStartY;
+
+            if (diff > 80 && !isPulling) {
+                isPulling = true;
+                showPullRefresh();
+            }
+        }
+    });
+
+    mainContent.addEventListener('touchend', () => {
+        if (isPulling) {
+            isPulling = false;
+            hidePullRefresh();
+            // Trigger refresh - Streamlit will handle this
+            window.location.reload();
+        }
+        touchStartY = 0;
+    });
+}
+
+function showPullRefresh() {
+    let indicator = document.querySelector('.pull-to-refresh');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.className = 'pull-to-refresh';
+        indicator.innerHTML = '<div class="pull-spinner"></div><span>Refreshing...</span>';
+        document.body.appendChild(indicator);
+    }
+    indicator.classList.add('visible');
+}
+
+function hidePullRefresh() {
+    const indicator = document.querySelector('.pull-to-refresh');
+    if (indicator) {
+        indicator.classList.remove('visible');
+    }
+}
+
+// ========== SWIPE GESTURES ==========
+function initSwipeGestures() {
+    const cards = document.querySelectorAll('.swipeable-card');
+
+    cards.forEach(card => {
+        let startX = 0;
+        let currentX = 0;
+
+        card.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        card.addEventListener('touchmove', (e) => {
+            currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+
+            if (diff > 0 && diff < 120) {
+                card.style.transform = `translateX(-${diff}px)`;
+            }
+        });
+
+        card.addEventListener('touchend', () => {
+            const diff = startX - currentX;
+
+            if (diff > 80) {
+                card.style.transform = 'translateX(-120px)';
+            } else {
+                card.style.transform = 'translateX(0)';
+            }
+        });
+    });
+}
+
+// ========== PAGE TRANSITIONS ==========
+function addPageTransition() {
+    const main = document.querySelector('.main');
+    if (main) {
+        main.classList.add('page-transition-enter');
+        setTimeout(() => main.classList.remove('page-transition-enter'), 400);
+    }
+}
+
+// Initialize all features
+document.addEventListener('DOMContentLoaded', () => {
+    initKanban();
+    initPullToRefresh();
+    initSwipeGestures();
+    addPageTransition();
+});
+
+// Re-init on Streamlit updates
+const streamlitObserver = new MutationObserver(() => {
+    initKanban();
+    initSwipeGestures();
+});
+streamlitObserver.observe(document.body, { childList: true, subtree: true });
 </script>
 """, unsafe_allow_html=True)
 
@@ -2103,6 +2919,248 @@ if 'language' not in st.session_state:
 # Error notification system
 if 'error_notifications' not in st.session_state:
     st.session_state.error_notifications = []  # List of error notifications
+
+# Visual Enhancement Settings
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = True  # Default to dark mode (holographic theme)
+if 'card_view_mode' not in st.session_state:
+    st.session_state.card_view_mode = 'expanded'  # 'expanded' or 'compact'
+if 'new_leads_count' not in st.session_state:
+    st.session_state.new_leads_count = 0  # Badge counter for new leads
+if 'toast_messages' not in st.session_state:
+    st.session_state.toast_messages = []  # Toast notification queue
+if 'kanban_stages' not in st.session_state:
+    st.session_state.kanban_stages = {
+        'new': [],
+        'contacted': [],
+        'qualified': [],
+        'proposal': [],
+        'won': [],
+        'lost': []
+    }
+if 'activity_timeline' not in st.session_state:
+    st.session_state.activity_timeline = []  # Activity log for timeline
+if 'is_loading' not in st.session_state:
+    st.session_state.is_loading = False  # For skeleton loaders
+
+# ============================================
+# VISUAL ENHANCEMENT HELPER FUNCTIONS
+# ============================================
+
+def show_toast(title: str, message: str, toast_type: str = "info"):
+    """Show a toast notification using JavaScript."""
+    st.markdown(f"""
+    <script>
+        if (typeof showToast === 'function') {{
+            showToast("{title}", "{message}", "{toast_type}");
+        }}
+    </script>
+    """, unsafe_allow_html=True)
+
+def add_activity(title: str, description: str, activity_type: str = "action"):
+    """Add an activity to the timeline."""
+    activity = {
+        'timestamp': datetime.now(),
+        'title': title,
+        'description': description,
+        'type': activity_type
+    }
+    st.session_state.activity_timeline.insert(0, activity)
+    # Keep only last 50 activities
+    st.session_state.activity_timeline = st.session_state.activity_timeline[:50]
+
+def render_skeleton(skeleton_type: str = "card", count: int = 3):
+    """Render skeleton loading placeholders."""
+    skeletons = ""
+    for _ in range(count):
+        if skeleton_type == "card":
+            skeletons += '<div class="skeleton skeleton-card"></div>'
+        elif skeleton_type == "metric":
+            skeletons += '<div class="skeleton skeleton-metric"></div>'
+        elif skeleton_type == "text":
+            skeletons += '''
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text medium"></div>
+                <div class="skeleton skeleton-text short"></div>
+            '''
+    st.markdown(f'<div class="skeleton-container">{skeletons}</div>', unsafe_allow_html=True)
+
+def render_view_toggle():
+    """Render the view mode toggle (expanded/compact)."""
+    current_mode = st.session_state.card_view_mode
+    expanded_active = "active" if current_mode == "expanded" else ""
+    compact_active = "active" if current_mode == "compact" else ""
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        toggle_col1, toggle_col2 = st.columns(2)
+        with toggle_col1:
+            if st.button("📋 Expanded", key="view_expanded", use_container_width=True):
+                st.session_state.card_view_mode = "expanded"
+                st.rerun()
+        with toggle_col2:
+            if st.button("📑 Compact", key="view_compact", use_container_width=True):
+                st.session_state.card_view_mode = "compact"
+                st.rerun()
+
+def render_theme_toggle():
+    """Render the dark/light theme toggle."""
+    is_dark = st.session_state.dark_mode
+    theme_label = "🌙 Dark Mode" if is_dark else "☀️ Light Mode"
+
+    if st.button(theme_label, key="theme_toggle"):
+        st.session_state.dark_mode = not is_dark
+        st.rerun()
+
+def render_kanban_board(leads: list):
+    """Render a Kanban board with leads organized by stage."""
+    stages = {
+        'new': {'title': '🆕 New', 'color': '#00FFFF', 'leads': []},
+        'contacted': {'title': '📞 Contacted', 'color': '#FFB800', 'leads': []},
+        'qualified': {'title': '✅ Qualified', 'color': '#00FF88', 'leads': []},
+        'proposal': {'title': '📝 Proposal', 'color': '#0080FF', 'leads': []},
+        'won': {'title': '🏆 Won', 'color': '#00FF88', 'leads': []},
+        'lost': {'title': '❌ Lost', 'color': '#FF3366', 'leads': []}
+    }
+
+    # Distribute leads to stages (simplified logic)
+    for i, lead in enumerate(leads):
+        stage_key = 'new'
+        if hasattr(lead, 'stage'):
+            stage_key = lead.stage.lower() if lead.stage.lower() in stages else 'new'
+        elif i % 6 == 0:
+            stage_key = 'contacted'
+        elif i % 6 == 1:
+            stage_key = 'qualified'
+        stages[stage_key]['leads'].append(lead)
+
+    # Render Kanban HTML
+    kanban_html = '<div class="kanban-container">'
+    for stage_key, stage_data in stages.items():
+        lead_cards = ""
+        for lead in stage_data['leads'][:5]:  # Limit to 5 per column
+            title = lead.title[:40] + "..." if len(lead.title) > 40 else lead.title
+            lead_cards += f'''
+                <div class="kanban-card" draggable="true" data-lead-id="{lead.id}">
+                    <div class="kanban-card-title">{title}</div>
+                    <div class="kanban-card-meta">
+                        <span>📊 {getattr(lead, 'ai_score', 0.5)*100:.0f}%</span>
+                        <span>•</span>
+                        <span>{lead.source.value}</span>
+                    </div>
+                </div>
+            '''
+
+        kanban_html += f'''
+            <div class="kanban-column" data-stage="{stage_key}">
+                <div class="kanban-header">
+                    <span class="kanban-title">{stage_data['title']}</span>
+                    <span class="kanban-count">{len(stage_data['leads'])}</span>
+                </div>
+                <div class="kanban-cards">
+                    {lead_cards if lead_cards else '<div style="color: var(--text-dim); font-size: 13px; text-align: center; padding: 20px;">No leads</div>'}
+                </div>
+            </div>
+        '''
+    kanban_html += '</div>'
+
+    st.markdown(kanban_html, unsafe_allow_html=True)
+
+def render_timeline(limit: int = 10):
+    """Render the activity timeline."""
+    activities = st.session_state.activity_timeline[:limit]
+
+    if not activities:
+        st.markdown('''
+            <div style="text-align: center; padding: 40px; color: var(--text-dim);">
+                <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+                <p>No activities yet. Start searching for leads!</p>
+            </div>
+        ''', unsafe_allow_html=True)
+        return
+
+    timeline_html = '<div class="timeline-container">'
+    for activity in activities:
+        time_str = activity['timestamp'].strftime("%H:%M")
+        date_str = activity['timestamp'].strftime("%b %d")
+        timeline_html += f'''
+            <div class="timeline-item">
+                <div class="timeline-time">{date_str} • {time_str}</div>
+                <div class="timeline-title">{activity['title']}</div>
+                <div class="timeline-desc">{activity['description']}</div>
+            </div>
+        '''
+    timeline_html += '</div>'
+
+    st.markdown(timeline_html, unsafe_allow_html=True)
+
+def render_animated_metric(label: str, value: int, prefix: str = "", suffix: str = "", color: str = "cyan"):
+    """Render an animated metric with counter animation."""
+    colors = {
+        'cyan': 'var(--cyan)',
+        'green': 'var(--success)',
+        'yellow': 'var(--warning)',
+        'red': 'var(--error)',
+        'blue': 'var(--electric-blue)'
+    }
+    color_var = colors.get(color, 'var(--cyan)')
+
+    st.markdown(f'''
+        <div class="metric-card-animated">
+            <div class="metric-label" style="color: var(--text-secondary);">{label}</div>
+            <div class="metric-value animated-counter" data-target="{value}" style="color: {color_var};">
+                {prefix}<span class="counter-value">{value}</span>{suffix}
+            </div>
+        </div>
+    ''', unsafe_allow_html=True)
+
+def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
+    """Render interactive Plotly charts."""
+    # Define holographic color scheme
+    colors = ['#00FFFF', '#0080FF', '#00FF88', '#FFB800', '#FF3366', '#00CED1']
+
+    fig = None
+
+    if chart_type == "pie":
+        fig = px.pie(
+            values=list(data.values()),
+            names=list(data.keys()),
+            color_discrete_sequence=colors,
+            hole=0.4
+        )
+    elif chart_type == "bar":
+        fig = px.bar(
+            x=list(data.keys()),
+            y=list(data.values()),
+            color_discrete_sequence=colors
+        )
+    elif chart_type == "line":
+        fig = px.line(
+            x=list(data.keys()),
+            y=list(data.values()),
+            markers=True
+        )
+        fig.update_traces(line_color='#00FFFF')
+
+    if fig:
+        # Apply holographic styling
+        fig.update_layout(
+            title=title,
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(family='Rajdhani', color='#E0F7FF'),
+            title_font=dict(family='Orbitron', size=16, color='#00FFFF'),
+            legend=dict(
+                bgcolor='rgba(0,20,40,0.6)',
+                bordercolor='rgba(0,255,255,0.3)',
+                borderwidth=1
+            ),
+            margin=dict(l=20, r=20, t=40, b=20)
+        )
+        fig.update_xaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#80C4D4'))
+        fig.update_yaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#80C4D4'))
+
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 def add_error_notification(title: str, message: str, error_type: str = "error", source: str = "System"):
     """Add an error notification to the queue.
