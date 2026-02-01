@@ -81,6 +81,14 @@ class Lead(BaseModel):
     sent_to_crm: bool = Field(default=False)
     hubspot_id: Optional[str] = Field(default=None)
 
+    # Extra data (for enrichment services like Apollo, Google Maps, etc.)
+    extra_data: Optional[dict] = Field(default=None, description="Additional data from enrichment services")
+    posted_at: Optional[datetime] = Field(default=None, description="When the original content was posted")
+    location: Optional[str] = Field(default=None, description="Geographic location")
+    website: Optional[str] = Field(default=None, description="Company website URL")
+    rating: Optional[float] = Field(default=None, description="Business rating (e.g., from Yelp/Google Maps)")
+    reviews_count: Optional[int] = Field(default=None, description="Number of reviews")
+
     def __hash__(self):
         return hash(self.id)
 
