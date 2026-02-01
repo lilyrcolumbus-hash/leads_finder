@@ -135,6 +135,30 @@ st.markdown("""
 
     /* ========== FONTS ========== */
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+
+    /* Fix Material Icons display */
+    .material-icons, .material-symbols-outlined {
+        font-family: 'Material Icons', 'Material Symbols Outlined' !important;
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hide broken icon text fallbacks */
+    [class*="icon"]:empty::before,
+    span[data-icon]::before {
+        font-family: 'Material Icons' !important;
+    }
 
     /* ========== FUTURISTIC COLOR PALETTE ========== */
     :root {
