@@ -4157,43 +4157,12 @@ def render_sidebar():
 # PAGES
 # ============================================
 def show_dashboard():
-    # Futuristic Holographic Dashboard Header
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(40, 30, 20, 0.6) 0%, rgba(30, 20, 15, 0.8) 100%);
-                border: 1px solid rgba(232, 93, 4, 0.2);
-                border-radius: 16px;
-                padding: 32px;
-                margin-bottom: 32px;
-                position: relative;
-                overflow: hidden;
-                backdrop-filter: blur(10px);
-                box-shadow: 0 0 40px rgba(232, 93, 4, 0.1), inset 0 0 60px rgba(232, 93, 4, 0.05);">
-        <!-- Scan line effect -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%); opacity: 0.8;"></div>
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%); opacity: 0.5;"></div>
-
-        <div style="display: flex; align-items: center; gap: 24px; position: relative; z-index: 1;">
-            <div style="background: linear-gradient(135deg, rgba(232, 93, 4, 0.2) 0%, rgba(244, 140, 6, 0.2) 100%);
-                        border: 1px solid #E85D04;
-                        border-radius: 12px;
-                        padding: 16px;
-                        box-shadow: 0 0 30px rgba(232, 93, 4, 0.3), inset 0 0 20px rgba(232, 93, 4, 0.1);">
-                <span style="font-size: 36px; filter: drop-shadow(0 0 10px #E85D04);">📊</span>
-            </div>
-            <div>
-                <h1 style="margin: 0 0 8px 0; color: #E85D04; font-size: 28px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(232, 93, 4, 0.5);">DASHBOARD</h1>
-                <p style="margin: 0; color: #D4A574; font-size: 15px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">SYSTEM OVERVIEW • LEAD GENERATION METRICS • REAL-TIME DATA</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Dashboard Header
+    st.title("📊 Dashboard")
+    st.caption("System Overview • Lead Generation Metrics")
 
     # Quick Actions
-    st.markdown("""
-    <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 16px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">⚡ QUICK ACTIONS</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    st.subheader("⚡ Quick Actions")
 
     col1, col2, col3 = st.columns(3)
 
@@ -8531,80 +8500,11 @@ Is there anything specific about the platform or lead generation strategies I ca
 # ============================================
 def render_floating_assistant():
     """Render a floating AI assistant button accessible from any page."""
-
     # Don't show floating button on AI Assistant page
     if st.session_state.get('nav_page') == "AI Assistant":
         return
-
-    # Create a container at the bottom of the page for the floating button
-    st.markdown("""
-    <style>
-        /* Floating AI Assistant Button Container */
-        .floating-ai-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
-        }
-        .floating-ai-btn {
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            animation: pulse-glow 2s infinite;
-        }
-        .floating-ai-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5), 0 6px 16px rgba(99, 102, 241, 0.4);
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4), 0 4px 12px rgba(99, 102, 241, 0.3); }
-            50% { box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6), 0 4px 16px rgba(99, 102, 241, 0.5); }
-        }
-        /* Custom style for the floating button */
-        div[data-testid="stVerticalBlock"] > div:has(> div > div > button#floating_ai_assistant) {
-            position: fixed !important;
-            bottom: 24px !important;
-            right: 24px !important;
-            z-index: 9999 !important;
-        }
-        button#floating_ai_assistant {
-            background: linear-gradient(135deg, #E85D04 0%, #F48C06 50%, #DC2F02 100%) !important;
-            color: white !important;
-            border: none !important;
-            padding: 14px 24px !important;
-            border-radius: 30px !important;
-            font-weight: 600 !important;
-            box-shadow: 0 8px 24px rgba(232, 93, 4, 0.4) !important;
-            animation: pulse-glow 2s infinite !important;
-            white-space: nowrap !important;
-            min-width: max-content !important;
-        }
-        button#floating_ai_assistant:hover {
-            transform: translateY(-3px) scale(1.02) !important;
-            box-shadow: 0 12px 32px rgba(232, 93, 4, 0.5) !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Create a floating button using Streamlit's native button with custom positioning
-    # We'll use a container at the end of the page
-    floating_container = st.container()
-    with floating_container:
-        col1, col2, col3 = st.columns([6, 2, 1])
-        with col3:
-            if st.button("🤖 AI Assistant", key="floating_ai_assistant", type="primary"):
-                st.session_state.nav_page = "AI Assistant"
-                st.rerun()
+    # Button is now in sidebar menu, no floating button needed
+    pass
 
 
 def show_lead_warming():
