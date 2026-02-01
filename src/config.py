@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
     hunter_api_key: str = Field(default="", alias="HUNTER_API_KEY")
+    apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
 
     # Reddit subreddits to search
     subreddits: List[str] = [
