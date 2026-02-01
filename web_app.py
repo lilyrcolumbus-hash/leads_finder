@@ -3447,14 +3447,47 @@ function applyPremiumStyles() {
         el.classList.add('glass-card', 'hover-pulse');
     });
 
-    // Add glow borders to buttons
+    // Add glow borders to ALL buttons
     document.querySelectorAll('.stButton > button').forEach(btn => {
         btn.classList.add('glow-border', 'ripple-effect');
     });
 
     // Add premium card style to expanders
     document.querySelectorAll('[data-testid="stExpander"]').forEach(el => {
-        el.classList.add('premium-card');
+        el.classList.add('premium-card', 'glass-card');
+    });
+
+    // Add glass effect to sidebar
+    const sidebar = document.querySelector('[data-testid="stSidebar"]');
+    if (sidebar) {
+        sidebar.classList.add('glass-card');
+    }
+
+    // Add neumorphic effect to select boxes
+    document.querySelectorAll('[data-testid="stSelectbox"]').forEach(el => {
+        el.classList.add('neumorphic');
+    });
+
+    // Add glow to text inputs
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+        el.classList.add('glow-border');
+    });
+
+    // Add animated gradient to headers
+    document.querySelectorAll('h1, h2, h3').forEach(el => {
+        if (!el.classList.contains('animated-gradient-text')) {
+            el.classList.add('animated-gradient-text');
+        }
+    });
+
+    // Add hover effects to dataframes/tables
+    document.querySelectorAll('[data-testid="stDataFrame"]').forEach(el => {
+        el.classList.add('glass-card', 'hover-lift');
+    });
+
+    // Add colored shadows to cards
+    document.querySelectorAll('.stAlert, [data-testid="stNotification"]').forEach(el => {
+        el.classList.add('shadow-orange', 'glass-card');
     });
 }
 
@@ -3467,7 +3500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     applySavedTheme();
     applyPremiumStyles();
-    // initCustomCursor(); // Uncomment to enable custom cursor
+    initCustomCursor(); // Custom cursor enabled
 });
 
 // Re-init on Streamlit updates
