@@ -89,6 +89,82 @@ class HubSpotCRM:
         """Check if HubSpot is properly configured."""
         return bool(self.api_key)
 
+    def test_connection(self) -> dict:
+        """
+        Test the HubSpot API connection.
+
+        Returns:
+            dict with 'success', 'message', and optionally 'account_info'
+        """
+        if not self.is_configured():
+            return {
+                'success': False,
+                'message': 'HubSpot API key not configured'
+            }
+
+        try:
+            # Try to get account info
+            url = f"{self.BASE_URL}/account-info/v3/details"
+            response = self.client.get(url)
+
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'success': True,
+                    'message': 'Connected successfully',
+                    'account_info': {
+                        'portal_id': data.get('portalId'),
+                        'account_type': data.get('accountType'),
+                        'time_zone': data.get('timeZone')
+                    }
+                }
+            elif response.status_code == 401:
+                return {
+                    'success': False,
+                    'message': 'Invalid API key or token expired'
+                }
+            elif response.status_code == 403:
+                return {
+                    'success': False,
+                    'message': 'Access denied - check API key permissions'
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': f'API returned status {response.status_code}'
+                }
+
+        except httpx.ConnectError:
+            return {
+                'success': False,
+                'message': 'Network error - cannot reach HubSpot API'
+            }
+        except httpx.TimeoutException:
+            return {
+                'success': False,
+                'message': 'Connection timeout - HubSpot API not responding'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'Connection error: {str(e)[:100]}'
+            }
+
+    def get_contacts_count(self) -> int:
+        """Get total number of contacts in HubSpot."""
+        if not self.is_configured():
+            return 0
+
+        try:
+            url = f"{self.BASE_URL}/crm/v3/objects/contacts?limit=1"
+            response = self.client.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('total', 0)
+        except Exception:
+            pass
+        return 0
+
     # ==================== CREATE OPERATIONS ====================
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))

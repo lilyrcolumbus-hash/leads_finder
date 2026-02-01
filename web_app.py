@@ -8274,6 +8274,66 @@ def show_config():
     </div>
     """, unsafe_allow_html=True)
 
+    # Connection Tests Section
+    st.markdown("""
+    <div style="margin: 24px 0;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <h2 style="margin: 0; color: #E85D04; font-size: 18px; font-weight: 700;">🔌 Connection Tests</h2>
+        </div>
+        <p style="margin: 0 0 16px 0; color: #E8DFD5; font-size: 13px;">Test your API connections to verify they're working correctly</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_test1, col_test2, col_test3 = st.columns(3)
+
+    with col_test1:
+        if st.button("🧪 Test HubSpot", use_container_width=True, key="test_hubspot_conn"):
+            with st.spinner("Testing HubSpot..."):
+                with HubSpotCRM() as crm:
+                    result = crm.test_connection()
+                    if result['success']:
+                        st.success(f"✅ {result['message']}")
+                        if 'account_info' in result:
+                            st.info(f"Portal ID: {result['account_info'].get('portal_id', 'N/A')}")
+                    else:
+                        st.error(f"❌ {result['message']}")
+
+    with col_test2:
+        if st.button("🧪 Test Gemini AI", use_container_width=True, key="test_gemini_conn"):
+            if settings.gemini_api_key:
+                with st.spinner("Testing Gemini..."):
+                    try:
+                        import google.generativeai as genai
+                        genai.configure(api_key=settings.gemini_api_key)
+                        model = genai.GenerativeModel('gemini-1.5-flash')
+                        response = model.generate_content("Say OK")
+                        st.success("✅ Gemini AI connected!")
+                    except Exception as e:
+                        st.error(f"❌ {str(e)[:80]}")
+            else:
+                st.warning("⚠️ Gemini not configured")
+
+    with col_test3:
+        if st.button("🧪 Test Google API", use_container_width=True, key="test_google_conn"):
+            if settings.google_api_key:
+                with st.spinner("Testing Google..."):
+                    try:
+                        import httpx
+                        url = f"https://www.googleapis.com/customsearch/v1?key={settings.google_api_key}&cx={settings.google_search_engine_id}&q=test&num=1"
+                        resp = httpx.get(url, timeout=10)
+                        if resp.status_code == 200:
+                            st.success("✅ Google API connected!")
+                        elif resp.status_code == 403:
+                            st.error("❌ Quota exceeded (100/day limit)")
+                        else:
+                            st.error(f"❌ Status {resp.status_code}")
+                    except Exception as e:
+                        st.error(f"❌ {str(e)[:80]}")
+            else:
+                st.warning("⚠️ Google not configured")
+
+    st.markdown("---")
+
     # System Status Section
     st.markdown("""
     <div style="margin-bottom: 24px;">
@@ -8285,7 +8345,7 @@ def show_config():
     """, unsafe_allow_html=True)
 
     stats = lead_manager.get_stats()
-    ai_ready = settings.openai_api_key or settings.anthropic_api_key
+    ai_ready = settings.openai_api_key or settings.anthropic_api_key or settings.gemini_api_key
 
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
