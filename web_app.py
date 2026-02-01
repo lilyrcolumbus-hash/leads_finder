@@ -188,7 +188,7 @@ st.markdown("""
         /* Text */
         --text-bright: #FFFFFF;
         --text-primary: #E0F7FF;
-        --text-secondary: #D4A574;
+        --text-secondary: #E8DFD5;
         --text-dim: #4A7080;
 
         /* Status */
@@ -244,7 +244,7 @@ st.markdown("""
         /* Text - Warm tones */
         --text-bright: #FFFFFF;
         --text-primary: #FFF3E6;
-        --text-secondary: #D4A574;
+        --text-secondary: #E8DFD5;
         --text-dim: #8B7355;
 
         /* Status */
@@ -3807,8 +3807,8 @@ def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
             ),
             margin=dict(l=20, r=20, t=40, b=20)
         )
-        fig.update_xaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#D4A574'))
-        fig.update_yaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#D4A574'))
+        fig.update_xaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#E8DFD5'))
+        fig.update_yaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#E8DFD5'))
 
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
@@ -4219,7 +4219,7 @@ def show_dashboard():
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">📈 KEY METRICS</h3>
-        <p style="margin: 0; color: #D4A574; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
+        <p style="margin: 0; color: #E8DFD5; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -4238,7 +4238,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #F48C06 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #F48C06);">👥</div>
             <div style="font-size: 36px; font-weight: 700; color: #F48C06; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(244, 140, 6, 0.5);">{leads_count}</div>
-            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
+            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
         </div>
         <!-- Hot Leads -->
@@ -4253,7 +4253,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
             <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
-            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
+            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
         </div>
         <!-- Qualified -->
@@ -4268,7 +4268,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
             <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
-            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
+            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
         </div>
         <!-- Keywords -->
@@ -4283,7 +4283,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
             <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
-            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
+            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
         </div>
         <!-- Sources -->
@@ -4298,7 +4298,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #E85D04);">🔗</div>
             <div style="font-size: 36px; font-weight: 700; color: #E85D04; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(232, 93, 4, 0.5);">{sources_count}/4</div>
-            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
+            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
         </div>
     </div>
@@ -4315,7 +4315,7 @@ def show_dashboard():
                 backdrop-filter: blur(10px);">
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 30%, #F48C06 70%, transparent 100%); opacity: 0.5;"></div>
         <h4 style="margin: 0 0 12px 0; color: #E85D04; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #D4A574; font-family: 'Rajdhani', sans-serif;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #E8DFD5; font-family: 'Rajdhani', sans-serif;">
             <div><span style="color: #F48C06;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
             <div><span style="color: #FF3366;">▸</span> <strong>HOT LEADS:</strong> Priority targets (Score 80+)</div>
             <div><span style="color: #00FF88;">▸</span> <strong>QUALIFIED:</strong> AI-verified prospects</div>
@@ -4329,7 +4329,7 @@ def show_dashboard():
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">🌐 DATA SOURCES</h3>
-        <p style="margin: 0; color: #D4A574; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
+        <p style="margin: 0; color: #E8DFD5; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -4350,7 +4350,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF4500);">🔴</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #FF4500; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);">REDDIT</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
         </div>
         <!-- Hacker News -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -4367,7 +4367,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF6600);">🟠</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #FF6600; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 102, 0, 0.3);">HACKER NEWS</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
         </div>
         <!-- Google -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -4384,7 +4384,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #4285F4);">🔵</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #4285F4; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(66, 133, 244, 0.3);">GOOGLE</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
         </div>
         <!-- Indeed -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -4401,7 +4401,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #DC2F02);">💼</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #DC2F02; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(220, 47, 2, 0.3);">INDEED</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -4410,7 +4410,7 @@ def show_dashboard():
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
-        <p style="margin: 0; color: #D4A574; font-size: 13px;">Three simple steps to find qualified leads</p>
+        <p style="margin: 0; color: #E8DFD5; font-size: 13px;">Three simple steps to find qualified leads</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -4420,19 +4420,19 @@ def show_dashboard():
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
             <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">1</div>
             <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Search</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 13px;">Select sources and find prospects automatically</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 13px;">Select sources and find prospects automatically</p>
         </div>
         <!-- Step 2 -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
             <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">2</div>
             <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Qualify</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
         </div>
         <!-- Step 3 -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
             <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">3</div>
             <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Export</h4>
-            <p style="margin: 0; color: #D4A574; font-size: 13px;">Send the best leads directly to HubSpot</p>
+            <p style="margin: 0; color: #E8DFD5; font-size: 13px;">Send the best leads directly to HubSpot</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -6255,7 +6255,7 @@ def show_crm():
         <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border-radius: 16px; border: 2px dashed rgba(232, 93, 4, 0.4);">
             <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
             <h3 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 20px;">No leads in your CRM</h3>
-            <p style="margin: 0; color: #D4A574;">Import leads or search for new leads to start building your pipeline</p>
+            <p style="margin: 0; color: #E8DFD5;">Import leads or search for new leads to start building your pipeline</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -7722,7 +7722,7 @@ def show_config():
             </div>
             <div>
                 <h1 style="margin: 0 0 8px 0; color: #E85D04; font-size: 28px; font-weight: 700;">Settings</h1>
-                <p style="margin: 0; color: #D4A574; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
+                <p style="margin: 0; color: #E8DFD5; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
             </div>
         </div>
     </div>
@@ -7734,7 +7734,7 @@ def show_config():
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
             <h2 style="margin: 0; color: #E85D04; font-size: 20px; font-weight: 700;">🔗 API Integrations</h2>
         </div>
-        <p style="margin: 0; color: #D4A574; font-size: 14px;">Connect your external services to unlock full platform functionality</p>
+        <p style="margin: 0; color: #E8DFD5; font-size: 14px;">Connect your external services to unlock full platform functionality</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -7780,7 +7780,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hubspot_bg}; color: {hubspot_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hubspot_icon}</span> {hubspot_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Sync leads & contacts</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">Sync leads & contacts</p>
         </div>
         <!-- Google -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
@@ -7789,7 +7789,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {google_bg}; color: {google_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{google_icon}</span> {google_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Web search for leads</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">Web search for leads</p>
         </div>
         <!-- OpenAI -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
@@ -7798,7 +7798,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {openai_bg}; color: {openai_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{openai_icon}</span> {openai_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">AI lead qualification</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">AI lead qualification</p>
         </div>
         <!-- Anthropic -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
@@ -7807,7 +7807,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {anthropic_bg}; color: {anthropic_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{anthropic_icon}</span> {anthropic_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">AI assistant</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">AI assistant</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -7834,7 +7834,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hunter_bg}; color: {hunter_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hunter_icon}</span> {hunter_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Email finder service</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">Email finder service</p>
         </div>
         <!-- Apollo.io -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
@@ -7843,7 +7843,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {apollo_bg}; color: {apollo_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{apollo_icon}</span> {apollo_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Email + Phone + Company</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">Email + Phone + Company</p>
         </div>
         <!-- Deduplication -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
@@ -7852,7 +7852,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>✓</span> Active
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Remove duplicate leads</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">Remove duplicate leads</p>
         </div>
         <!-- CSV Export -->
         <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
@@ -7861,7 +7861,7 @@ def show_config():
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>✓</span> Available
             </div>
-            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Export leads to CSV</p>
+            <p style="margin: 12px 0 0 0; color: #E8DFD5; font-size: 11px;">Export leads to CSV</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
