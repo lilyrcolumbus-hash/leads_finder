@@ -4740,16 +4740,20 @@ def show_search():
 
     st.divider()
 
-    # AI Option
-    ai_available = bool(settings.openai_api_key or settings.anthropic_api_key)
+    # AI Option (supports OpenAI, Anthropic, or Gemini)
+    ai_available = bool(settings.openai_api_key or settings.anthropic_api_key or settings.gemini_api_key)
     st.subheader("🤖 AI Qualification (Recommended)")
 
     use_ai = st.checkbox("Use AI to qualify leads automatically", value=ai_available, key="ai_check")
 
-    if not ai_available and use_ai:
-        st.warning("⚠️ Configure OpenAI or Anthropic API key in Settings to enable AI qualification")
-    elif not ai_available:
-        st.info("💡 Configure OpenAI or Anthropic API key in Settings for better lead qualification")
+    if ai_available:
+        # Show which AI is configured
+        ai_provider = "Gemini" if settings.gemini_api_key else ("OpenAI" if settings.openai_api_key else "Anthropic")
+        st.success(f"✅ AI Qualification enabled ({ai_provider})")
+    elif use_ai:
+        st.warning("⚠️ Configure OpenAI, Anthropic, or Gemini API key in Settings to enable AI qualification")
+    else:
+        st.info("💡 Configure an AI API key (OpenAI, Anthropic, or Gemini) in Settings for better lead qualification")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
