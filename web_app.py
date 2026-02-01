@@ -4073,6 +4073,8 @@ def add_error_notification(title: str, message: str, error_type: str = "error", 
         'timestamp': datetime.now().isoformat(),
         'dismissed': False
     }
+    # Keep only last 3 notifications to prevent UI clutter
+    st.session_state.error_notifications = st.session_state.error_notifications[-2:]
     st.session_state.error_notifications.append(notification)
 
 def dismiss_notification(notification_id):
@@ -4086,168 +4088,172 @@ def clear_all_notifications():
     st.session_state.error_notifications = []
 
 def render_error_notifications():
-    """Render the error notification panel if there are active notifications."""
+    """Render the error notification panel with auto-dismiss functionality."""
+    from datetime import datetime, timedelta
+
+    # Auto-dismiss notifications older than 10 seconds
+    now = datetime.now()
+    for notif in st.session_state.error_notifications:
+        try:
+            notif_time = datetime.fromisoformat(notif['timestamp'])
+            if (now - notif_time).total_seconds() > 10:
+                notif['dismissed'] = True
+        except:
+            pass
+
     active_notifications = [n for n in st.session_state.error_notifications if not n.get('dismissed')]
 
     if not active_notifications:
         return
 
-    # Error notification styles
+    # Improved error notification styles with auto-dismiss
     st.markdown("""
     <style>
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(120%); }
         }
         .error-panel {
             position: fixed;
-            top: 80px;
-            right: 20px;
+            top: 70px;
+            right: 16px;
             z-index: 9999;
-            max-width: 400px;
-            animation: slideIn 0.3s ease-out;
+            max-width: 320px;
+            pointer-events: auto;
         }
         .error-notification {
-            background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
-            border: 1px solid #FECACA;
-            border-left: 4px solid #EF4444;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2);
-            animation: slideIn 0.3s ease-out;
+            background: linear-gradient(135deg, rgba(30, 20, 15, 0.95) 0%, rgba(40, 25, 18, 0.95) 100%);
+            border: 1px solid rgba(232, 93, 4, 0.3);
+            border-left: 3px solid #EF4444;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            animation: slideInRight 0.3s ease-out, fadeOut 0.5s ease-in 8s forwards;
+            position: relative;
         }
         .error-notification.warning {
-            background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
-            border-color: #FDE68A;
             border-left-color: #F59E0B;
-            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.2);
         }
         .error-notification.api-error {
-            background: linear-gradient(135deg, #FFFFFF 0%, #2D2015 100%);
-            border-color: #BFDBFE;
             border-left-color: #E85D04;
-            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+        }
+        .error-close-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #94A3B8;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .error-close-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #EF4444;
         }
         .error-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 4px;
+            padding-right: 20px;
         }
         .error-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            margin-right: 12px;
+            font-size: 14px;
         }
-        .error-icon.error { background: #FEE2E2; }
-        .error-icon.warning { background: #FEF3C7; }
-        .error-icon.api-error { background: #3D2A1A; }
         .error-title {
             font-weight: 600;
-            font-size: 14px;
-            color: #1E293B;
+            font-size: 12px;
+            color: #FFFFFF;
             flex: 1;
         }
         .error-source {
-            font-size: 10px;
-            color: #64748B;
-            background: #F1F5F9;
-            padding: 2px 8px;
-            border-radius: 10px;
+            font-size: 9px;
+            color: #E85D04;
+            background: rgba(232, 93, 4, 0.15);
+            padding: 2px 6px;
+            border-radius: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
         .error-message {
-            font-size: 13px;
-            color: #475569;
-            line-height: 1.5;
-            margin-top: 8px;
-            padding-left: 44px;
-        }
-        .error-time {
             font-size: 11px;
             color: #94A3B8;
-            padding-left: 44px;
-            margin-top: 8px;
+            line-height: 1.4;
+            margin-top: 4px;
+            max-height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .error-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-left: 44px;
+        .error-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #EF4444, #F59E0B);
+            border-radius: 0 0 0 8px;
+            animation: shrink 8s linear forwards;
         }
-        .notification-badge {
-            position: fixed;
-            top: 85px;
-            right: 25px;
-            background: #EF4444;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            z-index: 10000;
-            animation: pulse 2s infinite;
+        @keyframes shrink {
+            from { width: 100%; }
+            to { width: 0%; }
         }
     </style>
+    <script>
+        // Auto-remove notifications from DOM after animation
+        setTimeout(function() {
+            const panel = document.querySelector('.error-panel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+        }, 9000);
+    </script>
     """, unsafe_allow_html=True)
 
-    # Build notifications HTML
+    # Build notifications HTML - only show last 3
     notifications_html = '<div class="error-panel">'
 
-    for notif in active_notifications[-5:]:  # Show last 5 notifications
+    for notif in active_notifications[-3:]:
         error_type = notif.get('type', 'error')
         icon = '⚠️' if error_type == 'warning' else '🔌' if error_type == 'api_error' else '❌'
         css_class = error_type.replace('_', '-')
 
-        # Format timestamp
-        try:
-            from datetime import datetime
-            ts = datetime.fromisoformat(notif['timestamp'])
-            time_str = ts.strftime('%H:%M:%S')
-        except:
-            time_str = 'Just now'
+        # Truncate message if too long
+        message = notif['message'][:100] + '...' if len(notif['message']) > 100 else notif['message']
 
         notifications_html += f"""
         <div class="error-notification {css_class}">
+            <div class="error-close-btn" onclick="this.parentElement.style.display='none'">✕</div>
             <div class="error-header">
-                <div style="display: flex; align-items: center;">
-                    <div class="error-icon {css_class}">{icon}</div>
-                    <div class="error-title">{notif['title']}</div>
-                </div>
+                <span class="error-icon">{icon}</span>
+                <span class="error-title">{notif['title']}</span>
                 <span class="error-source">{notif['source']}</span>
             </div>
-            <div class="error-message">{notif['message']}</div>
-            <div class="error-time">🕐 {time_str}</div>
+            <div class="error-message">{message}</div>
+            <div class="error-progress"></div>
         </div>
         """
 
     notifications_html += '</div>'
-
-    # Badge showing count
-    if len(active_notifications) > 0:
-        notifications_html += f'<div class="notification-badge">{len(active_notifications)}</div>'
-
     st.markdown(notifications_html, unsafe_allow_html=True)
 
-    # Dismiss button
-    if st.button("✕ Dismiss All Notifications", key="dismiss_all_errors"):
-        clear_all_notifications()
-        st.rerun()
+    # Auto-clear old notifications from session state
+    st.session_state.error_notifications = [
+        n for n in st.session_state.error_notifications
+        if not n.get('dismissed')
+    ][-5:]  # Keep only last 5
 
 
 # ============================================
