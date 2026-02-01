@@ -6,13 +6,19 @@ Modern, Clean, Professional Design
 Run with: streamlit run web_app.py
 """
 
+import sys
+from pathlib import Path
+
+# CRITICAL: Load .env BEFORE any other imports that use settings
+from dotenv import load_dotenv
+env_path = Path(__file__).parent / ".env"
+load_dotenv(env_path, override=True)
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
-import sys
-from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))

@@ -1,8 +1,17 @@
 """Configuration settings for the lead generation app."""
 
+import os
+from pathlib import Path
 from typing import List
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
+# Load .env from project root
+_project_root = Path(__file__).parent.parent
+_env_file = _project_root / ".env"
+if _env_file.exists():
+    load_dotenv(_env_file, override=True)
 
 
 class Settings(BaseSettings):
