@@ -139,32 +139,32 @@ st.markdown("""
     /* ========== FUTURISTIC COLOR PALETTE ========== */
     :root {
         /* Primary - Cyan Neon */
-        --cyan: #00FFFF;
-        --cyan-glow: rgba(0, 255, 255, 0.5);
-        --cyan-dim: rgba(0, 255, 255, 0.2);
-        --cyan-subtle: rgba(0, 255, 255, 0.1);
+        --cyan: #E85D04;
+        --cyan-glow: rgba(232, 93, 4, 0.5);
+        --cyan-dim: rgba(232, 93, 4, 0.2);
+        --cyan-subtle: rgba(232, 93, 4, 0.1);
 
         /* Secondary - Electric Blue */
-        --electric-blue: #0080FF;
-        --electric-glow: rgba(0, 128, 255, 0.5);
-        --electric-dim: rgba(0, 128, 255, 0.2);
+        --electric-blue: #F48C06;
+        --electric-glow: rgba(244, 140, 6, 0.5);
+        --electric-dim: rgba(244, 140, 6, 0.2);
 
         /* Accent - Teal */
-        --teal: #00CED1;
-        --teal-glow: rgba(0, 206, 209, 0.5);
-        --teal-dim: rgba(0, 206, 209, 0.2);
+        --teal: #DC2F02;
+        --teal-glow: rgba(220, 47, 2, 0.5);
+        --teal-dim: rgba(220, 47, 2, 0.2);
 
         /* Background */
         --bg-dark: #0A0A1A;
         --bg-darker: #050510;
         --bg-panel: rgba(10, 15, 30, 0.85);
-        --bg-glass: rgba(0, 20, 40, 0.6);
-        --bg-glass-light: rgba(0, 40, 80, 0.3);
+        --bg-glass: rgba(30, 20, 15, 0.6);
+        --bg-glass-light: rgba(40, 30, 20, 0.3);
 
         /* Text */
         --text-bright: #FFFFFF;
         --text-primary: #E0F7FF;
-        --text-secondary: #80C4D4;
+        --text-secondary: #D4A574;
         --text-dim: #4A7080;
 
         /* Status */
@@ -176,8 +176,8 @@ st.markdown("""
         --error-glow: rgba(255, 51, 102, 0.4);
 
         /* Glass & Borders */
-        --glass-border: rgba(0, 255, 255, 0.15);
-        --glass-border-bright: rgba(0, 255, 255, 0.4);
+        --glass-border: rgba(232, 93, 4, 0.15);
+        --glass-border-bright: rgba(232, 93, 4, 0.4);
 
         /* Border Radius */
         --radius-sm: 8px;
@@ -186,9 +186,9 @@ st.markdown("""
         --radius-xl: 20px;
 
         /* Shadows & Glows */
-        --glow-cyan: 0 0 20px rgba(0, 255, 255, 0.3), 0 0 40px rgba(0, 255, 255, 0.1);
-        --glow-blue: 0 0 20px rgba(0, 128, 255, 0.3), 0 0 40px rgba(0, 128, 255, 0.1);
-        --glow-intense: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2);
+        --glow-cyan: 0 0 20px rgba(232, 93, 4, 0.3), 0 0 40px rgba(232, 93, 4, 0.1);
+        --glow-blue: 0 0 20px rgba(244, 140, 6, 0.3), 0 0 40px rgba(244, 140, 6, 0.1);
+        --glow-intense: 0 0 30px rgba(232, 93, 4, 0.5), 0 0 60px rgba(232, 93, 4, 0.2);
         --shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
 
@@ -548,7 +548,7 @@ st.markdown("""
 
     /* ========== COLORED SHADOWS ========== */
     .shadow-cyan {
-        box-shadow: 0 10px 40px rgba(0, 255, 255, 0.2), 0 0 20px rgba(0, 255, 255, 0.1) !important;
+        box-shadow: 0 10px 40px rgba(232, 93, 4, 0.2), 0 0 20px rgba(232, 93, 4, 0.1) !important;
     }
 
     .shadow-orange {
@@ -669,7 +669,7 @@ st.markdown("""
         text-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
 
-    .theme-holographic { background: linear-gradient(135deg, #00FFFF, #0080FF); }
+    .theme-holographic { background: linear-gradient(135deg, #E85D04, #F48C06); }
     .theme-corporate-orange-btn { background: linear-gradient(135deg, #E85D04, #F48C06); }
     .theme-sunset { background: linear-gradient(135deg, #FF6B6B, #845EC2); }
     .theme-ocean { background: linear-gradient(135deg, #1A535C, #4ECDC4); }
@@ -713,8 +713,8 @@ st.markdown("""
         right: 0;
         bottom: 0;
         background-image:
-            linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            linear-gradient(rgba(232, 93, 4, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(232, 93, 4, 0.03) 1px, transparent 1px);
         background-size: 50px 50px;
         pointer-events: none;
         z-index: 0;
@@ -734,7 +734,7 @@ st.markdown("""
 
     /* ========== SIDEBAR - HOLOGRAPHIC PANEL ========== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(0, 20, 40, 0.95) 0%, rgba(5, 10, 25, 0.98) 100%) !important;
+        background: linear-gradient(180deg, rgba(30, 20, 15, 0.95) 0%, rgba(5, 10, 25, 0.98) 100%) !important;
         border-right: 1px solid var(--glass-border) !important;
         box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5), inset -1px 0 0 var(--cyan-dim) !important;
     }
@@ -793,7 +793,7 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 128, 255, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.15) 0%, rgba(244, 140, 6, 0.15) 100%) !important;
         color: var(--cyan) !important;
         font-weight: 600 !important;
         border-color: var(--cyan) !important;
@@ -944,7 +944,7 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 206, 209, 0.2) 100%);
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(220, 47, 2, 0.2) 100%);
         color: var(--success);
         font-size: 10px;
         font-weight: 700;
@@ -1411,18 +1411,18 @@ st.markdown("""
     /* Primary Button - Cyan Neon Glow */
     .stButton > button[kind="primary"],
     .stButton > button:not([kind]) {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 128, 255, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.15) 0%, rgba(244, 140, 6, 0.15) 100%) !important;
         color: var(--cyan) !important;
         border: 1px solid var(--cyan) !important;
-        box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0, 255, 255, 0.1) !important;
+        box-shadow: var(--glow-cyan), inset 0 0 20px rgba(232, 93, 4, 0.1) !important;
         text-shadow: 0 0 10px var(--cyan-glow) !important;
     }
 
     .stButton > button[kind="primary"]:hover,
     .stButton > button:not([kind]):hover {
-        background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(0, 128, 255, 0.25) 100%) !important;
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.25) 0%, rgba(244, 140, 6, 0.25) 100%) !important;
         transform: translateY(-2px) !important;
-        box-shadow: var(--glow-intense), inset 0 0 30px rgba(0, 255, 255, 0.2) !important;
+        box-shadow: var(--glow-intense), inset 0 0 30px rgba(232, 93, 4, 0.2) !important;
         text-shadow: 0 0 15px var(--cyan) !important;
     }
 
@@ -1463,7 +1463,7 @@ st.markdown("""
     }
 
     .stButton > button[kind="tertiary"]:hover {
-        background: rgba(0, 255, 255, 0.05) !important;
+        background: rgba(232, 93, 4, 0.05) !important;
         color: var(--cyan) !important;
         border-color: var(--cyan-dim) !important;
     }
@@ -1476,7 +1476,7 @@ st.markdown("""
 
     /* Download buttons - Success Neon */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 206, 209, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(220, 47, 2, 0.15) 100%) !important;
         color: var(--success) !important;
         border: 1px solid var(--success) !important;
         border-radius: 8px !important;
@@ -1492,7 +1492,7 @@ st.markdown("""
     }
 
     .stDownloadButton > button:hover {
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 206, 209, 0.25) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.25) 0%, rgba(220, 47, 2, 0.25) 100%) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 0 30px var(--success-glow), 0 0 60px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.2) !important;
     }
@@ -1516,7 +1516,7 @@ st.markdown("""
     }
 
     .stLinkButton > a:hover {
-        background: linear-gradient(135deg, rgba(0, 128, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%) !important;
+        background: linear-gradient(135deg, rgba(244, 140, 6, 0.2) 0%, rgba(232, 93, 4, 0.2) 100%) !important;
         color: var(--cyan) !important;
         border-color: var(--cyan) !important;
         transform: translateY(-2px) !important;
@@ -1557,7 +1557,7 @@ st.markdown("""
         left: -100% !important;
         width: 100% !important;
         height: 100% !important;
-        background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.1) 50%, transparent 100%) !important;
+        background: linear-gradient(90deg, transparent 0%, rgba(232, 93, 4, 0.1) 50%, transparent 100%) !important;
         transition: left 0.5s ease !important;
     }
 
@@ -1570,7 +1570,7 @@ st.markdown("""
     /* Success buttons - Green Neon */
     .btn-success button,
     [data-testid*="success"] button {
-        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 206, 209, 0.15) 100%) !important;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(220, 47, 2, 0.15) 100%) !important;
         color: var(--success) !important;
         border-color: var(--success) !important;
         box-shadow: 0 0 20px var(--success-glow) !important;
@@ -1617,15 +1617,15 @@ st.markdown("""
     .btn-info button,
     [data-testid*="sync"] button,
     [data-testid*="refresh"] button {
-        background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 50%, #7DD3FC 100%) !important;
-        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4) !important;
+        background: linear-gradient(135deg, #E85D04 0%, #38BDF8 50%, #7DD3FC 100%) !important;
+        box-shadow: 0 4px 15px rgba(232, 93, 4, 0.4) !important;
     }
 
     .btn-info button:hover,
     [data-testid*="sync"] button:hover,
     [data-testid*="refresh"] button:hover {
-        background: linear-gradient(135deg, #0284C7 0%, #0EA5E9 50%, #38BDF8 100%) !important;
-        box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5) !important;
+        background: linear-gradient(135deg, #0284C7 0%, #E85D04 50%, #38BDF8 100%) !important;
+        box-shadow: 0 8px 25px rgba(232, 93, 4, 0.5) !important;
     }
 
     /* Purple/Violet buttons - Import/Export */
@@ -2516,17 +2516,17 @@ st.markdown("""
         --text-primary: #334155;
         --text-secondary: #64748B;
         --text-dim: #94A3B8;
-        --cyan: #0EA5E9;
-        --cyan-glow: rgba(14, 165, 233, 0.3);
-        --cyan-dim: rgba(14, 165, 233, 0.15);
-        --glass-border: rgba(14, 165, 233, 0.2);
-        --glass-border-bright: rgba(14, 165, 233, 0.4);
+        --cyan: #E85D04;
+        --cyan-glow: rgba(232, 93, 4, 0.3);
+        --cyan-dim: rgba(232, 93, 4, 0.15);
+        --glass-border: rgba(232, 93, 4, 0.2);
+        --glass-border-bright: rgba(232, 93, 4, 0.4);
     }
 
     .light-mode .stApp::before {
         background-image:
-            linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+            linear-gradient(rgba(232, 93, 4, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(232, 93, 4, 0.05) 1px, transparent 1px);
     }
 
     /* ========== TOAST NOTIFICATIONS ========== */
@@ -3608,10 +3608,10 @@ def render_theme_toggle():
 def render_kanban_board(leads: list):
     """Render a Kanban board with leads organized by stage."""
     stages = {
-        'new': {'title': '🆕 New', 'color': '#00FFFF', 'leads': []},
+        'new': {'title': '🆕 New', 'color': '#E85D04', 'leads': []},
         'contacted': {'title': '📞 Contacted', 'color': '#FFB800', 'leads': []},
         'qualified': {'title': '✅ Qualified', 'color': '#00FF88', 'leads': []},
-        'proposal': {'title': '📝 Proposal', 'color': '#0080FF', 'leads': []},
+        'proposal': {'title': '📝 Proposal', 'color': '#F48C06', 'leads': []},
         'won': {'title': '🏆 Won', 'color': '#00FF88', 'leads': []},
         'lost': {'title': '❌ Lost', 'color': '#FF3366', 'leads': []}
     }
@@ -3710,7 +3710,7 @@ def render_animated_metric(label: str, value: int, prefix: str = "", suffix: str
 def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
     """Render interactive Plotly charts."""
     # Define holographic color scheme
-    colors = ['#00FFFF', '#0080FF', '#00FF88', '#FFB800', '#FF3366', '#00CED1']
+    colors = ['#E85D04', '#F48C06', '#00FF88', '#FFB800', '#FF3366', '#DC2F02']
 
     fig = None
 
@@ -3733,7 +3733,7 @@ def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
             y=list(data.values()),
             markers=True
         )
-        fig.update_traces(line_color='#00FFFF')
+        fig.update_traces(line_color='#E85D04')
 
     if fig:
         # Apply holographic styling
@@ -3742,7 +3742,7 @@ def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             font=dict(family='Rajdhani', color='#E0F7FF'),
-            title_font=dict(family='Orbitron', size=16, color='#00FFFF'),
+            title_font=dict(family='Orbitron', size=16, color='#E85D04'),
             legend=dict(
                 bgcolor='rgba(0,20,40,0.6)',
                 bordercolor='rgba(0,255,255,0.3)',
@@ -3750,8 +3750,8 @@ def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
             ),
             margin=dict(l=20, r=20, t=40, b=20)
         )
-        fig.update_xaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#80C4D4'))
-        fig.update_yaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#80C4D4'))
+        fig.update_xaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#D4A574'))
+        fig.update_yaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#D4A574'))
 
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
@@ -4126,30 +4126,30 @@ def render_sidebar():
 def show_dashboard():
     # Futuristic Holographic Dashboard Header
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.6) 0%, rgba(0, 20, 40, 0.8) 100%);
-                border: 1px solid rgba(0, 255, 255, 0.2);
+    <div style="background: linear-gradient(135deg, rgba(40, 30, 20, 0.6) 0%, rgba(30, 20, 15, 0.8) 100%);
+                border: 1px solid rgba(232, 93, 4, 0.2);
                 border-radius: 16px;
                 padding: 32px;
                 margin-bottom: 32px;
                 position: relative;
                 overflow: hidden;
                 backdrop-filter: blur(10px);
-                box-shadow: 0 0 40px rgba(0, 255, 255, 0.1), inset 0 0 60px rgba(0, 255, 255, 0.05);">
+                box-shadow: 0 0 40px rgba(232, 93, 4, 0.1), inset 0 0 60px rgba(232, 93, 4, 0.05);">
         <!-- Scan line effect -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.8;"></div>
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%); opacity: 0.5;"></div>
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%); opacity: 0.8;"></div>
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%); opacity: 0.5;"></div>
 
         <div style="display: flex; align-items: center; gap: 24px; position: relative; z-index: 1;">
-            <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
-                        border: 1px solid #00FFFF;
+            <div style="background: linear-gradient(135deg, rgba(232, 93, 4, 0.2) 0%, rgba(244, 140, 6, 0.2) 100%);
+                        border: 1px solid #E85D04;
                         border-radius: 12px;
                         padding: 16px;
-                        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);">
-                <span style="font-size: 36px; filter: drop-shadow(0 0 10px #00FFFF);">📊</span>
+                        box-shadow: 0 0 30px rgba(232, 93, 4, 0.3), inset 0 0 20px rgba(232, 93, 4, 0.1);">
+                <span style="font-size: 36px; filter: drop-shadow(0 0 10px #E85D04);">📊</span>
             </div>
             <div>
-                <h1 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 28px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">DASHBOARD</h1>
-                <p style="margin: 0; color: #80C4D4; font-size: 15px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">SYSTEM OVERVIEW • LEAD GENERATION METRICS • REAL-TIME DATA</p>
+                <h1 style="margin: 0 0 8px 0; color: #E85D04; font-size: 28px; font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em; text-shadow: 0 0 20px rgba(232, 93, 4, 0.5);">DASHBOARD</h1>
+                <p style="margin: 0; color: #D4A574; font-size: 15px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">SYSTEM OVERVIEW • LEAD GENERATION METRICS • REAL-TIME DATA</p>
             </div>
         </div>
     </div>
@@ -4158,7 +4158,7 @@ def show_dashboard():
     # Quick Actions
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 16px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">⚡ QUICK ACTIONS</h3>
+        <h3 style="margin: 0 0 16px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">⚡ QUICK ACTIONS</h3>
     </div>
     """, unsafe_allow_html=True)
 
@@ -4192,8 +4192,8 @@ def show_dashboard():
     # Metrics Section Header - Holographic
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">📈 KEY METRICS</h3>
-        <p style="margin: 0; color: #80C4D4; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
+        <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">📈 KEY METRICS</h3>
+        <p style="margin: 0; color: #D4A574; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -4201,18 +4201,18 @@ def show_dashboard():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Leads Found -->
-        <div style="background: linear-gradient(135deg, rgba(0, 128, 255, 0.15) 0%, rgba(0, 40, 80, 0.3) 100%);
-                    border: 1px solid rgba(0, 128, 255, 0.4);
+        <div style="background: linear-gradient(135deg, rgba(244, 140, 6, 0.15) 0%, rgba(40, 30, 20, 0.3) 100%);
+                    border: 1px solid rgba(244, 140, 6, 0.4);
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
                     position: relative;
                     overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 128, 255, 0.2), inset 0 0 30px rgba(0, 128, 255, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #0080FF 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #0080FF);">👥</div>
-            <div style="font-size: 36px; font-weight: 700; color: #0080FF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 128, 255, 0.5);">{leads_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
+                    box-shadow: 0 0 20px rgba(244, 140, 6, 0.2), inset 0 0 30px rgba(244, 140, 6, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #F48C06 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #F48C06);">👥</div>
+            <div style="font-size: 36px; font-weight: 700; color: #F48C06; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(244, 140, 6, 0.5);">{leads_count}</div>
+            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
         </div>
         <!-- Hot Leads -->
@@ -4227,7 +4227,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
             <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
+            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
         </div>
         <!-- Qualified -->
@@ -4242,7 +4242,7 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
             <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
+            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
         </div>
         <!-- Keywords -->
@@ -4257,22 +4257,22 @@ def show_dashboard():
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
             <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
             <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
+            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
         </div>
         <!-- Sources -->
-        <div style="background: linear-gradient(135deg, rgba(0, 255, 255, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%);
-                    border: 1px solid rgba(0, 255, 255, 0.4);
+        <div style="background: linear-gradient(135deg, rgba(232, 93, 4, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%);
+                    border: 1px solid rgba(232, 93, 4, 0.4);
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
                     position: relative;
                     overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FFFF);">🔗</div>
-            <div style="font-size: 36px; font-weight: 700; color: #00FFFF; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);">{sources_count}/4</div>
-            <div style="font-size: 11px; color: #80C4D4; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
+                    box-shadow: 0 0 20px rgba(232, 93, 4, 0.2), inset 0 0 30px rgba(232, 93, 4, 0.05);">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%);"></div>
+            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #E85D04);">🔗</div>
+            <div style="font-size: 36px; font-weight: 700; color: #E85D04; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(232, 93, 4, 0.5);">{sources_count}/4</div>
+            <div style="font-size: 11px; color: #D4A574; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
             <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
         </div>
     </div>
@@ -4280,21 +4280,21 @@ def show_dashboard():
 
     # Holographic Info Panel
     st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(0, 40, 80, 0.4) 0%, rgba(0, 20, 40, 0.6) 100%);
-                border: 1px solid rgba(0, 255, 255, 0.2);
+    <div style="background: linear-gradient(135deg, rgba(40, 30, 20, 0.4) 0%, rgba(30, 20, 15, 0.6) 100%);
+                border: 1px solid rgba(232, 93, 4, 0.2);
                 border-radius: 12px;
                 padding: 20px;
                 margin-bottom: 32px;
                 position: relative;
                 backdrop-filter: blur(10px);">
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FFFF 30%, #0080FF 70%, transparent 100%); opacity: 0.5;"></div>
-        <h4 style="margin: 0 0 12px 0; color: #00FFFF; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #80C4D4; font-family: 'Rajdhani', sans-serif;">
-            <div><span style="color: #0080FF;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 30%, #F48C06 70%, transparent 100%); opacity: 0.5;"></div>
+        <h4 style="margin: 0 0 12px 0; color: #E85D04; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #D4A574; font-family: 'Rajdhani', sans-serif;">
+            <div><span style="color: #F48C06;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
             <div><span style="color: #FF3366;">▸</span> <strong>HOT LEADS:</strong> Priority targets (Score 80+)</div>
             <div><span style="color: #00FF88;">▸</span> <strong>QUALIFIED:</strong> AI-verified prospects</div>
             <div><span style="color: #FFB800;">▸</span> <strong>KEYWORDS:</strong> Active pain indicators</div>
-            <div><span style="color: #00FFFF;">▸</span> <strong>SOURCES:</strong> Connected data streams</div>
+            <div><span style="color: #E85D04;">▸</span> <strong>SOURCES:</strong> Connected data streams</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -4302,8 +4302,8 @@ def show_dashboard():
     # Data Sources Section - Holographic
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #00FFFF; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);">🌐 DATA SOURCES</h3>
-        <p style="margin: 0; color: #80C4D4; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
+        <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">🌐 DATA SOURCES</h3>
+        <p style="margin: 0; color: #D4A574; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -4324,7 +4324,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF4500);">🔴</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #FF4500; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);">REDDIT</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
+            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
         </div>
         <!-- Hacker News -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -4341,7 +4341,7 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF6600);">🟠</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #FF6600; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 102, 0, 0.3);">HACKER NEWS</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
+            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
         </div>
         <!-- Google -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
@@ -4358,24 +4358,24 @@ def show_dashboard():
                 <span style="font-size: 24px; filter: drop-shadow(0 0 5px #4285F4);">🔵</span>
             </div>
             <h4 style="margin: 0 0 4px 0; color: #4285F4; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(66, 133, 244, 0.3);">GOOGLE</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
+            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
         </div>
         <!-- Indeed -->
         <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
-                    border: 1px solid rgba(0, 206, 209, 0.3);
+                    border: 1px solid rgba(220, 47, 2, 0.3);
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
                     transition: all 0.3s ease;
                     backdrop-filter: blur(10px);">
             <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
-                        background: linear-gradient(135deg, rgba(0, 206, 209, 0.2) 0%, rgba(0, 206, 209, 0.1) 100%);
-                        border: 1px solid rgba(0, 206, 209, 0.5);
-                        box-shadow: 0 0 15px rgba(0, 206, 209, 0.3);">
-                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #00CED1);">💼</span>
+                        background: linear-gradient(135deg, rgba(220, 47, 2, 0.2) 0%, rgba(220, 47, 2, 0.1) 100%);
+                        border: 1px solid rgba(220, 47, 2, 0.5);
+                        box-shadow: 0 0 15px rgba(220, 47, 2, 0.3);">
+                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #DC2F02);">💼</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #00CED1; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(0, 206, 209, 0.3);">INDEED</h4>
-            <p style="margin: 0; color: #80C4D4; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
+            <h4 style="margin: 0 0 4px 0; color: #DC2F02; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(220, 47, 2, 0.3);">INDEED</h4>
+            <p style="margin: 0; color: #D4A574; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
