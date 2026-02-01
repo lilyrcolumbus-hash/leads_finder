@@ -64,6 +64,20 @@ class Settings(BaseSettings):
         '"scheduling nightmare" business owner'
     ]
 
+    # Industries with keywords
+    industries: dict = {
+        "HVAC": ["hvac", "heating", "cooling", "air conditioning", "furnace"],
+        "Plumbing": ["plumbing", "plumber", "pipes", "drain", "water heater"],
+        "Electrical": ["electrician", "electrical", "wiring", "outlet"],
+        "Roofing": ["roofing", "roof", "shingles", "gutters"],
+        "Landscaping": ["landscaping", "lawn", "garden", "yard"],
+        "Dental": ["dental", "dentist", "orthodontist", "teeth"],
+        "Real Estate": ["realtor", "real estate", "property", "homes"],
+        "Legal": ["lawyer", "attorney", "legal", "law firm"],
+        "Medical": ["medical", "doctor", "clinic", "healthcare"],
+        "Auto Repair": ["mechanic", "auto repair", "car service", "automotive"]
+    }
+
     # Batch sizes
     max_leads_per_source: int = 50
     ai_filter_batch_size: int = 10
