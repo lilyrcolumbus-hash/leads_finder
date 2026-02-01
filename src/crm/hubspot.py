@@ -102,15 +102,43 @@ class HubSpotCRM:
         Returns:
             HubSpot contact ID or None on failure
         """
+        from src.utils.models import LeadCategory
+
         if not self.is_configured():
             self.logger.warning("HubSpot not configured")
             return None
+
+        # Determine HubSpot Lead Status based on category
+        hs_lead_status = "OPEN"  # Default
+        lead_category_label = "Opportunity"
+
+        if lead.lead_category == LeadCategory.PAIN:
+            hs_lead_status = "OPEN"  # Hot leads marked as OPEN (priority)
+            lead_category_label = "🔴 PAIN - Has explicit problem"
+        elif lead.lead_category == LeadCategory.OPPORTUNITY:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🟡 OPPORTUNITY - Potential customer"
+        elif lead.lead_category == LeadCategory.COLD:
+            hs_lead_status = "UNQUALIFIED"
+            lead_category_label = "⚪ COLD - Low priority"
+        elif lead.has_explicit_pain:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🔴 PAIN - Has explicit problem"
+        elif lead.ai_score and lead.ai_score >= 0.6:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🔴 HIGH SCORE"
+        elif lead.ai_score and lead.ai_score >= 0.3:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🟡 OPPORTUNITY"
+        else:
+            hs_lead_status = "UNQUALIFIED"
+            lead_category_label = "⚪ COLD"
 
         # Prepare properties
         properties = {
             "lead_source": lead.source.value,
             "lead_stage": LeadStage.NEW.value,
-            "hs_lead_status": "NEW",
+            "hs_lead_status": hs_lead_status,
             "lead_score": str(int((lead.ai_score or 0.5) * 100)),
             "message": lead.content[:1000],
             "website": lead.url,
@@ -137,9 +165,20 @@ class HubSpotCRM:
         if lead.company:
             properties["company"] = lead.company
 
-        # Add AI reasoning as note
+        # Build detailed AI analysis note with category info
+        ai_notes = []
+        ai_notes.append(f"Category: {lead_category_label}")
+        ai_notes.append(f"AI Score: {(lead.ai_score or 0) * 100:.0f}%")
+        if lead.pain_score:
+            ai_notes.append(f"Pain Score: {lead.pain_score}")
         if lead.ai_reasoning:
-            properties["ai_analysis"] = lead.ai_reasoning
+            ai_notes.append(f"AI Analysis: {lead.ai_reasoning}")
+        if lead.keywords_matched:
+            ai_notes.append(f"Keywords: {', '.join(lead.keywords_matched[:5])}")
+        if lead.industry:
+            ai_notes.append(f"Industry: {lead.industry}")
+
+        properties["ai_analysis"] = " | ".join(ai_notes)
 
         url = f"{self.BASE_URL}/crm/v3/objects/contacts"
 

@@ -5502,8 +5502,12 @@ def show_leads():
             </div>
             """, unsafe_allow_html=True)
         else:
-            qualified = len([l for l in st.session_state.filtered_leads if l.is_qualified])
-            hot_leads = len([l for l in st.session_state.filtered_leads if l.pain_score >= 70])
+            from src.utils.models import LeadCategory
+
+            # Count by category
+            pain_leads = len([l for l in st.session_state.filtered_leads if l.lead_category == LeadCategory.PAIN])
+            opportunity_leads = len([l for l in st.session_state.filtered_leads if l.lead_category == LeadCategory.OPPORTUNITY])
+            cold_leads = len([l for l in st.session_state.filtered_leads if l.lead_category == LeadCategory.COLD or l.lead_category is None])
             avg_score = sum(l.pain_score for l in st.session_state.filtered_leads) / len(st.session_state.filtered_leads)
 
             st.markdown(f"""
@@ -5513,12 +5517,16 @@ def show_leads():
                     <span class="stat-label">total</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value" style="color: var(--error-500);">{hot_leads}</span>
-                    <span class="stat-label">hot leads</span>
+                    <span class="stat-value" style="color: #DC2626;">🔴 {pain_leads}</span>
+                    <span class="stat-label">pain</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-value" style="color: var(--success-600);">{qualified}</span>
-                    <span class="stat-label">qualified</span>
+                    <span class="stat-value" style="color: #F59E0B;">🟡 {opportunity_leads}</span>
+                    <span class="stat-label">opportunity</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" style="color: #6B7280;">⚪ {cold_leads}</span>
+                    <span class="stat-label">cold</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-value" style="color: var(--primary-600);">{avg_score:.0f}</span>
@@ -5528,17 +5536,29 @@ def show_leads():
             """, unsafe_allow_html=True)
 
             # Filters
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(4)
             with col1:
-                filter_urgency = st.selectbox("Filter by Urgency", ["All", "Hot (70+)", "High (50+)", "Medium (25+)"])
+                filter_category = st.selectbox("Filter by Category", ["All", "🔴 Pain", "🟡 Opportunity", "⚪ Cold"])
             with col2:
+                filter_urgency = st.selectbox("Filter by Score", ["All", "Hot (70+)", "High (50+)", "Medium (25+)"])
+            with col3:
                 industries_found = list(set(l.industry for l in st.session_state.filtered_leads if l.industry))
                 filter_industry = st.selectbox("Filter by Industry", ["All"] + industries_found)
-            with col3:
-                sort_by = st.selectbox("Sort by", ["Pain Score", "Date Found", "AI Score"])
+            with col4:
+                sort_by = st.selectbox("Sort by", ["Pain Score", "Category", "Date Found", "AI Score"])
 
             # Apply filters
             filtered = st.session_state.filtered_leads.copy()
+
+            # Category filter
+            if filter_category == "🔴 Pain":
+                filtered = [l for l in filtered if l.lead_category == LeadCategory.PAIN]
+            elif filter_category == "🟡 Opportunity":
+                filtered = [l for l in filtered if l.lead_category == LeadCategory.OPPORTUNITY]
+            elif filter_category == "⚪ Cold":
+                filtered = [l for l in filtered if l.lead_category == LeadCategory.COLD or l.lead_category is None]
+
+            # Score filter
             if filter_urgency == "Hot (70+)":
                 filtered = [l for l in filtered if l.pain_score >= 70]
             elif filter_urgency == "High (50+)":
@@ -5549,8 +5569,19 @@ def show_leads():
             if filter_industry != "All":
                 filtered = [l for l in filtered if l.industry == filter_industry]
 
+            # Sort
             if sort_by == "Pain Score":
                 filtered = sorted(filtered, key=lambda x: x.pain_score, reverse=True)
+            elif sort_by == "Category":
+                # Sort by category priority: Pain > Opportunity > Cold
+                def category_priority(lead):
+                    if lead.lead_category == LeadCategory.PAIN:
+                        return 0
+                    elif lead.lead_category == LeadCategory.OPPORTUNITY:
+                        return 1
+                    else:
+                        return 2
+                filtered = sorted(filtered, key=category_priority)
             elif sort_by == "AI Score":
                 filtered = sorted(filtered, key=lambda x: x.ai_score or 0, reverse=True)
             else:
@@ -5558,8 +5589,27 @@ def show_leads():
 
             st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
 
+            # Helper function to get category display
+            def get_category_badge(lead):
+                from src.utils.models import LeadCategory
+                if lead.lead_category == LeadCategory.PAIN:
+                    return "🔴 Pain"
+                elif lead.lead_category == LeadCategory.OPPORTUNITY:
+                    return "🟡 Opportunity"
+                elif lead.lead_category == LeadCategory.COLD:
+                    return "⚪ Cold"
+                else:
+                    # Fallback based on score
+                    if lead.ai_score and lead.ai_score >= 0.6:
+                        return "🔴 Pain"
+                    elif lead.ai_score and lead.ai_score >= 0.3:
+                        return "🟡 Opportunity"
+                    else:
+                        return "⚪ Cold"
+
             data = [{
-                "Pain": l.pain_score,
+                "Category": get_category_badge(l),
+                "Score": l.pain_score,
                 "Title": l.title[:40] + "..." if len(l.title) > 40 else l.title,
                 "Industry": l.industry or "-",
                 "Source": l.source.value,

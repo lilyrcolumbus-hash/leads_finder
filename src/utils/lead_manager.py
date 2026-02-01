@@ -1002,10 +1002,10 @@ class CSVExporter:
         'location', 'country',
         # Business info
         'industry', 'employees', 'revenue',
-        # Scoring
-        'pain_score', 'urgency', 'status',
+        # Scoring & Category
+        'category', 'pain_score', 'ai_score', 'urgency', 'status',
         # Content
-        'content_preview', 'notes',
+        'content_preview', 'notes', 'ai_reasoning',
         # Meta
         'source', 'tags', 'saved_at'
     ]
@@ -1025,6 +1025,25 @@ class CSVExporter:
             tags_str = ''
             if hasattr(lead, 'tags') and lead.tags:
                 tags_str = ', '.join(lead.tags) if isinstance(lead.tags, list) else str(lead.tags)
+
+            # Get category label
+            category_label = ''
+            if hasattr(lead, 'lead_category') and lead.lead_category:
+                if lead.lead_category.value == 'pain':
+                    category_label = 'Pain'
+                elif lead.lead_category.value == 'opportunity':
+                    category_label = 'Opportunity'
+                elif lead.lead_category.value == 'cold':
+                    category_label = 'Cold'
+                else:
+                    category_label = lead.lead_category.value
+            elif hasattr(lead, 'ai_score') and lead.ai_score:
+                if lead.ai_score >= 0.6:
+                    category_label = 'Pain'
+                elif lead.ai_score >= 0.3:
+                    category_label = 'Opportunity'
+                else:
+                    category_label = 'Cold'
 
             writer.writerow({
                 # Contact info
@@ -1047,13 +1066,16 @@ class CSVExporter:
                 'industry': lead.industry or '',
                 'employees': getattr(lead, 'employees', '') or '',
                 'revenue': getattr(lead, 'revenue', '') or '',
-                # Scoring
+                # Scoring & Category
+                'category': category_label,
                 'pain_score': lead.pain_score,
+                'ai_score': f"{lead.ai_score:.2f}" if lead.ai_score else '',
                 'urgency': lead.urgency.value if hasattr(lead.urgency, 'value') else str(lead.urgency),
                 'status': getattr(lead, 'status', 'new') or 'new',
                 # Content
                 'content_preview': lead.content[:200] if lead.content else '',
                 'notes': getattr(lead, 'notes', '') or '',
+                'ai_reasoning': getattr(lead, 'ai_reasoning', '') or '',
                 # Meta
                 'source': lead.source.value if hasattr(lead.source, 'value') else str(lead.source),
                 'tags': tags_str,
@@ -1080,6 +1102,17 @@ class CSVExporter:
             else:
                 tags_str = str(tags) if tags else ''
 
+            # Get category label
+            category_label = lead.get('lead_category', lead.get('category', ''))
+            if not category_label:
+                ai_score = lead.get('ai_score', 0)
+                if ai_score and ai_score >= 0.6:
+                    category_label = 'Pain'
+                elif ai_score and ai_score >= 0.3:
+                    category_label = 'Opportunity'
+                elif ai_score:
+                    category_label = 'Cold'
+
             writer.writerow({
                 # Contact info
                 'title': str(lead.get('title', ''))[:100],
@@ -1101,13 +1134,16 @@ class CSVExporter:
                 'industry': lead.get('industry', ''),
                 'employees': lead.get('employees', ''),
                 'revenue': lead.get('revenue', ''),
-                # Scoring
+                # Scoring & Category
+                'category': category_label,
                 'pain_score': lead.get('pain_score', 0),
+                'ai_score': lead.get('ai_score', ''),
                 'urgency': lead.get('urgency', ''),
                 'status': lead.get('status', 'new'),
                 # Content
                 'content_preview': str(lead.get('content', ''))[:200],
                 'notes': lead.get('notes', ''),
+                'ai_reasoning': lead.get('ai_reasoning', ''),
                 # Meta
                 'source': lead.get('source', ''),
                 'tags': tags_str,
