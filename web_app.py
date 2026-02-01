@@ -4459,14 +4459,20 @@ def show_search():
     with col1:
         use_reddit = st.checkbox("🔴 Reddit - Business subreddits", value=True, key="reddit_check")
         use_hn = st.checkbox("🟠 Hacker News - Startups", value=False, key="hn_check")
-        use_linkedin = st.checkbox("🔷 LinkedIn - Decision Makers", value=bool(settings.google_api_key), disabled=not settings.google_api_key, key="linkedin_check")
+        use_linkedin = st.checkbox("🔷 LinkedIn - Decision Makers", value=False, key="linkedin_check")
     with col2:
-        use_google = st.checkbox("🔵 Google Search", value=False, disabled=not settings.google_api_key, key="google_check")
+        use_google = st.checkbox("🔵 Google Search", value=False, key="google_check")
         use_ph = st.checkbox("🟣 Product Hunt", value=False, key="ph_check")
         use_indeed = st.checkbox("💼 Indeed - Hiring Receptionists", value=True, key="indeed_check")
     with col3:
         use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
         use_gmaps = st.checkbox("📍 Google Maps - Local Businesses", value=True, key="gmaps_check")
+
+    # Show warnings for sources that need API keys
+    if use_google and not settings.google_api_key:
+        st.warning("⚠️ Google Search requires API key. Configure in Settings → .env file")
+    if use_linkedin and not settings.google_api_key:
+        st.warning("⚠️ LinkedIn requires Google API key for search. Configure in Settings → .env file")
 
     st.info("💡 **Google Maps** busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. **GRATIS** - no usa API.")
 
@@ -4551,10 +4557,12 @@ def show_search():
     ai_available = bool(settings.openai_api_key or settings.anthropic_api_key)
     st.subheader("🤖 AI Qualification (Recommended)")
 
-    use_ai = st.checkbox("Use AI to qualify leads automatically", value=ai_available, disabled=not ai_available, key="ai_check")
+    use_ai = st.checkbox("Use AI to qualify leads automatically", value=ai_available, key="ai_check")
 
-    if not ai_available:
-        st.info("Configure OpenAI or Anthropic API key in Settings to enable AI qualification")
+    if not ai_available and use_ai:
+        st.warning("⚠️ Configure OpenAI or Anthropic API key in Settings to enable AI qualification")
+    elif not ai_available:
+        st.info("💡 Configure OpenAI or Anthropic API key in Settings for better lead qualification")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
