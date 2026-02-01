@@ -2435,7 +2435,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* ========== SELECTBOX DROPDOWN - DARK THEME ========== */
+    /* ========== SELECTBOX DROPDOWN - DARK THEME (FORCE) ========== */
     [data-baseweb="select"] span,
     [data-baseweb="select"] div {
         color: #FFFFFF !important;
@@ -2445,42 +2445,81 @@ st.markdown("""
         fill: #E85D04 !important;
     }
 
-    [data-baseweb="popover"] {
-        background: transparent !important;
+    /* Dropdown popover/menu container */
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div {
+        background: #1E1814 !important;
+        background-color: #1E1814 !important;
     }
 
-    [data-baseweb="menu"] {
-        background: linear-gradient(135deg, rgba(40, 32, 24, 0.98) 0%, rgba(28, 22, 16, 0.99) 100%) !important;
-        border-radius: var(--radius-md) !important;
-        border: 1px solid rgba(232, 93, 4, 0.4) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(232, 93, 4, 0.15) !important;
-        backdrop-filter: blur(10px) !important;
+    /* Main dropdown menu */
+    [data-baseweb="menu"],
+    [data-baseweb="listbox"],
+    [role="listbox"],
+    ul[data-baseweb="menu"],
+    div[data-baseweb="menu"] {
+        background: #1E1814 !important;
+        background-color: #1E1814 !important;
+        border-radius: 12px !important;
+        border: 1px solid #E85D04 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
     }
 
-    [data-baseweb="menu"] li {
-        color: #E8DFD5 !important;
+    /* All dropdown options/items */
+    [data-baseweb="menu"] li,
+    [data-baseweb="listbox"] li,
+    [role="listbox"] li,
+    [role="option"],
+    [data-baseweb="menu"] > li,
+    ul[role="listbox"] > li {
+        background: #1E1814 !important;
+        background-color: #1E1814 !important;
+        color: #FFFFFF !important;
         padding: 12px 16px !important;
         transition: all 0.2s ease !important;
+        border: none !important;
     }
 
-    [data-baseweb="menu"] li:hover {
-        background: linear-gradient(135deg, rgba(232, 93, 4, 0.2) 0%, rgba(244, 140, 6, 0.1) 100%) !important;
+    /* Hover state for options */
+    [data-baseweb="menu"] li:hover,
+    [data-baseweb="listbox"] li:hover,
+    [role="listbox"] li:hover,
+    [role="option"]:hover,
+    [data-baseweb="menu"] > li:hover {
+        background: #3D2A1A !important;
+        background-color: #3D2A1A !important;
         color: #FFFFFF !important;
     }
 
-    [data-baseweb="menu"] li[aria-selected="true"] {
-        background: linear-gradient(135deg, rgba(232, 93, 4, 0.3) 0%, rgba(244, 140, 6, 0.2) 100%) !important;
+    /* Selected/highlighted option */
+    [data-baseweb="menu"] li[aria-selected="true"],
+    [data-baseweb="listbox"] li[aria-selected="true"],
+    [role="option"][aria-selected="true"],
+    [data-baseweb="menu"] li[data-highlighted="true"],
+    li[data-highlighted] {
+        background: #4A3020 !important;
+        background-color: #4A3020 !important;
         color: #FFFFFF !important;
         border-left: 3px solid #E85D04 !important;
     }
 
-    /* Dropdown option text */
-    [data-baseweb="menu"] [role="option"] {
-        color: #E8DFD5 !important;
+    /* Force text color on all nested elements */
+    [data-baseweb="menu"] li *,
+    [data-baseweb="listbox"] li *,
+    [role="listbox"] li *,
+    [role="option"] *,
+    [role="option"] span,
+    [data-baseweb="menu"] li span,
+    [data-baseweb="menu"] li div {
+        color: #FFFFFF !important;
+        background: transparent !important;
     }
 
-    [data-baseweb="menu"] [role="option"]:hover {
-        color: #FFFFFF !important;
+    /* Override any inline styles on the listbox container */
+    div[data-baseweb="popover"] > div > div,
+    div[data-baseweb="popover"] > div > div > ul {
+        background: #1E1814 !important;
+        background-color: #1E1814 !important;
     }
 
     /* ========== SPINNER ========== */
@@ -3252,6 +3291,41 @@ function styleButtons() {
 styleButtons();
 const observer = new MutationObserver(styleButtons);
 observer.observe(document.body, { childList: true, subtree: true });
+
+// ========== FORCE DARK DROPDOWN MENUS ==========
+function styleDropdowns() {
+    // Style all dropdown menus
+    document.querySelectorAll('[data-baseweb="popover"], [data-baseweb="menu"], [data-baseweb="listbox"], [role="listbox"]').forEach(el => {
+        el.style.setProperty('background', '#1E1814', 'important');
+        el.style.setProperty('background-color', '#1E1814', 'important');
+        el.style.setProperty('border', '1px solid #E85D04', 'important');
+        el.style.setProperty('border-radius', '12px', 'important');
+    });
+
+    // Style all dropdown options
+    document.querySelectorAll('[data-baseweb="menu"] li, [data-baseweb="listbox"] li, [role="option"], [role="listbox"] li').forEach(el => {
+        el.style.setProperty('background', '#1E1814', 'important');
+        el.style.setProperty('background-color', '#1E1814', 'important');
+        el.style.setProperty('color', '#FFFFFF', 'important');
+
+        // Style all children
+        el.querySelectorAll('*').forEach(child => {
+            child.style.setProperty('color', '#FFFFFF', 'important');
+            child.style.setProperty('background', 'transparent', 'important');
+        });
+    });
+
+    // Style highlighted/hovered items
+    document.querySelectorAll('[data-highlighted="true"], [aria-selected="true"]').forEach(el => {
+        el.style.setProperty('background', '#3D2A1A', 'important');
+        el.style.setProperty('background-color', '#3D2A1A', 'important');
+    });
+}
+
+// Observer for dropdowns
+const dropdownObserver = new MutationObserver(styleDropdowns);
+dropdownObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
+styleDropdowns();
 
 // ========== THEME TOGGLE ==========
 function toggleTheme() {
