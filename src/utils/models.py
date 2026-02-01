@@ -53,6 +53,17 @@ class Lead(BaseModel):
     name: Optional[str] = Field(default=None, description="Real name if available")
     company: Optional[str] = Field(default=None, description="Company name if mentioned")
 
+    # Professional & Social info
+    linkedin: Optional[str] = Field(default=None, description="LinkedIn profile URL")
+    twitter: Optional[str] = Field(default=None, description="Twitter/X handle")
+    position: Optional[str] = Field(default=None, description="Job title/position")
+    author: Optional[str] = Field(default=None, description="Author name if from post")
+
+    # Company info
+    employees: Optional[str] = Field(default=None, description="Number of employees (e.g., '10-50')")
+    revenue: Optional[str] = Field(default=None, description="Company revenue range")
+    country: Optional[str] = Field(default=None, description="Country")
+
     # Content
     title: str = Field(description="Title of post or search result")
     content: str = Field(description="Full text content")
@@ -91,6 +102,11 @@ class Lead(BaseModel):
     website: Optional[str] = Field(default=None, description="Company website URL")
     rating: Optional[float] = Field(default=None, description="Business rating (e.g., from Yelp/Google Maps)")
     reviews_count: Optional[int] = Field(default=None, description="Number of reviews")
+
+    # CRM fields
+    status: Optional[str] = Field(default="new", description="Lead status in CRM pipeline")
+    notes: Optional[str] = Field(default=None, description="Notes about the lead")
+    tags: List[str] = Field(default_factory=list, description="Tags for categorization")
 
     def __hash__(self):
         return hash(self.id)
