@@ -3474,6 +3474,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const streamlitObserver = new MutationObserver(() => {
     initKanban();
     initSwipeGestures();
+    applySavedTheme();
     applyPremiumStyles();
 });
 streamlitObserver.observe(document.body, { childList: true, subtree: true });
