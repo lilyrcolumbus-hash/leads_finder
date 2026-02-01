@@ -5596,22 +5596,22 @@ def show_analytics():
     st.markdown(f"""
     <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h1 style="margin: 0; color: #1E293B; font-size: 28px;">📊 {t('analytics_title')}</h1>
+            <h1 style="margin: 0; color: #FFFFFF; font-size: 28px;">📊 {t('analytics_title')}</h1>
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #6366F1; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600;">?</span>
-                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 16px 20px; border-radius: 12px; font-size: 13px; width: 320px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-                    <strong style="color: #818CF8; font-size: 15px;">{t('analytics_tooltip_title')}</strong><br><br>
+                <span style="cursor: help; background: #E85D04; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600;">?</span>
+                <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: rgba(30, 25, 20, 0.98); border: 1px solid rgba(232, 93, 4, 0.3); color: white; padding: 16px 20px; border-radius: 12px; font-size: 13px; width: 320px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                    <strong style="color: #E85D04; font-size: 15px;">{t('analytics_tooltip_title')}</strong><br><br>
                     {t('analytics_tooltip_desc')}<br><br>
                     • <strong>{t('leads_found')}:</strong> {t('total_discovered')}<br>
                     • <strong>{t('qualified_leads')}:</strong> {t('passed_filters')}<br>
                     • <strong>{t('conversion_rate')}:</strong> {t('qualified_total')}<br>
                     • <strong>{t('leads_by_source')}:</strong> {t('leads_by_source_desc')}<br><br>
-                    <em style="color: #94A3B8;">{t('go_to_settings').split('.')[0]}</em>
-                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1E293B;"></div>
+                    <em style="color: #A09080;">{t('go_to_settings').split('.')[0]}</em>
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid rgba(30, 25, 20, 0.98);"></div>
                 </div>
             </div>
         </div>
-        <p style="color: #64748B; margin: 0; font-size: 15px;">{t('analytics_subtitle')}</p>
+        <p style="color: #E8DFD5; margin: 0; font-size: 15px;">{t('analytics_subtitle')}</p>
     </div>
     <style>
         .metric-tooltip-wrapper:hover .metric-tooltip {{
@@ -5630,28 +5630,28 @@ def show_analytics():
         hot_leads = len([l for l in st.session_state.leads if getattr(l, 'pain_score', 0) >= 70])
         avg_score = sum(getattr(l, 'pain_score', 0) for l in st.session_state.leads) / total_leads if total_leads > 0 else 0
 
-        # Modern KPI Cards
+        # Modern KPI Cards - Dark Theme with Corporate Orange accents
         st.markdown(f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{total_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('total_discovered')}</div>
+            <div style="background: linear-gradient(135deg, rgba(45, 35, 25, 0.95) 0%, rgba(30, 25, 20, 0.98) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
+                <div style="font-size: 14px; color: #E8DFD5; margin-bottom: 8px;">🔍 {t('leads_found')}</div>
+                <div style="font-size: 36px; font-weight: 700; color: #E85D04;">{total_leads}</div>
+                <div style="font-size: 12px; margin-top: 8px; color: #A09080;">{t('total_discovered')}</div>
             </div>
-            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{qualified_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('passed_filters')}</div>
+            <div style="background: linear-gradient(135deg, rgba(35, 50, 35, 0.95) 0%, rgba(25, 35, 25, 0.98) 100%); border: 1px solid rgba(45, 198, 83, 0.3); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
+                <div style="font-size: 14px; color: #E8DFD5; margin-bottom: 8px;">✅ {t('qualified_leads')}</div>
+                <div style="font-size: 36px; font-weight: 700; color: #2DC653;">{qualified_leads}</div>
+                <div style="font-size: 12px; margin-top: 8px; color: #A09080;">{t('passed_filters')}</div>
             </div>
-            <div style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{rate:.1f}%</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">{t('qualified_total')}</div>
+            <div style="background: linear-gradient(135deg, rgba(50, 40, 25, 0.95) 0%, rgba(35, 30, 20, 0.98) 100%); border: 1px solid rgba(244, 140, 6, 0.3); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
+                <div style="font-size: 14px; color: #E8DFD5; margin-bottom: 8px;">📈 {t('conversion_rate')}</div>
+                <div style="font-size: 36px; font-weight: 700; color: #F48C06;">{rate:.1f}%</div>
+                <div style="font-size: 12px; margin-top: 8px; color: #A09080;">{t('qualified_total')}</div>
             </div>
-            <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
-                <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
-                <div style="font-size: 36px; font-weight: 700;">{hot_leads}</div>
-                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Score 70+</div>
+            <div style="background: linear-gradient(135deg, rgba(50, 30, 30, 0.95) 0%, rgba(35, 22, 22, 0.98) 100%); border: 1px solid rgba(220, 47, 2, 0.3); border-radius: 16px; padding: 24px; color: white; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
+                <div style="font-size: 14px; color: #E8DFD5; margin-bottom: 8px;">🔥 {t('hot_leads')}</div>
+                <div style="font-size: 36px; font-weight: 700; color: #DC2F02;">{hot_leads}</div>
+                <div style="font-size: 12px; margin-top: 8px; color: #A09080;">Score 70+</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -5660,8 +5660,8 @@ def show_analytics():
             # Source distribution with modern visualization
             st.markdown(f"""
             <div style="margin-bottom: 16px;">
-                <h3 style="color: #1E293B; margin: 0 0 8px 0; font-size: 20px;">📊 {t('leads_by_source')}</h3>
-                <p style="color: #64748B; margin: 0; font-size: 13px;">{t('leads_by_source_desc')}</p>
+                <h3 style="color: #FFFFFF; margin: 0 0 8px 0; font-size: 20px;">📊 {t('leads_by_source')}</h3>
+                <p style="color: #E8DFD5; margin: 0; font-size: 13px;">{t('leads_by_source_desc')}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -5685,7 +5685,7 @@ def show_analytics():
 
             # Build modern bar chart
             max_count = max(source_counts.values()) if source_counts else 1
-            chart_html = '<div style="background: white; border: 1px solid #E5E7EB; border-radius: 16px; padding: 24px;">'
+            chart_html = '<div style="background: linear-gradient(135deg, rgba(35, 30, 25, 0.95) 0%, rgba(25, 22, 18, 0.98) 100%); border: 1px solid rgba(232, 93, 4, 0.2); border-radius: 16px; padding: 24px;">'
 
             for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
                 color, icon = source_colors.get(source.lower(), ('#6B7280', '📊'))
@@ -5696,10 +5696,10 @@ def show_analytics():
                 <div style="display: flex; align-items: center; margin-bottom: 16px;">
                     <div style="width: 120px; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 20px;">{icon}</span>
-                        <span style="font-size: 14px; font-weight: 600; color: #374151; text-transform: capitalize;">{source}</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #E8DFD5; text-transform: capitalize;">{source}</span>
                     </div>
                     <div style="flex: 1; margin: 0 20px;">
-                        <div style="background: #E5E7EB; border-radius: 8px; height: 28px; overflow: hidden;">
+                        <div style="background: rgba(60, 50, 40, 0.5); border-radius: 8px; height: 28px; overflow: hidden;">
                             <div style="background: linear-gradient(90deg, {color} 0%, {color}CC 100%); width: {width_pct}%; height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 12px; transition: width 0.5s ease;">
                                 <span style="color: white; font-weight: 700; font-size: 13px;">{count}</span>
                             </div>
