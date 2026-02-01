@@ -126,11 +126,59 @@ st.set_page_config(
 st.markdown("""
 <style>
     /* ========== HIDE STREAMLIT ELEMENTS ========== */
-    *[class*="keyboard"], *[id*="keyboard"], *[data-testid*="keyboard"],
     [data-testid="stKeyboardShortcuts"], .stKeyboardShortcut,
     #MainMenu, footer, header, .stDeployButton {
         display: none !important;
         visibility: hidden !important;
+    }
+
+    /* ========== FIX SIDEBAR COLLAPSE BUTTON ========== */
+    /* Hide the text fallback and show proper icon */
+    [data-testid="collapsedControl"] {
+        background: var(--bg-glass) !important;
+        border: 1px solid var(--glass-border) !important;
+        border-radius: 8px !important;
+    }
+
+    [data-testid="collapsedControl"] svg {
+        display: block !important;
+    }
+
+    /* Replace broken Material icon text with Unicode arrow */
+    button[kind="secondary"] span:not(:empty),
+    [data-testid="baseButton-secondary"] span {
+        font-size: 0 !important;
+    }
+
+    button[kind="secondary"] span:not(:empty)::after,
+    [data-testid="baseButton-secondary"] span::after {
+        content: "◀" !important;
+        font-size: 16px !important;
+        color: var(--cyan) !important;
+    }
+
+    /* Sidebar toggle button styling */
+    [data-testid="stSidebarCollapseButton"] button,
+    .css-1rs6os button {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button span,
+    .css-1rs6os button span {
+        font-size: 0 !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button span::after,
+    .css-1rs6os button span::after {
+        content: "◀" !important;
+        font-size: 20px !important;
+        color: var(--cyan) !important;
+    }
+
+    /* When sidebar is collapsed, show right arrow */
+    [data-testid="stSidebarCollapsedControl"] button span::after {
+        content: "▶" !important;
     }
 
     /* ========== FONTS ========== */
