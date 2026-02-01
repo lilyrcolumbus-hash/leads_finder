@@ -4915,14 +4915,46 @@ def show_search():
             try:
                 ai_filter = AILeadFilter()
                 filtered = ai_filter.filter_leads(all_leads)
-                qualified = [l for l in filtered if l.is_qualified]
-                st.session_state.filtered_leads = qualified
+
+                # Count by category
+                from src.utils.models import LeadCategory
+                pain_count = len([l for l in filtered if l.lead_category == LeadCategory.PAIN])
+                opportunity_count = len([l for l in filtered if l.lead_category == LeadCategory.OPPORTUNITY])
+                cold_count = len([l for l in filtered if l.lead_category == LeadCategory.COLD])
+
+                # Show all leads (not just qualified) but sorted by category
+                st.session_state.filtered_leads = filtered
                 with results:
-                    st.success(f"AI qualified {len(qualified)}/{len(all_leads)} leads")
-            except:
+                    st.success(f"AI categorized {len(filtered)} leads: 🔴 {pain_count} Pain | 🟡 {opportunity_count} Opportunity | ⚪ {cold_count} Cold")
+
+                # Update stored leads with AI data (category, score, reasoning)
+                ai_updated = lead_manager.update_leads_with_ai_data(filtered)
+                if ai_updated > 0:
+                    with results:
+                        st.info(f"💾 Updated {ai_updated} leads in CRM with AI analysis")
+
+            except Exception as e:
                 st.session_state.filtered_leads = all_leads
+                with results:
+                    st.warning(f"AI filter error, showing all leads: {str(e)[:50]}")
         else:
             st.session_state.filtered_leads = all_leads
+
+        # Save search history
+        try:
+            sources_used = [name for name, _ in scrapers]
+            lead_manager.save_search_history(
+                search_params={
+                    'industry': selected_industry,
+                    'time_filter': selected_time,
+                    'location': search_location if 'search_location' in dir() else None,
+                    'ai_enabled': use_ai,
+                },
+                results_count=len(all_leads),
+                sources_used=sources_used
+            )
+        except Exception:
+            pass  # Don't fail search if history save fails
 
         # Hunter.io email enrichment for leads without emails
         if settings.hunter_api_key and all_leads:
@@ -5654,16 +5686,77 @@ def show_leads():
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.success(f"Found {len(saved_leads)} saved leads in database")
+            # Count by category
+            pain_count = len([l for l in saved_leads if l.get('lead_category') == 'pain'])
+            opportunity_count = len([l for l in saved_leads if l.get('lead_category') == 'opportunity'])
+            cold_count = len([l for l in saved_leads if l.get('lead_category') == 'cold' or not l.get('lead_category')])
 
-            # Display saved leads
+            st.markdown(f"""
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-value">{len(saved_leads)}</span>
+                    <span class="stat-label">total saved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" style="color: #DC2626;">🔴 {pain_count}</span>
+                    <span class="stat-label">pain</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" style="color: #F59E0B;">🟡 {opportunity_count}</span>
+                    <span class="stat-label">opportunity</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" style="color: #6B7280;">⚪ {cold_count}</span>
+                    <span class="stat-label">cold/uncat</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Category filter for saved leads
+            filter_saved_cat = st.selectbox(
+                "Filter by Category",
+                ["All", "🔴 Pain", "🟡 Opportunity", "⚪ Cold/Uncategorized"],
+                key="filter_saved_category"
+            )
+
+            # Apply category filter
+            filtered_saved = saved_leads.copy()
+            if filter_saved_cat == "🔴 Pain":
+                filtered_saved = [l for l in saved_leads if l.get('lead_category') == 'pain']
+            elif filter_saved_cat == "🟡 Opportunity":
+                filtered_saved = [l for l in saved_leads if l.get('lead_category') == 'opportunity']
+            elif filter_saved_cat == "⚪ Cold/Uncategorized":
+                filtered_saved = [l for l in saved_leads if l.get('lead_category') == 'cold' or not l.get('lead_category')]
+
+            # Helper to get category badge for saved leads
+            def get_saved_category_badge(lead_dict):
+                cat = lead_dict.get('lead_category', '')
+                if cat == 'pain':
+                    return "🔴 Pain"
+                elif cat == 'opportunity':
+                    return "🟡 Opportunity"
+                elif cat == 'cold':
+                    return "⚪ Cold"
+                else:
+                    # Fallback based on ai_score
+                    ai_score = lead_dict.get('ai_score', 0)
+                    if ai_score and ai_score >= 0.6:
+                        return "🔴 Pain"
+                    elif ai_score and ai_score >= 0.3:
+                        return "🟡 Opportunity"
+                    else:
+                        return "⚪ -"
+
+            # Display saved leads with category
             data = [{
-                "Pain": l.get('pain_score', 0),
+                "Category": get_saved_category_badge(l),
+                "Score": l.get('pain_score', 0),
                 "Title": str(l.get('title', ''))[:40] + "..." if len(str(l.get('title', ''))) > 40 else l.get('title', ''),
                 "Industry": l.get('industry', '-') or '-',
                 "Source": l.get('source', '-'),
+                "AI": f"{l.get('ai_score', 0):.2f}" if l.get('ai_score') else '-',
                 "Saved": l.get('saved_at', '-')[:10] if l.get('saved_at') else '-'
-            } for l in saved_leads[:100]]  # Limit to 100 for performance
+            } for l in filtered_saved[:100]]  # Limit to 100 for performance
 
             st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
 

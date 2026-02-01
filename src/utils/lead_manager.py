@@ -147,6 +147,114 @@ class LeadManager:
         with open(self.storage_path, 'w') as f:
             json.dump(existing_data, f, indent=2, default=str)
 
+    def update_leads_with_ai_data(self, leads: List[Lead]) -> int:
+        """
+        Update existing leads in storage with AI analysis data (category, score, etc.).
+        Returns the number of leads updated.
+        """
+        if not self.storage_path.exists():
+            return 0
+
+        try:
+            with open(self.storage_path, 'r') as f:
+                existing_data = json.load(f)
+        except Exception:
+            return 0
+
+        existing_leads = existing_data.get('leads', [])
+
+        # Create a lookup map by hash
+        leads_by_hash = {}
+        for lead in leads:
+            lead_hash = self._generate_hash(lead)
+            leads_by_hash[lead_hash] = lead
+
+        updated_count = 0
+        for stored_lead in existing_leads:
+            stored_hash = stored_lead.get('hash', '')
+            if stored_hash in leads_by_hash:
+                lead = leads_by_hash[stored_hash]
+
+                # Update AI-related fields
+                if lead.ai_score is not None:
+                    stored_lead['ai_score'] = lead.ai_score
+                if lead.ai_reasoning:
+                    stored_lead['ai_reasoning'] = lead.ai_reasoning
+                if lead.is_qualified is not None:
+                    stored_lead['is_qualified'] = lead.is_qualified
+                if lead.has_explicit_pain is not None:
+                    stored_lead['has_explicit_pain'] = lead.has_explicit_pain
+
+                # Update category
+                if lead.lead_category:
+                    stored_lead['lead_category'] = lead.lead_category.value if hasattr(lead.lead_category, 'value') else str(lead.lead_category)
+
+                # Update scoring fields if present
+                if lead.pain_score is not None:
+                    stored_lead['pain_score'] = lead.pain_score
+                if lead.intent_score is not None:
+                    stored_lead['intent_score'] = lead.intent_score
+                if lead.fit_score is not None:
+                    stored_lead['fit_score'] = lead.fit_score
+                if lead.total_score is not None:
+                    stored_lead['total_score'] = lead.total_score
+                if lead.urgency:
+                    stored_lead['urgency'] = lead.urgency.value if hasattr(lead.urgency, 'value') else str(lead.urgency)
+                if lead.industry:
+                    stored_lead['industry'] = lead.industry
+
+                stored_lead['ai_updated_at'] = datetime.now().isoformat()
+                updated_count += 1
+
+        # Save updated data
+        existing_data['last_updated'] = datetime.now().isoformat()
+        with open(self.storage_path, 'w') as f:
+            json.dump(existing_data, f, indent=2, default=str)
+
+        return updated_count
+
+    def save_search_history(self, search_params: Dict, results_count: int, sources_used: List[str]) -> None:
+        """Save search history for analytics and tracking."""
+        history_path = self.storage_path.parent / "search_history.json"
+
+        existing_history = []
+        if history_path.exists():
+            try:
+                with open(history_path, 'r') as f:
+                    existing_history = json.load(f)
+            except Exception:
+                pass
+
+        search_record = {
+            'timestamp': datetime.now().isoformat(),
+            'params': search_params,
+            'results_count': results_count,
+            'sources': sources_used,
+        }
+
+        existing_history.append(search_record)
+
+        # Keep only last 100 searches
+        if len(existing_history) > 100:
+            existing_history = existing_history[-100:]
+
+        with open(history_path, 'w') as f:
+            json.dump(existing_history, f, indent=2)
+
+    def get_search_history(self, limit: int = 20) -> List[Dict]:
+        """Get recent search history."""
+        history_path = self.storage_path.parent / "search_history.json"
+
+        if not history_path.exists():
+            return []
+
+        try:
+            with open(history_path, 'r') as f:
+                history = json.load(f)
+                return history[-limit:]
+        except Exception:
+            return []
+
     def import_from_csv(self, csv_content: str) -> Dict:
         """Import leads from CSV content. Returns stats about import."""
         imported = 0
