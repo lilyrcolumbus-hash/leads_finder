@@ -4416,30 +4416,30 @@ def show_dashboard():
     # How It Works Section
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
-        <p style="margin: 0; color: #64748B; font-size: 13px;">Three simple steps to find qualified leads</p>
+        <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
+        <p style="margin: 0; color: #D4A574; font-size: 13px;">Three simple steps to find qualified leads</p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
         <!-- Step 1 -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">1</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Search</h4>
-            <p style="margin: 0; color: #64748B; font-size: 13px;">Select sources and find prospects automatically</p>
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">1</div>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Search</h4>
+            <p style="margin: 0; color: #D4A574; font-size: 13px;">Select sources and find prospects automatically</p>
         </div>
         <!-- Step 2 -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">2</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Qualify</h4>
-            <p style="margin: 0; color: #64748B; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">2</div>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Qualify</h4>
+            <p style="margin: 0; color: #D4A574; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
         </div>
         <!-- Step 3 -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; text-align: center;">
-            <div style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">3</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Export</h4>
-            <p style="margin: 0; color: #64748B; font-size: 13px;">Send the best leads directly to HubSpot</p>
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
+            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">3</div>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Export</h4>
+            <p style="margin: 0; color: #D4A574; font-size: 13px;">Send the best leads directly to HubSpot</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -6251,10 +6251,10 @@ def show_crm():
     # Empty state
     if not all_leads:
         st.markdown("""
-        <div style="text-align: center; padding: 60px 20px; background: #F8FAFC; border-radius: 16px; border: 2px dashed #E2E8F0;">
+        <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border-radius: 16px; border: 2px dashed rgba(232, 93, 4, 0.4);">
             <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
-            <h3 style="margin: 0 0 8px 0; color: #1E293B; font-size: 20px;">No leads in your CRM</h3>
-            <p style="margin: 0; color: #64748B;">Import leads or search for new leads to start building your pipeline</p>
+            <h3 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 20px;">No leads in your CRM</h3>
+            <p style="margin: 0; color: #D4A574;">Import leads or search for new leads to start building your pipeline</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -7712,16 +7712,16 @@ Best regards'''
 
 
 def show_config():
-    # Modern Settings Header
+    # Modern Settings Header - Corporate Orange Theme
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #1E293B 0%, #334155 100%); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+    <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: center;">
+            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: center;">
                 <span style="font-size: 36px;">⚙️</span>
             </div>
             <div>
-                <h1 style="margin: 0 0 8px 0; color: white; font-size: 28px; font-weight: 700;">Settings</h1>
-                <p style="margin: 0; color: #94A3B8; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
+                <h1 style="margin: 0 0 8px 0; color: #E85D04; font-size: 28px; font-weight: 700;">Settings</h1>
+                <p style="margin: 0; color: #D4A574; font-size: 15px;">Configure your API integrations, system parameters, and platform preferences</p>
             </div>
         </div>
     </div>
@@ -7731,9 +7731,9 @@ def show_config():
     st.markdown("""
     <div style="margin-bottom: 24px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <h2 style="margin: 0; color: #1E293B; font-size: 20px; font-weight: 700;">🔗 API Integrations</h2>
+            <h2 style="margin: 0; color: #E85D04; font-size: 20px; font-weight: 700;">🔗 API Integrations</h2>
         </div>
-        <p style="margin: 0; color: #64748B; font-size: 14px;">Connect your external services to unlock full platform functionality</p>
+        <p style="margin: 0; color: #D4A574; font-size: 14px;">Connect your external services to unlock full platform functionality</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -7773,40 +7773,40 @@ def show_config():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
         <!-- HubSpot -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">HubSpot CRM</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">HubSpot CRM</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hubspot_bg}; color: {hubspot_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hubspot_icon}</span> {hubspot_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Sync leads & contacts</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Sync leads & contacts</p>
         </div>
         <!-- Google -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Google Search</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Google Search</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {google_bg}; color: {google_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{google_icon}</span> {google_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Web search for leads</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Web search for leads</p>
         </div>
         <!-- OpenAI -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">🤖</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">OpenAI</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">OpenAI</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {openai_bg}; color: {openai_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{openai_icon}</span> {openai_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">AI lead qualification</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">AI lead qualification</p>
         </div>
         <!-- Anthropic -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">🧠</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Anthropic Claude</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Anthropic Claude</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {anthropic_bg}; color: {anthropic_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{anthropic_icon}</span> {anthropic_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">AI assistant</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">AI assistant</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -7827,40 +7827,40 @@ def show_config():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Hunter.io -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">📧</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Hunter.io</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Hunter.io</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {hunter_bg}; color: {hunter_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{hunter_icon}</span> {hunter_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Email finder service</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Email finder service</p>
         </div>
         <!-- Apollo.io -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">🚀</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Apollo.io</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Apollo.io</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: {apollo_bg}; color: {apollo_color}; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>{apollo_icon}</span> {apollo_text}
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Email + Phone + Company</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Email + Phone + Company</p>
         </div>
         <!-- Deduplication -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">🔄</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">Deduplication</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Deduplication</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>✓</span> Active
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Remove duplicate leads</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Remove duplicate leads</p>
         </div>
         <!-- CSV Export -->
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 12px;">📥</div>
-            <h4 style="margin: 0 0 8px 0; color: #1E293B; font-size: 16px; font-weight: 600;">CSV Export</h4>
+            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">CSV Export</h4>
             <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #D1FAE5; color: #10B981; border-radius: 20px; font-size: 12px; font-weight: 600;">
                 <span>✓</span> Available
             </div>
-            <p style="margin: 12px 0 0 0; color: #64748B; font-size: 11px;">Export leads to CSV</p>
+            <p style="margin: 12px 0 0 0; color: #D4A574; font-size: 11px;">Export leads to CSV</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -8570,18 +8570,20 @@ def render_floating_assistant():
             z-index: 9999 !important;
         }
         button#floating_ai_assistant {
-            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #4F46E5 100%) !important;
+            background: linear-gradient(135deg, #E85D04 0%, #F48C06 50%, #DC2F02 100%) !important;
             color: white !important;
             border: none !important;
             padding: 14px 24px !important;
             border-radius: 30px !important;
             font-weight: 600 !important;
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4) !important;
+            box-shadow: 0 8px 24px rgba(232, 93, 4, 0.4) !important;
             animation: pulse-glow 2s infinite !important;
+            white-space: nowrap !important;
+            min-width: max-content !important;
         }
         button#floating_ai_assistant:hover {
             transform: translateY(-3px) scale(1.02) !important;
-            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5) !important;
+            box-shadow: 0 12px 32px rgba(232, 93, 4, 0.5) !important;
         }
     </style>
     """, unsafe_allow_html=True)
