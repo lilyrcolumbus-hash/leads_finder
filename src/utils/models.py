@@ -1,8 +1,11 @@
-"""Data models for the lead generation app."""
+"""Data models for the lead generation app.
+
+Updated: Added extra fields for business data (website, location, rating, etc.)
+"""
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -82,7 +85,7 @@ class Lead(BaseModel):
     hubspot_id: Optional[str] = Field(default=None)
 
     # Extra data (for enrichment services like Apollo, Google Maps, etc.)
-    extra_data: Optional[dict] = Field(default=None, description="Additional data from enrichment services")
+    extra_data: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional data from enrichment services")
     posted_at: Optional[datetime] = Field(default=None, description="When the original content was posted")
     location: Optional[str] = Field(default=None, description="Geographic location")
     website: Optional[str] = Field(default=None, description="Company website URL")
