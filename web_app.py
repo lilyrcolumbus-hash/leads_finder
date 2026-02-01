@@ -1694,23 +1694,50 @@ st.markdown("""
 
     /* ========== CHECKBOXES ========== */
     .stCheckbox {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: rgba(30, 25, 20, 0.6) !important;
+        border: 2px solid rgba(232, 93, 4, 0.2) !important;
         border-radius: var(--radius-md) !important;
         padding: 16px 20px !important;
         margin: 6px 0 !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.3s ease !important;
+        opacity: 0.7;
     }
 
     .stCheckbox:hover {
-        border-color: var(--primary-300) !important;
-        background: var(--primary-50) !important;
+        border-color: rgba(232, 93, 4, 0.5) !important;
+        background: rgba(40, 30, 20, 0.8) !important;
+        opacity: 1;
+        box-shadow: 0 0 15px rgba(232, 93, 4, 0.2);
+    }
+
+    /* Checked checkbox - bright and glowing */
+    .stCheckbox:has(input:checked) {
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.15) 0%, rgba(40, 30, 20, 0.9) 100%) !important;
+        border-color: #E85D04 !important;
+        opacity: 1 !important;
+        box-shadow: 0 0 20px rgba(232, 93, 4, 0.4), inset 0 0 20px rgba(232, 93, 4, 0.1) !important;
+    }
+
+    /* Unchecked checkbox - dimmed appearance */
+    .stCheckbox:has(input:not(:checked)) {
+        background: rgba(20, 18, 15, 0.5) !important;
+        border-color: rgba(100, 80, 60, 0.3) !important;
+        opacity: 0.6;
+    }
+
+    .stCheckbox:has(input:not(:checked)):hover {
+        opacity: 0.9;
+        border-color: rgba(232, 93, 4, 0.4) !important;
     }
 
     .stCheckbox label {
         font-size: 15px !important;
         font-weight: 500 !important;
-        color: var(--slate-700) !important;
+        color: #FFFFFF !important;
+    }
+
+    .stCheckbox:has(input:not(:checked)) label {
+        color: #A0958A !important;
     }
 
     /* ========== TABS ========== */
@@ -2404,22 +2431,36 @@ st.markdown("""
 
     /* ========== ENHANCED CHECKBOX STYLING ========== */
     .stCheckbox > label {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
         font-weight: 500 !important;
     }
 
     .stCheckbox > label > div {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
     }
 
     .stCheckbox > label > div > p,
     .stCheckbox > label > div > span {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
         font-weight: 500 !important;
     }
 
     .stCheckbox [data-testid="stMarkdownContainer"] p {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* Checked state indicator */
+    .stCheckbox:has(input:checked) > label {
+        color: #FFFFFF !important;
+        text-shadow: 0 0 10px rgba(232, 93, 4, 0.5);
+    }
+
+    /* Unchecked state - dimmed text */
+    .stCheckbox:has(input:not(:checked)) > label,
+    .stCheckbox:has(input:not(:checked)) > label > div,
+    .stCheckbox:has(input:not(:checked)) > label > div > p,
+    .stCheckbox:has(input:not(:checked)) > label > div > span {
+        color: #8A8078 !important;
     }
 
     /* ========== ENHANCED ALERTS ========== */
