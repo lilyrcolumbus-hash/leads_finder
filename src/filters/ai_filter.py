@@ -59,7 +59,7 @@ Return a JSON array of these objects. Example:
             try:
                 import google.generativeai as genai
                 genai.configure(api_key=settings.gemini_api_key)
-                self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
                 self.logger.info("Initialized Google Gemini client")
             except Exception as e:
                 self.logger.warning(f"Failed to initialize Gemini: {e}")

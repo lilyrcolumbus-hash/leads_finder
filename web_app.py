@@ -8311,7 +8311,7 @@ def show_config():
                     try:
                         import google.generativeai as genai
                         genai.configure(api_key=settings.gemini_api_key)
-                        model = genai.GenerativeModel('gemini-1.5-flash')
+                        model = genai.GenerativeModel('gemini-2.0-flash')
                         response = model.generate_content("Say OK")
                         st.success("✅ Gemini AI connected!")
                     except Exception as e:
