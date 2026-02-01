@@ -817,12 +817,58 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, rgba(232, 93, 4, 0.15) 0%, rgba(244, 140, 6, 0.15) 100%) !important;
-        color: var(--cyan) !important;
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.2) 0%, rgba(244, 140, 6, 0.1) 100%) !important;
+        color: #FFFFFF !important;
         font-weight: 600 !important;
         border-color: var(--cyan) !important;
-        box-shadow: var(--glow-intense), inset 0 0 30px var(--cyan-dim) !important;
-        text-shadow: 0 0 15px var(--cyan);
+        border-left: 3px solid #E85D04 !important;
+        box-shadow: 0 0 20px rgba(232, 93, 4, 0.3), inset 0 0 20px rgba(232, 93, 4, 0.1) !important;
+        text-shadow: 0 0 10px rgba(232, 93, 4, 0.5);
+        position: relative;
+    }
+
+    /* Hide default radio circle indicator */
+    [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label > div:first-child {
+        display: none !important;
+    }
+
+    /* Active menu item left glow bar */
+    [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"]::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 20%;
+        height: 60%;
+        width: 3px;
+        background: linear-gradient(180deg, #F48C06 0%, #E85D04 50%, #DC2F02 100%);
+        border-radius: 0 2px 2px 0;
+        box-shadow: 0 0 10px #E85D04, 0 0 20px rgba(232, 93, 4, 0.5);
+    }
+
+    /* Active indicator dot - orange glow */
+    [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"]::after {
+        content: '';
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: #E85D04;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #E85D04, 0 0 16px rgba(232, 93, 4, 0.6);
+        animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 8px #E85D04, 0 0 16px rgba(232, 93, 4, 0.6);
+        }
+        50% {
+            opacity: 0.7;
+            box-shadow: 0 0 12px #E85D04, 0 0 24px rgba(232, 93, 4, 0.8);
+        }
     }
 
     /* ========== LOGO SECTION - HOLOGRAPHIC ========== */
