@@ -5082,34 +5082,47 @@ def show_search():
 
         # Navigation buttons after search
         with results:
+            # IMPORTANT: Ensure leads are saved before any navigation
+            if all_leads:
+                save_result = lead_manager.save_leads(all_leads)
+                if save_result > 0:
+                    st.success(f"✅ {save_result} leads saved to database")
+
             nav_col1, nav_col2, nav_col3 = st.columns(3)
             with nav_col1:
-                if st.button("📋 View in CRM", type="primary", use_container_width=True):
+                if st.button("📋 View in CRM", type="primary", use_container_width=True, key="nav_crm_btn"):
+                    # Force save filtered leads before navigation
+                    if st.session_state.filtered_leads:
+                        lead_manager.save_leads(st.session_state.filtered_leads)
                     st.session_state.nav_page = "CRM"
                     st.rerun()
             with nav_col2:
-                if st.button("📊 View All Leads", use_container_width=True):
+                if st.button("📊 View All Leads", use_container_width=True, key="nav_leads_btn"):
+                    # Force save filtered leads before navigation
+                    if st.session_state.filtered_leads:
+                        lead_manager.save_leads(st.session_state.filtered_leads)
                     st.session_state.nav_page = "My Leads"
                     st.rerun()
             with nav_col3:
                 # Manual HubSpot sync button
                 with HubSpotCRM() as crm:
                     if crm.is_configured():
-                        if st.button("🔗 Sync to HubSpot", use_container_width=True):
+                        if st.button("🔗 Sync to HubSpot", use_container_width=True, key="nav_hubspot_btn"):
                             sync_progress = st.progress(0)
                             synced = 0
-                            total = len(all_leads)
-                            for i, lead in enumerate(all_leads):
+                            leads_to_sync = st.session_state.filtered_leads if st.session_state.filtered_leads else all_leads
+                            total = len(leads_to_sync)
+                            for i, lead in enumerate(leads_to_sync):
                                 try:
                                     result = crm.create_contact(lead)
                                     if result:
                                         synced += 1
                                 except:
                                     pass
-                                sync_progress.progress((i + 1) / total)
-                            st.success(f"Synced {synced}/{total} leads to HubSpot!")
+                                sync_progress.progress((i + 1) / total if total > 0 else 1)
+                            st.success(f"✅ Synced {synced}/{total} leads to HubSpot!")
                     else:
-                        st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True)
+                        st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True, key="nav_hubspot_disabled")
 
     # Preview - Modern Lead Cards
     if st.session_state.scraping_done and st.session_state.filtered_leads:
