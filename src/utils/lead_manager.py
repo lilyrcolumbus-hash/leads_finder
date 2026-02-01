@@ -74,45 +74,58 @@ class LeadManager:
 
     def save_leads(self, leads: List[Lead]) -> int:
         """Save leads to JSON storage. Returns number of new leads saved."""
+        # Ensure directory exists
+        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+
         existing_data = {'leads': [], 'last_updated': None}
 
         if self.storage_path.exists():
             try:
                 with open(self.storage_path, 'r') as f:
                     existing_data = json.load(f)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Warning: Could not load existing leads: {e}")
 
         new_count = 0
         for lead in leads:
-            lead_hash = self._generate_hash(lead)
+            try:
+                lead_hash = self._generate_hash(lead)
 
-            if lead_hash not in self._seen_hashes:
-                lead_dict = lead.model_dump()
-                lead_dict['hash'] = lead_hash
-                lead_dict['saved_at'] = datetime.now().isoformat()
-                # Set default CRM status for new leads
-                lead_dict['status'] = 'new'
-                # Convert datetime objects to strings
-                if lead_dict.get('found_at'):
-                    lead_dict['found_at'] = str(lead_dict['found_at'])
-                if lead_dict.get('posted_at'):
-                    lead_dict['posted_at'] = str(lead_dict['posted_at'])
-                # Convert enum to string
-                if lead_dict.get('source'):
-                    lead_dict['source'] = str(lead_dict['source'].value) if hasattr(lead_dict['source'], 'value') else str(lead_dict['source'])
-                if lead_dict.get('urgency'):
-                    lead_dict['urgency'] = str(lead_dict['urgency'].value) if hasattr(lead_dict['urgency'], 'value') else str(lead_dict['urgency'])
+                if lead_hash not in self._seen_hashes:
+                    lead_dict = lead.model_dump()
+                    lead_dict['hash'] = lead_hash
+                    lead_dict['saved_at'] = datetime.now().isoformat()
+                    # Set default CRM status for new leads
+                    lead_dict['status'] = 'new'
+                    # Convert datetime objects to strings
+                    if lead_dict.get('found_at'):
+                        lead_dict['found_at'] = str(lead_dict['found_at'])
+                    if lead_dict.get('posted_at'):
+                        lead_dict['posted_at'] = str(lead_dict['posted_at'])
+                    # Convert enum to string
+                    if lead_dict.get('source'):
+                        lead_dict['source'] = str(lead_dict['source'].value) if hasattr(lead_dict['source'], 'value') else str(lead_dict['source'])
+                    if lead_dict.get('urgency'):
+                        lead_dict['urgency'] = str(lead_dict['urgency'].value) if hasattr(lead_dict['urgency'], 'value') else str(lead_dict['urgency'])
+                    if lead_dict.get('lead_category'):
+                        lead_dict['lead_category'] = str(lead_dict['lead_category'].value) if hasattr(lead_dict['lead_category'], 'value') else str(lead_dict['lead_category'])
 
-                existing_data['leads'].append(lead_dict)
-                self._seen_hashes.add(lead_hash)
-                new_count += 1
+                    existing_data['leads'].append(lead_dict)
+                    self._seen_hashes.add(lead_hash)
+                    new_count += 1
+            except Exception as e:
+                print(f"Warning: Could not save lead: {e}")
+                continue
 
         existing_data['last_updated'] = datetime.now().isoformat()
         existing_data['total_count'] = len(existing_data['leads'])
 
-        with open(self.storage_path, 'w') as f:
-            json.dump(existing_data, f, indent=2, default=str)
+        try:
+            with open(self.storage_path, 'w') as f:
+                json.dump(existing_data, f, indent=2, default=str)
+        except Exception as e:
+            print(f"Error saving leads to file: {e}")
+            return 0
 
         return new_count
 
