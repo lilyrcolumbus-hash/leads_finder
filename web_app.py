@@ -2356,35 +2356,36 @@ st.markdown("""
         background: var(--primary-50) !important;
     }
 
-    /* ========== SELECT BOX ========== */
+    /* ========== SELECT BOX - DARK THEME ========== */
     .stSelectbox > div > div {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: linear-gradient(135deg, rgba(35, 28, 20, 0.95) 0%, rgba(25, 20, 15, 0.98) 100%) !important;
+        border: 1px solid rgba(232, 93, 4, 0.3) !important;
         border-radius: var(--radius-md) !important;
         font-size: 15px !important;
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
         padding: 4px 8px !important;
     }
 
     .stSelectbox > div > div:hover {
-        border-color: var(--primary-300) !important;
+        border-color: #E85D04 !important;
+        box-shadow: 0 0 15px rgba(232, 93, 4, 0.2) !important;
     }
 
     .stSelectbox label, .stTextInput label, .stTextArea label, .stNumberInput label {
-        color: var(--slate-700) !important;
+        color: #E8DFD5 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
         margin-bottom: 6px !important;
     }
 
-    /* ========== TEXT INPUTS ========== */
+    /* ========== TEXT INPUTS - DARK THEME ========== */
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea,
     .stNumberInput > div > div > input {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: linear-gradient(135deg, rgba(35, 28, 20, 0.95) 0%, rgba(25, 20, 15, 0.98) 100%) !important;
+        border: 1px solid rgba(232, 93, 4, 0.3) !important;
         border-radius: var(--radius-md) !important;
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
         font-size: 15px !important;
         padding: 12px 14px !important;
     }
@@ -2392,62 +2393,94 @@ st.markdown("""
     .stTextInput > div > div > input:focus,
     .stTextArea > div > div > textarea:focus,
     .stNumberInput > div > div > input:focus {
-        border-color: var(--primary-400) !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        border-color: #E85D04 !important;
+        box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2) !important;
     }
 
     .stTextInput > div > div > input::placeholder,
     .stTextArea > div > div > textarea::placeholder {
-        color: var(--slate-400) !important;
+        color: #8A8078 !important;
     }
 
-    /* ========== MULTISELECT ========== */
+    /* ========== MULTISELECT - DARK THEME ========== */
     .stMultiSelect > div > div {
-        background: var(--white) !important;
-        border: 1px solid var(--border-light) !important;
+        background: linear-gradient(135deg, rgba(35, 28, 20, 0.95) 0%, rgba(25, 20, 15, 0.98) 100%) !important;
+        border: 1px solid rgba(232, 93, 4, 0.3) !important;
         border-radius: var(--radius-md) !important;
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
     }
 
     .stMultiSelect span {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
     }
 
-    /* ========== RADIO BUTTONS (main area) ========== */
+    .stMultiSelect [data-baseweb="tag"] {
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.3) 0%, rgba(244, 140, 6, 0.2) 100%) !important;
+        border: 1px solid rgba(232, 93, 4, 0.5) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* ========== RADIO BUTTONS (main area) - DARK THEME ========== */
     .main .stRadio label {
-        color: var(--slate-700) !important;
+        color: #E8DFD5 !important;
         font-weight: 500 !important;
     }
 
-    /* ========== ALL LABELS AND TEXT ========== */
+    /* ========== ALL LABELS AND TEXT - DARK THEME ========== */
     .main p, .main span, .main label, .main div {
-        color: var(--slate-700);
+        color: #E8DFD5;
     }
 
     .main h1, .main h2, .main h3, .main h4 {
-        color: var(--slate-900) !important;
+        color: #FFFFFF !important;
     }
 
-    /* ========== SELECTBOX DROPDOWN ========== */
+    /* ========== SELECTBOX DROPDOWN - DARK THEME ========== */
     [data-baseweb="select"] span,
     [data-baseweb="select"] div {
-        color: var(--slate-800) !important;
+        color: #FFFFFF !important;
+    }
+
+    [data-baseweb="select"] svg {
+        fill: #E85D04 !important;
+    }
+
+    [data-baseweb="popover"] {
+        background: transparent !important;
     }
 
     [data-baseweb="menu"] {
-        background: var(--white) !important;
+        background: linear-gradient(135deg, rgba(40, 32, 24, 0.98) 0%, rgba(28, 22, 16, 0.99) 100%) !important;
         border-radius: var(--radius-md) !important;
-        border: 1px solid var(--border-light) !important;
-        box-shadow: var(--shadow-lg) !important;
+        border: 1px solid rgba(232, 93, 4, 0.4) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(232, 93, 4, 0.15) !important;
+        backdrop-filter: blur(10px) !important;
     }
 
     [data-baseweb="menu"] li {
-        color: var(--slate-800) !important;
+        color: #E8DFD5 !important;
         padding: 12px 16px !important;
+        transition: all 0.2s ease !important;
     }
 
     [data-baseweb="menu"] li:hover {
-        background: var(--primary-50) !important;
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.2) 0%, rgba(244, 140, 6, 0.1) 100%) !important;
+        color: #FFFFFF !important;
+    }
+
+    [data-baseweb="menu"] li[aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(232, 93, 4, 0.3) 0%, rgba(244, 140, 6, 0.2) 100%) !important;
+        color: #FFFFFF !important;
+        border-left: 3px solid #E85D04 !important;
+    }
+
+    /* Dropdown option text */
+    [data-baseweb="menu"] [role="option"] {
+        color: #E8DFD5 !important;
+    }
+
+    [data-baseweb="menu"] [role="option"]:hover {
+        color: #FFFFFF !important;
     }
 
     /* ========== SPINNER ========== */
