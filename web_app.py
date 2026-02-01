@@ -8332,11 +8332,20 @@ def show_config():
                         url = f"https://www.googleapis.com/customsearch/v1?key={settings.google_api_key}&cx={settings.google_search_engine_id}&q=test&num=1"
                         resp = httpx.get(url, timeout=10)
                         if resp.status_code == 200:
-                            st.success("✅ Google API connected!")
-                        elif resp.status_code == 403:
-                            st.error("❌ Quota exceeded (100/day limit)")
+                            data = resp.json()
+                            total = data.get('searchInformation', {}).get('totalResults', '0')
+                            st.success(f"✅ Google API connected! ({total} results)")
                         else:
-                            st.error(f"❌ Status {resp.status_code}")
+                            # Show actual error from Google
+                            try:
+                                error_data = resp.json()
+                                error_msg = error_data.get('error', {}).get('message', f'Status {resp.status_code}')
+                                error_reason = error_data.get('error', {}).get('errors', [{}])[0].get('reason', '')
+                                st.error(f"❌ {error_msg}")
+                                if error_reason:
+                                    st.info(f"Reason: {error_reason}")
+                            except:
+                                st.error(f"❌ Status {resp.status_code}")
                     except Exception as e:
                         st.error(f"❌ {str(e)[:80]}")
             else:
