@@ -21,9 +21,13 @@ class GoogleScraper(BaseScraper):
         self.search_engine_id = settings.google_search_engine_id
         self.search_queries = settings.google_search_queries
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
         """
         Scrape Google Search for leads.
+
+        Args:
+            time_filter: Optional time filter
+            location: Optional location filter
 
         Returns:
             LeadBatch with found leads

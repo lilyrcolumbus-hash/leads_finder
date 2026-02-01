@@ -44,9 +44,13 @@ class ProductHuntScraper(BaseScraper):
             "call management"
         ]
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
         """
         Scrape Product Hunt for relevant founders and discussions.
+
+        Args:
+            time_filter: Optional time filter (not used)
+            location: Optional location filter (not used)
 
         Returns:
             LeadBatch with found leads

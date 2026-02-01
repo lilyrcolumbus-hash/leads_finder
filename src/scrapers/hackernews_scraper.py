@@ -31,9 +31,13 @@ class HackerNewsScraper(BaseScraper):
             "call center small business"
         ]
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
         """
         Scrape Hacker News for leads.
+
+        Args:
+            time_filter: Optional time filter (not used)
+            location: Optional location filter (not used)
 
         Returns:
             LeadBatch with found leads

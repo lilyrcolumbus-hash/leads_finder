@@ -124,7 +124,7 @@ class GoogleMapsScraper:
 
         return LeadBatch(
             leads=unique_leads,
-            source=LeadSource.GOOGLE_MY_BUSINESS,
+            source=LeadSource.GOOGLE_MAPS,
             scraped_at=datetime.now()
         )
 
@@ -216,7 +216,7 @@ class GoogleMapsScraper:
 
             lead = Lead(
                 id=f"gmaps_{hash(f'{name}{phone}{location}')}",
-                source=LeadSource.GOOGLE_MY_BUSINESS,
+                source=LeadSource.GOOGLE_MAPS,
                 title=name,
                 content=f"{category.title()} business in {location}. {address or ''}",
                 url=f"https://www.google.com/search?q={quote_plus(name + ' ' + location)}",
@@ -274,7 +274,7 @@ class GoogleMapsScraper:
 
                             lead = Lead(
                                 id=f"gmaps_json_{hash(f'{name}{phone}')}",
-                                source=LeadSource.GOOGLE_MY_BUSINESS,
+                                source=LeadSource.GOOGLE_MAPS,
                                 title=name,
                                 content=f"{category.title()} in {location}",
                                 url=website or f"https://www.google.com/search?q={quote_plus(name)}",
@@ -439,6 +439,6 @@ class GoogleMapsScraper:
 
         return LeadBatch(
             leads=unique_leads,
-            source=LeadSource.GOOGLE_MY_BUSINESS,
+            source=LeadSource.GOOGLE_MAPS,
             scraped_at=datetime.now()
         )
