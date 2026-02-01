@@ -31,7 +31,7 @@ from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.enrichment.apollo_enricher import enrich_leads_with_apollo
 from src.utils.background_tasks import task_manager, TaskStatus
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper, FacebookScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -4700,7 +4700,7 @@ def show_search():
     st.divider()
 
     # Active Sources Section
-    st.subheader("📡 Active Sources (8 Available)")
+    st.subheader("📡 Active Sources (9 Available)")
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -4714,12 +4714,15 @@ def show_search():
     with col3:
         use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
         use_gmaps = st.checkbox("📍 Google Maps - Local Businesses", value=True, key="gmaps_check")
+        use_facebook = st.checkbox("📘 Facebook - Public Groups", value=False, key="facebook_check")
 
     # Show warnings for sources that need API keys
     if use_google and not settings.google_api_key:
         st.warning("⚠️ Google Search requires API key. Configure in Settings → .env file")
     if use_linkedin and not settings.google_api_key:
         st.warning("⚠️ LinkedIn requires Google API key for search. Configure in Settings → .env file")
+    if use_facebook and not settings.facebook_access_token:
+        st.warning("⚠️ Facebook requires Access Token. Configure FACEBOOK_ACCESS_TOKEN in Settings → .env file")
 
     st.info("💡 **Google Maps** busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. **GRATIS** - no usa API.")
 
@@ -4833,6 +4836,7 @@ def show_search():
         if use_yelp: scrapers.append(("Yelp", YelpScraper))
         if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
         if use_gmaps: scrapers.append(("Google Maps", GoogleMapsScraper))
+        if use_facebook and settings.facebook_access_token: scrapers.append(("Facebook", FacebookScraper))
 
         if not scrapers:
             st.warning("Select at least one source")
@@ -8337,6 +8341,25 @@ def show_config():
                         st.error(f"❌ {str(e)[:80]}")
             else:
                 st.warning("⚠️ Google not configured")
+
+    # Second row of connection tests
+    col_test4, col_test5, col_test6 = st.columns(3)
+
+    with col_test4:
+        if st.button("🧪 Test Facebook", use_container_width=True, key="test_facebook_conn"):
+            if settings.facebook_access_token:
+                with st.spinner("Testing Facebook..."):
+                    try:
+                        with FacebookScraper() as fb:
+                            result = fb.test_connection()
+                            if result['success']:
+                                st.success(f"✅ {result['message']}")
+                            else:
+                                st.error(f"❌ {result['message']}")
+                    except Exception as e:
+                        st.error(f"❌ {str(e)[:80]}")
+            else:
+                st.warning("⚠️ Facebook not configured")
 
     st.markdown("---")
 

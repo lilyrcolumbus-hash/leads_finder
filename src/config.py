@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
     hunter_api_key: str = Field(default="", alias="HUNTER_API_KEY")
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
+    facebook_access_token: str = Field(default="", alias="FACEBOOK_ACCESS_TOKEN")
 
     # Reddit subreddits to search
     subreddits: List[str] = [
