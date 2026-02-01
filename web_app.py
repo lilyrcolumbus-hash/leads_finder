@@ -1656,14 +1656,14 @@ st.markdown("""
     .btn-purple button,
     [data-testid*="import"] button,
     [data-testid*="export"] button {
-        background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 50%, #C4B5FD 100%) !important;
+        background: linear-gradient(135deg, #DC2F02 0%, #A78BFA 50%, #C4B5FD 100%) !important;
         box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
     }
 
     .btn-purple button:hover,
     [data-testid*="import"] button:hover,
     [data-testid*="export"] button:hover {
-        background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A78BFA 100%) !important;
+        background: linear-gradient(135deg, #7C3AED 0%, #DC2F02 50%, #A78BFA 100%) !important;
         box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5) !important;
     }
 
@@ -1686,9 +1686,9 @@ st.markdown("""
     [data-testid*="arrow"] button:hover,
     [data-testid*="prev"] button:hover,
     [data-testid*="next"] button:hover {
-        background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important;
+        background: linear-gradient(135deg, #E85D04 0%, #E85D04 100%) !important;
         color: white !important;
-        border-color: #4F46E5 !important;
+        border-color: #E85D04 !important;
         box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
     }
 
@@ -1996,7 +1996,7 @@ st.markdown("""
     }
 
     .result-value.green { color: #059669; }
-    .result-value.blue { color: #2563EB; }
+    .result-value.blue { color: #F48C06; }
     .result-value.orange { color: #EA580C; }
 
     .result-label {
@@ -2094,9 +2094,9 @@ st.markdown("""
         align-items: center;
         gap: 4px;
         padding: 3px 10px;
-        background: #8B5CF60D;
+        background: #DC2F020D;
         color: #7C3AED;
-        border: 1px solid #8B5CF633;
+        border: 1px solid #DC2F0233;
         border-radius: 20px;
         font-size: 11px;
         font-weight: 600;
@@ -2121,7 +2121,7 @@ st.markdown("""
 
     .lead-score-mini.pain { background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); }
     .lead-score-mini.intent { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
-    .lead-score-mini.fit { background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); }
+    .lead-score-mini.fit { background: linear-gradient(135deg, #3D2A1A 0%, #BFDBFE 100%); }
 
     .lead-score-mini-icon {
         font-size: 18px;
@@ -2136,7 +2136,7 @@ st.markdown("""
 
     .lead-score-mini.pain .lead-score-mini-value { color: #DC2626; }
     .lead-score-mini.intent .lead-score-mini-value { color: #D97706; }
-    .lead-score-mini.fit .lead-score-mini-value { color: #2563EB; }
+    .lead-score-mini.fit .lead-score-mini-value { color: #F48C06; }
 
     .lead-score-mini-label {
         font-size: 9px;
@@ -2181,7 +2181,7 @@ st.markdown("""
         padding: 16px;
         background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
         border-radius: 10px;
-        border-left: 3px solid #3B82F6;
+        border-left: 3px solid #E85D04;
     }
 
     .lead-content-text {
@@ -2214,7 +2214,7 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         padding: 8px 16px;
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
         color: white !important;
         border-radius: 8px;
         font-size: 12px;
@@ -2224,7 +2224,7 @@ st.markdown("""
     }
 
     .lead-view-btn:hover {
-        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+        background: linear-gradient(135deg, #F48C06 0%, #DC2F02 100%);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
@@ -2259,7 +2259,7 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         padding: 6px 14px;
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
         color: white;
         border-radius: 20px;
         font-size: 13px;
@@ -3927,9 +3927,9 @@ def render_error_notifications():
             box-shadow: 0 10px 40px rgba(245, 158, 11, 0.2);
         }
         .error-notification.api-error {
-            background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
+            background: linear-gradient(135deg, #FFFFFF 0%, #2D2015 100%);
             border-color: #BFDBFE;
-            border-left-color: #3B82F6;
+            border-left-color: #E85D04;
             box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
         }
         .error-header {
@@ -3950,7 +3950,7 @@ def render_error_notifications():
         }
         .error-icon.error { background: #FEE2E2; }
         .error-icon.warning { background: #FEF3C7; }
-        .error-icon.api-error { background: #DBEAFE; }
+        .error-icon.api-error { background: #3D2A1A; }
         .error-title {
             font-weight: 600;
             font-size: 14px;
@@ -4113,7 +4113,7 @@ def render_sidebar():
                 transition: all 0.3s ease;
             }}
             .lang-toggle:hover {{
-                border-color: #3B82F6;
+                border-color: #E85D04;
                 box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
             }}
             .lang-toggle:hover .globe-icon {{
@@ -4167,7 +4167,7 @@ def render_sidebar():
         current_task = task_manager.get_current_task()
         if current_task and current_task.status == TaskStatus.RUNNING:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
                         border-radius: 12px; padding: 12px; margin: 16px 0;">
                 <div style="display: flex; align-items: center; gap: 8px; color: white;">
                     <div class="spinner" style="width: 16px; height: 16px; border-width: 2px;"></div>
@@ -5749,9 +5749,9 @@ def show_analytics():
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Warm Leads (40-69)</div>
                     <div style="font-size: 12px; color: #9CA3AF;">{t('need_more_nurturing')}</div>
                 </div>
-                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #3B82F6;">
+                <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; text-align: center; border-top: 4px solid #E85D04;">
                     <div style="font-size: 32px; margin-bottom: 8px;">❄️</div>
-                    <div style="font-size: 28px; font-weight: 700; color: #3B82F6;">{score_ranges['❄️ Cold (0-39)']}</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #E85D04;">{score_ranges['❄️ Cold (0-39)']}</div>
                     <div style="font-size: 13px; color: #6B7280; margin-top: 4px;">Cold Leads (0-39)</div>
                     <div style="font-size: 12px; color: #9CA3AF;">{t('low_priority')}</div>
                 </div>
@@ -5760,7 +5760,7 @@ def show_analytics():
 
         else:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 40px; text-align: center; margin-top: 24px;">
+            <div style="background: linear-gradient(135deg, #2A2015 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 16px; padding: 40px; text-align: center; margin-top: 24px;">
                 <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
                 <h3 style="color: #0369A1; margin: 0 0 8px 0;">{t('no_data_yet')}</h3>
                 <p style="color: #0284C7; margin: 0;">{t('go_to_find_leads')}</p>
@@ -5771,7 +5771,7 @@ def show_analytics():
         if not crm.is_configured():
             st.markdown(f"""
             <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-                        border-left: 4px solid #6366F1;
+                        border-left: 4px solid #E85D04;
                         border-radius: 12px;
                         padding: 16px 20px;
                         margin-top: 32px;">
@@ -5842,7 +5842,7 @@ def show_analytics():
 
                     stage_html = '<div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px;">'
                     max_stage = max(stats["by_stage"].values()) if stats["by_stage"].values() else 1
-                    stage_colors = ['#3B82F6', '#06B6D4', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444']
+                    stage_colors = ['#E85D04', '#F48C06', '#DC2F02', '#F59E0B', '#10B981', '#EF4444']
 
                     for i, (stage, count) in enumerate(stats["by_stage"].items()):
                         color = stage_colors[i % len(stage_colors)]
@@ -5950,7 +5950,7 @@ def show_crm():
             cursor: pointer;
         }
         .lead-card:hover {
-            border-color: #3B82F6;
+            border-color: #E85D04;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
         .lead-card-header {
@@ -5972,7 +5972,7 @@ def show_crm():
             margin: 4px 0 0 0;
         }
         .lead-card-score {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
             color: white;
             font-size: 10px;
             font-weight: 600;
@@ -6011,9 +6011,9 @@ def show_crm():
             transition: all 0.2s ease;
         }
         .lead-action-btn:hover {
-            background: #3B82F6;
+            background: #E85D04;
             color: white;
-            border-color: #3B82F6;
+            border-color: #E85D04;
         }
 
         /* Contact Detail Card */
@@ -6035,7 +6035,7 @@ def show_crm():
         .contact-avatar {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+            background: linear-gradient(135deg, #E85D04 0%, #DC2F02 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -6105,8 +6105,8 @@ def show_crm():
             transition: all 0.2s ease;
         }
         .quick-action-btn:hover {
-            border-color: #3B82F6;
-            background: #EFF6FF;
+            border-color: #E85D04;
+            background: #2D2015;
         }
         .quick-action-icon {
             font-size: 24px;
@@ -6165,7 +6165,7 @@ def show_crm():
             border-left: 3px solid #F59E0B;
         }
         .task-card.upcoming {
-            border-left: 3px solid #3B82F6;
+            border-left: 3px solid #E85D04;
         }
         .task-card.completed {
             background: #F8FAFC;
@@ -6205,7 +6205,7 @@ def show_crm():
             transition: all 0.2s ease;
         }
         .template-card:hover {
-            border-color: #8B5CF6;
+            border-color: #DC2F02;
             background: #FAF5FF;
         }
         .template-name {
@@ -6230,8 +6230,8 @@ def show_crm():
             font-size: 12px;
         }
         .calendar-day.today {
-            border-color: #3B82F6;
-            background: #EFF6FF;
+            border-color: #E85D04;
+            background: #2D2015;
         }
         .calendar-day-number {
             font-weight: 600;
@@ -6239,7 +6239,7 @@ def show_crm():
             margin-bottom: 4px;
         }
         .calendar-event {
-            background: #3B82F6;
+            background: #E85D04;
             color: white;
             padding: 2px 6px;
             border-radius: 4px;
@@ -6254,8 +6254,8 @@ def show_crm():
 
     # CRM Stage definitions
     CRM_STAGES = {
-        'new': {'name': 'New', 'icon': '📥', 'color': '#3B82F6', 'bg': '#EFF6FF'},
-        'contacted': {'name': 'Contacted', 'icon': '📧', 'color': '#8B5CF6', 'bg': '#F5F3FF'},
+        'new': {'name': 'New', 'icon': '📥', 'color': '#E85D04', 'bg': '#2D2015'},
+        'contacted': {'name': 'Contacted', 'icon': '📧', 'color': '#DC2F02', 'bg': '#F5F3FF'},
         'demo': {'name': 'Demo', 'icon': '🎯', 'color': '#F59E0B', 'bg': '#FFFBEB'},
         'proposal': {'name': 'Proposal', 'icon': '📋', 'color': '#EC4899', 'bg': '#FDF2F8'},
         'won': {'name': 'Won', 'icon': '✅', 'color': '#10B981', 'bg': '#ECFDF5'},
@@ -6315,12 +6315,12 @@ def show_crm():
     kpi_cols = st.columns(6)
 
     kpi_data = [
-        ("📊", "Total Leads", total_leads, "#3B82F6"),
+        ("📊", "Total Leads", total_leads, "#E85D04"),
         ("🔥", "Active", active_count, "#F59E0B"),
         ("📈", "Win Rate", f"{win_rate:.0f}%", "#10B981"),
         ("✅", "Won", won_count, "#10B981"),
         ("❌", "Lost", lost_count, "#EF4444"),
-        ("⭐", "Avg Score", f"{avg_score:.0f}", "#8B5CF6")
+        ("⭐", "Avg Score", f"{avg_score:.0f}", "#DC2F02")
     ]
 
     for i, (icon, label, value, color) in enumerate(kpi_data):
@@ -6803,7 +6803,7 @@ Best regards'''
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
             <h3 style="margin: 0; color: #1E293B;">Deals & Opportunities</h3>
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #3B82F6; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <span style="cursor: help; background: #E85D04; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
                 <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     <strong style="color: #10B981;">What are Deals?</strong><br><br>
                     Deals track potential revenue from your leads. Use them to:<br><br>
@@ -6849,7 +6849,7 @@ Best regards'''
             st.markdown(f"""
             <div class="crm-kpi-card">
                 <div class="crm-kpi-icon">📋</div>
-                <div class="crm-kpi-value" style="color: #3B82F6;">{deal_count}</div>
+                <div class="crm-kpi-value" style="color: #E85D04;">{deal_count}</div>
                 <div class="crm-kpi-label">Total Deals</div>
             </div>
             """, unsafe_allow_html=True)
@@ -6859,7 +6859,7 @@ Best regards'''
             st.markdown(f"""
             <div class="crm-kpi-card">
                 <div class="crm-kpi-icon">📊</div>
-                <div class="crm-kpi-value" style="color: #8B5CF6;">${avg_deal:,.0f}</div>
+                <div class="crm-kpi-value" style="color: #DC2F02;">${avg_deal:,.0f}</div>
                 <div class="crm-kpi-label">Avg Deal Size</div>
             </div>
             """, unsafe_allow_html=True)
@@ -6995,10 +6995,10 @@ Best regards'''
                 <div style="font-size: 12px; font-weight: 600; color: #92400E; text-transform: uppercase; letter-spacing: 0.05em;">Due Today</div>
                 <div style="font-size: 10px; color: #B45309; margin-top: 4px;">Complete before EOD</div>
             </div>
-            <div style="background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #93C5FD;">
-                <div style="font-size: 32px; font-weight: 800; color: #2563EB;">{len(upcoming_tasks)}</div>
+            <div style="background: linear-gradient(135deg, #3D2A1A 0%, #BFDBFE 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #8B5A2B;">
+                <div style="font-size: 32px; font-weight: 800; color: #F48C06;">{len(upcoming_tasks)}</div>
                 <div style="font-size: 12px; font-weight: 600; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.05em;">Upcoming</div>
-                <div style="font-size: 10px; color: #1D4ED8; margin-top: 4px;">Scheduled for later</div>
+                <div style="font-size: 10px; color: #DC2F02; margin-top: 4px;">Scheduled for later</div>
             </div>
             <div style="background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #6EE7B7;">
                 <div style="font-size: 32px; font-weight: 800; color: #059669;">{len(completed_tasks)}</div>
@@ -7012,7 +7012,7 @@ Best regards'''
         st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid #E2E8F0;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 8px; padding: 8px 12px;">
+                <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); border-radius: 8px; padding: 8px 12px;">
                     <span style="color: white; font-size: 16px;">+</span>
                 </div>
                 <div>
@@ -7026,7 +7026,7 @@ Best regards'''
         with st.expander("Click here to add a new task", expanded=False):
             # Explanation inside the form
             st.markdown("""
-            <div style="background: #F0F9FF; border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 3px solid #3B82F6;">
+            <div style="background: #2A2015; border-radius: 8px; padding: 12px; margin-bottom: 16px; border-left: 3px solid #E85D04;">
                 <p style="margin: 0; color: #1E40AF; font-size: 13px;">
                     <strong>How to create a task:</strong> Fill in the title, select task type (call, email, meeting, etc.), set a due date, and optionally link it to a contact.
                 </p>
@@ -7085,7 +7085,7 @@ Best regards'''
                     <span style="color: #DC2626;">All</span> = View all tasks |
                     <span style="color: #DC2626;">Overdue</span> = Past due date |
                     <span style="color: #D97706;">Today</span> = Due today |
-                    <span style="color: #2563EB;">Upcoming</span> = Future tasks |
+                    <span style="color: #F48C06;">Upcoming</span> = Future tasks |
                     <span style="color: #059669;">Completed</span> = Done tasks
                 </p>
             </div>
@@ -7121,7 +7121,7 @@ Best regards'''
                 status_styles = {
                     "overdue": {"bg": "#FEE2E2", "border": "#FCA5A5", "color": "#DC2626"},
                     "today": {"bg": "#FEF3C7", "border": "#FCD34D", "color": "#D97706"},
-                    "upcoming": {"bg": "#DBEAFE", "border": "#93C5FD", "color": "#2563EB"},
+                    "upcoming": {"bg": "#3D2A1A", "border": "#8B5A2B", "color": "#F48C06"},
                     "completed": {"bg": "#F1F5F9", "border": "#CBD5E1", "color": "#64748B"}
                 }
                 style = status_styles.get(task_status, {"bg": "#FFFFFF", "border": "#E2E8F0", "color": "#475569"})
@@ -7268,9 +7268,9 @@ Best regards'''
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
             <h3 style="margin: 0; color: #1E293B;">Calendar View</h3>
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #8B5CF6; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <span style="cursor: help; background: #DC2F02; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
                 <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 300px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <strong style="color: #8B5CF6;">Calendar Overview</strong><br><br>
+                    <strong style="color: #DC2F02;">Calendar Overview</strong><br><br>
                     This calendar shows all your scheduled activities:<br><br>
                     • <strong>📞 Tasks:</strong> Calls, emails, and meetings appear on their due dates<br>
                     • <strong>💰 Deals:</strong> Deal close dates are highlighted<br>
@@ -7329,7 +7329,7 @@ Best regards'''
 
                         for task in day_tasks[:2]:
                             task_type = task.get('type', '📝').split()[0]
-                            events_html += f"<div class='calendar-event' style='background: #3B82F6;'>{task_type} {task.get('title', '')[:15]}</div>"
+                            events_html += f"<div class='calendar-event' style='background: #E85D04;'>{task_type} {task.get('title', '')[:15]}</div>"
 
                         for deal in day_deals[:1]:
                             events_html += f"<div class='calendar-event' style='background: #10B981;'>💰 {deal.get('name', '')[:15]}</div>"
@@ -7384,9 +7384,9 @@ Best regards'''
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
             <h3 style="margin: 0; color: #1E293B;">Pipeline Analytics</h3>
             <div class="metric-tooltip-wrapper" style="position: relative; display: inline-block;">
-                <span style="cursor: help; background: #06B6D4; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
+                <span style="cursor: help; background: #F48C06; color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">?</span>
                 <div class="metric-tooltip" style="position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1E293B; color: white; padding: 12px 16px; border-radius: 8px; font-size: 12px; width: 280px; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <strong style="color: #06B6D4;">Analytics Dashboard</strong><br><br>
+                    <strong style="color: #F48C06;">Analytics Dashboard</strong><br><br>
                     Track your sales performance:<br><br>
                     • <strong>Funnel:</strong> See how leads progress through stages<br>
                     • <strong>Conversion:</strong> Your win rate percentage<br>
@@ -7427,7 +7427,7 @@ Best regards'''
 
             with perf_col2:
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+                <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
                     <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">In Progress</div>
                     <div style="font-size: 32px; font-weight: 700;">{in_progress}</div>
                     <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">Active Opportunities</div>
@@ -7465,7 +7465,7 @@ Best regards'''
             # Build funnel HTML
             max_count = max(status_counts.values()) if status_counts.values() else 1
             funnel_html = ""
-            colors = ['#3B82F6', '#06B6D4', '#8B5CF6', '#F59E0B', '#10B981', '#EF4444']
+            colors = ['#E85D04', '#F48C06', '#DC2F02', '#F59E0B', '#10B981', '#EF4444']
 
             for i, (stage_key, stage_info) in enumerate(CRM_STAGES.items()):
                 count = status_counts.get(stage_key, 0)
@@ -7856,8 +7856,8 @@ def show_config():
     # Row 2 - Enrichment APIs
     hunter_status = "connected" if settings.hunter_api_key else "optional"
     hunter_icon = "✓" if settings.hunter_api_key else "○"
-    hunter_color = "#10B981" if settings.hunter_api_key else "#3B82F6"
-    hunter_bg = "#D1FAE5" if settings.hunter_api_key else "#DBEAFE"
+    hunter_color = "#10B981" if settings.hunter_api_key else "#E85D04"
+    hunter_bg = "#D1FAE5" if settings.hunter_api_key else "#3D2A1A"
     hunter_text = "Connected" if settings.hunter_api_key else "Optional"
 
     apollo_status = "connected" if settings.apollo_api_key else "disconnected"
@@ -7923,7 +7923,7 @@ def show_config():
     st.markdown(f"""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Storage -->
-        <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+        <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
             <div style="font-size: 28px; margin-bottom: 8px;">💾</div>
             <div style="font-size: 32px; font-weight: 700;">{stats['total']}</div>
             <div style="font-size: 14px; opacity: 0.9;">Saved Leads</div>
@@ -7935,7 +7935,7 @@ def show_config():
             <div style="font-size: 14px; opacity: 0.9;">Pain + Intent + Fit</div>
         </div>
         <!-- AI Filter -->
-        <div style="background: linear-gradient(135deg, {'#8B5CF6' if ai_ready else '#F59E0B'} 0%, {'#7C3AED' if ai_ready else '#D97706'} 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
+        <div style="background: linear-gradient(135deg, {'#DC2F02' if ai_ready else '#F59E0B'} 0%, {'#7C3AED' if ai_ready else '#D97706'} 100%); border-radius: 16px; padding: 20px; text-align: center; color: white;">
             <div style="font-size: 28px; margin-bottom: 8px;">🎯</div>
             <div style="font-size: 20px; font-weight: 700;">AI Filter</div>
             <div style="font-size: 14px; opacity: 0.9;">{'Ready' if ai_ready else 'No AI Key'}</div>
@@ -7957,7 +7957,7 @@ def show_config():
                 <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">🏢 Industries Configured</h3>
                 <p style="margin: 0; color: #64748B; font-size: 13px;">Target industries for lead generation</p>
             </div>
-            <div style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
                 {len(settings.industries)} industries
             </div>
         </div>
@@ -8020,7 +8020,7 @@ def show_config():
     st.markdown("""
     <div style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE; border-radius: 16px; padding: 24px; margin-top: 24px;">
         <div style="display: flex; align-items: flex-start; gap: 16px;">
-            <div style="background: #4F46E5; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
+            <div style="background: #E85D04; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;">
                 <span style="font-size: 24px;">💡</span>
             </div>
             <div>
@@ -8045,7 +8045,7 @@ def show_ai_assistant():
     st.markdown("""
     <style>
         .assistant-header {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%);
+            background: linear-gradient(135deg, #E85D04 0%, #7C3AED 50%, #EC4899 100%);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
@@ -8073,7 +8073,7 @@ def show_ai_assistant():
         }
         .user-message {
             background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-            border-left: 4px solid #4F46E5;
+            border-left: 4px solid #E85D04;
             margin-left: 40px;
         }
         .assistant-message {
@@ -8106,9 +8106,9 @@ def show_ai_assistant():
             transition: all 0.2s ease;
         }
         .quick-action-chip:hover {
-            background: #4F46E5;
+            background: #E85D04;
             color: white;
-            border-color: #4F46E5;
+            border-color: #E85D04;
         }
         .stats-card {
             background: white;
@@ -8120,7 +8120,7 @@ def show_ai_assistant():
         .stats-value {
             font-size: 24px;
             font-weight: 700;
-            color: #4F46E5;
+            color: #E85D04;
         }
         .stats-label {
             font-size: 12px;
@@ -8580,7 +8580,7 @@ def show_lead_warming():
     <style>
         /* Temperature Indicators */
         .temp-cold {
-            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            background: linear-gradient(135deg, #60A5FA 0%, #E85D04 100%);
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
@@ -8635,7 +8635,7 @@ def show_lead_warming():
             top: 4px;
             width: 12px;
             height: 12px;
-            background: #3B82F6;
+            background: #E85D04;
             border-radius: 50%;
             border: 2px solid white;
         }
@@ -8675,7 +8675,7 @@ def show_lead_warming():
 
         /* Warming Actions */
         .warming-action-btn {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
             color: white;
             border: none;
             padding: 10px 16px;
@@ -9072,7 +9072,7 @@ def show_lead_warming():
 
         with col1:
             st.markdown("""
-            <div style="background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%); padding: 16px; border-radius: 12px; text-align: center; color: white; margin-bottom: 16px;">
+            <div style="background: linear-gradient(135deg, #60A5FA 0%, #E85D04 100%); padding: 16px; border-radius: 12px; text-align: center; color: white; margin-bottom: 16px;">
                 <div style="font-size: 24px;">❄️</div>
                 <div style="font-size: 20px; font-weight: 700;">COLD</div>
                 <div style="font-size: 13px; opacity: 0.9;">Day 1-2</div>
@@ -9178,7 +9178,7 @@ def show_lead_warming():
                 transition: all 0.2s ease;
             }
             .template-card:hover {
-                border-color: #3B82F6;
+                border-color: #E85D04;
                 box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
             }
             .template-header {
@@ -9188,7 +9188,7 @@ def show_lead_warming():
                 margin-bottom: 12px;
             }
             .template-badge {
-                background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+                background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
                 color: white;
                 padding: 4px 10px;
                 border-radius: 6px;
@@ -9207,7 +9207,7 @@ def show_lead_warming():
                 color: #334155;
             }
             .template-text strong {
-                color: #3B82F6;
+                color: #E85D04;
             }
         </style>
         """, unsafe_allow_html=True)
@@ -9225,8 +9225,8 @@ def show_lead_warming():
             comment_templates = [
                 {"type": "Agreement", "icon": "👍", "color": "#10B981", "template": "Great insight! I've seen this in my work too - <strong>[specific example]</strong>. Thanks for sharing."},
                 {"type": "Question", "icon": "❓", "color": "#F59E0B", "template": "Interesting perspective. Have you found that <strong>[related question]</strong>? I'd love to hear your thoughts."},
-                {"type": "Value Add", "icon": "💡", "color": "#3B82F6", "template": "This resonates with me. I'd add that <strong>[additional point]</strong> can also help. What do you think?"},
-                {"type": "Industry", "icon": "🏢", "color": "#8B5CF6", "template": "As someone in <strong>[industry]</strong>, I appreciate this take. We're seeing <strong>[relevant trend]</strong> as well."},
+                {"type": "Value Add", "icon": "💡", "color": "#E85D04", "template": "This resonates with me. I'd add that <strong>[additional point]</strong> can also help. What do you think?"},
+                {"type": "Industry", "icon": "🏢", "color": "#DC2F02", "template": "As someone in <strong>[industry]</strong>, I appreciate this take. We're seeing <strong>[relevant trend]</strong> as well."},
             ]
 
             for i, template in enumerate(comment_templates):
@@ -9276,25 +9276,25 @@ def show_lead_warming():
         """, unsafe_allow_html=True)
 
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 12px; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #2A2015 0%, #E0F2FE 100%); border: 1px solid #BAE6FD; border-radius: 12px; padding: 20px;">
             <div style="background: white; border-radius: 8px; padding: 20px; font-family: 'Georgia', serif;">
                 <div style="border-bottom: 1px solid #E2E8F0; padding-bottom: 12px; margin-bottom: 16px;">
-                    <span style="background: #3B82F6; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;">SUBJECT</span>
+                    <span style="background: #E85D04; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;">SUBJECT</span>
                     <span style="margin-left: 12px; color: #1E293B; font-weight: 500;">Following up on our LinkedIn connection</span>
                 </div>
                 <div style="color: #334155; font-size: 14px; line-height: 1.8;">
-                    Hi <strong style="color: #3B82F6;">[Name]</strong>,<br><br>
+                    Hi <strong style="color: #E85D04;">[Name]</strong>,<br><br>
 
-                    I hope this message finds you well! We connected on LinkedIn recently, and I've really enjoyed your insights on <strong style="color: #3B82F6;">[topic they posted about]</strong>.<br><br>
+                    I hope this message finds you well! We connected on LinkedIn recently, and I've really enjoyed your insights on <strong style="color: #E85D04;">[topic they posted about]</strong>.<br><br>
 
-                    I noticed that <strong style="color: #3B82F6;">[Company]</strong> is in the <strong style="color: #3B82F6;">[industry]</strong> space, and I wanted to reach out because we help businesses like yours <strong style="color: #3B82F6;">[value proposition]</strong>.<br><br>
+                    I noticed that <strong style="color: #E85D04;">[Company]</strong> is in the <strong style="color: #E85D04;">[industry]</strong> space, and I wanted to reach out because we help businesses like yours <strong style="color: #E85D04;">[value proposition]</strong>.<br><br>
 
                     <span style="background: #FEF3C7; padding: 2px 6px; border-radius: 4px;">[Specific observation about their company/role that shows you've done your research]</span><br><br>
 
                     Would you be open to a quick 15-minute call to explore if there might be a fit? I'd love to learn more about your current priorities and see if we can help.<br><br>
 
                     Best regards,<br>
-                    <strong style="color: #3B82F6;">[Your Name]</strong><br><br>
+                    <strong style="color: #E85D04;">[Your Name]</strong><br><br>
 
                     <em style="color: #64748B;">P.S. [Reference something specific from their recent LinkedIn activity]</em>
                 </div>
