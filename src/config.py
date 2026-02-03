@@ -1,8 +1,17 @@
 """Configuration settings for the lead generation app."""
 
+import os
+from pathlib import Path
 from typing import List
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
+# Load .env from project root
+_project_root = Path(__file__).parent.parent
+_env_file = _project_root / ".env"
+if _env_file.exists():
+    load_dotenv(_env_file, override=True)
 
 
 class Settings(BaseSettings):
@@ -15,6 +24,10 @@ class Settings(BaseSettings):
     google_places_api_key: str = Field(default="", alias="GOOGLE_PLACES_API_KEY")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
+    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+    hunter_api_key: str = Field(default="", alias="HUNTER_API_KEY")
+    apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
+    facebook_access_token: str = Field(default="", alias="FACEBOOK_ACCESS_TOKEN")
 
     # Reddit subreddits to search
     subreddits: List[str] = [
@@ -117,6 +130,38 @@ class Settings(BaseSettings):
     google_maps_max_results_per_search: int = 20
     google_maps_max_reviews_per_business: int = 10
     google_maps_min_reviews: int = 5  # Minimum reviews to consider
+
+    # Industries with keywords
+    industries: dict = {
+        "HVAC": ["hvac", "heating", "cooling", "air conditioning", "furnace"],
+        "Plumbing": ["plumbing", "plumber", "pipes", "drain", "water heater"],
+        "Electrical": ["electrician", "electrical", "wiring", "outlet"],
+        "Roofing": ["roofing", "roof", "shingles", "gutters"],
+        "Landscaping": ["landscaping", "lawn", "garden", "yard"],
+        "Dental": ["dental", "dentist", "orthodontist", "teeth"],
+        "Real Estate": ["realtor", "real estate", "property", "homes"],
+        "Legal": ["lawyer", "attorney", "legal", "law firm"],
+        "Medical": ["medical", "doctor", "clinic", "healthcare"],
+        "Auto Repair": ["mechanic", "auto repair", "car service", "automotive"]
+    }
+
+    # Urgency keywords for scoring
+    urgency_keywords: List[str] = [
+        "urgent", "asap", "immediately", "emergency", "critical",
+        "desperate", "help needed", "right away", "as soon as possible",
+        "can't wait", "time sensitive", "deadline", "losing money",
+        "losing customers", "frustrated", "fed up", "at my wits end"
+    ]
+
+    # Scoring weights for lead qualification
+    scoring_weights: dict = {
+        "keyword_match": 9,           # Points per pain keyword matched (max 45)
+        "urgency_keyword": 8,         # Points per urgency keyword (max 25)
+        "multiple_pain_points": 10,   # Bonus for 3+ pain keywords
+        "recent_post": 15,            # Bonus for posts < 24 hours old
+        "solution_seeking": 5,        # Bonus for solution-seeking language
+        "industry_match": 5,          # Bonus for matching target industry
+    }
 
     # Batch sizes
     max_leads_per_source: int = 50

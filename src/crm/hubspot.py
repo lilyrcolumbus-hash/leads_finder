@@ -89,6 +89,82 @@ class HubSpotCRM:
         """Check if HubSpot is properly configured."""
         return bool(self.api_key)
 
+    def test_connection(self) -> dict:
+        """
+        Test the HubSpot API connection.
+
+        Returns:
+            dict with 'success', 'message', and optionally 'account_info'
+        """
+        if not self.is_configured():
+            return {
+                'success': False,
+                'message': 'HubSpot API key not configured'
+            }
+
+        try:
+            # Try to get account info
+            url = f"{self.BASE_URL}/account-info/v3/details"
+            response = self.client.get(url)
+
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'success': True,
+                    'message': 'Connected successfully',
+                    'account_info': {
+                        'portal_id': data.get('portalId'),
+                        'account_type': data.get('accountType'),
+                        'time_zone': data.get('timeZone')
+                    }
+                }
+            elif response.status_code == 401:
+                return {
+                    'success': False,
+                    'message': 'Invalid API key or token expired'
+                }
+            elif response.status_code == 403:
+                return {
+                    'success': False,
+                    'message': 'Access denied - check API key permissions'
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': f'API returned status {response.status_code}'
+                }
+
+        except httpx.ConnectError:
+            return {
+                'success': False,
+                'message': 'Network error - cannot reach HubSpot API'
+            }
+        except httpx.TimeoutException:
+            return {
+                'success': False,
+                'message': 'Connection timeout - HubSpot API not responding'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'Connection error: {str(e)[:100]}'
+            }
+
+    def get_contacts_count(self) -> int:
+        """Get total number of contacts in HubSpot."""
+        if not self.is_configured():
+            return 0
+
+        try:
+            url = f"{self.BASE_URL}/crm/v3/objects/contacts?limit=1"
+            response = self.client.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('total', 0)
+        except Exception:
+            pass
+        return 0
+
     # ==================== CREATE OPERATIONS ====================
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
@@ -102,15 +178,43 @@ class HubSpotCRM:
         Returns:
             HubSpot contact ID or None on failure
         """
+        from src.utils.models import LeadCategory
+
         if not self.is_configured():
             self.logger.warning("HubSpot not configured")
             return None
+
+        # Determine HubSpot Lead Status based on category
+        hs_lead_status = "OPEN"  # Default
+        lead_category_label = "Opportunity"
+
+        if lead.lead_category == LeadCategory.PAIN:
+            hs_lead_status = "OPEN"  # Hot leads marked as OPEN (priority)
+            lead_category_label = "🔴 PAIN - Has explicit problem"
+        elif lead.lead_category == LeadCategory.OPPORTUNITY:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🟡 OPPORTUNITY - Potential customer"
+        elif lead.lead_category == LeadCategory.COLD:
+            hs_lead_status = "UNQUALIFIED"
+            lead_category_label = "⚪ COLD - Low priority"
+        elif lead.has_explicit_pain:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🔴 PAIN - Has explicit problem"
+        elif lead.ai_score and lead.ai_score >= 0.6:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🔴 HIGH SCORE"
+        elif lead.ai_score and lead.ai_score >= 0.3:
+            hs_lead_status = "OPEN"
+            lead_category_label = "🟡 OPPORTUNITY"
+        else:
+            hs_lead_status = "UNQUALIFIED"
+            lead_category_label = "⚪ COLD"
 
         # Prepare properties
         properties = {
             "lead_source": lead.source.value,
             "lead_stage": LeadStage.NEW.value,
-            "hs_lead_status": "NEW",
+            "hs_lead_status": hs_lead_status,
             "lead_score": str(int((lead.ai_score or 0.5) * 100)),
             "message": lead.content[:1000],
             "website": lead.url,
@@ -137,9 +241,20 @@ class HubSpotCRM:
         if lead.company:
             properties["company"] = lead.company
 
-        # Add AI reasoning as note
+        # Build detailed AI analysis note with category info
+        ai_notes = []
+        ai_notes.append(f"Category: {lead_category_label}")
+        ai_notes.append(f"AI Score: {(lead.ai_score or 0) * 100:.0f}%")
+        if lead.pain_score:
+            ai_notes.append(f"Pain Score: {lead.pain_score}")
         if lead.ai_reasoning:
-            properties["ai_analysis"] = lead.ai_reasoning
+            ai_notes.append(f"AI Analysis: {lead.ai_reasoning}")
+        if lead.keywords_matched:
+            ai_notes.append(f"Keywords: {', '.join(lead.keywords_matched[:5])}")
+        if lead.industry:
+            ai_notes.append(f"Industry: {lead.industry}")
+
+        properties["ai_analysis"] = " | ".join(ai_notes)
 
         url = f"{self.BASE_URL}/crm/v3/objects/contacts"
 
@@ -161,9 +276,54 @@ class HubSpotCRM:
             self.logger.error(f"Failed to create contact: {e}")
             return None
 
+    def contact_exists(self, email: str = None, url: str = None) -> Optional[str]:
+        """
+        Check if a contact already exists in HubSpot.
+
+        Args:
+            email: Email to search for
+            url: Website URL to search for
+
+        Returns:
+            Contact ID if exists, None otherwise
+        """
+        if not self.is_configured():
+            return None
+
+        # Try email search first
+        if email and not email.endswith("@leadgen.placeholder"):
+            contact_id = self._get_existing_contact_id(email)
+            if contact_id:
+                return contact_id
+
+        # Try website URL search
+        if url:
+            search_url = f"{self.BASE_URL}/crm/v3/objects/contacts/search"
+            body = {
+                "filterGroups": [{
+                    "filters": [{
+                        "propertyName": "website",
+                        "operator": "EQ",
+                        "value": url
+                    }]
+                }],
+                "limit": 1
+            }
+            try:
+                response = self.client.post(search_url, json=body)
+                if response.status_code == 200:
+                    data = response.json()
+                    results = data.get("results", [])
+                    if results:
+                        return results[0]["id"]
+            except Exception:
+                pass
+
+        return None
+
     def send_leads_to_crm(self, leads: List[Lead]) -> Dict[str, int]:
         """
-        Send multiple leads to HubSpot.
+        Send multiple leads to HubSpot with deduplication.
 
         Args:
             leads: List of leads to send
@@ -173,10 +333,21 @@ class HubSpotCRM:
         """
         results = {"created": 0, "existing": 0, "failed": 0}
 
-        self.logger.info(f"Sending {len(leads)} leads to HubSpot")
+        self.logger.info(f"Sending {len(leads)} leads to HubSpot (with deduplication)")
 
         for lead in leads:
             try:
+                # Check for existing contact first (deduplication)
+                existing_id = self.contact_exists(email=lead.email, url=lead.url)
+
+                if existing_id:
+                    self.logger.info(f"Lead {lead.id[:8]} already exists in HubSpot (ID: {existing_id})")
+                    lead.hubspot_id = existing_id
+                    lead.sent_to_crm = True
+                    results["existing"] += 1
+                    continue
+
+                # Create new contact
                 result = self.create_contact(lead)
                 if result:
                     lead.hubspot_id = result
@@ -184,6 +355,7 @@ class HubSpotCRM:
                     results["created"] += 1
                 else:
                     results["failed"] += 1
+
             except Exception as e:
                 self.logger.error(f"Error sending lead {lead.id}: {e}")
                 results["failed"] += 1

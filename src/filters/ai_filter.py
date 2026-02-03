@@ -1,4 +1,4 @@
-"""AI-powered lead filtering using OpenAI or Anthropic."""
+"""AI-powered lead filtering using OpenAI, Anthropic, or Google Gemini."""
 
 import json
 from typing import List, Tuple
@@ -34,20 +34,36 @@ Leads to analyze:
 For each lead, return a JSON object with:
 - "id": the lead ID
 - "score": float from 0 to 1 (1 = highly qualified)
-- "is_qualified": boolean (true if score >= 0.6)
+- "is_qualified": boolean (true if score >= 0.3, meaning it's worth reaching out)
+- "has_explicit_pain": boolean (true ONLY if they explicitly mention a problem like missed calls, complaints, need help)
+- "category": one of "pain", "opportunity", or "cold"
+  - "pain": score >= 0.6 AND has explicit problem/complaint mentioned
+  - "opportunity": score 0.3-0.6 OR score >= 0.6 but no explicit pain (potential customer)
+  - "cold": score < 0.3 (low priority but keep for reference)
 - "reasoning": brief explanation (max 100 chars)
 
 Return a JSON array of these objects. Example:
-[{{"id": "abc123", "score": 0.8, "is_qualified": true, "reasoning": "Business owner mentions missed calls costing customers"}}]"""
+[{{"id": "abc123", "score": 0.8, "is_qualified": true, "has_explicit_pain": true, "category": "pain", "reasoning": "Business owner mentions missed calls costing customers"}}]"""
 
     def __init__(self):
         self.logger = get_logger("AIFilter")
         self.openai_client = None
         self.anthropic_client = None
+        self.gemini_model = None
         self._init_clients()
 
     def _init_clients(self):
         """Initialize AI clients based on available API keys."""
+        # Try Gemini first (user's preferred)
+        if settings.gemini_api_key:
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=settings.gemini_api_key)
+                self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
+                self.logger.info("Initialized Google Gemini client")
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize Gemini: {e}")
+
         if settings.openai_api_key:
             try:
                 from openai import OpenAI
@@ -66,24 +82,40 @@ Return a JSON array of these objects. Example:
 
     def filter_leads(self, leads: List[Lead]) -> List[Lead]:
         """
-        Filter leads using AI to find qualified prospects.
+        Analyze and categorize leads using AI.
 
         Args:
-            leads: List of leads to filter
+            leads: List of leads to analyze
 
         Returns:
-            List of qualified leads with AI scores
+            List of ALL leads with AI scores and categories (pain/opportunity/cold)
         """
+        from src.utils.models import LeadCategory
+
         if not leads:
             return []
 
-        if not self.openai_client and not self.anthropic_client:
-            self.logger.warning("No AI client available. Returning leads unfiltered.")
+        if not self.openai_client and not self.anthropic_client and not self.gemini_model:
+            self.logger.warning("No AI client available. Returning leads with default categories.")
+            # Assign default categories based on keywords
+            for lead in leads:
+                if len(lead.keywords_matched) >= 3:
+                    lead.lead_category = LeadCategory.PAIN
+                    lead.is_qualified = True
+                    lead.ai_score = 0.7
+                elif len(lead.keywords_matched) >= 1:
+                    lead.lead_category = LeadCategory.OPPORTUNITY
+                    lead.is_qualified = True
+                    lead.ai_score = 0.4
+                else:
+                    lead.lead_category = LeadCategory.COLD
+                    lead.is_qualified = False
+                    lead.ai_score = 0.2
             return leads
 
-        self.logger.info(f"Filtering {len(leads)} leads with AI")
+        self.logger.info(f"Analyzing {len(leads)} leads with AI")
 
-        qualified_leads = []
+        all_leads = []
         batch_size = settings.ai_filter_batch_size
 
         # Process in batches
@@ -91,21 +123,39 @@ Return a JSON array of these objects. Example:
             batch = leads[i:i + batch_size]
             try:
                 scored_leads = self._score_batch(batch)
-                qualified_leads.extend(scored_leads)
+                all_leads.extend(scored_leads)
             except Exception as e:
                 self.logger.error(f"Error scoring batch: {e}")
-                # On error, include leads with keywords as potentially qualified
+                # On error, categorize based on keywords
                 for lead in batch:
-                    if len(lead.keywords_matched) >= 2:
+                    if len(lead.keywords_matched) >= 3:
+                        lead.lead_category = LeadCategory.PAIN
                         lead.is_qualified = True
-                        lead.ai_score = 0.5
-                        lead.ai_reasoning = "Fallback: Multiple keywords matched"
-                        qualified_leads.append(lead)
+                        lead.ai_score = 0.7
+                        lead.ai_reasoning = "Fallback: Multiple pain keywords matched"
+                        lead.has_explicit_pain = True
+                    elif len(lead.keywords_matched) >= 1:
+                        lead.lead_category = LeadCategory.OPPORTUNITY
+                        lead.is_qualified = True
+                        lead.ai_score = 0.4
+                        lead.ai_reasoning = "Fallback: Keywords matched, potential opportunity"
+                    else:
+                        lead.lead_category = LeadCategory.COLD
+                        lead.is_qualified = False
+                        lead.ai_score = 0.2
+                        lead.ai_reasoning = "Fallback: No clear indicators"
+                    all_leads.append(lead)
 
-        qualified_count = len([l for l in qualified_leads if l.is_qualified])
-        self.logger.info(f"AI filtering complete: {qualified_count}/{len(leads)} leads qualified")
+        # Count by category
+        pain_count = len([l for l in all_leads if l.lead_category == LeadCategory.PAIN])
+        opportunity_count = len([l for l in all_leads if l.lead_category == LeadCategory.OPPORTUNITY])
+        cold_count = len([l for l in all_leads if l.lead_category == LeadCategory.COLD])
 
-        return qualified_leads
+        self.logger.info(
+            f"AI analysis complete: {pain_count} pain, {opportunity_count} opportunity, {cold_count} cold"
+        )
+
+        return all_leads
 
     def _score_batch(self, leads: List[Lead]) -> List[Lead]:
         """Score a batch of leads using AI."""
@@ -124,9 +174,11 @@ Return a JSON array of these objects. Example:
 
         prompt = self.USER_PROMPT_TEMPLATE.format(leads_json=json.dumps(leads_data, indent=2))
 
-        # Try OpenAI first, then Anthropic
+        # Try Gemini first, then OpenAI, then Anthropic
         response_text = None
-        if self.openai_client:
+        if self.gemini_model:
+            response_text = self._call_gemini(prompt)
+        elif self.openai_client:
             response_text = self._call_openai(prompt)
         elif self.anthropic_client:
             response_text = self._call_anthropic(prompt)
@@ -136,6 +188,16 @@ Return a JSON array of these objects. Example:
 
         # Parse response and update leads
         return self._parse_ai_response(response_text, leads)
+
+    def _call_gemini(self, prompt: str) -> str | None:
+        """Call Google Gemini API."""
+        try:
+            full_prompt = f"{self.SYSTEM_PROMPT}\n\n{prompt}"
+            response = self.gemini_model.generate_content(full_prompt)
+            return response.text
+        except Exception as e:
+            self.logger.error(f"Gemini API error: {e}")
+            return None
 
     def _call_openai(self, prompt: str) -> str | None:
         """Call OpenAI API."""
@@ -188,12 +250,32 @@ Return a JSON array of these objects. Example:
         # Create mapping of scores by ID
         score_map = {s["id"]: s for s in scores}
 
-        # Update leads with scores
+        # Update leads with scores and categories
+        from src.utils.models import LeadCategory
+
         for lead in leads:
             if lead.id in score_map:
                 score_data = score_map[lead.id]
                 lead.ai_score = float(score_data.get("score", 0))
                 lead.is_qualified = bool(score_data.get("is_qualified", False))
                 lead.ai_reasoning = score_data.get("reasoning", "")
+                lead.has_explicit_pain = bool(score_data.get("has_explicit_pain", False))
+
+                # Set lead category from AI response or calculate from score
+                category_str = score_data.get("category", "").lower()
+                if category_str == "pain":
+                    lead.lead_category = LeadCategory.PAIN
+                elif category_str == "opportunity":
+                    lead.lead_category = LeadCategory.OPPORTUNITY
+                elif category_str == "cold":
+                    lead.lead_category = LeadCategory.COLD
+                else:
+                    # Fallback: calculate category from score
+                    if lead.ai_score >= 0.6 and lead.has_explicit_pain:
+                        lead.lead_category = LeadCategory.PAIN
+                    elif lead.ai_score >= 0.3:
+                        lead.lead_category = LeadCategory.OPPORTUNITY
+                    else:
+                        lead.lead_category = LeadCategory.COLD
 
         return leads

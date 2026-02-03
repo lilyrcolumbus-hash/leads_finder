@@ -44,3 +44,11 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local data
+data/
+*.db
+
+# Local data
+data/
+*.db

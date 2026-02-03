@@ -21,9 +21,13 @@ class GoogleScraper(BaseScraper):
         self.search_engine_id = settings.google_search_engine_id
         self.search_queries = settings.google_search_queries
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
         """
         Scrape Google Search for leads.
+
+        Args:
+            time_filter: Optional time filter
+            location: Optional location filter
 
         Returns:
             LeadBatch with found leads
@@ -39,23 +43,28 @@ class GoogleScraper(BaseScraper):
 
         self.logger.info(f"Starting Google Search scrape with {len(self.search_queries)} queries")
 
+        failed_queries = 0
         for query in self.search_queries:
             try:
                 leads = self._search_google(query)
                 all_leads.extend(leads)
-                self.logger.info(f"Found {len(leads)} results for: {query}")
+                if leads:
+                    self.logger.info(f"Found {len(leads)} results for: {query}")
                 time.sleep(1)  # Rate limiting
             except Exception as e:
-                error_msg = f"Error searching Google for '{query}': {str(e)}"
-                self.logger.error(error_msg)
-                batch.errors.append(error_msg)
+                failed_queries += 1
+                self.logger.debug(f"Query failed: {query}")
+
+        # Report summary if all queries failed
+        if failed_queries == len(self.search_queries) and len(all_leads) == 0:
+            batch.errors.append("Google API: All queries failed. Check quota (100/day free) or API key.")
 
         # Also search review sites for complaint patterns
         try:
             review_leads = self._search_reviews()
             all_leads.extend(review_leads)
         except Exception as e:
-            batch.errors.append(f"Error searching reviews: {str(e)}")
+            self.logger.debug(f"Review search skipped: {e}")
 
         # Deduplicate
         unique_leads = list({lead.id: lead for lead in all_leads}.values())
@@ -90,10 +99,37 @@ class GoogleScraper(BaseScraper):
 
         try:
             response = self.fetch_url(url)
+
+            # Check HTTP status code for common errors
+            if hasattr(response, 'status_code'):
+                if response.status_code == 403:
+                    self.logger.warning("Google API: Access denied (403). Check API key permissions or quota.")
+                    return leads
+                elif response.status_code == 429:
+                    self.logger.warning("Google API: Rate limit exceeded (429). Daily quota may be exhausted.")
+                    return leads
+                elif response.status_code == 400:
+                    self.logger.warning("Google API: Bad request (400). Check Search Engine ID.")
+                    return leads
+                elif response.status_code != 200:
+                    self.logger.warning(f"Google API: HTTP {response.status_code}")
+                    return leads
+
             data = response.json()
 
+            # Check for API-level errors
             if "error" in data:
-                raise Exception(data["error"].get("message", "Unknown API error"))
+                error_info = data["error"]
+                error_code = error_info.get("code", "unknown")
+                error_msg = error_info.get("message", "Unknown API error")
+
+                if error_code == 403:
+                    self.logger.warning(f"Google API quota exceeded or access denied: {error_msg}")
+                elif error_code == 400:
+                    self.logger.warning(f"Google API bad request: {error_msg}")
+                else:
+                    self.logger.warning(f"Google API error ({error_code}): {error_msg}")
+                return leads
 
             for item in data.get("items", []):
                 lead = self._item_to_lead(item, query)
@@ -101,8 +137,19 @@ class GoogleScraper(BaseScraper):
                     leads.append(lead)
 
         except Exception as e:
-            self.logger.debug(f"Google search failed: {e}")
-            raise
+            error_str = str(e).lower()
+            if "403" in error_str or "forbidden" in error_str:
+                self.logger.warning("Google API: Access forbidden. Quota may be exceeded (100/day free limit).")
+            elif "429" in error_str or "rate" in error_str:
+                self.logger.warning("Google API: Rate limited. Try again later.")
+            elif "401" in error_str or "unauthorized" in error_str:
+                self.logger.warning("Google API: Invalid API key.")
+            elif "400" in error_str:
+                self.logger.warning("Google API: Invalid Search Engine ID.")
+            else:
+                self.logger.debug(f"Google search failed: {e}")
+            # Don't raise, just return empty to continue with other sources
+            return leads
 
         return leads
 
@@ -166,6 +213,7 @@ class GoogleScraper(BaseScraper):
                 url=link,
                 keywords_matched=keywords,
                 email=self.extract_email(full_text),
+                phone=self.extract_phone(full_text),
                 company=self.extract_company(full_text) or metatags.get("og:site_name")
             )
 

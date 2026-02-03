@@ -24,9 +24,13 @@ class RedditScraper(BaseScraper):
         super().__init__()
         self.subreddits = settings.subreddits
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
         """
         Scrape Reddit for leads matching pain keywords.
+
+        Args:
+            time_filter: Optional time filter (not used for Reddit RSS)
+            location: Optional location filter (not used for Reddit)
 
         Returns:
             LeadBatch with found leads
@@ -199,6 +203,7 @@ class RedditScraper(BaseScraper):
                 keywords_matched=keywords,
                 subreddit=subreddit,
                 email=self.extract_email(full_text),
+                phone=self.extract_phone(full_text),
                 company=self.extract_company(full_text)
             )
 
