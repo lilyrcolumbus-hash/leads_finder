@@ -7,7 +7,8 @@ This document provides context for AI assistants working with this codebase.
 A modular, multi-source lead generation application designed to find business owners with communication pain points (missed calls, scheduling issues, customer communication problems). The app scrapes multiple platforms, filters leads using AI, and syncs them to HubSpot CRM.
 
 **Key Features:**
-- Multi-source lead scraping (Reddit, Hacker News, Google Search, Product Hunt)
+- Multi-source lead scraping (Reddit, Hacker News, Google Search, Product Hunt, Google Maps)
+- **Google Maps review analysis** - Detects communication pain points in business reviews
 - AI-powered lead qualification (OpenAI/Anthropic)
 - HubSpot CRM integration with full CRUD operations
 - Dual interfaces: CLI (Rich TUI) and Web (Streamlit)
@@ -30,7 +31,8 @@ lead-generation/
     │   ├── reddit_scraper.py   # Reddit RSS feeds
     │   ├── hackernews_scraper.py # HN Algolia API
     │   ├── google_scraper.py   # Google Custom Search
-    │   └── producthunt_scraper.py # Product Hunt RSS
+    │   ├── producthunt_scraper.py # Product Hunt RSS
+    │   └── google_maps_scraper.py # Google Maps/Places API with review analysis
     ├── filters/
     │   └── ai_filter.py        # OpenAI/Anthropic lead scorer
     ├── crm/
@@ -67,6 +69,7 @@ streamlit run web_app.py
 HUBSPOT_API_KEY         # Required for CRM operations
 GOOGLE_API_KEY          # Required for Google Search scraping
 GOOGLE_SEARCH_ENGINE_ID # Required for Google Search scraping
+GOOGLE_PLACES_API_KEY   # Optional (Google Maps scraping, falls back to GOOGLE_API_KEY)
 OPENAI_API_KEY          # Optional (AI filtering)
 ANTHROPIC_API_KEY       # Optional (AI filtering fallback)
 ```
@@ -124,13 +127,40 @@ ANTHROPIC_API_KEY       # Optional (AI filtering fallback)
 2. Placeholder emails generated if none found: `{lead_id}@leadgen.placeholder`
 3. Full lifecycle tracking (NEW -> CONTACTED -> DEMO -> PROPOSAL -> CLOSED)
 
+### Google Maps Scraper (Pain Detection)
+The Google Maps scraper (`src/scrapers/google_maps_scraper.py`) uses Google Places API to:
+
+1. **Search businesses** by type and location (configurable in settings)
+2. **Extract contact info**: phone, address, website, email
+3. **Analyze reviews** for communication pain points
+4. **Calculate pain score** (0-1) based on negative review frequency
+5. **Mark leads** with `has_pain` flag regardless of pain detection
+
+**Pain Detection Process:**
+```
+Reviews → Keyword Matching → Pain Score Calculation → Lead Flagging
+```
+
+**Review Pain Keywords** (configurable in `settings.review_pain_keywords`):
+- "never answers", "no one picks up", "can't get through"
+- "went to voicemail", "hard to reach", "no response"
+- "terrible communication", "ignored my calls"
+
+**Business Types** (configurable in `settings.google_maps_business_types`):
+- plumber, electrician, hvac, dentist, lawyer
+- accountant, real_estate_agent, contractor
+- auto_repair, veterinarian, medical_clinic
+
+**Locations** (configurable in `settings.google_maps_locations`):
+- Default: Miami FL, Houston TX, Phoenix AZ, Los Angeles CA, Chicago IL
+
 ## Key Data Models
 
 ### Lead (`src/utils/models.py`)
 ```python
 class Lead(BaseModel):
     id: str                          # Unique identifier
-    source: LeadSource               # reddit, hacker_news, google_search, product_hunt
+    source: LeadSource               # reddit, hacker_news, google_search, product_hunt, google_maps
     username: Optional[str]
     email: Optional[str]
     title: str
@@ -141,6 +171,21 @@ class Lead(BaseModel):
     is_qualified: bool
     sent_to_crm: bool
     hubspot_id: Optional[str]
+
+    # Google Maps specific fields
+    phone: Optional[str]             # Business phone number
+    address: Optional[str]           # Business address
+    website: Optional[str]           # Business website
+    rating: Optional[float]          # Google Maps rating 1-5
+    review_count: Optional[int]      # Total number of reviews
+    business_type: Optional[str]     # Type of business
+    place_id: Optional[str]          # Google Place ID
+
+    # Pain detection fields
+    has_pain: bool                   # Whether pain points detected in reviews
+    pain_score: Optional[float]      # Pain intensity score 0-1
+    pain_reviews: List[str]          # Reviews containing pain keywords
+    pain_summary: Optional[str]      # Summary of pain points found
 ```
 
 ### LeadSource Enum
@@ -150,6 +195,7 @@ class LeadSource(str, Enum):
     HACKER_NEWS = "hacker_news"
     GOOGLE_SEARCH = "google_search"
     PRODUCT_HUNT = "product_hunt"
+    GOOGLE_MAPS = "google_maps"
 ```
 
 ### Settings (`src/config.py`)
@@ -209,24 +255,58 @@ class NewSourceScraper(BaseScraper):
 
 ### Run full scraping pipeline
 ```python
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, GoogleMapsScraper
 from src.filters.ai_filter import AIFilter
 from src.crm.hubspot import HubSpotCRM
 from src.config import settings
 
 # Scrape all sources
 leads = []
-with RedditScraper(settings) as scraper:
-    leads.extend(scraper.scrape())
+with RedditScraper() as scraper:
+    leads.extend(scraper.scrape().leads)
 
 # Filter with AI
-ai_filter = AIFilter(settings)
+ai_filter = AIFilter()
 qualified = ai_filter.filter_leads(leads)
 
 # Send to CRM
-with HubSpotCRM(settings) as crm:
+with HubSpotCRM() as crm:
     for lead in qualified:
         crm.create_contact(lead)
+```
+
+### Scrape Google Maps with pain detection
+```python
+from src.scrapers import GoogleMapsScraper
+
+with GoogleMapsScraper() as scraper:
+    batch = scraper.scrape()
+
+    # All leads (with or without pain)
+    all_leads = batch.leads
+
+    # Filter leads WITH pain detected
+    pain_leads = [l for l in batch.leads if l.has_pain]
+
+    # Filter leads WITHOUT pain (still valid contacts)
+    no_pain_leads = [l for l in batch.leads if not l.has_pain]
+
+    for lead in pain_leads:
+        print(f"{lead.title}: {lead.phone}")
+        print(f"  Pain Score: {lead.pain_score}")
+        print(f"  Pain Summary: {lead.pain_summary}")
+```
+
+### Scrape specific business type or location
+```python
+from src.scrapers import GoogleMapsScraper
+
+with GoogleMapsScraper() as scraper:
+    # Single location, all business types
+    batch = scraper.scrape_single_location("Austin, TX")
+
+    # Single business type, all locations
+    batch = scraper.scrape_single_type("dentist")
 ```
 
 ### Access CRM data

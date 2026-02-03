@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadSource
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, GoogleMapsScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -262,7 +262,8 @@ def show_home():
         ("📱 Reddit", "Subreddits de negocios"),
         ("💻 Hacker News", "Discusiones de startups"),
         ("🔍 Google", "Búsquedas específicas"),
-        ("🚀 Product Hunt", "Founders activos")
+        ("🚀 Product Hunt", "Founders activos"),
+        ("📍 Google Maps", "Reviews de negocios locales")
     ]
 
     for icon_name, desc in sources:
@@ -303,6 +304,11 @@ def show_search():
     use_hn = st.checkbox("💻 Hacker News", value=True)
     use_google = st.checkbox("🔍 Google Search", value=bool(settings.google_api_key))
     use_ph = st.checkbox("🚀 Product Hunt", value=True)
+    use_gmaps = st.checkbox(
+        "📍 Google Maps (Reviews)",
+        value=bool(settings.google_places_api_key or settings.google_api_key),
+        help="Busca negocios y analiza reviews para detectar problemas de comunicación"
+    )
 
     st.markdown("---")
 
@@ -331,6 +337,8 @@ def show_search():
             scrapers.append(("Google Search", GoogleScraper))
         if use_ph:
             scrapers.append(("Product Hunt", ProductHuntScraper))
+        if use_gmaps:
+            scrapers.append(("Google Maps", GoogleMapsScraper))
 
         if not scrapers:
             st.warning("⚠️ Selecciona al menos una fuente")
@@ -378,12 +386,56 @@ def show_search():
 
         for lead in st.session_state.filtered_leads[:10]:
             title_short = lead.title[:50] + "..." if len(lead.title) > 50 else lead.title
-            with st.expander(f"📌 {title_short}"):
+
+            # Add pain indicator for Google Maps leads
+            pain_badge = ""
+            if lead.source.value == "google_maps":
+                if lead.has_pain:
+                    pain_badge = " 🔴 DOLOR DETECTADO"
+                else:
+                    pain_badge = " 🟢 Sin dolor"
+
+            with st.expander(f"📌 {title_short}{pain_badge}"):
                 st.markdown(f"**Fuente:** {lead.source.value}")
                 st.markdown(f"**Keywords:** {', '.join(lead.keywords_matched[:3])}")
                 if lead.ai_score:
                     score_pct = int(lead.ai_score * 100)
                     st.markdown(f"**Score AI:** {score_pct}%")
+
+                # Google Maps specific info
+                if lead.source.value == "google_maps":
+                    st.markdown("---")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if lead.phone:
+                            st.markdown(f"📞 **Teléfono:** {lead.phone}")
+                        if lead.rating:
+                            st.markdown(f"⭐ **Rating:** {lead.rating}/5")
+                    with col2:
+                        if lead.review_count:
+                            st.markdown(f"📝 **Reviews:** {lead.review_count}")
+                        if lead.website:
+                            st.markdown(f"🌐 **Web:** [Sitio]({lead.website})")
+
+                    if lead.address:
+                        st.markdown(f"📍 **Dirección:** {lead.address}")
+
+                    # Pain details
+                    if lead.has_pain:
+                        st.markdown("---")
+                        st.markdown("### 🔴 Análisis de Dolor")
+                        if lead.pain_score:
+                            st.markdown(f"**Intensidad:** {lead.pain_score:.0%}")
+                        if lead.pain_summary:
+                            st.markdown(f"**Resumen:** {lead.pain_summary}")
+                        if lead.pain_reviews:
+                            st.markdown("**Reviews con problemas:**")
+                            for review in lead.pain_reviews[:3]:
+                                st.markdown(f"> _{review}_")
+                    else:
+                        st.markdown("---")
+                        st.info("🟢 No se detectaron problemas de comunicación en las reviews")
+
                 st.markdown(f"**URL:** [{lead.url[:40]}...]({lead.url})")
                 st.markdown(f"**Contenido:**\n{lead.content[:200]}...")
 
@@ -534,6 +586,7 @@ def show_config():
     apis = [
         ("HubSpot", settings.hubspot_api_key, "CRM"),
         ("Google", settings.google_api_key, "Búsquedas"),
+        ("Google Places", settings.google_places_api_key or settings.google_api_key, "Google Maps"),
         ("OpenAI", settings.openai_api_key, "AI Filter"),
         ("Anthropic", settings.anthropic_api_key, "AI Filter"),
     ]

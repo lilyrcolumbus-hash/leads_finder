@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadBatch
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, GoogleMapsScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -79,6 +79,7 @@ def run_scraping() -> List[Lead]:
         ("Hacker News", HackerNewsScraper),
         ("Google Search", GoogleScraper),
         ("Product Hunt", ProductHuntScraper),
+        ("Google Maps", GoogleMapsScraper),
     ]
 
     with Progress(
@@ -156,8 +157,9 @@ def menu_search_leads():
     console.print("  [3] Solo Hacker News")
     console.print("  [4] Solo Google Search")
     console.print("  [5] Solo Product Hunt")
+    console.print("  [6] Solo Google Maps (con analisis de reviews)")
 
-    source = Prompt.ask("Opcion", choices=["1", "2", "3", "4", "5"], default="1")
+    source = Prompt.ask("Opcion", choices=["1", "2", "3", "4", "5", "6"], default="1")
 
     # Run scraping
     leads = run_scraping() if source == "1" else run_single_source(source)
@@ -188,6 +190,7 @@ def run_single_source(source: str) -> List[Lead]:
         "3": ("Hacker News", HackerNewsScraper),
         "4": ("Google", GoogleScraper),
         "5": ("Product Hunt", ProductHuntScraper),
+        "6": ("Google Maps", GoogleMapsScraper),
     }
 
     name, ScraperClass = scrapers.get(source, ("Reddit", RedditScraper))
@@ -245,15 +248,27 @@ def display_leads_table(leads: List[Lead], title: str = "Leads"):
     table.add_column("Titulo", style="green", max_width=40)
     table.add_column("Keywords", style="yellow", max_width=30)
     table.add_column("Score", justify="center")
+    table.add_column("Dolor", justify="center")
 
     for lead in leads[:20]:
         score = f"{lead.ai_score:.2f}" if lead.ai_score else "-"
+
+        # Pain indicator for Google Maps leads
+        if lead.source.value == "google_maps":
+            if lead.has_pain:
+                pain_str = f"[red]SI ({lead.pain_score:.1f})[/red]" if lead.pain_score else "[red]SI[/red]"
+            else:
+                pain_str = "[green]NO[/green]"
+        else:
+            pain_str = "-"
+
         table.add_row(
             lead.id[:8],
             lead.source.value,
             lead.title[:40],
             ", ".join(lead.keywords_matched[:3]),
-            score
+            score,
+            pain_str
         )
 
     console.print(table)
