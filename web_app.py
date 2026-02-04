@@ -4951,54 +4951,7 @@ def show_search():
         st.session_state.leads = all_leads
         st.session_state.raw_leads = all_leads.copy()  # Store raw leads before AI filter
 
-        # Auto-save leads to storage
-        saved_count = lead_manager.save_leads(all_leads)
-        if saved_count > 0:
-            with results:
-                st.success(f"Auto-saved {saved_count} new leads to database")
-
-        # AUTO-SYNC TO HUBSPOT if configured
-        with HubSpotCRM() as crm:
-            if crm.is_configured():
-                status.markdown("""
-                <div class="loading-box">
-                    <div class="spinner"></div>
-                    <span class="loading-text">Syncing to HubSpot...</span>
-                </div>
-                """, unsafe_allow_html=True)
-
-                hubspot_synced = 0
-                for lead in all_leads:
-                    try:
-                        result = crm.create_contact(lead)
-                        if result:
-                            hubspot_synced += 1
-                    except Exception as e:
-                        pass  # Continue with other leads
-
-                if hubspot_synced > 0:
-                    with results:
-                        st.success(f"✅ Auto-synced {hubspot_synced} leads to HubSpot!")
-                else:
-                    with results:
-                        st.info("HubSpot: Leads may already exist or sync failed")
-
-        # Store search summary
-        st.session_state.last_search_results = {
-            'total_found': len(all_leads),
-            'sources': {
-                'Reddit': len([l for l in all_leads if l.source.value == 'reddit']),
-                'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
-                'Google': len([l for l in all_leads if l.source.value == 'google_search']),
-                'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
-                'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
-                'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
-                'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
-                'Google Maps': len([l for l in all_leads if l.source.value == 'google_my_business']),
-            }
-        }
-
-        # AI Filter
+        # AI QUALIFICATION FIRST (before HubSpot sync so leads have scores)
         if use_ai and all_leads:
             status.markdown("""
             <div class="loading-box">
@@ -5009,31 +4962,86 @@ def show_search():
 
             try:
                 ai_filter = AILeadFilter()
-                filtered = ai_filter.filter_leads(all_leads)
+                # AI scores ALL leads (doesn't filter them out)
+                all_leads = ai_filter.filter_leads(all_leads)
 
                 # Count by category
                 from src.utils.models import LeadCategory
-                pain_count = len([l for l in filtered if l.lead_category == LeadCategory.PAIN])
-                opportunity_count = len([l for l in filtered if l.lead_category == LeadCategory.OPPORTUNITY])
-                cold_count = len([l for l in filtered if l.lead_category == LeadCategory.COLD])
+                pain_count = len([l for l in all_leads if l.lead_category == LeadCategory.PAIN])
+                opportunity_count = len([l for l in all_leads if l.lead_category == LeadCategory.OPPORTUNITY])
+                cold_count = len([l for l in all_leads if l.lead_category == LeadCategory.COLD])
+                qualified_count = len([l for l in all_leads if l.is_qualified])
 
-                # Show all leads (not just qualified) but sorted by category
-                st.session_state.filtered_leads = filtered
                 with results:
-                    st.success(f"AI categorized {len(filtered)} leads: 🔴 {pain_count} Pain | 🟡 {opportunity_count} Opportunity | ⚪ {cold_count} Cold")
-
-                # Update stored leads with AI data (category, score, reasoning)
-                ai_updated = lead_manager.update_leads_with_ai_data(filtered)
-                if ai_updated > 0:
-                    with results:
-                        st.info(f"💾 Updated {ai_updated} leads in CRM with AI analysis")
+                    st.success(f"AI analyzed {len(all_leads)} leads: ✅ {qualified_count} Qualified | 🔴 {pain_count} Pain | 🟡 {opportunity_count} Opportunity | ⚪ {cold_count} Cold")
 
             except Exception as e:
-                st.session_state.filtered_leads = all_leads
                 with results:
-                    st.warning(f"AI filter error, showing all leads: {str(e)[:50]}")
-        else:
-            st.session_state.filtered_leads = all_leads
+                    st.warning(f"AI qualification error: {str(e)[:50]} - Continuing with all leads")
+
+        # ALL leads go to filtered_leads (qualified AND non-qualified)
+        st.session_state.filtered_leads = all_leads
+
+        # Auto-save leads to storage (with AI data if available)
+        saved_count = lead_manager.save_leads(all_leads)
+        if saved_count > 0:
+            with results:
+                st.success(f"Auto-saved {saved_count} new leads to database")
+
+        # AUTO-SYNC ALL LEADS TO HUBSPOT (with AI qualification data)
+        with HubSpotCRM() as crm:
+            if crm.is_configured():
+                status.markdown("""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Syncing ALL leads to HubSpot...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                hubspot_synced = 0
+                qualified_synced = 0
+                for lead in all_leads:
+                    try:
+                        result = crm.create_contact(lead)
+                        if result:
+                            hubspot_synced += 1
+                            if getattr(lead, 'is_qualified', False):
+                                qualified_synced += 1
+                    except Exception as e:
+                        pass  # Continue with other leads
+
+                if hubspot_synced > 0:
+                    with results:
+                        st.success(f"✅ Synced {hubspot_synced} leads to HubSpot ({qualified_synced} marked as qualified)")
+                else:
+                    with results:
+                        st.info("HubSpot: Leads may already exist or sync failed")
+
+        # Update stored leads with AI data (category, score, reasoning)
+        if use_ai:
+            try:
+                ai_updated = lead_manager.update_leads_with_ai_data(all_leads)
+                if ai_updated > 0:
+                    with results:
+                        st.info(f"💾 Updated {ai_updated} leads with AI analysis")
+            except Exception:
+                pass
+
+        # Store search summary
+        st.session_state.last_search_results = {
+            'total_found': len(all_leads),
+            'qualified_count': len([l for l in all_leads if getattr(l, 'is_qualified', False)]),
+            'sources': {
+                'Reddit': len([l for l in all_leads if l.source.value == 'reddit']),
+                'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
+                'Google': len([l for l in all_leads if l.source.value == 'google_search']),
+                'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
+                'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
+                'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
+                'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
+                'Google Maps': len([l for l in all_leads if l.source.value == 'google_maps']),
+            }
+        }
 
         # Save search history
         try:
