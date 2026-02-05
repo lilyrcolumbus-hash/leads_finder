@@ -29,41 +29,63 @@ class Settings(BaseSettings):
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
     facebook_access_token: str = Field(default="", alias="FACEBOOK_ACCESS_TOKEN")
 
-    # Reddit subreddits to search
+    # Reddit subreddits to search - Active business communities
     subreddits: List[str] = [
         "smallbusiness",
+        "Entrepreneur",
         "sweatystartup",
+        "startups",
+        "business",
         "HVAC",
         "Plumbing",
         "electricians",
         "Roofing",
         "landscaping",
         "dentistry",
-        "realtors"
+        "realtors",
+        "contractors",
+        "HomeImprovement",
+        "lawncare"
     ]
 
-    # Pain point keywords
+    # Pain point keywords - General terms people actually use
     pain_keywords: List[str] = [
-        "missed calls",
-        "losing customers",
-        "need receptionist",
-        "can't answer phone",
-        "cant answer phone",
+        # Phone/Communication problems
+        "phone",
+        "calls",
+        "customers",
+        "clients",
+        "busy",
         "overwhelmed",
-        "scheduling nightmare",
-        "no one answers",
+        "stressed",
+        "help needed",
+        "struggling",
+        "frustrated",
+        # Business problems
+        "losing money",
+        "losing customers",
         "bad reviews",
-        "customer complaints",
-        "phone keeps ringing",
-        "voicemail full",
-        "answering service",
-        "receptionist needed",
-        "need answering service",
-        "never answers phone",
-        "front desk",
-        "call handling",
-        "missed appointment",
-        "booking system"
+        "complaints",
+        "too many",
+        "can't keep up",
+        "need help",
+        "hiring",
+        "staff",
+        "receptionist",
+        "assistant",
+        # Scheduling
+        "appointments",
+        "scheduling",
+        "bookings",
+        "no shows",
+        "cancellations",
+        # General pain
+        "problem",
+        "issue",
+        "nightmare",
+        "disaster",
+        "advice needed",
+        "what do you do"
     ]
 
     # Google search queries
