@@ -5332,6 +5332,39 @@ def show_search():
             </div>
             """, unsafe_allow_html=True)
 
+        # PERSISTENT NAVIGATION BUTTONS (always visible when leads exist)
+        st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
+        st.markdown("### 📌 Quick Actions")
+        nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
+        with nav_col1:
+            if st.button("📋 View All Leads", type="primary", use_container_width=True, key="persistent_view_leads"):
+                lead_manager.save_leads(st.session_state.filtered_leads)
+                st.session_state.nav_page = "My Leads"
+                st.rerun()
+        with nav_col2:
+            if st.button("💼 View in CRM", use_container_width=True, key="persistent_view_crm"):
+                lead_manager.save_leads(st.session_state.filtered_leads)
+                st.session_state.nav_page = "CRM"
+                st.rerun()
+        with nav_col3:
+            csv_data = csv_exporter.export_leads(st.session_state.filtered_leads)
+            st.download_button(
+                label="📥 Export CSV",
+                data=csv_data,
+                file_name=f"leads_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="persistent_export_csv"
+            )
+        with nav_col4:
+            if st.button("🗑️ Clear Results", use_container_width=True, key="persistent_clear"):
+                st.session_state.raw_leads = []
+                st.session_state.filtered_leads = []
+                st.session_state.leads = []
+                st.session_state.scraping_done = False
+                st.session_state.last_search_results = None
+                st.rerun()
+
     # Section to review ALL raw leads (before AI filter)
     if st.session_state.scraping_done and st.session_state.raw_leads:
         st.divider()
@@ -5375,19 +5408,31 @@ def show_search():
                     with col2:
                         st.link_button("View", lead.url, use_container_width=True)
 
-        # Clear results button
-        col1, col2 = st.columns(2)
+        # Action buttons at bottom
+        st.markdown("<div style='height: 16px'></div>", unsafe_allow_html=True)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
-            if st.button("🗑️ Clear Search Results", type="secondary", use_container_width=True):
+            if st.button("📋 Go to My Leads", type="primary", use_container_width=True, key="bottom_go_leads"):
+                lead_manager.save_leads(st.session_state.filtered_leads)
+                st.session_state.nav_page = "My Leads"
+                st.rerun()
+        with col2:
+            if st.button("💼 Go to CRM", use_container_width=True, key="bottom_go_crm"):
+                lead_manager.save_leads(st.session_state.filtered_leads)
+                st.session_state.nav_page = "CRM"
+                st.rerun()
+        with col3:
+            if st.button("🔄 Search Again", use_container_width=True, key="bottom_search_again"):
+                st.session_state.scraping_done = False
+                st.rerun()
+        with col4:
+            if st.button("🗑️ Clear All", use_container_width=True, key="bottom_clear_all"):
                 st.session_state.raw_leads = []
                 st.session_state.filtered_leads = []
                 st.session_state.leads = []
                 st.session_state.scraping_done = False
                 st.session_state.last_search_results = None
                 st.rerun()
-        with col2:
-            if st.button("💾 Keep & Continue", type="primary", use_container_width=True):
-                st.success("Results saved! You can view them in My Leads or CRM anytime.")
 
 
 def show_leads():
