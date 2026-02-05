@@ -62,7 +62,8 @@ class RedditScraper(BaseScraper):
 
     def _scrape_subreddit(self, subreddit: str) -> List[Lead]:
         """
-        Scrape a single subreddit for matching posts.
+        Scrape a single subreddit - get ALL recent posts.
+        AI will qualify them later, we don't filter here.
 
         Args:
             subreddit: Name of subreddit to scrape
@@ -72,15 +73,8 @@ class RedditScraper(BaseScraper):
         """
         leads = []
 
-        # Search for each pain keyword
-        for keyword in self.pain_keywords[:10]:  # Limit to avoid rate limits
-            try:
-                leads.extend(self._search_keyword(subreddit, keyword))
-                time.sleep(1)  # Be nice to Reddit
-            except Exception as e:
-                self.logger.warning(f"Error searching '{keyword}' in r/{subreddit}: {e}")
-
-        # Also get recent posts from the subreddit
+        # Get ALL recent posts from the subreddit (no keyword filtering)
+        # AI will qualify them later
         try:
             leads.extend(self._get_recent_posts(subreddit))
         except Exception as e:
@@ -108,9 +102,9 @@ class RedditScraper(BaseScraper):
         return leads
 
     def _get_recent_posts(self, subreddit: str) -> List[Lead]:
-        """Get recent posts from subreddit RSS feed."""
+        """Get ALL recent posts from subreddit RSS feed (no filtering)."""
         leads = []
-        url = f"https://www.reddit.com/r/{subreddit}/new.rss?limit=50"
+        url = f"https://www.reddit.com/r/{subreddit}/new.rss?limit=100"
 
         try:
             response = self.fetch_url(url)
@@ -118,7 +112,7 @@ class RedditScraper(BaseScraper):
 
             for entry in entries:
                 lead = self._entry_to_lead(entry, subreddit)
-                if lead and lead.keywords_matched:
+                if lead:  # Add ALL leads, AI will qualify later
                     leads.append(lead)
 
         except Exception as e:
@@ -172,23 +166,27 @@ class RedditScraper(BaseScraper):
     def _entry_to_lead(self, entry: dict, subreddit: str) -> Lead | None:
         """
         Convert RSS entry to Lead object.
+        Returns ALL posts - AI will qualify them later.
 
         Args:
             entry: Parsed RSS entry dict
             subreddit: Name of subreddit
 
         Returns:
-            Lead object or None if not relevant
+            Lead object or None if parsing fails
         """
         try:
             title = entry.get("title", "")
             content = entry.get("content", "")
+
+            # Skip empty posts
+            if not title and not content:
+                return None
+
             full_text = f"{title} {content}"
 
-            # Check for pain keywords
+            # Check for pain keywords (for reference, but don't filter)
             keywords = self.find_keywords(full_text)
-            if not keywords:
-                return None
 
             # Extract author
             author = entry.get("author", "").replace("/u/", "")
@@ -200,11 +198,13 @@ class RedditScraper(BaseScraper):
                 title=title,
                 content=content[:2000],  # Limit content length
                 url=entry.get("link", ""),
-                keywords_matched=keywords,
+                keywords_matched=keywords,  # May be empty, that's OK
                 subreddit=subreddit,
                 email=self.extract_email(full_text),
                 phone=self.extract_phone(full_text),
-                company=self.extract_company(full_text)
+                company=self.extract_company(full_text),
+                # Mark if has keywords for quick filtering
+                has_pain=len(keywords) > 0
             )
 
             return lead

@@ -18,17 +18,21 @@ class HackerNewsScraper(BaseScraper):
 
     def __init__(self):
         super().__init__()
-        # Additional HN-specific keywords
+        # Broader HN-specific keywords to find more leads
         self.hn_keywords = [
-            "small business phone",
-            "receptionist startup",
-            "answering service",
-            "customer calls",
-            "missed calls business",
-            "phone support overwhelmed",
-            "scheduling customers",
-            "appointment booking",
-            "call center small business"
+            "small business",
+            "startup founder",
+            "business owner",
+            "my company",
+            "running a business",
+            "customers",
+            "clients",
+            "growing business",
+            "hiring help",
+            "overwhelmed",
+            "scaling",
+            "solopreneur",
+            "bootstrapped"
         ]
 
     def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
@@ -142,12 +146,13 @@ class HackerNewsScraper(BaseScraper):
     def _hit_to_lead(self, hit: dict) -> Lead | None:
         """
         Convert Algolia hit to Lead object.
+        Returns ALL results - AI will qualify later.
 
         Args:
             hit: Search result from Algolia
 
         Returns:
-            Lead object or None if not relevant
+            Lead object or None if parsing fails
         """
         try:
             object_id = hit.get("objectID", "")
@@ -156,12 +161,14 @@ class HackerNewsScraper(BaseScraper):
             comment_text = hit.get("comment_text", "") or ""
             content = story_text or comment_text
 
+            # Skip empty posts
+            if not title and not content:
+                return None
+
             full_text = f"{title} {content}"
 
-            # Check for pain keywords
+            # Check for pain keywords (for reference, don't filter)
             keywords = self.find_keywords(full_text)
-            if not keywords:
-                return None
 
             # Build URL
             url = hit.get("url") or self.ITEM_URL.format(item_id=object_id)
@@ -173,10 +180,11 @@ class HackerNewsScraper(BaseScraper):
                 title=title,
                 content=content[:2000],
                 url=url,
-                keywords_matched=keywords,
+                keywords_matched=keywords,  # May be empty
                 email=self.extract_email(full_text),
                 phone=self.extract_phone(full_text),
-                company=self.extract_company(full_text)
+                company=self.extract_company(full_text),
+                has_pain=len(keywords) > 0
             )
 
             return lead
