@@ -4760,10 +4760,6 @@ def show_search():
         st.warning("⚠️ Facebook requires Access Token")
 
     st.success("💡 **9 fuentes GRATIS** (Reddit, HN, Product Hunt, Yelp, Google Maps, Indeed, Yellow Pages, BBB, Craigslist) - No necesitan API!")
-    for i, (icon, name) in enumerate(coming_sources):
-        with coming_cols[i]:
-            st.markdown(f"**{icon}**")
-            st.caption(name)
 
     st.divider()
 
