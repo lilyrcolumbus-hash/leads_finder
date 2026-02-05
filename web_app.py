@@ -31,7 +31,11 @@ from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
 from src.enrichment.apollo_enricher import enrich_leads_with_apollo
 from src.utils.background_tasks import task_manager, TaskStatus
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper, FacebookScraper
+from src.scrapers import (
+    RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper,
+    IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper, FacebookScraper,
+    YellowPagesScraper, BBBScraper, CraigslistScraper, GoogleMapsWebScraper
+)
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -4727,42 +4731,35 @@ def show_search():
     st.divider()
 
     # Active Sources Section
-    st.subheader("📡 Active Sources (9 Available)")
+    st.subheader("📡 Active Sources (12 Available)")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
-        use_reddit = st.checkbox("🔴 Reddit - Business subreddits", value=True, key="reddit_check")
-        use_hn = st.checkbox("🟠 Hacker News - Startups", value=False, key="hn_check")
-        use_linkedin = st.checkbox("🔷 LinkedIn - Decision Makers", value=False, key="linkedin_check")
+        use_reddit = st.checkbox("🔴 Reddit", value=True, key="reddit_check")
+        use_hn = st.checkbox("🟠 Hacker News", value=True, key="hn_check")
+        use_ph = st.checkbox("🟣 Product Hunt", value=True, key="ph_check")
     with col2:
-        use_google = st.checkbox("🔵 Google Search", value=False, key="google_check")
-        use_ph = st.checkbox("🟣 Product Hunt", value=False, key="ph_check")
-        use_indeed = st.checkbox("💼 Indeed - Hiring Receptionists", value=True, key="indeed_check")
+        use_yelp = st.checkbox("⭐ Yelp", value=True, key="yelp_check")
+        use_gmaps = st.checkbox("📍 Google Maps", value=True, key="gmaps_check")
+        use_indeed = st.checkbox("💼 Indeed", value=True, key="indeed_check")
     with col3:
-        use_yelp = st.checkbox("⭐ Yelp - Service Businesses", value=True, key="yelp_check")
-        use_gmaps = st.checkbox("📍 Google Maps - Local Businesses", value=True, key="gmaps_check")
-        use_facebook = st.checkbox("📘 Facebook - Public Groups", value=False, key="facebook_check")
+        use_yellowpages = st.checkbox("📒 Yellow Pages", value=True, key="yp_check")
+        use_bbb = st.checkbox("🏢 BBB (Quejas)", value=True, key="bbb_check")
+        use_craigslist = st.checkbox("📋 Craigslist", value=True, key="cl_check")
+    with col4:
+        use_google = st.checkbox("🔵 Google Search", value=False, key="google_check")
+        use_linkedin = st.checkbox("🔷 LinkedIn", value=False, key="linkedin_check")
+        use_facebook = st.checkbox("📘 Facebook", value=False, key="facebook_check")
 
     # Show warnings for sources that need API keys
     if use_google and not settings.google_api_key:
-        st.warning("⚠️ Google Search requires API key. Configure in Settings → .env file")
+        st.warning("⚠️ Google Search requires API key")
     if use_linkedin and not settings.google_api_key:
-        st.warning("⚠️ LinkedIn requires Google API key for search. Configure in Settings → .env file")
+        st.warning("⚠️ LinkedIn requires Google API key")
     if use_facebook and not settings.facebook_access_token:
-        st.warning("⚠️ Facebook requires Access Token. Configure FACEBOOK_ACCESS_TOKEN in Settings → .env file")
+        st.warning("⚠️ Facebook requires Access Token")
 
-    st.info("💡 **Google Maps** busca negocios locales (dentistas, HVAC, abogados) y extrae teléfono, website y email. **GRATIS** - no usa API.")
-
-    st.divider()
-
-    # Coming Soon Sources
-    st.subheader("🚀 Coming Soon (2 More)")
-
-    coming_cols = st.columns(2)
-    coming_sources = [
-        ("🐦", "Twitter/X"),
-        ("📘", "Facebook Groups")
-    ]
+    st.success("💡 **9 fuentes GRATIS** (Reddit, HN, Product Hunt, Yelp, Google Maps, Indeed, Yellow Pages, BBB, Craigslist) - No necesitan API!")
     for i, (icon, name) in enumerate(coming_sources):
         with coming_cols[i]:
             st.markdown(f"**{icon}**")
@@ -4855,14 +4852,19 @@ def show_search():
         results = st.container()
 
         scrapers = []
+        # Free scrapers (no API needed)
         if use_reddit: scrapers.append(("Reddit", RedditScraper))
         if use_hn: scrapers.append(("Hacker News", HackerNewsScraper))
-        if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
         if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
         if use_indeed: scrapers.append(("Indeed", IndeedScraper))
         if use_yelp: scrapers.append(("Yelp", YelpScraper))
+        if use_gmaps: scrapers.append(("Google Maps", GoogleMapsWebScraper))  # Web scraping version
+        if use_yellowpages: scrapers.append(("Yellow Pages", YellowPagesScraper))
+        if use_bbb: scrapers.append(("BBB", BBBScraper))
+        if use_craigslist: scrapers.append(("Craigslist", CraigslistScraper))
+        # API-required scrapers
+        if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
         if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
-        if use_gmaps: scrapers.append(("Google Maps", GoogleMapsScraper))
         if use_facebook and settings.facebook_access_token: scrapers.append(("Facebook", FacebookScraper))
 
         if not scrapers:

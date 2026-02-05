@@ -10,6 +10,9 @@ from .indeed_scraper import IndeedScraper
 from .yelp_scraper import YelpScraper
 from .linkedin_scraper import LinkedInScraper
 from .facebook_scraper import FacebookScraper
+from .yellowpages_scraper import YellowPagesScraper
+from .bbb_scraper import BBBScraper
+from .craigslist_scraper import CraigslistScraper
 from .base_scraper import BaseScraper
 
 __all__ = [
@@ -23,5 +26,8 @@ __all__ = [
     "IndeedScraper",
     "YelpScraper",
     "LinkedInScraper",
-    "FacebookScraper"
+    "FacebookScraper",
+    "YellowPagesScraper",
+    "BBBScraper",
+    "CraigslistScraper"
 ]
