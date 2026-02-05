@@ -1,6 +1,8 @@
 """Yelp scraper for finding businesses with phone/service complaints."""
 
 import time
+import re
+import json
 from typing import List
 from urllib.parse import quote
 
@@ -32,23 +34,19 @@ class YelpScraper(BaseScraper):
             "salons",
             "veterinarians"
         ]
-        # Keywords indicating phone problems in reviews
-        self.review_keywords = [
-            "never answers",
-            "can't get through",
-            "no one picks up",
-            "voicemail",
-            "didn't return call",
-            "hard to reach",
-            "phone goes to",
-            "couldn't reach",
-            "won't answer",
-            "poor communication"
-        ]
+        # Better headers to avoid blocking
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+        }
 
     def scrape(self, time_filter: str = "week", location: str = "") -> LeadBatch:
         """
-        Scrape Yelp for businesses with phone/service complaints.
+        Scrape Yelp for businesses.
 
         Args:
             time_filter: Time range (not used by Yelp, but kept for API consistency)
@@ -57,19 +55,17 @@ class YelpScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        # Store location for use in search
         self.search_location = location
-
         location_msg = f" in {location}" if location else ""
         self.logger.info(f"Starting Yelp scrape for businesses{location_msg}")
 
         # Search businesses in target categories
-        for category in self.categories[:5]:  # Limit for speed
+        for category in self.categories[:5]:
             try:
                 leads = self._search_category(category, location)
                 all_leads.extend(leads)
                 self.logger.info(f"Found {len(leads)} businesses in '{category}'")
-                time.sleep(1)
+                time.sleep(2)  # More delay to avoid blocking
             except Exception as e:
                 error_msg = f"Error searching Yelp for '{category}': {str(e)}"
                 self.logger.warning(error_msg)
@@ -92,74 +88,185 @@ class YelpScraper(BaseScraper):
         if user_location:
             locations = [user_location]
         else:
-            locations = ["New York", "Los Angeles", "Chicago", "Houston", "Miami"]
+            locations = ["Miami, FL", "Houston, TX", "Phoenix, AZ", "Los Angeles, CA", "Chicago, IL"]
 
-        for location in locations[:3]:  # Limit locations for speed
+        for location in locations[:3]:
             url = f"{self.BASE_URL}?find_desc={quote(category)}&find_loc={quote(location)}"
 
             try:
-                response = self.fetch_url(url)
+                response = self.session.get(url, headers=self.headers, timeout=15)
+
+                if response.status_code != 200:
+                    self.logger.debug(f"Yelp returned {response.status_code} for {category} in {location}")
+                    continue
+
                 soup = BeautifulSoup(response.text, "lxml")
 
-                # Find business cards
-                business_cards = soup.find_all("div", {"data-testid": "serp-ia-card"})
+                # Method 1: Try to find JSON data embedded in the page
+                leads_from_json = self._extract_from_json(response.text, category, location)
+                if leads_from_json:
+                    leads.extend(leads_from_json)
+                    continue
 
-                if not business_cards:
-                    business_cards = soup.find_all("div", class_=lambda x: x and "businessName" in str(x))
+                # Method 2: Parse HTML directly with multiple selectors
+                leads_from_html = self._extract_from_html(soup, category, location)
+                leads.extend(leads_from_html)
 
-                if not business_cards:
-                    # Try alternate selector
-                    business_cards = soup.find_all("h3", class_=lambda x: x and "css-" in str(x))
-
-                for card in business_cards[:10]:
-                    lead = self._parse_business(card, category, location)
-                    if lead:
-                        leads.append(lead)
-
-                time.sleep(0.5)
+                time.sleep(1)
 
             except Exception as e:
                 self.logger.debug(f"Yelp search failed for '{category}' in {location}: {e}")
 
         return leads
 
-    def _parse_business(self, card, category: str, location: str) -> Lead | None:
-        """Parse a business card into a Lead."""
+    def _extract_from_json(self, html: str, category: str, location: str) -> List[Lead]:
+        """Try to extract business data from embedded JSON."""
+        leads = []
+
         try:
-            # Extract business name
-            name_elem = card.find("a", class_=lambda x: x and "css-" in str(x))
-            if not name_elem:
-                name_elem = card.find("a", href=lambda x: x and "/biz/" in str(x))
+            # Look for JSON-LD data
+            json_pattern = r'<script type="application/ld\+json">(.*?)</script>'
+            matches = re.findall(json_pattern, html, re.DOTALL)
 
-            if not name_elem:
-                return None
+            for match in matches:
+                try:
+                    data = json.loads(match)
+                    if isinstance(data, dict) and data.get("@type") == "LocalBusiness":
+                        lead = self._json_to_lead(data, category, location)
+                        if lead:
+                            leads.append(lead)
+                    elif isinstance(data, list):
+                        for item in data:
+                            if isinstance(item, dict) and item.get("@type") == "LocalBusiness":
+                                lead = self._json_to_lead(item, category, location)
+                                if lead:
+                                    leads.append(lead)
+                except:
+                    continue
 
-            name = name_elem.get_text(strip=True)
-            href = name_elem.get("href", "")
+            # Also try to find embedded search results data
+            search_data_pattern = r'"searchPageProps":\s*(\{.*?\})\s*[,}]'
+            search_match = re.search(search_data_pattern, html)
+            if search_match:
+                try:
+                    # This is complex nested JSON, just look for business names and URLs
+                    biz_pattern = r'"name":\s*"([^"]+)".*?"businessUrl":\s*"([^"]+)"'
+                    biz_matches = re.findall(biz_pattern, html)
+                    for name, url in biz_matches[:15]:
+                        if name and len(name) > 2:
+                            lead = Lead(
+                                id=self.generate_id("yelp", name, location),
+                                source=self.source,
+                                title=f"{name} - {category.title()}",
+                                content=f"{name} is a {category} business in {location}. Found on Yelp.",
+                                url=f"https://www.yelp.com{url}" if url.startswith("/") else url,
+                                company=name,
+                                keywords_matched=[f"category:{category}", f"location:{location}"],
+                                has_pain=True,
+                            )
+                            leads.append(lead)
+                except:
+                    pass
 
+        except Exception as e:
+            self.logger.debug(f"JSON extraction failed: {e}")
+
+        return leads
+
+    def _json_to_lead(self, data: dict, category: str, location: str) -> Lead | None:
+        """Convert JSON-LD LocalBusiness to Lead."""
+        try:
+            name = data.get("name", "")
             if not name or len(name) < 3:
                 return None
 
-            # Build URL
-            url = f"https://www.yelp.com{href}" if href.startswith("/") else href
+            url = data.get("url", "")
+            phone = data.get("telephone", "")
+            address = ""
+            if "address" in data:
+                addr = data["address"]
+                if isinstance(addr, dict):
+                    address = f"{addr.get('streetAddress', '')}, {addr.get('addressLocality', '')}, {addr.get('addressRegion', '')}"
 
-            # Extract rating if available
-            rating_elem = card.find("div", {"aria-label": lambda x: x and "star rating" in str(x).lower()})
-            rating = rating_elem.get("aria-label", "") if rating_elem else ""
+            rating = data.get("aggregateRating", {}).get("ratingValue", "")
 
-            # Create lead
             lead = Lead(
                 id=self.generate_id("yelp", name, location),
                 source=self.source,
                 title=f"{name} - {category.title()}",
-                content=f"{name} is a {category} business in {location}. {rating}. Local service businesses often struggle with phone management and could benefit from AI receptionist.",
+                content=f"{name} is a {category} business in {location}. Rating: {rating}/5. {address}",
                 url=url,
                 company=name,
+                phone=phone,
+                address=address,
+                rating=float(rating) if rating else None,
                 keywords_matched=[f"category:{category}", f"location:{location}"],
+                has_pain=True,
             )
-
             return lead
-
-        except Exception as e:
-            self.logger.debug(f"Error parsing Yelp business: {e}")
+        except:
             return None
+
+    def _extract_from_html(self, soup: BeautifulSoup, category: str, location: str) -> List[Lead]:
+        """Extract businesses from HTML using multiple methods."""
+        leads = []
+
+        # Try multiple selectors for business names
+        selectors = [
+            ("a", {"href": lambda x: x and "/biz/" in str(x)}),
+            ("h3", {}),
+            ("span", {"class": lambda x: x and "businessName" in str(x) if x else False}),
+        ]
+
+        seen_names = set()
+
+        for tag, attrs in selectors:
+            elements = soup.find_all(tag, attrs)[:20]
+
+            for elem in elements:
+                try:
+                    # Get the text and clean it
+                    name = elem.get_text(strip=True)
+
+                    # Skip if too short, already seen, or looks like navigation
+                    if not name or len(name) < 3 or len(name) > 100:
+                        continue
+                    if name.lower() in seen_names:
+                        continue
+                    if any(skip in name.lower() for skip in ["yelp", "sign up", "log in", "write a review", "more", "map"]):
+                        continue
+
+                    seen_names.add(name.lower())
+
+                    # Get URL if available
+                    url = ""
+                    if tag == "a":
+                        url = elem.get("href", "")
+                    else:
+                        link = elem.find_parent("a") or elem.find("a")
+                        if link:
+                            url = link.get("href", "")
+
+                    if url and not url.startswith("http"):
+                        url = f"https://www.yelp.com{url}"
+
+                    # Only include if it looks like a business page
+                    if url and "/biz/" not in url:
+                        continue
+
+                    lead = Lead(
+                        id=self.generate_id("yelp", name, location),
+                        source=self.source,
+                        title=f"{name} - {category.title()}",
+                        content=f"{name} is a {category} business in {location}. Found on Yelp - local service business.",
+                        url=url or f"https://www.yelp.com/search?find_desc={quote(name)}&find_loc={quote(location)}",
+                        company=name,
+                        keywords_matched=[f"category:{category}", f"location:{location}"],
+                        has_pain=True,
+                    )
+                    leads.append(lead)
+
+                except Exception as e:
+                    continue
+
+        return leads
