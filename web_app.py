@@ -4461,14 +4461,10 @@ def render_sidebar():
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            # Auto-refresh every 2 seconds while task is running
-            st.markdown("""
-            <script>
-                setTimeout(function() {
-                    window.location.reload();
-                }, 2000);
-            </script>
-            """, unsafe_allow_html=True)
+            # Auto-refresh using Streamlit's native rerun (preserves session state)
+            import time as _time
+            _time.sleep(2)
+            st.rerun()
         elif current_task and current_task.status == TaskStatus.COMPLETED:
             st.markdown(f"""
             <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);
