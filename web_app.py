@@ -4922,18 +4922,34 @@ def show_search():
 
     # AI Option (supports OpenAI, Anthropic, or Gemini)
     ai_available = bool(settings.openai_api_key or settings.anthropic_api_key or settings.gemini_api_key)
-    st.subheader("🤖 AI Qualification (Recommended)")
 
-    use_ai = st.checkbox("Use AI to qualify leads automatically", value=ai_available, key="ai_check")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+                border: 2px solid #93C5FD; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <span style="font-size: 24px;">🤖</span>
+            <div>
+                <h4 style="margin: 0 0 8px 0; color: #1E40AF; font-size: 16px; font-weight: 700;">AI Lead Qualification</h4>
+                <p style="margin: 0; color: #1E3A8A; font-size: 13px; line-height: 1.5;">
+                    When enabled, AI analyzes each lead to score relevance and identify pain points.
+                    This filters out low-quality leads and prioritizes the best prospects for your outreach.
+                </p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    use_ai = st.checkbox("✅ Enable AI Qualification (Recommended)", value=ai_available, key="ai_check",
+                         help="AI will analyze and score each lead based on relevance, pain points, and conversion potential")
 
     if ai_available:
         # Show which AI is configured
         ai_provider = "Gemini" if settings.gemini_api_key else ("OpenAI" if settings.openai_api_key else "Anthropic")
-        st.success(f"✅ AI Qualification enabled ({ai_provider})")
+        st.success(f"🎯 Connected to **{ai_provider}** - AI will score and qualify your leads")
     elif use_ai:
-        st.warning("⚠️ Configure OpenAI, Anthropic, or Gemini API key in Settings to enable AI qualification")
+        st.warning("⚠️ No AI configured. Go to **Settings** to add OpenAI, Anthropic, or Gemini API key")
     else:
-        st.info("💡 Configure an AI API key (OpenAI, Anthropic, or Gemini) in Settings for better lead qualification")
+        st.info("💡 Enable AI qualification for better lead scoring (configure API key in Settings)")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
