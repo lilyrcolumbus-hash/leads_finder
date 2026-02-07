@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
 
+    # Ollama (local AI - free)
+    ollama_base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
+    ollama_model: str = Field(default="qwen2.5-coder:7b", alias="OLLAMA_MODEL")
+
     # Reddit subreddits to search
     subreddits: List[str] = [
         "smallbusiness",
@@ -63,9 +67,55 @@ class Settings(BaseSettings):
         '"scheduling nightmare" business owner'
     ]
 
+    # Google Maps search niches
+    maps_niches: List[str] = [
+        "dentist",
+        "plumber",
+        "hvac",
+        "roofing",
+        "electrician",
+        "landscaping",
+        "real estate agent",
+        "auto repair",
+        "veterinarian",
+        "chiropractor"
+    ]
+
+    # Google Maps default locations
+    maps_locations: List[str] = [
+        "Texas",
+        "Florida",
+        "California",
+        "New York",
+        "Illinois"
+    ]
+
+    # Domains to skip when extracting emails
+    junk_domains: List[str] = [
+        "gstatic.com",
+        "schema.org",
+        "googleapis.com",
+        "google.com",
+        "facebook.com",
+        "twitter.com",
+        "instagram.com",
+        "youtube.com",
+        "linkedin.com",
+        "yelp.com",
+        "w3.org",
+        "example.com",
+        "sentry.io",
+        "wixpress.com",
+        "squarespace.com",
+        "wordpress.com"
+    ]
+
     # Batch sizes
     max_leads_per_source: int = 50
     ai_filter_batch_size: int = 10
+
+    # CSV export path
+    csv_export_dir: str = "exports"
 
     class Config:
         env_file = ".env"

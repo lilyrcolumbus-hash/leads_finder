@@ -12,6 +12,8 @@ class LeadSource(str, Enum):
     HACKER_NEWS = "hacker_news"
     GOOGLE_SEARCH = "google_search"
     PRODUCT_HUNT = "product_hunt"
+    GOOGLE_MAPS = "google_maps"
+    WEBSITE_EMAIL = "website_email"
 
 
 class Lead(BaseModel):
@@ -26,6 +28,9 @@ class Lead(BaseModel):
     email: Optional[str] = Field(default=None, description="Email if available")
     name: Optional[str] = Field(default=None, description="Real name if available")
     company: Optional[str] = Field(default=None, description="Company name if mentioned")
+    phone: Optional[str] = Field(default=None, description="Phone number if available")
+    website: Optional[str] = Field(default=None, description="Business website URL")
+    address: Optional[str] = Field(default=None, description="Business address")
 
     # Content
     title: str = Field(description="Title of post or search result")
@@ -35,11 +40,14 @@ class Lead(BaseModel):
     # Metadata
     keywords_matched: List[str] = Field(default_factory=list, description="Pain keywords found")
     subreddit: Optional[str] = Field(default=None, description="Subreddit if from Reddit")
+    niche: Optional[str] = Field(default=None, description="Business niche/industry")
+    location: Optional[str] = Field(default=None, description="Geographic location")
 
     # AI Analysis
     ai_score: Optional[float] = Field(default=None, description="AI relevance score 0-1")
     ai_reasoning: Optional[str] = Field(default=None, description="AI explanation")
     is_qualified: bool = Field(default=False, description="Whether AI qualified this lead")
+    personalized_message: Optional[str] = Field(default=None, description="AI-generated outreach message")
 
     # Tracking
     found_at: datetime = Field(default_factory=datetime.utcnow)
