@@ -4790,8 +4790,18 @@ def show_search():
 
     st.divider()
 
+    # Field requirements legend
+    st.markdown("""
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
+        <div style="display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px;">
+            <span><span style="color: #DC2626; font-weight: bold;">*</span> <span style="color: #475569;">Required field</span></span>
+            <span><span style="color: #6B7280; font-style: italic;">(optional)</span> <span style="color: #475569;">Optional field</span></span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     # Active Sources Section
-    st.subheader("📡 Active Sources (12 Available)")
+    st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📡 Active Sources <span style="color: #DC2626;">*</span> <span style="color: #6B7280; font-size: 13px;">(Select at least one)</span></p>', unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -4837,7 +4847,7 @@ def show_search():
     st.divider()
 
     # Time Filter
-    st.subheader("📅 Time Range")
+    st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📅 Time Range <span style="color: #DC2626;">*</span></p>', unsafe_allow_html=True)
     time_options = {
         "Last 24 hours": "day",
         "Last 7 days": "week",
@@ -4852,13 +4862,13 @@ def show_search():
     st.divider()
 
     # Location Filter
-    st.subheader("📍 Location Filter (for Indeed & Yelp)")
+    st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📍 Location Filter <span style="color: #6B7280; font-size: 13px; font-style: italic;">(optional - for Indeed & Yelp)</span></p>', unsafe_allow_html=True)
 
     import re
 
     location_col1, location_col2 = st.columns(2)
     with location_col1:
-        search_city = st.text_input("City", placeholder="Miami, Los Angeles, etc.", key="search_city")
+        search_city = st.text_input("City (optional)", placeholder="Miami, Los Angeles, etc.", key="search_city")
         # Validate city: only letters, spaces, hyphens, apostrophes, and periods
         city_valid = True
         if search_city:
@@ -4881,7 +4891,7 @@ def show_search():
             "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
             "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
         ]
-        search_state = st.selectbox("State", us_states, key="search_state")
+        search_state = st.selectbox("State (optional)", us_states, key="search_state")
 
     zip_col1, zip_col2 = st.columns(2)
     with zip_col1:
