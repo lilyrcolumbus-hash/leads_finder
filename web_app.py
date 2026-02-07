@@ -5839,17 +5839,98 @@ def show_leads():
                     else:
                         return "⚪ Cold"
 
-            data = [{
-                "Category": get_category_badge(l),
-                "Score": l.pain_score,
-                "Title": l.title[:40] + "..." if len(l.title) > 40 else l.title,
-                "Industry": l.industry or "-",
-                "Source": l.source.value,
-                "Keywords": len(l.keywords_matched),
-                "AI": f"{l.ai_score:.2f}" if l.ai_score else "-"
-            } for l in filtered]
+            # Visual Lead Cards Display
+            st.markdown(f"**Showing {len(filtered)} leads**")
 
-            st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+            for idx, lead in enumerate(filtered):
+                category_badge = get_category_badge(lead)
+
+                # Determine card color based on category
+                if lead.lead_category == LeadCategory.PAIN:
+                    card_border = "#DC2626"
+                    card_bg = "linear-gradient(135deg, #FEF2F2 0%, #FFFFFF 100%)"
+                    badge_bg = "#DC2626"
+                elif lead.lead_category == LeadCategory.OPPORTUNITY:
+                    card_border = "#F59E0B"
+                    card_bg = "linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)"
+                    badge_bg = "#F59E0B"
+                else:
+                    card_border = "#6B7280"
+                    card_bg = "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)"
+                    badge_bg = "#6B7280"
+
+                # Get contact info
+                email_display = lead.email if lead.email else "No email"
+                phone_display = lead.phone if lead.phone else "No phone"
+
+                st.markdown(f"""
+                <div style="
+                    background: {card_bg};
+                    border: 2px solid {card_border};
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 16px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">
+                                {lead.title[:60] + '...' if len(lead.title) > 60 else lead.title}
+                            </h3>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                                <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                    {category_badge}
+                                </span>
+                                <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                    Score: {lead.pain_score}
+                                </span>
+                                <span style="color: #6B7280; font-size: 13px;">
+                                    📂 {lead.source.value}
+                                </span>
+                                {f'<span style="color: #6B7280; font-size: 13px;">🏢 {lead.industry}</span>' if lead.industry else ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">📧</span>
+                            <span style="color: #374151; font-size: 14px;">{email_display}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">📱</span>
+                            <span style="color: #374151; font-size: 14px;">{phone_display}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">🔑</span>
+                            <span style="color: #374151; font-size: 14px;">{len(lead.keywords_matched)} keywords</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">🤖</span>
+                            <span style="color: #374151; font-size: 14px;">AI: {f'{lead.ai_score:.2f}' if lead.ai_score else 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    {f'<div style="margin-top: 12px; padding: 12px; background: #F3F4F6; border-radius: 8px;"><p style="margin: 0; color: #4B5563; font-size: 13px; line-height: 1.5;">{lead.content[:200] + "..." if len(lead.content) > 200 else lead.content}</p></div>' if lead.content else ''}
+
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <a href="{lead.url}" target="_blank" style="
+                            background: #F97316;
+                            color: white;
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            text-decoration: none;
+                            font-size: 13px;
+                            font-weight: 600;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                        ">
+                            View Original ↗
+                        </a>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
             st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -5947,18 +6028,100 @@ def show_leads():
                     else:
                         return "⚪ -"
 
-            # Display saved leads with category
-            data = [{
-                "Category": get_saved_category_badge(l),
-                "Score": l.get('pain_score', 0),
-                "Title": str(l.get('title', ''))[:40] + "..." if len(str(l.get('title', ''))) > 40 else l.get('title', ''),
-                "Industry": l.get('industry', '-') or '-',
-                "Source": l.get('source', '-'),
-                "AI": f"{l.get('ai_score', 0):.2f}" if l.get('ai_score') else '-',
-                "Saved": l.get('saved_at', '-')[:10] if l.get('saved_at') else '-'
-            } for l in filtered_saved[:100]]  # Limit to 100 for performance
+            # Display saved leads with visual cards
+            st.markdown(f"**Showing {min(len(filtered_saved), 50)} of {len(filtered_saved)} saved leads**")
 
-            st.dataframe(pd.DataFrame(data), use_container_width=True, hide_index=True)
+            for lead_dict in filtered_saved[:50]:  # Limit to 50 for performance
+                category_badge = get_saved_category_badge(lead_dict)
+                cat = lead_dict.get('lead_category', '')
+
+                # Determine card color based on category
+                if cat == 'pain':
+                    card_border = "#DC2626"
+                    card_bg = "linear-gradient(135deg, #FEF2F2 0%, #FFFFFF 100%)"
+                    badge_bg = "#DC2626"
+                elif cat == 'opportunity':
+                    card_border = "#F59E0B"
+                    card_bg = "linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)"
+                    badge_bg = "#F59E0B"
+                else:
+                    card_border = "#6B7280"
+                    card_bg = "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)"
+                    badge_bg = "#6B7280"
+
+                title = lead_dict.get('title', 'No title')
+                email_display = lead_dict.get('email', 'No email') or 'No email'
+                phone_display = lead_dict.get('phone', 'No phone') or 'No phone'
+                industry = lead_dict.get('industry', '')
+                source = lead_dict.get('source', 'unknown')
+                pain_score = lead_dict.get('pain_score', 0)
+                ai_score = lead_dict.get('ai_score')
+                url = lead_dict.get('url', '#')
+                saved_at = lead_dict.get('saved_at', '')[:10] if lead_dict.get('saved_at') else ''
+
+                st.markdown(f"""
+                <div style="
+                    background: {card_bg};
+                    border: 2px solid {card_border};
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 16px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">
+                                {title[:60] + '...' if len(str(title)) > 60 else title}
+                            </h3>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                                <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                    {category_badge}
+                                </span>
+                                <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                    Score: {pain_score}
+                                </span>
+                                <span style="color: #6B7280; font-size: 13px;">
+                                    📂 {source}
+                                </span>
+                                {f'<span style="color: #6B7280; font-size: 13px;">🏢 {industry}</span>' if industry else ''}
+                                {f'<span style="color: #9CA3AF; font-size: 12px;">📅 {saved_at}</span>' if saved_at else ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">📧</span>
+                            <span style="color: #374151; font-size: 14px;">{email_display}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">📱</span>
+                            <span style="color: #374151; font-size: 14px;">{phone_display}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 16px;">🤖</span>
+                            <span style="color: #374151; font-size: 14px;">AI: {f'{ai_score:.2f}' if ai_score else 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <a href="{url}" target="_blank" style="
+                            background: #F97316;
+                            color: white;
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            text-decoration: none;
+                            font-size: 13px;
+                            font-weight: 600;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 6px;
+                        ">
+                            View Original ↗
+                        </a>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
             st.divider()
 
