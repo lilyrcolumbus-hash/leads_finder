@@ -4854,9 +4854,25 @@ def show_search():
     # Location Filter
     st.subheader("📍 Location Filter (for Indeed & Yelp)")
 
+    import re
+
     location_col1, location_col2 = st.columns(2)
     with location_col1:
         search_city = st.text_input("City", placeholder="Miami, Los Angeles, etc.", key="search_city")
+        # Validate city: only letters, spaces, hyphens, apostrophes, and periods
+        city_valid = True
+        if search_city:
+            city_pattern = re.compile(r"^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s\-\.']+$")
+            if not city_pattern.match(search_city):
+                st.error("⚠️ City should only contain letters and spaces")
+                city_valid = False
+            elif len(search_city) < 2:
+                st.error("⚠️ City name too short")
+                city_valid = False
+            elif len(search_city) > 50:
+                st.error("⚠️ City name too long (max 50 characters)")
+                city_valid = False
+
     with location_col2:
         us_states = [
             "All States", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
@@ -4870,16 +4886,24 @@ def show_search():
     zip_col1, zip_col2 = st.columns(2)
     with zip_col1:
         search_zip = st.text_input("Zip Code (optional)", placeholder="33101", key="search_zip")
+        # Validate zip code: 5 digits or 5+4 format (XXXXX or XXXXX-XXXX)
+        zip_valid = True
+        if search_zip:
+            zip_pattern = re.compile(r"^\d{5}(-\d{4})?$")
+            if not zip_pattern.match(search_zip):
+                st.error("⚠️ Invalid zip code. Use format: 33101 or 33101-1234")
+                zip_valid = False
+
     with zip_col2:
         search_radius = st.selectbox("Radius", ["10 miles", "25 miles", "50 miles", "100 miles"], index=1, key="search_radius")
 
-    # Build location string
+    # Build location string (only if valid)
     location_parts = []
-    if search_city:
+    if search_city and city_valid:
         location_parts.append(search_city)
     if search_state and search_state != "All States":
         location_parts.append(search_state)
-    if search_zip:
+    if search_zip and zip_valid:
         location_parts.append(search_zip)
 
     search_location = ", ".join(location_parts) if location_parts else ""
