@@ -4963,338 +4963,380 @@ def show_search():
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
-    # Search Button
-    if st.button("Start Search", type="primary", use_container_width=True):
-        all_leads = []
-        progress = st.progress(0)
-        status = st.empty()
-        results = st.container()
+    # Validation check before search
+    any_source_selected = any([
+        use_reddit, use_hn, use_ph, use_yelp, use_gmaps, use_indeed,
+        use_yellowpages, use_bbb, use_craigslist,
+        (use_google and settings.google_api_key),
+        (use_linkedin and settings.google_api_key),
+        (use_facebook and settings.facebook_access_token)
+    ])
 
-        scrapers = []
-        # Free scrapers (no API needed)
-        if use_reddit: scrapers.append(("Reddit", RedditScraper))
-        if use_hn: scrapers.append(("Hacker News", HackerNewsScraper))
-        if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
-        if use_indeed: scrapers.append(("Indeed", IndeedScraper))
-        if use_yelp: scrapers.append(("Yelp", YelpScraper))
-        if use_gmaps: scrapers.append(("Google Maps", GoogleMapsWebScraper))  # Web scraping version
-        if use_yellowpages: scrapers.append(("Yellow Pages", YellowPagesScraper))
-        if use_bbb: scrapers.append(("BBB", BBBScraper))
-        if use_craigslist: scrapers.append(("Craigslist", CraigslistScraper))
-        # API-required scrapers
-        if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
-        if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
-        if use_facebook and settings.facebook_access_token: scrapers.append(("Facebook", FacebookScraper))
+    # Check for validation errors
+    validation_errors = []
+    if not any_source_selected:
+        validation_errors.append("Select at least one data source")
 
-        if not scrapers:
-            st.warning("Select at least one source")
-            return
-
-        for i, (name, Scraper) in enumerate(scrapers):
-            status.markdown(f"""
-            <div class="loading-box">
-                <div class="spinner"></div>
-                <span class="loading-text">Searching {name}...</span>
+    # Show validation status
+    if validation_errors:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #FEF2F2 0%, #FECACA 100%);
+                    border: 2px solid #F87171; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px;">⚠️</span>
+                <div>
+                    <strong style="color: #991B1B; font-size: 15px;">Cannot start search</strong>
+                    <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #B91C1C; font-size: 13px;">
+                        {"".join(f"<li>{error}</li>" for error in validation_errors)}
+                    </ul>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
+        st.button("🔍 Start Search", type="primary", use_container_width=True, disabled=True)
+    else:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+                    border: 2px solid #86EFAC; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">✅</span>
+                <span style="color: #166534; font-size: 14px; font-weight: 500;">Ready to search - All required fields are complete</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            try:
-                with Scraper() as s:
-                    # Pass location to location-aware scrapers
-                    if name in ["Indeed", "Yelp", "LinkedIn", "Google Maps"] and search_location:
-                        batch = s.scrape(time_filter=selected_time, location=search_location)
-                    else:
-                        batch = s.scrape(time_filter=selected_time)
-                    all_leads.extend(batch.leads)
+        # Search Button - only enabled when validation passes
+        if st.button("🔍 Start Search", type="primary", use_container_width=True):
+            all_leads = []
+            progress = st.progress(0)
+            status = st.empty()
+            results = st.container()
+
+            scrapers = []
+            # Free scrapers (no API needed)
+            if use_reddit: scrapers.append(("Reddit", RedditScraper))
+            if use_hn: scrapers.append(("Hacker News", HackerNewsScraper))
+            if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
+            if use_indeed: scrapers.append(("Indeed", IndeedScraper))
+            if use_yelp: scrapers.append(("Yelp", YelpScraper))
+            if use_gmaps: scrapers.append(("Google Maps", GoogleMapsWebScraper))  # Web scraping version
+            if use_yellowpages: scrapers.append(("Yellow Pages", YellowPagesScraper))
+            if use_bbb: scrapers.append(("BBB", BBBScraper))
+            if use_craigslist: scrapers.append(("Craigslist", CraigslistScraper))
+            # API-required scrapers
+            if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
+            if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
+            if use_facebook and settings.facebook_access_token: scrapers.append(("Facebook", FacebookScraper))
+
+            if not scrapers:
+                st.warning("Select at least one source")
+                return
+
+            for i, (name, Scraper) in enumerate(scrapers):
+                status.markdown(f"""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Searching {name}...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                try:
+                    with Scraper() as s:
+                        # Pass location to location-aware scrapers
+                        if name in ["Indeed", "Yelp", "LinkedIn", "Google Maps"] and search_location:
+                            batch = s.scrape(time_filter=selected_time, location=search_location)
+                        else:
+                            batch = s.scrape(time_filter=selected_time)
+                        all_leads.extend(batch.leads)
+                        with results:
+                            st.success(f"{name}: {len(batch.leads)} leads")
+                except ConnectionError as e:
+                    add_error_notification(
+                        title=f"Connection Failed: {name}",
+                        message=f"Could not connect to {name}. Check your internet connection or try again later.",
+                        error_type="api_error",
+                        source=name
+                    )
                     with results:
-                        st.success(f"{name}: {len(batch.leads)} leads")
-            except ConnectionError as e:
-                add_error_notification(
-                    title=f"Connection Failed: {name}",
-                    message=f"Could not connect to {name}. Check your internet connection or try again later.",
-                    error_type="api_error",
-                    source=name
-                )
-                with results:
-                    st.warning(f"{name}: Connection error")
-            except TimeoutError as e:
-                add_error_notification(
-                    title=f"Timeout: {name}",
-                    message=f"{name} took too long to respond. The service might be overloaded.",
-                    error_type="api_error",
-                    source=name
-                )
-                with results:
-                    st.warning(f"{name}: Timeout")
-            except Exception as e:
-                error_msg = str(e)[:100]
-                add_error_notification(
-                    title=f"Search Error: {name}",
-                    message=f"Error while searching {name}: {error_msg}",
-                    error_type="error",
-                    source=name
-                )
-                with results:
-                    st.warning(f"{name}: Error - {str(e)[:50]}")
+                        st.warning(f"{name}: Connection error")
+                except TimeoutError as e:
+                    add_error_notification(
+                        title=f"Timeout: {name}",
+                        message=f"{name} took too long to respond. The service might be overloaded.",
+                        error_type="api_error",
+                        source=name
+                    )
+                    with results:
+                        st.warning(f"{name}: Timeout")
+                except Exception as e:
+                    error_msg = str(e)[:100]
+                    add_error_notification(
+                        title=f"Search Error: {name}",
+                        message=f"Error while searching {name}: {error_msg}",
+                        error_type="error",
+                        source=name
+                    )
+                    with results:
+                        st.warning(f"{name}: Error - {str(e)[:50]}")
 
-            progress.progress((i + 1) / len(scrapers))
+                progress.progress((i + 1) / len(scrapers))
 
-        # Enrich leads with Pain Score and Industry
-        status.markdown("""
-        <div class="loading-box">
-            <div class="spinner"></div>
-            <span class="loading-text">Calculating Lead Scores (Pain + Intent + Fit)...</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        all_leads = enrich_leads(all_leads)
-
-        # Deduplicate leads
-        status.markdown("""
-        <div class="loading-box">
-            <div class="spinner"></div>
-            <span class="loading-text">Removing duplicates...</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        duplicates_count = lead_manager.get_duplicate_count(all_leads)
-        all_leads = lead_manager.deduplicate(all_leads)
-
-        if duplicates_count > 0:
-            with results:
-                st.info(f"Removed {duplicates_count} duplicate leads")
-
-        # Filter by industry if selected
-        if selected_industry != "All Industries":
-            industry_subreddits = settings.industries.get(selected_industry, [])
-            all_leads = [l for l in all_leads if l.subreddit and l.subreddit.lower() in [s.lower() for s in industry_subreddits] or l.industry == selected_industry]
-
-        st.session_state.leads = all_leads
-        st.session_state.raw_leads = all_leads.copy()  # Store raw leads before AI filter
-
-        # AI QUALIFICATION FIRST (before HubSpot sync so leads have scores)
-        if use_ai and all_leads:
+            # Enrich leads with Pain Score and Industry
             status.markdown("""
             <div class="loading-box">
                 <div class="spinner"></div>
-                <span class="loading-text">Qualifying with AI...</span>
+                <span class="loading-text">Calculating Lead Scores (Pain + Intent + Fit)...</span>
             </div>
             """, unsafe_allow_html=True)
 
-            try:
-                ai_filter = AILeadFilter()
-                # AI scores ALL leads (doesn't filter them out)
-                all_leads = ai_filter.filter_leads(all_leads)
+            all_leads = enrich_leads(all_leads)
 
-                # Count by category
-                from src.utils.models import LeadCategory
-                pain_count = len([l for l in all_leads if l.lead_category == LeadCategory.PAIN])
-                opportunity_count = len([l for l in all_leads if l.lead_category == LeadCategory.OPPORTUNITY])
-                cold_count = len([l for l in all_leads if l.lead_category == LeadCategory.COLD])
-                qualified_count = len([l for l in all_leads if l.is_qualified])
+            # Deduplicate leads
+            status.markdown("""
+            <div class="loading-box">
+                <div class="spinner"></div>
+                <span class="loading-text">Removing duplicates...</span>
+            </div>
+            """, unsafe_allow_html=True)
 
+            duplicates_count = lead_manager.get_duplicate_count(all_leads)
+            all_leads = lead_manager.deduplicate(all_leads)
+
+            if duplicates_count > 0:
                 with results:
-                    st.success(f"AI analyzed {len(all_leads)} leads: ✅ {qualified_count} Qualified | 🔴 {pain_count} Pain | 🟡 {opportunity_count} Opportunity | ⚪ {cold_count} Cold")
+                    st.info(f"Removed {duplicates_count} duplicate leads")
 
-            except Exception as e:
-                with results:
-                    st.warning(f"AI qualification error: {str(e)[:50]} - Continuing with all leads")
+            # Filter by industry if selected
+            if selected_industry != "All Industries":
+                industry_subreddits = settings.industries.get(selected_industry, [])
+                all_leads = [l for l in all_leads if l.subreddit and l.subreddit.lower() in [s.lower() for s in industry_subreddits] or l.industry == selected_industry]
 
-        # ALL leads go to filtered_leads (qualified AND non-qualified)
-        st.session_state.filtered_leads = all_leads
+            st.session_state.leads = all_leads
+            st.session_state.raw_leads = all_leads.copy()  # Store raw leads before AI filter
 
-        # Auto-save leads to storage (with AI data if available)
-        saved_count = lead_manager.save_leads(all_leads)
-        if saved_count > 0:
-            with results:
-                st.success(f"Auto-saved {saved_count} new leads to database")
-
-        # AUTO-SYNC ALL LEADS TO HUBSPOT (with AI qualification data)
-        with HubSpotCRM() as crm:
-            if crm.is_configured():
+            # AI QUALIFICATION FIRST (before HubSpot sync so leads have scores)
+            if use_ai and all_leads:
                 status.markdown("""
                 <div class="loading-box">
                     <div class="spinner"></div>
-                    <span class="loading-text">Syncing ALL leads to HubSpot...</span>
-                </div>
-                """, unsafe_allow_html=True)
-
-                hubspot_synced = 0
-                qualified_synced = 0
-                for lead in all_leads:
-                    try:
-                        result = crm.create_contact(lead)
-                        if result:
-                            hubspot_synced += 1
-                            if getattr(lead, 'is_qualified', False):
-                                qualified_synced += 1
-                    except Exception as e:
-                        pass  # Continue with other leads
-
-                if hubspot_synced > 0:
-                    with results:
-                        st.success(f"✅ Synced {hubspot_synced} leads to HubSpot ({qualified_synced} marked as qualified)")
-                else:
-                    with results:
-                        st.info("HubSpot: Leads may already exist or sync failed")
-
-        # Update stored leads with AI data (category, score, reasoning)
-        if use_ai:
-            try:
-                ai_updated = lead_manager.update_leads_with_ai_data(all_leads)
-                if ai_updated > 0:
-                    with results:
-                        st.info(f"💾 Updated {ai_updated} leads with AI analysis")
-            except Exception:
-                pass
-
-        # Store search summary
-        st.session_state.last_search_results = {
-            'total_found': len(all_leads),
-            'qualified_count': len([l for l in all_leads if getattr(l, 'is_qualified', False)]),
-            'sources': {
-                'Reddit': len([l for l in all_leads if l.source.value == 'reddit']),
-                'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
-                'Google': len([l for l in all_leads if l.source.value == 'google_search']),
-                'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
-                'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
-                'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
-                'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
-                'Google Maps': len([l for l in all_leads if l.source.value == 'google_maps']),
-            }
-        }
-
-        # Save search history
-        try:
-            sources_used = [name for name, _ in scrapers]
-            lead_manager.save_search_history(
-                search_params={
-                    'industry': selected_industry,
-                    'time_filter': selected_time,
-                    'location': search_location if 'search_location' in dir() else None,
-                    'ai_enabled': use_ai,
-                },
-                results_count=len(all_leads),
-                sources_used=sources_used
-            )
-        except Exception:
-            pass  # Don't fail search if history save fails
-
-        # Hunter.io email enrichment for leads without emails
-        if settings.hunter_api_key and all_leads:
-            leads_without_email = [l for l in all_leads if not l.email]
-            if leads_without_email:
-                status.markdown("""
-                <div class="loading-box">
-                    <div class="spinner"></div>
-                    <span class="loading-text">Finding emails with Hunter.io...</span>
+                    <span class="loading-text">Qualifying with AI...</span>
                 </div>
                 """, unsafe_allow_html=True)
 
                 try:
-                    enriched_count, _ = enrich_leads_with_hunter(all_leads, max_lookups=15)
-                    if enriched_count > 0:
-                        with results:
-                            st.success(f"Hunter.io found {enriched_count} emails")
-                        # Re-save leads with new emails
-                        lead_manager.save_leads(all_leads)
+                    ai_filter = AILeadFilter()
+                    # AI scores ALL leads (doesn't filter them out)
+                    all_leads = ai_filter.filter_leads(all_leads)
+
+                    # Count by category
+                    from src.utils.models import LeadCategory
+                    pain_count = len([l for l in all_leads if l.lead_category == LeadCategory.PAIN])
+                    opportunity_count = len([l for l in all_leads if l.lead_category == LeadCategory.OPPORTUNITY])
+                    cold_count = len([l for l in all_leads if l.lead_category == LeadCategory.COLD])
+                    qualified_count = len([l for l in all_leads if l.is_qualified])
+
+                    with results:
+                        st.success(f"AI analyzed {len(all_leads)} leads: ✅ {qualified_count} Qualified | 🔴 {pain_count} Pain | 🟡 {opportunity_count} Opportunity | ⚪ {cold_count} Cold")
+
                 except Exception as e:
                     with results:
-                        st.warning(f"Hunter.io: Could not enrich emails")
+                        st.warning(f"AI qualification error: {str(e)[:50]} - Continuing with all leads")
 
-        # Apollo.io Enrichment (if configured)
-        if settings.apollo_api_key and all_leads:
-            leads_to_enrich = [l for l in all_leads if not l.email or not l.phone]
-            if leads_to_enrich:
-                status.markdown("""
-                <div class="loading-box">
-                    <div class="spinner"></div>
-                    <span class="loading-text">Enriching with Apollo.io (email + phone + company data)...</span>
-                </div>
-                """, unsafe_allow_html=True)
+            # ALL leads go to filtered_leads (qualified AND non-qualified)
+            st.session_state.filtered_leads = all_leads
 
-                try:
-                    enriched_leads = enrich_leads_with_apollo(
-                        all_leads,
-                        api_key=settings.apollo_api_key,
-                        max_enrichments=10,
-                        delay_seconds=0.5
-                    )
-                    apollo_enriched = len([l for l in all_leads if l.extra_data and l.extra_data.get('apollo_enriched')])
-                    if apollo_enriched > 0:
+            # Auto-save leads to storage (with AI data if available)
+            saved_count = lead_manager.save_leads(all_leads)
+            if saved_count > 0:
+                with results:
+                    st.success(f"Auto-saved {saved_count} new leads to database")
+
+            # AUTO-SYNC ALL LEADS TO HUBSPOT (with AI qualification data)
+            with HubSpotCRM() as crm:
+                if crm.is_configured():
+                    status.markdown("""
+                    <div class="loading-box">
+                        <div class="spinner"></div>
+                        <span class="loading-text">Syncing ALL leads to HubSpot...</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    hubspot_synced = 0
+                    qualified_synced = 0
+                    for lead in all_leads:
+                        try:
+                            result = crm.create_contact(lead)
+                            if result:
+                                hubspot_synced += 1
+                                if getattr(lead, 'is_qualified', False):
+                                    qualified_synced += 1
+                        except Exception as e:
+                            pass  # Continue with other leads
+
+                    if hubspot_synced > 0:
                         with results:
-                            st.success(f"Apollo.io enriched {apollo_enriched} leads (email + phone + company)")
-                        lead_manager.save_leads(all_leads)
-                except Exception as e:
-                    with results:
-                        st.warning(f"Apollo.io: Could not enrich leads")
-
-        st.session_state.scraping_done = True
-        progress.progress(1.0)
-
-        # Calculate hot leads (Total Score >= 80)
-        hot_leads = len([l for l in st.session_state.filtered_leads if getattr(l, 'total_score', l.pain_score) >= 80])
-
-        status.markdown(f"""
-        <div class="results-box">
-            <div class="result-item">
-                <div class="result-value green">{len(st.session_state.filtered_leads)}</div>
-                <div class="result-label">Qualified</div>
-            </div>
-            <div class="result-item">
-                <div class="result-value orange">{hot_leads}</div>
-                <div class="result-label">Hot Leads</div>
-            </div>
-            <div class="result-item">
-                <div class="result-value blue">{len(all_leads)}</div>
-                <div class="result-label">Found</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Navigation buttons after search
-        with results:
-            # IMPORTANT: Ensure leads are saved before any navigation
-            if all_leads:
-                save_result = lead_manager.save_leads(all_leads)
-                if save_result > 0:
-                    st.success(f"✅ {save_result} leads saved to database")
-
-            nav_col1, nav_col2, nav_col3 = st.columns(3)
-            with nav_col1:
-                if st.button("📋 View in CRM", type="primary", use_container_width=True, key="nav_crm_btn"):
-                    # Force save filtered leads before navigation
-                    if st.session_state.filtered_leads:
-                        lead_manager.save_leads(st.session_state.filtered_leads)
-                    st.session_state.nav_page = "CRM"
-                    st.rerun()
-            with nav_col2:
-                if st.button("📊 View All Leads", use_container_width=True, key="nav_leads_btn"):
-                    # Force save filtered leads before navigation
-                    if st.session_state.filtered_leads:
-                        lead_manager.save_leads(st.session_state.filtered_leads)
-                    st.session_state.nav_page = "My Leads"
-                    st.rerun()
-            with nav_col3:
-                # Manual HubSpot sync button
-                with HubSpotCRM() as crm:
-                    if crm.is_configured():
-                        if st.button("🔗 Sync to HubSpot", use_container_width=True, key="nav_hubspot_btn"):
-                            sync_progress = st.progress(0)
-                            synced = 0
-                            leads_to_sync = st.session_state.filtered_leads if st.session_state.filtered_leads else all_leads
-                            total = len(leads_to_sync)
-                            for i, lead in enumerate(leads_to_sync):
-                                try:
-                                    result = crm.create_contact(lead)
-                                    if result:
-                                        synced += 1
-                                except:
-                                    pass
-                                sync_progress.progress((i + 1) / total if total > 0 else 1)
-                            st.success(f"✅ Synced {synced}/{total} leads to HubSpot!")
+                            st.success(f"✅ Synced {hubspot_synced} leads to HubSpot ({qualified_synced} marked as qualified)")
                     else:
-                        st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True, key="nav_hubspot_disabled")
+                        with results:
+                            st.info("HubSpot: Leads may already exist or sync failed")
+
+            # Update stored leads with AI data (category, score, reasoning)
+            if use_ai:
+                try:
+                    ai_updated = lead_manager.update_leads_with_ai_data(all_leads)
+                    if ai_updated > 0:
+                        with results:
+                            st.info(f"💾 Updated {ai_updated} leads with AI analysis")
+                except Exception:
+                    pass
+
+            # Store search summary
+            st.session_state.last_search_results = {
+                'total_found': len(all_leads),
+                'qualified_count': len([l for l in all_leads if getattr(l, 'is_qualified', False)]),
+                'sources': {
+                    'Reddit': len([l for l in all_leads if l.source.value == 'reddit']),
+                    'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
+                    'Google': len([l for l in all_leads if l.source.value == 'google_search']),
+                    'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
+                    'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
+                    'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
+                    'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
+                    'Google Maps': len([l for l in all_leads if l.source.value == 'google_maps']),
+                }
+            }
+
+            # Save search history
+            try:
+                sources_used = [name for name, _ in scrapers]
+                lead_manager.save_search_history(
+                    search_params={
+                        'industry': selected_industry,
+                        'time_filter': selected_time,
+                        'location': search_location if 'search_location' in dir() else None,
+                        'ai_enabled': use_ai,
+                    },
+                    results_count=len(all_leads),
+                    sources_used=sources_used
+                )
+            except Exception:
+                pass  # Don't fail search if history save fails
+
+            # Hunter.io email enrichment for leads without emails
+            if settings.hunter_api_key and all_leads:
+                leads_without_email = [l for l in all_leads if not l.email]
+                if leads_without_email:
+                    status.markdown("""
+                    <div class="loading-box">
+                        <div class="spinner"></div>
+                        <span class="loading-text">Finding emails with Hunter.io...</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    try:
+                        enriched_count, _ = enrich_leads_with_hunter(all_leads, max_lookups=15)
+                        if enriched_count > 0:
+                            with results:
+                                st.success(f"Hunter.io found {enriched_count} emails")
+                            # Re-save leads with new emails
+                            lead_manager.save_leads(all_leads)
+                    except Exception as e:
+                        with results:
+                            st.warning(f"Hunter.io: Could not enrich emails")
+
+            # Apollo.io Enrichment (if configured)
+            if settings.apollo_api_key and all_leads:
+                leads_to_enrich = [l for l in all_leads if not l.email or not l.phone]
+                if leads_to_enrich:
+                    status.markdown("""
+                    <div class="loading-box">
+                        <div class="spinner"></div>
+                        <span class="loading-text">Enriching with Apollo.io (email + phone + company data)...</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    try:
+                        enriched_leads = enrich_leads_with_apollo(
+                            all_leads,
+                            api_key=settings.apollo_api_key,
+                            max_enrichments=10,
+                            delay_seconds=0.5
+                        )
+                        apollo_enriched = len([l for l in all_leads if l.extra_data and l.extra_data.get('apollo_enriched')])
+                        if apollo_enriched > 0:
+                            with results:
+                                st.success(f"Apollo.io enriched {apollo_enriched} leads (email + phone + company)")
+                            lead_manager.save_leads(all_leads)
+                    except Exception as e:
+                        with results:
+                            st.warning(f"Apollo.io: Could not enrich leads")
+
+            st.session_state.scraping_done = True
+            progress.progress(1.0)
+
+            # Calculate hot leads (Total Score >= 80)
+            hot_leads = len([l for l in st.session_state.filtered_leads if getattr(l, 'total_score', l.pain_score) >= 80])
+
+            status.markdown(f"""
+            <div class="results-box">
+                <div class="result-item">
+                    <div class="result-value green">{len(st.session_state.filtered_leads)}</div>
+                    <div class="result-label">Qualified</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-value orange">{hot_leads}</div>
+                    <div class="result-label">Hot Leads</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-value blue">{len(all_leads)}</div>
+                    <div class="result-label">Found</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Navigation buttons after search
+            with results:
+                # IMPORTANT: Ensure leads are saved before any navigation
+                if all_leads:
+                    save_result = lead_manager.save_leads(all_leads)
+                    if save_result > 0:
+                        st.success(f"✅ {save_result} leads saved to database")
+
+                nav_col1, nav_col2, nav_col3 = st.columns(3)
+                with nav_col1:
+                    if st.button("📋 View in CRM", type="primary", use_container_width=True, key="nav_crm_btn"):
+                        # Force save filtered leads before navigation
+                        if st.session_state.filtered_leads:
+                            lead_manager.save_leads(st.session_state.filtered_leads)
+                        st.session_state.nav_page = "CRM"
+                        st.rerun()
+                with nav_col2:
+                    if st.button("📊 View All Leads", use_container_width=True, key="nav_leads_btn"):
+                        # Force save filtered leads before navigation
+                        if st.session_state.filtered_leads:
+                            lead_manager.save_leads(st.session_state.filtered_leads)
+                        st.session_state.nav_page = "My Leads"
+                        st.rerun()
+                with nav_col3:
+                    # Manual HubSpot sync button
+                    with HubSpotCRM() as crm:
+                        if crm.is_configured():
+                            if st.button("🔗 Sync to HubSpot", use_container_width=True, key="nav_hubspot_btn"):
+                                sync_progress = st.progress(0)
+                                synced = 0
+                                leads_to_sync = st.session_state.filtered_leads if st.session_state.filtered_leads else all_leads
+                                total = len(leads_to_sync)
+                                for i, lead in enumerate(leads_to_sync):
+                                    try:
+                                        result = crm.create_contact(lead)
+                                        if result:
+                                            synced += 1
+                                    except:
+                                        pass
+                                    sync_progress.progress((i + 1) / total if total > 0 else 1)
+                                st.success(f"✅ Synced {synced}/{total} leads to HubSpot!")
+                        else:
+                            st.button("🔗 HubSpot (Not configured)", disabled=True, use_container_width=True, key="nav_hubspot_disabled")
 
     # Preview - Modern Lead Cards
     if st.session_state.scraping_done and st.session_state.filtered_leads:
