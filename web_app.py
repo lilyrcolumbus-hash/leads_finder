@@ -4543,81 +4543,85 @@ def show_dashboard():
     # Check if there's data or show empty state guidance
     has_data = leads_count > 0
 
-    # Clean Metric Cards with visible icon containers
-    st.markdown(f"""
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px;">
-        <!-- Leads Found -->
+    # Clean Metric Cards using Streamlit columns for responsiveness
+    met_col1, met_col2, met_col3, met_col4, met_col5 = st.columns(5)
+
+    with met_col1:
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%);
-                    border: 2px solid #FDBA74;
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);">
-                <span style="font-size: 24px; line-height: 1;">👥</span>
+                    border: 2px solid #FDBA74; border-radius: 12px; padding: 16px;
+                    text-align: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1); min-height: 150px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+                        display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto;">
+                <span style="font-size: 20px; line-height: 1;">👥</span>
             </div>
-            <div style="font-size: 32px; font-weight: 700; color: #EA580C;">{leads_count if has_data else '—'}</div>
-            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Leads Found</div>
-            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">{'This session' if has_data else 'Start searching'}</div>
+            <div style="font-size: 28px; font-weight: 700; color: #EA580C;">{leads_count if has_data else '—'}</div>
+            <div style="font-size: 12px; color: #1F2937; margin-top: 4px; font-weight: 600;">Leads</div>
+            <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">{'Session' if has_data else 'Search'}</div>
         </div>
-        <!-- Hot Leads -->
+        """, unsafe_allow_html=True)
+
+    with met_col2:
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
-                    border: 2px solid #FCA5A5;
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
-                <span style="font-size: 24px; line-height: 1;">🔥</span>
+                    border: 2px solid #FCA5A5; border-radius: 12px; padding: 16px;
+                    text-align: center; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1); min-height: 150px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+                        display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto;">
+                <span style="font-size: 20px; line-height: 1;">🔥</span>
             </div>
-            <div style="font-size: 32px; font-weight: 700; color: #DC2626;">{hot_leads_count if has_data else '—'}</div>
-            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Hot Leads</div>
-            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">{'Score 80+' if has_data else 'Priority targets'}</div>
+            <div style="font-size: 28px; font-weight: 700; color: #DC2626;">{hot_leads_count if has_data else '—'}</div>
+            <div style="font-size: 12px; color: #1F2937; margin-top: 4px; font-weight: 600;">Hot</div>
+            <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">{'80+' if has_data else 'Priority'}</div>
         </div>
-        <!-- Qualified -->
+        """, unsafe_allow_html=True)
+
+    with met_col3:
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
-                    border: 2px solid #86EFAC;
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
-                <span style="font-size: 24px; line-height: 1;">✅</span>
+                    border: 2px solid #86EFAC; border-radius: 12px; padding: 16px;
+                    text-align: center; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1); min-height: 150px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+                        display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto;">
+                <span style="font-size: 20px; line-height: 1;">✅</span>
             </div>
-            <div style="font-size: 32px; font-weight: 700; color: #16A34A;">{qualified_count if has_data else '—'}</div>
-            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Qualified</div>
-            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">{'CRM ready' if has_data else 'AI verified'}</div>
+            <div style="font-size: 28px; font-weight: 700; color: #16A34A;">{qualified_count if has_data else '—'}</div>
+            <div style="font-size: 12px; color: #1F2937; margin-top: 4px; font-weight: 600;">Qualified</div>
+            <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">{'CRM' if has_data else 'AI'}</div>
         </div>
-        <!-- Keywords -->
+        """, unsafe_allow_html=True)
+
+    with met_col4:
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
-                    border: 2px solid #FCD34D;
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-                <span style="font-size: 24px; line-height: 1;">🔑</span>
+                    border: 2px solid #FCD34D; border-radius: 12px; padding: 16px;
+                    text-align: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1); min-height: 150px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+                        display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto;">
+                <span style="font-size: 20px; line-height: 1;">🔑</span>
             </div>
-            <div style="font-size: 32px; font-weight: 700; color: #D97706;">{keywords_count}</div>
-            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Keywords</div>
-            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">Active filters</div>
+            <div style="font-size: 28px; font-weight: 700; color: #D97706;">{keywords_count}</div>
+            <div style="font-size: 12px; color: #1F2937; margin-top: 4px; font-weight: 600;">Keywords</div>
+            <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">Active</div>
         </div>
-        <!-- Sources -->
+        """, unsafe_allow_html=True)
+
+    with met_col5:
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
-                    border: 2px solid #93C5FD;
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <span style="font-size: 24px; line-height: 1;">🔗</span>
+                    border: 2px solid #93C5FD; border-radius: 12px; padding: 16px;
+                    text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); min-height: 150px;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+                        display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto;">
+                <span style="font-size: 20px; line-height: 1;">🔗</span>
             </div>
-            <div style="font-size: 32px; font-weight: 700; color: #2563EB;">{sources_count}</div>
-            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Sources</div>
-            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">Available</div>
+            <div style="font-size: 28px; font-weight: 700; color: #2563EB;">{sources_count}</div>
+            <div style="font-size: 12px; color: #1F2937; margin-top: 4px; font-weight: 600;">Sources</div>
+            <div style="font-size: 10px; color: #6B7280; margin-top: 2px;">Available</div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
     # Show helpful tip when no data
     if not has_data:
@@ -4666,70 +4670,86 @@ def show_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
-        <!-- Reddit -->
+    # Use Streamlit columns for better responsiveness
+    src_col1, src_col2, src_col3, src_col4 = st.columns(4)
+
+    with src_col1:
+        st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
                     border: 2px solid #FCA5A5;
                     border-radius: 12px;
-                    padding: 20px;
+                    padding: 16px;
                     text-align: center;
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
-            <div style="width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+                    min-height: 140px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
                         background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
                         box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);">
-                <span style="font-size: 26px; line-height: 1; color: white; font-weight: bold;">R</span>
+                <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">R</span>
             </div>
-            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Reddit</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Business Feeds</p>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Reddit</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Business Feeds</p>
         </div>
-        <!-- Hacker News -->
+        """, unsafe_allow_html=True)
+
+    with src_col2:
+        st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%);
                     border: 2px solid #FDBA74;
                     border-radius: 12px;
-                    padding: 20px;
+                    padding: 16px;
                     text-align: center;
-                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);">
-            <div style="width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+                    min-height: 140px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
                         background: linear-gradient(135deg, #FF6600 0%, #FF8C00 100%);
                         box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);">
-                <span style="font-size: 26px; line-height: 1; color: white; font-weight: bold;">Y</span>
+                <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">Y</span>
             </div>
-            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Hacker News</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Tech Startups</p>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Hacker News</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Tech Startups</p>
         </div>
-        <!-- Google -->
+        """, unsafe_allow_html=True)
+
+    with src_col3:
+        st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
                     border: 2px solid #93C5FD;
                     border-radius: 12px;
-                    padding: 20px;
+                    padding: 16px;
                     text-align: center;
-                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);">
-            <div style="width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+                    min-height: 140px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
                         background: linear-gradient(135deg, #4285F4 0%, #5B9BF8 100%);
                         box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);">
-                <span style="font-size: 26px; line-height: 1; color: white; font-weight: bold;">G</span>
+                <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">G</span>
             </div>
-            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Google</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Web Search</p>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Google</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Web Search</p>
         </div>
-        <!-- Indeed -->
+        """, unsafe_allow_html=True)
+
+    with src_col4:
+        st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%);
                     border: 2px solid #FCD34D;
                     border-radius: 12px;
-                    padding: 20px;
+                    padding: 16px;
                     text-align: center;
-                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);">
-            <div style="width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+                    min-height: 140px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
                         background: linear-gradient(135deg, #2557A7 0%, #3B82F6 100%);
                         box-shadow: 0 4px 12px rgba(37, 87, 167, 0.3);">
-                <span style="font-size: 26px; line-height: 1; color: white; font-weight: bold;">In</span>
+                <span style="font-size: 20px; line-height: 1; color: white; font-weight: bold;">In</span>
             </div>
-            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Indeed</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Job Postings</p>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Indeed</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Job Postings</p>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
     # How It Works Section
     st.markdown("""
