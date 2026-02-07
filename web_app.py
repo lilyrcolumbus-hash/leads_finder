@@ -2805,6 +2805,33 @@ st.markdown("""
         color: var(--slate-700) !important;
     }
 
+    /* Ensure HTML content in st.markdown renders correctly */
+    [data-testid="stMarkdownContainer"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
+    }
+
+    [data-testid="stMarkdownContainer"] div,
+    [data-testid="stMarkdownContainer"] span,
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] h1,
+    [data-testid="stMarkdownContainer"] h2,
+    [data-testid="stMarkdownContainer"] h3,
+    [data-testid="stMarkdownContainer"] h4,
+    [data-testid="stMarkdownContainer"] a {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important;
+        white-space: normal !important;
+    }
+
+    /* Override any code-like styling on HTML content */
+    [data-testid="stMarkdownContainer"] > div:not([class]) {
+        font-family: 'Inter', -apple-system, sans-serif !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        white-space: normal !important;
+        color: inherit !important;
+    }
+
     /* Smooth transitions for all interactive elements */
     button, input, select, textarea, a {
         transition: all 0.2s ease !important;
@@ -6007,19 +6034,19 @@ def show_leads():
 
                 # Build card HTML
                 st.markdown(f"""
-                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                    <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">{title_display}</h3>
+                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-family: Inter, -apple-system, sans-serif;">
+                    <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
-                        <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Score: {lead.pain_score}</span>
-                        <span style="color: #6B7280; font-size: 13px;">📂 {lead.source.value}</span>
+                        <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">Score: {lead.pain_score}</span>
+                        <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {lead.source.value}</span>
                         {industry_html}
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
-                        <span style="color: #374151; font-size: 14px;">📧 {html.escape(email_display)}</span>
-                        <span style="color: #374151; font-size: 14px;">📱 {html.escape(phone_display)}</span>
-                        <span style="color: #374151; font-size: 14px;">🔑 {keywords_count} keywords</span>
-                        <span style="color: #374151; font-size: 14px;">🤖 AI: {ai_score_display}</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📧 {html.escape(email_display)}</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📱 {html.escape(phone_display)}</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">🔑 {keywords_count} keywords</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">🤖 AI: {ai_score_display}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -6170,19 +6197,19 @@ def show_leads():
                 saved_at_html = f'<span style="color: #9CA3AF; font-size: 12px;">📅 {saved_at}</span>' if saved_at else ''
 
                 st.markdown(f"""
-                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                    <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">{title_display}</h3>
+                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-family: Inter, -apple-system, sans-serif;">
+                    <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
-                        <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Score: {pain_score}</span>
-                        <span style="color: #6B7280; font-size: 13px;">📂 {source}</span>
+                        <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">Score: {pain_score}</span>
+                        <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {source}</span>
                         {industry_html}
                         {saved_at_html}
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
-                        <span style="color: #374151; font-size: 14px;">📧 {email_display}</span>
-                        <span style="color: #374151; font-size: 14px;">📱 {phone_display}</span>
-                        <span style="color: #374151; font-size: 14px;">🤖 AI: {ai_score_display}</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📧 {email_display}</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📱 {phone_display}</span>
+                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">🤖 AI: {ai_score_display}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
