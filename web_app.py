@@ -125,7 +125,7 @@ def t(key):
 # Page config
 st.set_page_config(
     page_title="LeadGen Pro",
-    page_icon="◇",
+    page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -162,7 +162,7 @@ st.markdown("""
 
     button[kind="secondary"] span:not(:empty)::after,
     [data-testid="baseButton-secondary"] span::after {
-        content: "◀" !important;
+        content: "←" !important;
         font-size: 16px !important;
         color: var(--cyan) !important;
     }
@@ -181,14 +181,14 @@ st.markdown("""
 
     [data-testid="stSidebarCollapseButton"] button span::after,
     .css-1rs6os button span::after {
-        content: "◀" !important;
+        content: "←" !important;
         font-size: 20px !important;
         color: var(--cyan) !important;
     }
 
     /* When sidebar is collapsed, show right arrow */
     [data-testid="stSidebarCollapsedControl"] button span::after {
-        content: "▶" !important;
+        content: "→" !important;
     }
 
     /* ========== FONTS ========== */
@@ -794,15 +794,16 @@ st.markdown("""
 
     /* ========== CLEAN TYPOGRAPHY ========== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
 
     html, body, [class*="css"] {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important;
         font-weight: 700 !important;
         letter-spacing: -0.02em !important;
         line-height: 1.3 !important;
@@ -811,7 +812,7 @@ st.markdown("""
     }
 
     p, span, div, label {
-        font-family: 'Inter', sans-serif !important;
+        font-family: 'Inter', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important;
         line-height: 1.6 !important;
         color: var(--slate-700) !important;
     }
@@ -4647,15 +4648,15 @@ def show_dashboard():
                     margin-bottom: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #F97316;">●</span>
+                    <div style="width: 10px; height: 10px; background: #F97316; border-radius: 50%;"></div>
                     <span style="color: #4B5563; font-size: 14px;"><strong>Conversion:</strong> {conv_rate}%</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #22C55E;">●</span>
+                    <div style="width: 10px; height: 10px; background: #22C55E; border-radius: 50%;"></div>
                     <span style="color: #4B5563; font-size: 14px;"><strong>Qualified:</strong> {qualified_count} of {leads_count}</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #3B82F6;">●</span>
+                    <div style="width: 10px; height: 10px; background: #3B82F6; border-radius: 50%;"></div>
                     <span style="color: #4B5563; font-size: 14px;"><strong>Status:</strong> Ready to export</span>
                 </div>
             </div>
@@ -8513,28 +8514,28 @@ def show_config():
 
     # HubSpot
     hubspot_status = "connected" if settings.hubspot_api_key else "disconnected"
-    hubspot_icon = "✓" if settings.hubspot_api_key else "○"
+    hubspot_icon = "+" if settings.hubspot_api_key else "-"
     hubspot_color = "#10B981" if settings.hubspot_api_key else "#F59E0B"
     hubspot_bg = "#D1FAE5" if settings.hubspot_api_key else "#FEF3C7"
     hubspot_text = "Connected" if settings.hubspot_api_key else "Not configured"
 
     # Google
     google_status = "connected" if settings.google_api_key else "disconnected"
-    google_icon = "✓" if settings.google_api_key else "○"
+    google_icon = "+" if settings.google_api_key else "-"
     google_color = "#10B981" if settings.google_api_key else "#F59E0B"
     google_bg = "#D1FAE5" if settings.google_api_key else "#FEF3C7"
     google_text = "Connected" if settings.google_api_key else "Not configured"
 
     # OpenAI
     openai_status = "connected" if settings.openai_api_key else "disconnected"
-    openai_icon = "✓" if settings.openai_api_key else "○"
+    openai_icon = "+" if settings.openai_api_key else "-"
     openai_color = "#10B981" if settings.openai_api_key else "#F59E0B"
     openai_bg = "#D1FAE5" if settings.openai_api_key else "#FEF3C7"
     openai_text = "Connected" if settings.openai_api_key else "Not configured"
 
     # Anthropic
     anthropic_status = "connected" if settings.anthropic_api_key else "disconnected"
-    anthropic_icon = "✓" if settings.anthropic_api_key else "○"
+    anthropic_icon = "+" if settings.anthropic_api_key else "-"
     anthropic_color = "#10B981" if settings.anthropic_api_key else "#F59E0B"
     anthropic_bg = "#D1FAE5" if settings.anthropic_api_key else "#FEF3C7"
     anthropic_text = "Connected" if settings.anthropic_api_key else "Not configured"
@@ -8582,13 +8583,13 @@ def show_config():
 
     # Row 2 - Enrichment APIs
     hunter_status = "connected" if settings.hunter_api_key else "optional"
-    hunter_icon = "✓" if settings.hunter_api_key else "○"
+    hunter_icon = "+" if settings.hunter_api_key else "-"
     hunter_color = "#10B981" if settings.hunter_api_key else "#E85D04"
     hunter_bg = "#D1FAE5" if settings.hunter_api_key else "#3D2A1A"
     hunter_text = "Connected" if settings.hunter_api_key else "Optional"
 
     apollo_status = "connected" if settings.apollo_api_key else "disconnected"
-    apollo_icon = "✓" if settings.apollo_api_key else "○"
+    apollo_icon = "+" if settings.apollo_api_key else "-"
     apollo_color = "#10B981" if settings.apollo_api_key else "#F59E0B"
     apollo_bg = "#D1FAE5" if settings.apollo_api_key else "#FEF3C7"
     apollo_text = "Connected" if settings.apollo_api_key else "Not configured"
