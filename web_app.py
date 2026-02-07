@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import settings
 from src.utils.logger import setup_logger
-from src.utils.models import Lead, LeadSource, LeadUrgency
+from src.utils.models import Lead, LeadSource, LeadUrgency, LeadCategory
 from src.utils.scoring import enrich_leads, calculate_pain_score, get_lead_grade
 from src.utils.lead_manager import lead_manager, csv_exporter, email_finder
 from src.utils.hunter_enricher import enrich_leads_with_hunter
@@ -5129,7 +5129,6 @@ def show_search():
                     all_leads = ai_filter.filter_leads(all_leads)
 
                     # Count by category
-                    from src.utils.models import LeadCategory
                     pain_count = len([l for l in all_leads if l.lead_category == LeadCategory.PAIN])
                     opportunity_count = len([l for l in all_leads if l.lead_category == LeadCategory.OPPORTUNITY])
                     cold_count = len([l for l in all_leads if l.lead_category == LeadCategory.COLD])
@@ -5867,8 +5866,6 @@ def show_leads():
             </div>
             """, unsafe_allow_html=True)
         else:
-            from src.utils.models import LeadCategory
-
             # Count by category
             pain_leads = len([l for l in st.session_state.filtered_leads if l.lead_category == LeadCategory.PAIN])
             opportunity_leads = len([l for l in st.session_state.filtered_leads if l.lead_category == LeadCategory.OPPORTUNITY])
@@ -5956,7 +5953,6 @@ def show_leads():
 
             # Helper function to get category display
             def get_category_badge(lead):
-                from src.utils.models import LeadCategory
                 if lead.lead_category == LeadCategory.PAIN:
                     return "🔴 Pain"
                 elif lead.lead_category == LeadCategory.OPPORTUNITY:
