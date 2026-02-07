@@ -4819,7 +4819,20 @@ def show_search():
     if use_facebook and not settings.facebook_access_token:
         st.warning("⚠️ Facebook requires Access Token")
 
-    st.success("💡 **9 fuentes GRATIS** (Reddit, HN, Product Hunt, Yelp, Google Maps, Indeed, Yellow Pages, BBB, Craigslist) - No necesitan API!")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+                border: 2px solid #86EFAC; border-radius: 12px; padding: 16px; margin: 16px 0;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <span style="font-size: 20px;">💡</span>
+            <div>
+                <strong style="color: #166534; font-size: 15px;">9 fuentes GRATIS - No necesitan API</strong>
+                <p style="margin: 4px 0 0 0; color: #15803D; font-size: 13px;">
+                    Reddit, HN, Product Hunt, Yelp, Google Maps, Indeed, Yellow Pages, BBB, Craigslist
+                </p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.divider()
 
