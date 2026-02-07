@@ -4726,30 +4726,30 @@ def show_dashboard():
     # How It Works Section
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
-        <p style="margin: 0; color: #E8DFD5; font-size: 13px;">Three simple steps to find qualified leads</p>
+        <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">🚀 How It Works</h3>
+        <p style="margin: 0; color: #6B7280; font-size: 13px;">Three simple steps to find qualified leads</p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
         <!-- Step 1 -->
-        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
-            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">1</div>
-            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Search</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 13px;">Select sources and find prospects automatically</p>
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%); border: 2px solid #FDBA74; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);">
+            <div style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 20px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);">1</div>
+            <h4 style="margin: 0 0 8px 0; color: #1F2937; font-size: 17px; font-weight: 700;">Search</h4>
+            <p style="margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;">Select sources and find prospects automatically</p>
         </div>
         <!-- Step 2 -->
-        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
-            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">2</div>
-            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Qualify</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 13px;">AI evaluates and scores each lead by relevance</p>
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%); border: 2px solid #FDBA74; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);">
+            <div style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 20px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);">2</div>
+            <h4 style="margin: 0 0 8px 0; color: #1F2937; font-size: 17px; font-weight: 700;">Qualify</h4>
+            <p style="margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;">AI evaluates and scores each lead by relevance</p>
         </div>
         <!-- Step 3 -->
-        <div style="background: linear-gradient(135deg, rgba(45, 32, 21, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%); border: 1px solid rgba(232, 93, 4, 0.3); border-radius: 16px; padding: 24px; text-align: center; backdrop-filter: blur(10px);">
-            <div style="background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 18px;">3</div>
-            <h4 style="margin: 0 0 8px 0; color: #FFFFFF; font-size: 16px; font-weight: 600;">Export</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 13px;">Send the best leads directly to HubSpot</p>
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%); border: 2px solid #FDBA74; border-radius: 16px; padding: 24px; text-align: center; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);">
+            <div style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: white; font-weight: 700; font-size: 20px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);">3</div>
+            <h4 style="margin: 0 0 8px 0; color: #1F2937; font-size: 17px; font-weight: 700;">Export</h4>
+            <p style="margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;">Send the best leads directly to HubSpot</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
