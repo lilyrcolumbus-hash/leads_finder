@@ -4642,83 +4642,75 @@ def show_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # Data Sources Section - Holographic
+    # Data Sources Section - Clean Design
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">🌐 DATA SOURCES</h3>
-        <p style="margin: 0; color: #E8DFD5; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Connected platforms for lead acquisition</p>
+        <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">🌐 Data Sources</h3>
+        <p style="margin: 0; color: #6B7280; font-size: 14px;">Connected platforms for lead acquisition</p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
         <!-- Reddit -->
-        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
-                    border: 1px solid rgba(255, 69, 0, 0.3);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+                    border: 2px solid #FCA5A5;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);">
-            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
-                        background: linear-gradient(135deg, rgba(255, 69, 0, 0.2) 0%, rgba(255, 69, 0, 0.1) 100%);
-                        border: 1px solid rgba(255, 69, 0, 0.5);
-                        box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);">
-                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF4500);">🔴</span>
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
+            <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
+                        box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);">
+                <span style="font-size: 24px;">🔴</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #FF4500; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 69, 0, 0.3);">REDDIT</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">BUSINESS FEEDS</p>
+            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Reddit</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Business Feeds</p>
         </div>
         <!-- Hacker News -->
-        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
-                    border: 1px solid rgba(255, 102, 0, 0.3);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%);
+                    border: 2px solid #FDBA74;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);">
-            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
-                        background: linear-gradient(135deg, rgba(255, 102, 0, 0.2) 0%, rgba(255, 102, 0, 0.1) 100%);
-                        border: 1px solid rgba(255, 102, 0, 0.5);
-                        box-shadow: 0 0 15px rgba(255, 102, 0, 0.3);">
-                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #FF6600);">🟠</span>
+                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);">
+            <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, #FF6600 0%, #FF8C00 100%);
+                        box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);">
+                <span style="font-size: 24px;">🟠</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #FF6600; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(255, 102, 0, 0.3);">HACKER NEWS</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">TECH STARTUPS</p>
+            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Hacker News</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Tech Startups</p>
         </div>
         <!-- Google -->
-        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
-                    border: 1px solid rgba(66, 133, 244, 0.3);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
+                    border: 2px solid #93C5FD;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);">
-            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
-                        background: linear-gradient(135deg, rgba(66, 133, 244, 0.2) 0%, rgba(66, 133, 244, 0.1) 100%);
-                        border: 1px solid rgba(66, 133, 244, 0.5);
-                        box-shadow: 0 0 15px rgba(66, 133, 244, 0.3);">
-                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #4285F4);">🔵</span>
+                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);">
+            <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, #4285F4 0%, #5B9BF8 100%);
+                        box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);">
+                <span style="font-size: 24px;">🔵</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #4285F4; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(66, 133, 244, 0.3);">GOOGLE</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">WEB SEARCH</p>
+            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Google</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Web Search</p>
         </div>
         <!-- Indeed -->
-        <div style="background: linear-gradient(135deg, rgba(0, 30, 50, 0.6) 0%, rgba(0, 15, 30, 0.8) 100%);
-                    border: 1px solid rgba(220, 47, 2, 0.3);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%);
+                    border: 2px solid #FCD34D;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);">
-            <div style="width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
-                        background: linear-gradient(135deg, rgba(220, 47, 2, 0.2) 0%, rgba(220, 47, 2, 0.1) 100%);
-                        border: 1px solid rgba(220, 47, 2, 0.5);
-                        box-shadow: 0 0 15px rgba(220, 47, 2, 0.3);">
-                <span style="font-size: 24px; filter: drop-shadow(0 0 5px #DC2F02);">💼</span>
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);">
+            <div style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;
+                        background: linear-gradient(135deg, #2557A7 0%, #3B82F6 100%);
+                        box-shadow: 0 4px 12px rgba(37, 87, 167, 0.3);">
+                <span style="font-size: 24px;">💼</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #DC2F02; font-size: 14px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(220, 47, 2, 0.3);">INDEED</h4>
-            <p style="margin: 0; color: #E8DFD5; font-size: 11px; font-family: 'Share Tech Mono', monospace;">JOB POSTINGS</p>
+            <h4 style="margin: 0 0 6px 0; color: #1F2937; font-size: 15px; font-weight: 700;">Indeed</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 13px; line-height: 1.4;">Job Postings</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
