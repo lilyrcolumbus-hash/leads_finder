@@ -4529,118 +4529,124 @@ def show_dashboard():
     qualified_count = len(st.session_state.filtered_leads)
     hot_leads_count = len([l for l in st.session_state.filtered_leads if getattr(l, 'total_score', l.pain_score) >= 80])
     keywords_count = len(settings.pain_keywords)
-    sources_count = sum([1 for x in [True, True, bool(settings.google_api_key), True] if x])
+    sources_count = 12  # Total available sources
     conv_rate = int((qualified_count / leads_count * 100)) if leads_count > 0 else 0
 
-    # Metrics Section Header - Holographic
+    # Metrics Section Header
     st.markdown("""
     <div style="margin-bottom: 24px;">
-        <h3 style="margin: 0 0 8px 0; color: #E85D04; font-size: 16px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(232, 93, 4, 0.3);">📈 KEY METRICS</h3>
-        <p style="margin: 0; color: #E8DFD5; font-size: 13px; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.05em;">Real-time lead generation performance data</p>
+        <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">📈 Key Metrics</h3>
+        <p style="margin: 0; color: #6B7280; font-size: 14px;">Real-time lead generation performance</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Holographic Metric Cards
+    # Check if there's data or show empty state guidance
+    has_data = leads_count > 0
+
+    # Clean Metric Cards
     st.markdown(f"""
-    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px;">
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px;">
         <!-- Leads Found -->
-        <div style="background: linear-gradient(135deg, rgba(244, 140, 6, 0.15) 0%, rgba(40, 30, 20, 0.3) 100%);
-                    border: 1px solid rgba(244, 140, 6, 0.4);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%);
+                    border: 2px solid #FDBA74;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(244, 140, 6, 0.2), inset 0 0 30px rgba(244, 140, 6, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #F48C06 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #F48C06);">👥</div>
-            <div style="font-size: 36px; font-weight: 700; color: #F48C06; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(244, 140, 6, 0.5);">{leads_count}</div>
-            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">LEADS FOUND</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">THIS SESSION</div>
+                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);">
+            <div style="font-size: 28px; margin-bottom: 8px;">👥</div>
+            <div style="font-size: 32px; font-weight: 700; color: #EA580C;">{leads_count if has_data else '—'}</div>
+            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Leads Found</div>
+            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">{'This session' if has_data else 'Start searching'}</div>
         </div>
         <!-- Hot Leads -->
-        <div style="background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(80, 20, 40, 0.3) 100%);
-                    border: 1px solid rgba(255, 51, 102, 0.4);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+                    border: 2px solid #FCA5A5;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(255, 51, 102, 0.2), inset 0 0 30px rgba(255, 51, 102, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FF3366 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FF3366);">🔥</div>
-            <div style="font-size: 36px; font-weight: 700; color: #FF3366; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 51, 102, 0.5);">{hot_leads_count}</div>
-            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">HOT LEADS</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">SCORE 80+</div>
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔥</div>
+            <div style="font-size: 32px; font-weight: 700; color: #DC2626;">{hot_leads_count if has_data else '—'}</div>
+            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Hot Leads</div>
+            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">{'Score 80+' if has_data else 'Priority targets'}</div>
         </div>
         <!-- Qualified -->
-        <div style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(0, 80, 50, 0.3) 100%);
-                    border: 1px solid rgba(0, 255, 136, 0.4);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+                    border: 2px solid #86EFAC;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 30px rgba(0, 255, 136, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #00FF88 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #00FF88);">✅</div>
-            <div style="font-size: 36px; font-weight: 700; color: #00FF88; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);">{qualified_count}</div>
-            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">QUALIFIED</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CRM READY</div>
+                    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);">
+            <div style="font-size: 28px; margin-bottom: 8px;">✅</div>
+            <div style="font-size: 32px; font-weight: 700; color: #16A34A;">{qualified_count if has_data else '—'}</div>
+            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Qualified</div>
+            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">{'CRM ready' if has_data else 'AI verified'}</div>
         </div>
         <!-- Keywords -->
-        <div style="background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(80, 60, 0, 0.3) 100%);
-                    border: 1px solid rgba(255, 184, 0, 0.4);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
+                    border: 2px solid #FCD34D;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(255, 184, 0, 0.2), inset 0 0 30px rgba(255, 184, 0, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #FFB800 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #FFB800);">🔑</div>
-            <div style="font-size: 36px; font-weight: 700; color: #FFB800; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255, 184, 0, 0.5);">{keywords_count}</div>
-            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">KEYWORDS</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">ACTIVE</div>
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔑</div>
+            <div style="font-size: 32px; font-weight: 700; color: #D97706;">{keywords_count}</div>
+            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Keywords</div>
+            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">Active filters</div>
         </div>
         <!-- Sources -->
-        <div style="background: linear-gradient(135deg, rgba(232, 93, 4, 0.15) 0%, rgba(0, 60, 60, 0.3) 100%);
-                    border: 1px solid rgba(232, 93, 4, 0.4);
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
+                    border: 2px solid #93C5FD;
                     border-radius: 12px;
                     padding: 20px;
                     text-align: center;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 0 20px rgba(232, 93, 4, 0.2), inset 0 0 30px rgba(232, 93, 4, 0.05);">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 50%, transparent 100%);"></div>
-            <div style="font-size: 28px; margin-bottom: 8px; filter: drop-shadow(0 0 5px #E85D04);">🔗</div>
-            <div style="font-size: 36px; font-weight: 700; color: #E85D04; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(232, 93, 4, 0.5);">{sources_count}/4</div>
-            <div style="font-size: 11px; color: #E8DFD5; margin-top: 4px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.1em;">SOURCES</div>
-            <div style="font-size: 10px; color: #4A7080; margin-top: 8px; font-family: 'Share Tech Mono', monospace;">CONNECTED</div>
+                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);">
+            <div style="font-size: 28px; margin-bottom: 8px;">🔗</div>
+            <div style="font-size: 32px; font-weight: 700; color: #2563EB;">{sources_count}</div>
+            <div style="font-size: 13px; color: #1F2937; margin-top: 4px; font-weight: 600;">Sources</div>
+            <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">Available</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Holographic Info Panel
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(40, 30, 20, 0.4) 0%, rgba(30, 20, 15, 0.6) 100%);
-                border: 1px solid rgba(232, 93, 4, 0.2);
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 32px;
-                position: relative;
-                backdrop-filter: blur(10px);">
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent 0%, #E85D04 30%, #F48C06 70%, transparent 100%); opacity: 0.5;"></div>
-        <h4 style="margin: 0 0 12px 0; color: #E85D04; font-size: 12px; font-weight: 600; font-family: 'Orbitron', sans-serif; letter-spacing: 0.15em;">📖 SYSTEM INFO</h4>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 12px; color: #E8DFD5; font-family: 'Rajdhani', sans-serif;">
-            <div><span style="color: #F48C06;">▸</span> <strong>LEADS FOUND:</strong> Total prospects discovered</div>
-            <div><span style="color: #FF3366;">▸</span> <strong>HOT LEADS:</strong> Priority targets (Score 80+)</div>
-            <div><span style="color: #00FF88;">▸</span> <strong>QUALIFIED:</strong> AI-verified prospects</div>
-            <div><span style="color: #FFB800;">▸</span> <strong>KEYWORDS:</strong> Active pain indicators</div>
-            <div><span style="color: #E85D04;">▸</span> <strong>SOURCES:</strong> Connected data streams</div>
+    # Show helpful tip when no data
+    if not has_data:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+                    border: 2px solid #FDBA74;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 24px;
+                    text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 12px;">🚀</div>
+            <h4 style="margin: 0 0 8px 0; color: #1F2937; font-size: 16px; font-weight: 700;">Ready to find leads?</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 14px;">Go to <strong>Find Leads</strong> to start searching across 12 sources</p>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
+    else:
+        # Info Panel with data
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+                    border: 1px solid #E5E7EB;
+                    border-radius: 12px;
+                    padding: 16px 20px;
+                    margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #F97316;">●</span>
+                    <span style="color: #4B5563; font-size: 14px;"><strong>Conversion:</strong> {conv_rate}%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #22C55E;">●</span>
+                    <span style="color: #4B5563; font-size: 14px;"><strong>Qualified:</strong> {qualified_count} of {leads_count}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #3B82F6;">●</span>
+                    <span style="color: #4B5563; font-size: 14px;"><strong>Status:</strong> Ready to export</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Data Sources Section - Clean Design
     st.markdown("""
