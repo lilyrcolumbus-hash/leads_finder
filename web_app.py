@@ -5992,74 +5992,49 @@ def show_leads():
                 email_display = lead.email if lead.email else "No email"
                 phone_display = lead.phone if lead.phone else "No phone"
 
+                # Prepare display values (escape HTML in content)
+                import html
+                title_display = lead.title[:60] + '...' if len(lead.title) > 60 else lead.title
+                title_display = html.escape(title_display)
+                content_display = ""
+                if lead.content:
+                    content_text = lead.content[:200] + "..." if len(lead.content) > 200 else lead.content
+                    content_display = html.escape(content_text)
+                industry_html = f'<span style="color: #6B7280; font-size: 13px;">🏢 {html.escape(lead.industry)}</span>' if lead.industry else ''
+                ai_score_display = f'{lead.ai_score:.2f}' if lead.ai_score else 'N/A'
+                keywords_count = len(lead.keywords_matched) if lead.keywords_matched else 0
+
+                # Build card HTML
                 st.markdown(f"""
-                <div style="
-                    background: {card_bg};
-                    border: 2px solid {card_border};
-                    border-radius: 12px;
-                    padding: 20px;
-                    margin-bottom: 16px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                        <div style="flex: 1;">
-                            <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">
-                                {lead.title[:60] + '...' if len(lead.title) > 60 else lead.title}
-                            </h3>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                                <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    {category_badge}
-                                </span>
-                                <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    Score: {lead.pain_score}
-                                </span>
-                                <span style="color: #6B7280; font-size: 13px;">
-                                    📂 {lead.source.value}
-                                </span>
-                                {f'<span style="color: #6B7280; font-size: 13px;">🏢 {lead.industry}</span>' if lead.industry else ''}
-                            </div>
-                        </div>
+                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">{title_display}</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
+                        <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">{category_badge}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Score: {lead.pain_score}</span>
+                        <span style="color: #6B7280; font-size: 13px;">📂 {lead.source.value}</span>
+                        {industry_html}
                     </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">📧</span>
-                            <span style="color: #374151; font-size: 14px;">{email_display}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">📱</span>
-                            <span style="color: #374151; font-size: 14px;">{phone_display}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">🔑</span>
-                            <span style="color: #374151; font-size: 14px;">{len(lead.keywords_matched)} keywords</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">🤖</span>
-                            <span style="color: #374151; font-size: 14px;">AI: {f'{lead.ai_score:.2f}' if lead.ai_score else 'N/A'}</span>
-                        </div>
-                    </div>
-
-                    {f'<div style="margin-top: 12px; padding: 12px; background: #F3F4F6; border-radius: 8px;"><p style="margin: 0; color: #4B5563; font-size: 13px; line-height: 1.5;">{lead.content[:200] + "..." if len(lead.content) > 200 else lead.content}</p></div>' if lead.content else ''}
-
-                    <div style="display: flex; gap: 8px; margin-top: 16px;">
-                        <a href="{lead.url}" target="_blank" style="
-                            background: #F97316;
-                            color: white;
-                            padding: 8px 16px;
-                            border-radius: 8px;
-                            text-decoration: none;
-                            font-size: 13px;
-                            font-weight: 600;
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 6px;
-                        ">
-                            View Original ↗
-                        </a>
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
+                        <span style="color: #374151; font-size: 14px;">📧 {html.escape(email_display)}</span>
+                        <span style="color: #374151; font-size: 14px;">📱 {html.escape(phone_display)}</span>
+                        <span style="color: #374151; font-size: 14px;">🔑 {keywords_count} keywords</span>
+                        <span style="color: #374151; font-size: 14px;">🤖 AI: {ai_score_display}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+                # Content preview (if exists)
+                if content_display:
+                    st.markdown(f"""
+                    <div style="margin-top: -12px; margin-bottom: 8px; padding: 12px; background: #F3F4F6; border-radius: 8px;">
+                        <p style="margin: 0; color: #4B5563; font-size: 13px; line-height: 1.5;">{content_display}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                # Action button using Streamlit columns for better compatibility
+                col_btn, col_space = st.columns([1, 3])
+                with col_btn:
+                    st.link_button("View Original ↗", lead.url)
 
             st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -6178,79 +6153,43 @@ def show_leads():
                     card_bg = "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)"
                     badge_bg = "#6B7280"
 
+                import html
                 title = lead_dict.get('title', 'No title')
-                email_display = lead_dict.get('email', 'No email') or 'No email'
-                phone_display = lead_dict.get('phone', 'No phone') or 'No phone'
+                title_display = html.escape(str(title)[:60] + '...' if len(str(title)) > 60 else str(title))
+                email_display = html.escape(lead_dict.get('email', 'No email') or 'No email')
+                phone_display = html.escape(lead_dict.get('phone', 'No phone') or 'No phone')
                 industry = lead_dict.get('industry', '')
+                industry_html = f'<span style="color: #6B7280; font-size: 13px;">🏢 {html.escape(industry)}</span>' if industry else ''
                 source = lead_dict.get('source', 'unknown')
                 pain_score = lead_dict.get('pain_score', 0)
                 ai_score = lead_dict.get('ai_score')
+                ai_score_display = f'{ai_score:.2f}' if ai_score else 'N/A'
                 url = lead_dict.get('url', '#')
                 saved_at = lead_dict.get('saved_at', '')[:10] if lead_dict.get('saved_at') else ''
+                saved_at_html = f'<span style="color: #9CA3AF; font-size: 12px;">📅 {saved_at}</span>' if saved_at else ''
 
                 st.markdown(f"""
-                <div style="
-                    background: {card_bg};
-                    border: 2px solid {card_border};
-                    border-radius: 12px;
-                    padding: 20px;
-                    margin-bottom: 16px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                        <div style="flex: 1;">
-                            <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">
-                                {title[:60] + '...' if len(str(title)) > 60 else title}
-                            </h3>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                                <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    {category_badge}
-                                </span>
-                                <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                                    Score: {pain_score}
-                                </span>
-                                <span style="color: #6B7280; font-size: 13px;">
-                                    📂 {source}
-                                </span>
-                                {f'<span style="color: #6B7280; font-size: 13px;">🏢 {industry}</span>' if industry else ''}
-                                {f'<span style="color: #9CA3AF; font-size: 12px;">📅 {saved_at}</span>' if saved_at else ''}
-                            </div>
-                        </div>
+                <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                    <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700;">{title_display}</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
+                        <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">{category_badge}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Score: {pain_score}</span>
+                        <span style="color: #6B7280; font-size: 13px;">📂 {source}</span>
+                        {industry_html}
+                        {saved_at_html}
                     </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">📧</span>
-                            <span style="color: #374151; font-size: 14px;">{email_display}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">📱</span>
-                            <span style="color: #374151; font-size: 14px;">{phone_display}</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 16px;">🤖</span>
-                            <span style="color: #374151; font-size: 14px;">AI: {f'{ai_score:.2f}' if ai_score else 'N/A'}</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 8px; margin-top: 16px;">
-                        <a href="{url}" target="_blank" style="
-                            background: #F97316;
-                            color: white;
-                            padding: 8px 16px;
-                            border-radius: 8px;
-                            text-decoration: none;
-                            font-size: 13px;
-                            font-weight: 600;
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 6px;
-                        ">
-                            View Original ↗
-                        </a>
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
+                        <span style="color: #374151; font-size: 14px;">📧 {email_display}</span>
+                        <span style="color: #374151; font-size: 14px;">📱 {phone_display}</span>
+                        <span style="color: #374151; font-size: 14px;">🤖 AI: {ai_score_display}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+                # Action button using Streamlit component
+                col_saved_btn, col_saved_space = st.columns([1, 3])
+                with col_saved_btn:
+                    st.link_button("View Original ↗", url)
 
             st.divider()
 
