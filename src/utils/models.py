@@ -13,6 +13,11 @@ class LeadSource(str, Enum):
     GOOGLE_SEARCH = "google_search"
     PRODUCT_HUNT = "product_hunt"
     GOOGLE_MAPS = "google_maps"
+    YELP = "yelp"
+    INDEED = "indeed"
+    YELLOW_PAGES = "yellow_pages"
+    BBB = "bbb"
+    CRAIGSLIST = "craigslist"
     WEBSITE_EMAIL = "website_email"
 
 

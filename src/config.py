@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     ollama_base_url: str = Field(default="http://localhost:11434", alias="OLLAMA_BASE_URL")
     ollama_model: str = Field(default="qwen2.5-coder:7b", alias="OLLAMA_MODEL")
 
+    # Gemini (Google AI - free tier)
+    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+
     # Reddit subreddits to search
     subreddits: List[str] = [
         "smallbusiness",

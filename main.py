@@ -3,9 +3,11 @@
 Lead Generation App - Main Entry Point
 
 A modular lead generation tool that:
-1. Scrapes multiple sources for potential leads
-2. Filters them using AI
-3. Manages them in HubSpot CRM
+1. Scrapes multiple sources for potential leads (10 sources)
+2. Extracts emails from business websites
+3. Filters them using AI (Ollama/Gemini/OpenAI/Anthropic)
+4. Exports to CSV or Google Sheets
+5. Manages them in HubSpot CRM
 
 Usage:
     python main.py              # Interactive menu
@@ -30,9 +32,14 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadBatch
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
-from src.filters import AILeadFilter
+from src.scrapers import (
+    RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper,
+    GoogleMapsScraper, YelpScraper, IndeedScraper, YellowPagesScraper,
+    BBBScraper, CraigslistScraper, EmailExtractor,
+)
+from src.filters import AILeadFilter, OllamaGeminiFilter
 from src.crm import HubSpotCRM, LeadStage
+from src.utils.csv_export import export_leads_to_csv, export_leads_for_google_sheets
 
 # Initialize
 console = Console()
@@ -43,8 +50,8 @@ def display_banner():
     """Display application banner."""
     banner = """
     ╔═══════════════════════════════════════════════════════════╗
-    ║           LEAD GENERATION APP v1.0                        ║
-    ║     Find business owners with communication pain points   ║
+    ║           LEAD GENERATION APP v2.0                        ║
+    ║     10 fuentes | Ollama/Gemini AI | CSV Export             ║
     ╚═══════════════════════════════════════════════════════════╝
     """
     console.print(Panel(banner, style="bold blue"))
@@ -58,35 +65,50 @@ def display_main_menu() -> str:
     console.print("  [3] Actualizar lead")
     console.print("  [4] Ver estadisticas")
     console.print("  [5] Buscar lead")
-    console.print("  [6] Configuracion")
+    console.print("  [6] Exportar a CSV")
+    console.print("  [7] Extraer emails de websites")
+    console.print("  [8] Generar mensajes personalizados")
+    console.print("  [9] Configuracion")
     console.print("  [0] Salir")
     console.print()
 
-    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6"], default="1")
+    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], default="1")
 
 
 # ==================== 1. SCRAPING ====================
 
-def run_scraping() -> List[Lead]:
-    """Run all scrapers and collect leads."""
+def run_scraping(selected_sources: Optional[List[str]] = None) -> List[Lead]:
+    """Run scrapers and collect leads."""
     all_leads: List[Lead] = []
     errors: List[str] = []
 
     console.print("\n[bold green]Iniciando busqueda de leads...[/bold green]\n")
 
-    scrapers = [
-        ("Reddit", RedditScraper),
-        ("Hacker News", HackerNewsScraper),
-        ("Google Search", GoogleScraper),
-        ("Product Hunt", ProductHuntScraper),
+    all_scrapers = [
+        ("Reddit", RedditScraper, "1"),
+        ("Hacker News", HackerNewsScraper, "2"),
+        ("Google Search", GoogleScraper, "3"),
+        ("Product Hunt", ProductHuntScraper, "4"),
+        ("Google Maps", GoogleMapsScraper, "5"),
+        ("Yelp", YelpScraper, "6"),
+        ("Indeed", IndeedScraper, "7"),
+        ("Yellow Pages", YellowPagesScraper, "8"),
+        ("BBB", BBBScraper, "9"),
+        ("Craigslist", CraigslistScraper, "10"),
     ]
+
+    # Filter to selected sources
+    if selected_sources:
+        scrapers = [(n, c, i) for n, c, i in all_scrapers if i in selected_sources]
+    else:
+        scrapers = all_scrapers
 
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console
     ) as progress:
-        for name, ScraperClass in scrapers:
+        for name, ScraperClass, _ in scrapers:
             task = progress.add_task(f"Buscando en {name}...", total=None)
             try:
                 with ScraperClass() as scraper:
@@ -111,18 +133,25 @@ def run_scraping() -> List[Lead]:
 
 
 def filter_leads_with_ai(leads: List[Lead]) -> List[Lead]:
-    """Filter leads using AI."""
+    """Filter leads using AI (tries Ollama/Gemini first, then OpenAI/Anthropic)."""
     if not leads:
         return []
 
-    console.print("\n[bold cyan]Filtrando leads con AI...[/bold cyan]")
+    # Try Ollama/Gemini first (free)
+    ollama_filter = OllamaGeminiFilter()
+    if ollama_filter.is_available():
+        console.print(f"\n[bold cyan]Filtrando leads con {ollama_filter.get_backend_name()} (gratis)...[/bold cyan]")
+        filtered = ollama_filter.filter_leads(leads)
+        qualified = [l for l in filtered if l.is_qualified]
+        console.print(f"[green]Leads calificados: {len(qualified)}/{len(leads)}[/green]")
+        return qualified
 
+    # Fallback to OpenAI/Anthropic
+    console.print("\n[bold cyan]Filtrando leads con AI (OpenAI/Anthropic)...[/bold cyan]")
     ai_filter = AILeadFilter()
     filtered = ai_filter.filter_leads(leads)
-
     qualified = [l for l in filtered if l.is_qualified]
     console.print(f"[green]Leads calificados: {len(qualified)}/{len(leads)}[/green]")
-
     return qualified
 
 
@@ -149,58 +178,103 @@ def send_to_hubspot(leads: List[Lead]) -> None:
 
 def menu_search_leads():
     """Main option 1: Search for new leads."""
-    # Select sources
     console.print("\n[bold]Selecciona fuentes para buscar:[/bold]")
-    console.print("  [1] Todas las fuentes")
-    console.print("  [2] Solo Reddit")
-    console.print("  [3] Solo Hacker News")
-    console.print("  [4] Solo Google Search")
-    console.print("  [5] Solo Product Hunt")
+    console.print("  [1]  Todas las fuentes (10)")
+    console.print("  [2]  Solo foros (Reddit + HN + Product Hunt)")
+    console.print("  [3]  Solo directorios (Google Maps + Yelp + YP + BBB)")
+    console.print("  [4]  Solo empleo (Indeed + Craigslist)")
+    console.print("  [5]  Seleccionar manualmente")
 
-    source = Prompt.ask("Opcion", choices=["1", "2", "3", "4", "5"], default="1")
+    choice = Prompt.ask("Opcion", choices=["1", "2", "3", "4", "5"], default="1")
 
-    # Run scraping
-    leads = run_scraping() if source == "1" else run_single_source(source)
+    selected = None
+    if choice == "2":
+        selected = ["1", "2", "4"]  # Reddit, HN, PH
+    elif choice == "3":
+        selected = ["5", "6", "8", "9"]  # GMaps, Yelp, YP, BBB
+    elif choice == "4":
+        selected = ["7", "10"]  # Indeed, Craigslist
+    elif choice == "5":
+        selected = _select_sources_manually()
+
+    leads = run_scraping(selected)
 
     if not leads:
         console.print("[yellow]No se encontraron leads[/yellow]")
         return
 
+    # Store leads in memory for later use
+    _store_leads(leads)
+
     # Show preview
     display_leads_table(leads[:10], title="Preview de leads encontrados")
+
+    # Email extraction
+    websites_count = sum(1 for l in leads if l.website and not l.email)
+    if websites_count > 0 and Confirm.ask(f"\nExtraer emails de {websites_count} sitios web?", default=True):
+        _run_email_extraction(leads)
 
     # AI filtering
     if Confirm.ask("\nFiltrar leads con AI?", default=True):
         leads = filter_leads_with_ai(leads)
+        _store_leads(leads)
 
     if not leads:
         console.print("[yellow]No quedaron leads despues del filtrado[/yellow]")
         return
 
-    # Send to HubSpot
-    send_to_hubspot(leads)
+    # Export options
+    console.print("\n[bold]Que quieres hacer con los leads?[/bold]")
+    console.print("  [1] Enviar a HubSpot")
+    console.print("  [2] Exportar a CSV")
+    console.print("  [3] Ambos")
+    console.print("  [4] Nada por ahora")
+
+    action = Prompt.ask("Opcion", choices=["1", "2", "3", "4"], default="2")
+
+    if action in ["1", "3"]:
+        send_to_hubspot(leads)
+    if action in ["2", "3"]:
+        _export_csv(leads)
 
 
-def run_single_source(source: str) -> List[Lead]:
-    """Run a single scraper based on selection."""
-    scrapers = {
-        "2": ("Reddit", RedditScraper),
-        "3": ("Hacker News", HackerNewsScraper),
-        "4": ("Google", GoogleScraper),
-        "5": ("Product Hunt", ProductHuntScraper),
-    }
+def _select_sources_manually() -> List[str]:
+    """Let user select individual sources."""
+    sources = [
+        ("1", "Reddit"),
+        ("2", "Hacker News"),
+        ("3", "Google Search"),
+        ("4", "Product Hunt"),
+        ("5", "Google Maps"),
+        ("6", "Yelp"),
+        ("7", "Indeed"),
+        ("8", "Yellow Pages"),
+        ("9", "BBB"),
+        ("10", "Craigslist"),
+    ]
 
-    name, ScraperClass = scrapers.get(source, ("Reddit", RedditScraper))
+    console.print("\n[bold]Fuentes disponibles:[/bold]")
+    for num, name in sources:
+        console.print(f"  [{num}] {name}")
 
-    console.print(f"\n[cyan]Buscando en {name}...[/cyan]")
+    selected_str = Prompt.ask("Ingresa los numeros separados por coma (ej: 1,5,6)")
+    return [s.strip() for s in selected_str.split(",")]
 
-    try:
-        with ScraperClass() as scraper:
-            batch = scraper.scrape()
-            return batch.leads
-    except Exception as e:
-        console.print(f"[red]Error: {e}[/red]")
-        return []
+
+# ==================== LEADS STORAGE ====================
+
+_current_leads: List[Lead] = []
+
+
+def _store_leads(leads: List[Lead]):
+    """Store leads in memory."""
+    global _current_leads
+    _current_leads = leads
+
+
+def _get_leads() -> List[Lead]:
+    """Get stored leads."""
+    return _current_leads
 
 
 # ==================== 2. VIEW LEADS ====================
@@ -208,55 +282,68 @@ def run_single_source(source: str) -> List[Lead]:
 def menu_view_leads():
     """Main option 2: View leads in CRM."""
     console.print("\n[bold]Ver leads:[/bold]")
-    console.print("  [1] Todos los leads")
-    console.print("  [2] Por etapa del pipeline")
+    console.print("  [1] Leads de esta sesion")
+    console.print("  [2] Leads en HubSpot")
     console.print("  [0] Volver")
 
     choice = Prompt.ask("Opcion", choices=["0", "1", "2"], default="1")
 
-    with HubSpotCRM() as crm:
-        if not crm.is_configured():
-            console.print("[red]HubSpot no configurado[/red]")
+    if choice == "1":
+        leads = _get_leads()
+        if not leads:
+            console.print("[yellow]No hay leads en esta sesion. Usa opcion 1 para buscar.[/yellow]")
             return
+        display_leads_table(leads, "Leads de esta sesion")
 
-        if choice == "1":
-            contacts = crm.get_all_contacts(limit=50)
-            display_contacts_table(contacts, "Todos los leads")
+    elif choice == "2":
+        with HubSpotCRM() as crm:
+            if not crm.is_configured():
+                console.print("[red]HubSpot no configurado[/red]")
+                return
 
-        elif choice == "2":
-            # Show stage submenu
-            console.print("\n[bold]Selecciona etapa:[/bold]")
-            for i, stage in enumerate(LeadStage, 1):
+            console.print("\n[bold]Filtrar por etapa:[/bold]")
+            console.print("  [1] Todos")
+            for i, stage in enumerate(LeadStage, 2):
                 console.print(f"  [{i}] {stage.value}")
 
-            stage_choice = IntPrompt.ask("Etapa", default=1)
-            stages = list(LeadStage)
-            if 1 <= stage_choice <= len(stages):
-                selected_stage = stages[stage_choice - 1]
-                contacts = crm.get_contacts_by_stage(selected_stage)
-                display_contacts_table(contacts, f"Leads en etapa: {selected_stage.value}")
+            stage_choice = Prompt.ask("Opcion", default="1")
+
+            if stage_choice == "1":
+                contacts = crm.get_all_contacts(limit=50)
+                display_contacts_table(contacts, "Todos los leads")
+            else:
+                stages = list(LeadStage)
+                idx = int(stage_choice) - 2
+                if 0 <= idx < len(stages):
+                    contacts = crm.get_contacts_by_stage(stages[idx])
+                    display_contacts_table(contacts, f"Leads en etapa: {stages[idx].value}")
 
 
 def display_leads_table(leads: List[Lead], title: str = "Leads"):
     """Display leads in a rich table."""
     table = Table(title=title, show_lines=True)
-    table.add_column("ID", style="dim", width=10)
-    table.add_column("Fuente", style="cyan")
-    table.add_column("Titulo", style="green", max_width=40)
-    table.add_column("Keywords", style="yellow", max_width=30)
-    table.add_column("Score", justify="center")
+    table.add_column("#", style="dim", width=4)
+    table.add_column("Fuente", style="cyan", width=12)
+    table.add_column("Empresa", style="green", max_width=25)
+    table.add_column("Email", style="yellow", max_width=25)
+    table.add_column("Telefono", style="blue", max_width=15)
+    table.add_column("Ubicacion", style="magenta", max_width=15)
+    table.add_column("Score", justify="center", width=6)
 
-    for lead in leads[:20]:
-        score = f"{lead.ai_score:.2f}" if lead.ai_score else "-"
+    for i, lead in enumerate(leads[:30], 1):
+        score = f"{lead.ai_score:.0%}" if lead.ai_score else "-"
         table.add_row(
-            lead.id[:8],
+            str(i),
             lead.source.value,
-            lead.title[:40],
-            ", ".join(lead.keywords_matched[:3]),
+            (lead.company or lead.title)[:25],
+            (lead.email or "-")[:25],
+            lead.phone or "-",
+            (lead.location or "-")[:15],
             score
         )
 
     console.print(table)
+    console.print(f"\nTotal: {len(leads)} leads")
 
 
 def display_contacts_table(contacts: List, title: str = "Contacts"):
@@ -322,7 +409,6 @@ def menu_update_lead():
         console.print(f"[green]Contacto: {contact.firstname} {contact.lastname} ({contact.email})[/green]")
 
         if choice == "1":
-            # Change stage
             console.print("\n[bold]Nueva etapa:[/bold]")
             for i, stage in enumerate(LeadStage, 1):
                 console.print(f"  [{i}] {stage.value}")
@@ -333,25 +419,21 @@ def menu_update_lead():
                     console.print("[green]Etapa actualizada[/green]")
 
         elif choice == "2":
-            # Add note
             note = Prompt.ask("Escribe la nota")
             if crm.add_note(contact_id, note):
                 console.print("[green]Nota agregada[/green]")
 
         elif choice == "3":
-            # Mark as won
             if Confirm.ask("Marcar como ganado?"):
                 if crm.mark_as_won(contact_id):
                     console.print("[green]Marcado como ganado![/green]")
 
         elif choice == "4":
-            # Mark as lost
             reason = Prompt.ask("Razon de perdida (opcional)", default="")
             if crm.mark_as_lost(contact_id, reason):
                 console.print("[yellow]Marcado como perdido[/yellow]")
 
         elif choice == "5":
-            # Delete
             if Confirm.ask("[red]Eliminar este contacto? Esta accion no se puede deshacer[/red]"):
                 if crm.delete_contact(contact_id):
                     console.print("[green]Contacto eliminado[/green]")
@@ -361,21 +443,41 @@ def menu_update_lead():
 
 def menu_statistics():
     """Main option 4: View statistics."""
+    leads = _get_leads()
+
+    if leads:
+        console.print("\n[bold cyan]═══ ESTADISTICAS DE SESION ═══[/bold cyan]")
+
+        # By source
+        source_counts = {}
+        for lead in leads:
+            source_counts[lead.source.value] = source_counts.get(lead.source.value, 0) + 1
+
+        table = Table(title="Leads por fuente")
+        table.add_column("Fuente", style="cyan")
+        table.add_column("Cantidad", justify="center", style="green")
+        table.add_column("Con email", justify="center", style="yellow")
+        table.add_column("Con telefono", justify="center", style="blue")
+
+        for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
+            source_leads = [l for l in leads if l.source.value == source]
+            with_email = sum(1 for l in source_leads if l.email)
+            with_phone = sum(1 for l in source_leads if l.phone)
+            table.add_row(source, str(count), str(with_email), str(with_phone))
+
+        console.print(table)
+
+        qualified = sum(1 for l in leads if l.is_qualified)
+        console.print(f"\nTotal: {len(leads)} | Calificados: {qualified} | Con email: {sum(1 for l in leads if l.email)} | Con telefono: {sum(1 for l in leads if l.phone)}")
+
+    # HubSpot stats
     with HubSpotCRM() as crm:
-        if not crm.is_configured():
-            console.print("[red]HubSpot no configurado[/red]")
-            return
-
-        console.print("\n[bold cyan]Obteniendo estadisticas...[/bold cyan]")
-        stats = crm.get_statistics()
-
-        if "error" in stats:
-            console.print(f"[red]{stats['error']}[/red]")
-            return
-
-        # Display stats panel
-        console.print(Panel(f"""
-[bold]ESTADISTICAS DE LEADS[/bold]
+        if crm.is_configured():
+            if Confirm.ask("\nVer estadisticas de HubSpot?", default=True):
+                stats = crm.get_statistics()
+                if "error" not in stats:
+                    console.print(Panel(f"""
+[bold]ESTADISTICAS DE HUBSPOT[/bold]
 
 Total de leads: [cyan]{stats['total_leads']}[/cyan]
 
@@ -390,10 +492,7 @@ Total de leads: [cyan]{stats['total_leads']}[/cyan]
 [bold]Metricas:[/bold]
   - Tasa de conversion: [cyan]{stats['conversion_rate']}%[/cyan]
   - Tasa de cierre:     [green]{stats['win_rate']}%[/green]
-
-[bold]Por fuente:[/bold]
-""" + "\n".join([f"  - {k}: {v}" for k, v in stats['by_source'].items()]),
-            title="Dashboard", border_style="green"))
+""", title="HubSpot Dashboard", border_style="green"))
 
 
 # ==================== 5. SEARCH ====================
@@ -411,26 +510,165 @@ def menu_search():
         display_contacts_table(contacts, f"Resultados para: {query}")
 
 
-# ==================== 6. CONFIGURATION ====================
+# ==================== 6. CSV EXPORT ====================
+
+def menu_export_csv():
+    """Main option 6: Export leads to CSV."""
+    leads = _get_leads()
+    if not leads:
+        console.print("[yellow]No hay leads para exportar. Usa opcion 1 para buscar primero.[/yellow]")
+        return
+
+    _export_csv(leads)
+
+
+def _export_csv(leads: List[Lead]):
+    """Export leads to CSV."""
+    console.print("\n[bold]Formato de exportacion:[/bold]")
+    console.print("  [1] CSV estandar")
+    console.print("  [2] Google Sheets (TSV)")
+
+    fmt = Prompt.ask("Opcion", choices=["1", "2"], default="1")
+
+    try:
+        if fmt == "1":
+            filepath = export_leads_to_csv(leads)
+        else:
+            filepath = export_leads_for_google_sheets(leads)
+
+        console.print(f"\n[green]Exportado exitosamente: {filepath}[/green]")
+        console.print(f"[dim]Total: {len(leads)} leads exportados[/dim]")
+    except Exception as e:
+        console.print(f"[red]Error al exportar: {e}[/red]")
+
+
+# ==================== 7. EMAIL EXTRACTION ====================
+
+def menu_extract_emails():
+    """Main option 7: Extract emails from websites."""
+    leads = _get_leads()
+    if not leads:
+        console.print("[yellow]No hay leads. Usa opcion 1 para buscar primero.[/yellow]")
+        return
+
+    websites_count = sum(1 for l in leads if l.website and not l.email)
+    if websites_count == 0:
+        console.print("[yellow]No hay sitios web pendientes de extraer emails.[/yellow]")
+        return
+
+    console.print(f"\n[cyan]Se encontraron {websites_count} sitios web sin email.[/cyan]")
+    if Confirm.ask("Iniciar extraccion de emails?", default=True):
+        _run_email_extraction(leads)
+
+
+def _run_email_extraction(leads: List[Lead]):
+    """Run email extraction on leads."""
+    console.print("\n[cyan]Extrayendo emails de sitios web...[/cyan]")
+
+    with EmailExtractor() as extractor:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console
+        ) as progress:
+            task = progress.add_task("Extrayendo emails...", total=None)
+            extractor.extract_emails_from_leads(leads)
+            progress.remove_task(task)
+
+    emails_found = sum(1 for l in leads if l.email)
+    console.print(f"[green]Emails encontrados: {emails_found}/{len(leads)}[/green]")
+    _store_leads(leads)
+
+
+# ==================== 8. PERSONALIZED MESSAGES ====================
+
+def menu_generate_messages():
+    """Main option 8: Generate personalized messages."""
+    leads = _get_leads()
+    if not leads:
+        console.print("[yellow]No hay leads. Usa opcion 1 para buscar primero.[/yellow]")
+        return
+
+    qualified = [l for l in leads if l.is_qualified and not l.personalized_message]
+    if not qualified:
+        console.print("[yellow]No hay leads calificados sin mensaje. Filtra con AI primero.[/yellow]")
+        return
+
+    ollama_filter = OllamaGeminiFilter()
+    if not ollama_filter.is_available():
+        console.print("[red]Se necesita Ollama o Gemini para generar mensajes.[/red]")
+        console.print("[dim]Instala Ollama o configura GEMINI_API_KEY en .env[/dim]")
+        return
+
+    console.print(f"\n[cyan]Generando mensajes para {len(qualified)} leads con {ollama_filter.get_backend_name()}...[/cyan]")
+
+    generated = 0
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console
+    ) as progress:
+        task = progress.add_task("Generando mensajes...", total=len(qualified))
+        for lead in qualified:
+            try:
+                message = ollama_filter.generate_message(lead)
+                if message:
+                    generated += 1
+                progress.update(task, advance=1, description=f"Generando mensajes... ({generated}/{len(qualified)})")
+            except Exception as e:
+                logger.error(f"Error generating message: {e}")
+
+    console.print(f"[green]Mensajes generados: {generated}/{len(qualified)}[/green]")
+
+    # Show sample
+    sample = [l for l in qualified if l.personalized_message][:3]
+    for lead in sample:
+        console.print(Panel(
+            f"[bold]{lead.company or lead.title}[/bold]\n\n{lead.personalized_message}",
+            border_style="green"
+        ))
+
+    _store_leads(leads)
+
+
+# ==================== 9. CONFIGURATION ====================
 
 def menu_configuration():
-    """Main option 6: View/edit configuration."""
+    """Main option 9: View/edit configuration."""
     console.print("\n[bold cyan]═══ CONFIGURACION ═══[/bold cyan]\n")
 
-    # Check API keys
-    console.print("[bold]Estado de APIs:[/bold]")
-    console.print(f"  HubSpot:   {'[green]Configurado[/green]' if settings.hubspot_api_key else '[red]No configurado[/red]'}")
-    console.print(f"  Google:    {'[green]Configurado[/green]' if settings.google_api_key else '[red]No configurado[/red]'}")
-    console.print(f"  OpenAI:    {'[green]Configurado[/green]' if settings.openai_api_key else '[red]No configurado[/red]'}")
-    console.print(f"  Anthropic: {'[green]Configurado[/green]' if settings.anthropic_api_key else '[red]No configurado[/red]'}")
+    # Check AI backends
+    console.print("[bold]Estado de AI:[/bold]")
 
-    console.print(f"\n[bold]Subreddits configurados:[/bold]")
-    console.print(f"  {', '.join(settings.subreddits)}")
+    ollama_filter = OllamaGeminiFilter()
+    if ollama_filter.ollama_available:
+        console.print(f"  Ollama:    [green]Activo ({settings.ollama_model})[/green]")
+    else:
+        console.print("  Ollama:    [red]No disponible[/red] [dim](instala Ollama y ejecuta: ollama pull qwen2.5-coder:7b)[/dim]")
+
+    console.print(f"  Gemini:    {'[green]Configurado[/green]' if settings.gemini_api_key else '[yellow]No configurado[/yellow] [dim](gratis: GEMINI_API_KEY en .env)[/dim]'}")
+    console.print(f"  OpenAI:    {'[green]Configurado[/green]' if settings.openai_api_key else '[dim]No configurado[/dim]'}")
+    console.print(f"  Anthropic: {'[green]Configurado[/green]' if settings.anthropic_api_key else '[dim]No configurado[/dim]'}")
+
+    console.print(f"\n[bold]Estado de APIs:[/bold]")
+    console.print(f"  HubSpot:   {'[green]Configurado[/green]' if settings.hubspot_api_key else '[red]No configurado[/red]'}")
+    console.print(f"  Google:    {'[green]Configurado[/green]' if settings.google_api_key else '[yellow]No configurado[/yellow]'}")
+
+    console.print(f"\n[bold]Fuentes disponibles (10):[/bold]")
+    console.print("  Reddit, Hacker News, Google Search, Product Hunt,")
+    console.print("  Google Maps, Yelp, Indeed, Yellow Pages, BBB, Craigslist")
+
+    console.print(f"\n[bold]Nichos configurados:[/bold]")
+    console.print(f"  {', '.join(settings.maps_niches)}")
+
+    console.print(f"\n[bold]Ubicaciones:[/bold]")
+    console.print(f"  {', '.join(settings.maps_locations)}")
 
     console.print(f"\n[bold]Keywords de dolor:[/bold]")
     for kw in settings.pain_keywords[:10]:
         console.print(f"  - {kw}")
-    console.print(f"  ... y {len(settings.pain_keywords) - 10} mas")
+    if len(settings.pain_keywords) > 10:
+        console.print(f"  ... y {len(settings.pain_keywords) - 10} mas")
 
     console.print("\n[dim]Edita el archivo .env para cambiar la configuracion[/dim]")
 
@@ -439,9 +677,10 @@ def menu_configuration():
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Lead Generation App")
+    parser = argparse.ArgumentParser(description="Lead Generation App v2.0")
     parser.add_argument("--scrape", action="store_true", help="Run scraping only")
     parser.add_argument("--stats", action="store_true", help="Show statistics")
+    parser.add_argument("--export", action="store_true", help="Scrape and export to CSV")
     parser.add_argument("--no-interactive", action="store_true", help="Non-interactive mode")
 
     args = parser.parse_args()
@@ -456,8 +695,17 @@ def main():
     if args.scrape:
         leads = run_scraping()
         filtered = filter_leads_with_ai(leads)
-        if not args.no_interactive:
+        if args.export:
+            filepath = export_leads_to_csv(filtered)
+            console.print(f"[green]Exported to: {filepath}[/green]")
+        elif not args.no_interactive:
             send_to_hubspot(filtered)
+        return
+
+    if args.export:
+        leads = run_scraping()
+        filepath = export_leads_to_csv(leads)
+        console.print(f"[green]Exported to: {filepath}[/green]")
         return
 
     if args.stats:
@@ -483,6 +731,12 @@ def main():
             elif choice == "5":
                 menu_search()
             elif choice == "6":
+                menu_export_csv()
+            elif choice == "7":
+                menu_extract_emails()
+            elif choice == "8":
+                menu_generate_messages()
+            elif choice == "9":
                 menu_configuration()
 
         except KeyboardInterrupt:
