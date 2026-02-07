@@ -9326,64 +9326,80 @@ def render_floating_assistant():
 
     st.markdown("""
     <style>
-        /* Floating AI Button - Modern Pill Design */
+        /* Add bottom padding to main content to prevent overlap */
+        .main .block-container {
+            padding-bottom: 100px !important;
+        }
+
+        /* Floating AI Button - Modern Compact Design */
         .floating-ai-btn {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
+            bottom: 20px;
+            right: 20px;
             z-index: 9999;
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: linear-gradient(135deg, #E85D04 0%, #DC2F02 100%);
+            gap: 8px;
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
             color: white;
             border: none;
             border-radius: 50px;
-            padding: 14px 20px;
+            padding: 12px 18px;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(232, 93, 4, 0.4), 0 0 40px rgba(232, 93, 4, 0.2);
+            box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             font-weight: 600;
-            font-size: 14px;
-            letter-spacing: 0.5px;
+            font-size: 13px;
+            letter-spacing: 0.3px;
             overflow: hidden;
             white-space: nowrap;
         }
 
         .floating-ai-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 30px rgba(232, 93, 4, 0.5), 0 0 60px rgba(232, 93, 4, 0.3);
-            background: linear-gradient(135deg, #F48C06 0%, #E85D04 100%);
-            padding-right: 24px;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(249, 115, 22, 0.45);
+            background: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
+            color: white;
+            text-decoration: none;
         }
 
         .floating-ai-btn:active {
-            transform: translateY(-1px) scale(0.98);
+            transform: translateY(0px);
         }
 
         .floating-ai-icon {
-            font-size: 20px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pulse-glow 2s ease-in-out infinite;
         }
 
         .floating-ai-text {
             font-size: 13px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        @keyframes pulse-glow {
-            0%, 100% {
-                filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+        /* Mobile: Show only icon to save space */
+        @media (max-width: 768px) {
+            .floating-ai-btn {
+                bottom: 16px;
+                right: 16px;
+                padding: 12px;
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+                justify-content: center;
             }
-            50% {
-                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+            .floating-ai-text {
+                display: none;
+            }
+            .floating-ai-icon {
+                font-size: 22px;
+            }
+            .main .block-container {
+                padding-bottom: 80px !important;
             }
         }
 
@@ -9395,7 +9411,7 @@ def render_floating_assistant():
             height: 100%;
             top: 0;
             left: 0;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
             opacity: 0;
             transition: opacity 0.3s;
         }
