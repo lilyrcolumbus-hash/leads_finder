@@ -34,11 +34,30 @@ from google.oauth2.service_account import Credentials
 SHEET_ID = "1P0A_7ptV2791YwQHH9wHAm0C41oPMmW7K1rn7afqHPY"
 CREDENTIALS_FILE = Path(__file__).parent / "credentials" / "google_sheets.json"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
+USER_AGENTS = [
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+]
+
+def get_headers():
+    """Get randomized headers to avoid detection."""
+    return {
+        "User-Agent": random.choice(USER_AGENTS),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0",
+    }
 
 # Column headers for the Sheet
 SHEET_HEADERS = [
@@ -104,10 +123,10 @@ JUNK_DOMAINS = [
 # ==================== SCRAPING ====================
 
 def get_client():
-    """Create HTTP client with retry."""
+    """Create HTTP client with retry and anti-detection."""
     return httpx.Client(
-        headers=HEADERS,
-        timeout=20,
+        headers=get_headers(),
+        timeout=30,
         follow_redirects=True,
         verify=True,
     )
@@ -118,107 +137,114 @@ def random_delay(min_s=1, max_s=3):
     time.sleep(random.uniform(min_s, max_s))
 
 
-def scrape_google_maps(niche: str, city: str, client: httpx.Client) -> list:
-    """Scrape Google Maps search results via Google search."""
+def scrape_via_duckduckgo(niche: str, city: str, client: httpx.Client) -> list:
+    """Scrape business listings via DuckDuckGo (less blocking than Google)."""
     leads = []
-    query = quote_plus(f"{niche} in {city}")
-    url = f"https://www.google.com/search?q={query}&num=20"
 
-    print(f"  Buscando en Google: {niche} in {city}...")
+    queries = [
+        f"{niche} in {city} phone address",
+        f"{niche} near {city} OH contact",
+    ]
+
+    print(f"  Buscando en DuckDuckGo: {niche} in {city}...")
+
+    for query_text in queries:
+        try:
+            url = f"https://html.duckduckgo.com/html/?q={quote_plus(query_text)}"
+            client._headers = get_headers()
+            resp = client.get(url)
+            soup = BeautifulSoup(resp.text, "lxml")
+
+            for result in soup.select("div.result, div.web-result"):
+                title_el = result.select_one("a.result__a, h2 a")
+                snippet_el = result.select_one("a.result__snippet, div.result__snippet")
+                link_el = result.select_one("a.result__url, a.result__a")
+
+                if not title_el:
+                    continue
+
+                title = title_el.get_text(strip=True)
+                link = ""
+                if link_el:
+                    link = link_el.get("href", "")
+                    if link.startswith("//"):
+                        link = "https:" + link
+
+                snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+
+                # Skip directories/aggregators
+                if any(skip in link for skip in ["youtube.com", "wikipedia.org", "facebook.com", "yelp.com/topic", "mapquest.com"]):
+                    continue
+
+                # Extract phone from snippet
+                phone = ""
+                phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+                if phone_match:
+                    phone = phone_match.group()
+
+                leads.append({
+                    "name": title,
+                    "phone": phone,
+                    "website": link,
+                    "address": "",
+                    "snippet": snippet,
+                    "source": "DuckDuckGo",
+                })
+
+            random_delay(2, 4)
+
+        except Exception as e:
+            print(f"    Error DuckDuckGo: {e}")
+
+    print(f"    DuckDuckGo: {len(leads)} resultados")
+    return leads
+
+
+def scrape_yelp_via_ddg(niche: str, city: str, client: httpx.Client) -> list:
+    """Find Yelp listings via DuckDuckGo search."""
+    leads = []
+    query = quote_plus(f"site:yelp.com {niche} {city}")
+    url = f"https://html.duckduckgo.com/html/?q={query}"
+
+    print(f"  Buscando Yelp via DuckDuckGo: {niche} in {city}...")
 
     try:
+        client._headers = get_headers()
         resp = client.get(url)
         soup = BeautifulSoup(resp.text, "lxml")
 
-        for result in soup.select("div.g, div[data-hveid]"):
-            title_el = result.select_one("h3")
-            link_el = result.select_one("a[href]")
-            snippet_el = result.select_one("div.VwiC3b, span.st, div[data-sncf]")
+        for result in soup.select("div.result, div.web-result"):
+            title_el = result.select_one("a.result__a, h2 a")
+            snippet_el = result.select_one("a.result__snippet, div.result__snippet")
 
             if not title_el:
                 continue
 
             title = title_el.get_text(strip=True)
-            link = link_el["href"] if link_el else ""
+            link = title_el.get("href", "")
             snippet = snippet_el.get_text(strip=True) if snippet_el else ""
 
-            # Skip non-business results
-            if any(skip in link for skip in ["youtube.com", "wikipedia.org", "yelp.com/topic"]):
+            if "yelp.com/biz/" not in link:
                 continue
 
-            # Extract phone from snippet
+            # Clean name - remove "- Yelp" suffix
+            name = re.sub(r'\s*[-–]\s*(Yelp|Reviews|Updated).*$', '', title).strip()
+            # Remove leading numbers like "1. "
+            name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+            if not name or len(name) < 3:
+                continue
+
             phone = ""
             phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
             if phone_match:
                 phone = phone_match.group()
 
             leads.append({
-                "name": title,
-                "phone": phone,
-                "website": link,
-                "address": "",
-                "snippet": snippet,
-                "source": "Google Search",
-            })
-
-        print(f"    Google: {len(leads)} resultados")
-
-    except Exception as e:
-        print(f"    Error Google: {e}")
-
-    return leads
-
-
-def scrape_yelp(niche: str, city: str, client: httpx.Client) -> list:
-    """Scrape Yelp search results."""
-    leads = []
-    query = quote_plus(niche)
-    location = quote_plus(city)
-    url = f"https://www.yelp.com/search?find_desc={query}&find_loc={location}"
-
-    print(f"  Buscando en Yelp: {niche} in {city}...")
-
-    try:
-        resp = client.get(url)
-        soup = BeautifulSoup(resp.text, "lxml")
-
-        for biz in soup.select('[data-testid="serp-ia-card"]'):
-            name_el = biz.select_one("a[href*='/biz/'] span")
-            link_el = biz.select_one("a[href*='/biz/']")
-            phone_el = biz.select_one("p:-soup-contains('(')")
-            rating_el = biz.select_one('[aria-label*="star rating"]')
-
-            name = name_el.get_text(strip=True) if name_el else ""
-            if not name:
-                h_el = biz.select_one("h3, h4")
-                name = h_el.get_text(strip=True) if h_el else ""
-
-            if not name:
-                continue
-
-            link = ""
-            if link_el and link_el.get("href"):
-                href = link_el["href"]
-                link = f"https://www.yelp.com{href}" if href.startswith("/") else href
-
-            phone = ""
-            if phone_el:
-                phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', phone_el.get_text())
-                if phone_match:
-                    phone = phone_match.group()
-
-            rating = ""
-            if rating_el:
-                rating_match = re.search(r'([\d.]+)\s*star', rating_el.get("aria-label", ""))
-                if rating_match:
-                    rating = rating_match.group(1)
-
-            leads.append({
                 "name": name,
                 "phone": phone,
                 "website": link,
                 "address": "",
-                "rating": rating,
                 "source": "Yelp",
             })
 
@@ -231,29 +257,46 @@ def scrape_yelp(niche: str, city: str, client: httpx.Client) -> list:
 
 
 def scrape_yellowpages(niche: str, city: str, client: httpx.Client) -> list:
-    """Scrape Yellow Pages."""
+    """Scrape Yellow Pages with proper URL format."""
     leads = []
-    query = quote_plus(niche)
-    location = quote_plus(city)
-    url = f"https://www.yellowpages.com/search?search_terms={query}&geo_location_terms={location}"
+
+    # Yellow Pages uses format: /city-state/niche
+    # e.g., /lima-oh/plumbers
+    city_parts = city.lower().replace(",", "").split()
+    # Try to build proper YP location slug
+    if len(city_parts) >= 2:
+        yp_location = f"{city_parts[0]}-{city_parts[1]}"
+    else:
+        yp_location = city_parts[0] + "-oh"
+
+    niche_slug = niche.lower().replace(" ", "-")
+    url = f"https://www.yellowpages.com/{yp_location}/{niche_slug}"
 
     print(f"  Buscando en Yellow Pages: {niche} in {city}...")
+    print(f"    URL: {url}")
 
     try:
+        client._headers = get_headers()
         resp = client.get(url)
         soup = BeautifulSoup(resp.text, "lxml")
 
-        for result in soup.select("div.result, div.v-card"):
-            name_el = result.select_one("a.business-name, h2 a")
-            phone_el = result.select_one("div.phones, div.phone")
-            addr_el = result.select_one("div.adr, p.adr, div.street-address")
-            link_el = result.select_one("a.track-visit-website")
+        for result in soup.select("div.result, div.v-card, div.srp-listing"):
+            name_el = result.select_one("a.business-name, h2 a, a.listing-name")
+            phone_el = result.select_one("div.phones, div.phone, a[href^='tel:']")
+            addr_el = result.select_one("div.adr, p.adr, div.street-address, p.adr")
+            link_el = result.select_one("a.track-visit-website, a[href*='website']")
 
             name = name_el.get_text(strip=True) if name_el else ""
             if not name:
                 continue
 
-            phone = phone_el.get_text(strip=True) if phone_el else ""
+            phone = ""
+            if phone_el:
+                phone_text = phone_el.get_text(strip=True) or phone_el.get("href", "")
+                phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', phone_text)
+                if phone_match:
+                    phone = phone_match.group()
+
             address = addr_el.get_text(strip=True) if addr_el else ""
             website = link_el["href"] if link_el and link_el.get("href") else ""
 
@@ -265,6 +308,40 @@ def scrape_yellowpages(niche: str, city: str, client: httpx.Client) -> list:
                 "source": "Yellow Pages",
             })
 
+        # Fallback: try search URL format
+        if not leads:
+            url2 = f"https://www.yellowpages.com/search?search_terms={quote_plus(niche)}&geo_location_terms={quote_plus(city)}"
+            client._headers = get_headers()
+            resp = client.get(url2)
+            soup = BeautifulSoup(resp.text, "lxml")
+
+            for result in soup.select("div.result, div.v-card, div.srp-listing"):
+                name_el = result.select_one("a.business-name, h2 a")
+                phone_el = result.select_one("div.phones, div.phone")
+                addr_el = result.select_one("div.adr, p.adr")
+                link_el = result.select_one("a.track-visit-website")
+
+                name = name_el.get_text(strip=True) if name_el else ""
+                if not name:
+                    continue
+
+                phone = ""
+                if phone_el:
+                    phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', phone_el.get_text())
+                    if phone_match:
+                        phone = phone_match.group()
+
+                address = addr_el.get_text(strip=True) if addr_el else ""
+                website = link_el["href"] if link_el and link_el.get("href") else ""
+
+                leads.append({
+                    "name": name,
+                    "phone": phone,
+                    "website": website,
+                    "address": address,
+                    "source": "Yellow Pages",
+                })
+
         print(f"    Yellow Pages: {len(leads)} resultados")
 
     except Exception as e:
@@ -273,38 +350,49 @@ def scrape_yellowpages(niche: str, city: str, client: httpx.Client) -> list:
     return leads
 
 
-def scrape_bbb(niche: str, city: str, client: httpx.Client) -> list:
-    """Scrape BBB listings."""
+def scrape_bbb_via_ddg(niche: str, city: str, client: httpx.Client) -> list:
+    """Find BBB listings via DuckDuckGo search."""
     leads = []
-    query = quote_plus(niche)
-    location = quote_plus(city)
-    url = f"https://www.bbb.org/search?find_country=US&find_text={query}&find_loc={location}&find_type=Category"
+    query = quote_plus(f"site:bbb.org {niche} {city}")
+    url = f"https://html.duckduckgo.com/html/?q={query}"
 
-    print(f"  Buscando en BBB: {niche} in {city}...")
+    print(f"  Buscando BBB via DuckDuckGo: {niche} in {city}...")
 
     try:
+        client._headers = get_headers()
         resp = client.get(url)
         soup = BeautifulSoup(resp.text, "lxml")
 
-        for result in soup.select("div.result-item, a[data-testid]"):
-            name_el = result.select_one("h3, span.result-name, div.result-name")
-            phone_el = result.select_one("a[href^='tel:'], span.phone")
+        for result in soup.select("div.result, div.web-result"):
+            title_el = result.select_one("a.result__a, h2 a")
+            snippet_el = result.select_one("a.result__snippet, div.result__snippet")
 
-            name = name_el.get_text(strip=True) if name_el else ""
-            if not name:
+            if not title_el:
+                continue
+
+            title = title_el.get_text(strip=True)
+            link = title_el.get("href", "")
+            snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+
+            if "bbb.org" not in link:
+                continue
+
+            # Clean name
+            name = re.sub(r'\s*[-–|]\s*(BBB|Better Business|Reviews|Accredited).*$', '', title, flags=re.IGNORECASE).strip()
+            name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+            if not name or len(name) < 3:
                 continue
 
             phone = ""
-            if phone_el:
-                phone_text = phone_el.get("href", "") or phone_el.get_text()
-                phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', phone_text)
-                if phone_match:
-                    phone = phone_match.group()
+            phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+            if phone_match:
+                phone = phone_match.group()
 
             leads.append({
                 "name": name,
                 "phone": phone,
-                "website": "",
+                "website": link,
                 "address": "",
                 "source": "BBB",
             })
@@ -428,7 +516,7 @@ def analyze_website_quality(url: str, client: httpx.Client) -> str:
 
 
 def search_reviews_for_pain(name: str, city: str, client: httpx.Client) -> dict:
-    """Search Google for reviews mentioning communication problems."""
+    """Search for reviews mentioning communication problems via DuckDuckGo."""
     result = {
         "rating": "",
         "total_reviews": "",
@@ -436,35 +524,36 @@ def search_reviews_for_pain(name: str, city: str, client: httpx.Client) -> dict:
         "business_complaints": [],
     }
 
-    # Search for reviews with communication complaints
     queries = [
-        f'"{name}" {city} reviews "no answer" OR "never call back" OR "can\'t reach" OR "don\'t answer" OR "poor communication"',
-        f'"{name}" {city} reviews "didn\'t respond" OR "voicemail" OR "waited" OR "ignored"',
+        f'"{name}" {city} reviews "no answer" OR "never call back" OR "poor communication"',
+        f'"{name}" {city} reviews "voicemail" OR "didn\'t respond" OR "can\'t reach"',
     ]
 
-    for query in queries:
+    for query_text in queries:
         try:
-            url = f"https://www.google.com/search?q={quote_plus(query)}&num=10"
+            url = f"https://html.duckduckgo.com/html/?q={quote_plus(query_text)}"
+            client._headers = get_headers()
             resp = client.get(url)
             soup = BeautifulSoup(resp.text, "lxml")
 
-            # Extract rating if visible
-            rating_el = soup.select_one('span[aria-label*="stars"], span[aria-label*="rating"]')
-            if rating_el and not result["rating"]:
-                rating_match = re.search(r'([\d.]+)', rating_el.get("aria-label", ""))
-                if rating_match:
-                    result["rating"] = rating_match.group(1)
+            for result_el in soup.select("div.result, div.web-result"):
+                snippet_el = result_el.select_one("a.result__snippet, div.result__snippet")
+                if not snippet_el:
+                    continue
 
-            # Extract review count
-            review_el = soup.select_one('span:-soup-contains("reviews"), span:-soup-contains("reseñas")')
-            if review_el and not result["total_reviews"]:
-                count_match = re.search(r'([\d,]+)', review_el.get_text())
-                if count_match:
-                    result["total_reviews"] = count_match.group(1)
+                text = snippet_el.get_text(strip=True).lower()
 
-            # Search snippets for pain keywords
-            for snippet in soup.select("div.VwiC3b, span.st, div[data-sncf]"):
-                text = snippet.get_text(strip=True).lower()
+                # Extract rating from snippets
+                if not result["rating"]:
+                    rating_match = re.search(r'(\d+\.?\d*)\s*(?:star|out of|/\s*5|★)', text)
+                    if rating_match:
+                        result["rating"] = rating_match.group(1)
+
+                # Extract review count
+                if not result["total_reviews"]:
+                    review_match = re.search(r'(\d+[\d,]*)\s*reviews?', text)
+                    if review_match:
+                        result["total_reviews"] = review_match.group(1)
 
                 for kw in PAIN_KEYWORDS_CLIENTS:
                     if kw.lower() in text:
@@ -489,36 +578,25 @@ def search_reviews_for_pain(name: str, city: str, client: httpx.Client) -> dict:
 
 
 def check_social_media(name: str, city: str, client: httpx.Client) -> str:
-    """Quick check for social media presence."""
+    """Quick check for social media presence via DuckDuckGo."""
     issues = []
 
-    # Search for Facebook page
     try:
-        query = quote_plus(f'"{name}" {city} site:facebook.com')
-        url = f"https://www.google.com/search?q={query}&num=3"
+        query = quote_plus(f'"{name}" {city} facebook OR instagram')
+        url = f"https://html.duckduckgo.com/html/?q={query}"
+        client._headers = get_headers()
         resp = client.get(url)
+        text = resp.text.lower()
 
-        if "facebook.com" not in resp.text.lower():
+        if "facebook.com" not in text:
             issues.append("Sin Facebook")
-
-        random_delay(0.5, 1)
-
-    except Exception:
-        pass
-
-    # Search for Instagram
-    try:
-        query = quote_plus(f'"{name}" {city} site:instagram.com')
-        url = f"https://www.google.com/search?q={query}&num=3"
-        resp = client.get(url)
-
-        if "instagram.com" not in resp.text.lower():
+        if "instagram.com" not in text:
             issues.append("Sin Instagram")
 
-        random_delay(0.5, 1)
+        random_delay(1, 2)
 
     except Exception:
-        pass
+        issues = ["No se pudo verificar"]
 
     if not issues:
         return "Tiene Facebook e Instagram"
@@ -706,16 +784,16 @@ def find_leads(niche: str, city: str):
     all_leads = []
 
     # Scrape from multiple sources
-    all_leads.extend(scrape_google_maps(niche, city, client))
+    all_leads.extend(scrape_via_duckduckgo(niche, city, client))
     random_delay(2, 4)
 
-    all_leads.extend(scrape_yelp(niche, city, client))
+    all_leads.extend(scrape_yelp_via_ddg(niche, city, client))
     random_delay(2, 4)
 
     all_leads.extend(scrape_yellowpages(niche, city, client))
     random_delay(2, 4)
 
-    all_leads.extend(scrape_bbb(niche, city, client))
+    all_leads.extend(scrape_bbb_via_ddg(niche, city, client))
 
     # Deduplicate by name
     seen = set()
