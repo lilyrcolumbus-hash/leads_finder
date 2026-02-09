@@ -65,6 +65,8 @@ def get_headers():
 
 # Column headers for the Sheet
 SHEET_HEADERS = [
+    "Fecha",
+    "Fuente",
     "Empresa",
     "Telefono",
     "Email",
@@ -81,8 +83,6 @@ SHEET_HEADERS = [
     "Redes Sociales",
     "Otros Servicios Posibles",
     "Mensaje Sugerido",
-    "Fuente",
-    "Fecha",
 ]
 
 # Keywords that indicate communication pain
@@ -630,13 +630,15 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
 
     # Get existing rows to avoid duplicates
     existing = worksheet.get_all_values()
-    existing_names = {row[0].lower() for row in existing[1:]} if len(existing) > 1 else set()
+    existing_names = {row[2].lower() for row in existing[1:] if len(row) > 2} if len(existing) > 1 else set()
 
     # Prepare new rows
     new_rows = []
     for lead in leads_data:
         if lead["name"].lower() not in existing_names:
             new_rows.append([
+                datetime.now().strftime("%Y-%m-%d %H:%M"),
+                lead.get("source", ""),
                 lead.get("name", ""),
                 lead.get("phone", ""),
                 lead.get("email", ""),
@@ -653,8 +655,6 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
                 lead.get("social_media", ""),
                 lead.get("other_services", ""),
                 lead.get("message", ""),
-                lead.get("source", ""),
-                datetime.now().strftime("%Y-%m-%d %H:%M"),
             ])
 
     if new_rows:
@@ -662,16 +662,16 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
         next_row = len(existing) + 1
         worksheet.update(f"A{next_row}", new_rows)
 
-        # Color code the NECESITA AI RECEPTIONIST column
+        # Color code the NECESITA AI RECEPTIONIST column (Column K, index 10)
         for i, row in enumerate(new_rows):
             cell_row = next_row + i
-            need_level = row[8]  # Column I
+            need_level = row[10]  # Column K
             if need_level == "ALTO":
-                worksheet.format(f"I{cell_row}", {"backgroundColor": {"red": 0.8, "green": 0.2, "blue": 0.2}})
+                worksheet.format(f"K{cell_row}", {"backgroundColor": {"red": 0.8, "green": 0.2, "blue": 0.2}})
             elif need_level == "MEDIO":
-                worksheet.format(f"I{cell_row}", {"backgroundColor": {"red": 1.0, "green": 0.8, "blue": 0.2}})
+                worksheet.format(f"K{cell_row}", {"backgroundColor": {"red": 1.0, "green": 0.8, "blue": 0.2}})
             else:
-                worksheet.format(f"I{cell_row}", {"backgroundColor": {"red": 0.7, "green": 0.9, "blue": 0.7}})
+                worksheet.format(f"K{cell_row}", {"backgroundColor": {"red": 0.7, "green": 0.9, "blue": 0.7}})
 
     return len(new_rows)
 
@@ -812,6 +812,8 @@ def find_leads(niche: str, city: str):
             writer.writeheader()
             for lead in investigated_leads:
                 writer.writerow({
+                    "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "Fuente": lead["source"],
                     "Empresa": lead["name"],
                     "Telefono": lead["phone"],
                     "Email": lead["email"],
@@ -828,8 +830,6 @@ def find_leads(niche: str, city: str):
                     "Redes Sociales": lead["social_media"],
                     "Otros Servicios Posibles": lead["other_services"],
                     "Mensaje Sugerido": lead["message"],
-                    "Fuente": lead["source"],
-                    "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
                 })
         print(f"  Guardado en: {csv_file}")
 
