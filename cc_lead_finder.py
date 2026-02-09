@@ -9,7 +9,7 @@ Usage:
     python cc_lead_finder.py "dentists" "Los Angeles"
 
 Requirements:
-    pip install gspread google-auth httpx beautifulsoup4 lxml duckduckgo-search
+    pip install gspread google-auth httpx beautifulsoup4 lxml ddgs
 """
 
 import sys
@@ -24,7 +24,10 @@ from urllib.parse import quote_plus, urljoin
 
 import httpx
 from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS
+try:
+    from ddgs import DDGS
+except ImportError:
+    from duckduckgo_search import DDGS
 
 # Google Sheets
 import gspread
@@ -141,9 +144,8 @@ def random_delay(min_s=1, max_s=3):
 def search_ddg(query: str, max_results: int = 25) -> list:
     """Search DuckDuckGo using the proper library."""
     try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=max_results))
-            return results
+        results = list(DDGS().text(query, max_results=max_results))
+        return results
     except Exception as e:
         print(f"    Error DDG search: {e}")
         return []
