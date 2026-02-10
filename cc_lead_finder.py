@@ -353,6 +353,118 @@ def scrape_bbb_search(niche: str, city: str) -> list:
     return leads
 
 
+def scrape_linkedin_search(niche: str, city: str) -> list:
+    """Find business LinkedIn profiles via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en LinkedIn: {niche} in {city}...")
+
+    results = search_ddg(f"site:linkedin.com/company {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "linkedin.com" not in link:
+            continue
+
+        # Clean name
+        name = re.sub(r'\s*[-–|]\s*(LinkedIn|Company|Overview|Profile).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": "",
+            "city": city,
+            "source": "LinkedIn",
+        })
+
+    print(f"    LinkedIn: {len(leads)} resultados")
+    return leads
+
+
+def scrape_indeed_hiring(niche: str, city: str) -> list:
+    """Find businesses hiring receptionist/customer service via DuckDuckGo + Indeed."""
+    leads = []
+
+    print(f"  Buscando en Indeed (contratando recepcionista): {niche} in {city}...")
+
+    queries = [
+        f"site:indeed.com receptionist {niche} {city}",
+        f"site:indeed.com \"customer service\" {niche} {city}",
+        f"site:indeed.com \"front desk\" {niche} {city}",
+        f"site:indeed.com \"phone\" {niche} {city} hiring",
+    ]
+
+    for query_text in queries:
+        results = search_ddg(query_text, max_results=10)
+
+        for r in results:
+            title = r.get("title", "")
+            link = r.get("href", "")
+            snippet = r.get("body", "")
+
+            if "indeed.com" not in link:
+                continue
+
+            # Try to extract company name from Indeed title format: "Job Title - Company Name"
+            name = ""
+            if " - " in title:
+                parts = title.split(" - ")
+                if len(parts) >= 2:
+                    # Company is usually the second part
+                    name = re.sub(r'\s*[-–|]\s*(Indeed|Job|Review).*$', '', parts[1], flags=re.IGNORECASE).strip()
+
+            if not name or len(name) < 3:
+                # Try from snippet
+                name = re.sub(r'\s*[-–|]\s*(Indeed|Job|Review).*$', '', title, flags=re.IGNORECASE).strip()
+
+            if not name or len(name) < 3:
+                continue
+
+            # Detect what they're hiring for
+            hiring_role = ""
+            for keyword in ["receptionist", "customer service", "front desk", "phone operator", "office manager", "secretary", "answering"]:
+                if keyword in title.lower() or keyword in snippet.lower():
+                    hiring_role = keyword
+                    break
+
+            leads.append({
+                "name": name,
+                "phone": "",
+                "website": link,
+                "address": "",
+                "city": city,
+                "source": "Indeed",
+                "hiring_role": hiring_role,
+            })
+
+        random_delay(1, 2)
+
+    # Deduplicate within Indeed results
+    seen = set()
+    unique = []
+    for lead in leads:
+        key = lead["name"].lower().strip()
+        if key not in seen:
+            seen.add(key)
+            unique.append(lead)
+
+    print(f"    Indeed (contratando): {len(unique)} resultados")
+    return unique
+
+
 # ==================== INVESTIGATION ====================
 
 def extract_emails_from_website(url: str, client: httpx.Client) -> list:
@@ -542,10 +654,15 @@ def check_social_media(name: str, city: str) -> str:
         return ", ".join(issues)
 
 
-def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: str) -> tuple:
+def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: str, hiring_role: str = "") -> tuple:
     """Determine if business needs AI Receptionist. Returns (level, evidence)."""
     score = 0
     evidence = []
+
+    # Hiring receptionist/customer service (STRONGEST signal - automatic ALTO)
+    if hiring_role:
+        score += 10
+        evidence.append(f"CONTRATANDO: {hiring_role} (Indeed)")
 
     # Client complaints about communication (strongest signal)
     if reviews["client_complaints"]:
@@ -748,6 +865,12 @@ def find_leads(niche: str, city: str):
         random_delay(1, 3)
 
         all_leads.extend(scrape_bbb_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_linkedin_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_indeed_hiring(niche, search_city))
         random_delay(2, 4)
 
     # Deduplicate by name
@@ -791,7 +914,8 @@ def find_leads(niche: str, city: str):
         random_delay(0.5, 1)
 
         # Determine AI Receptionist need
-        need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, social)
+        hiring_role = lead.get("hiring_role", "")
+        need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, social, hiring_role)
 
         # Suggest other services
         other_services = suggest_other_services(website_quality, social)
