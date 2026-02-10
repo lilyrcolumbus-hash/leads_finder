@@ -465,6 +465,232 @@ def scrape_indeed_hiring(niche: str, city: str) -> list:
     return unique
 
 
+def scrape_google_maps_search(niche: str, city: str) -> list:
+    """Find Google Maps/Business listings via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Google Maps: {niche} in {city}...")
+
+    results = search_ddg(f"site:google.com/maps {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "google.com" not in link:
+            continue
+
+        # Clean name
+        name = re.sub(r'\s*[-–·]\s*(Google Maps|Maps|Reviews).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        # Extract rating from snippet
+        rating = ""
+        rating_match = re.search(r'(\d+\.?\d*)\s*(?:stars?|estrellas?|rating)', snippet, re.IGNORECASE)
+        if rating_match:
+            rating = rating_match.group(1)
+
+        address = ""
+        addr_match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct|Pkwy|Hwy)[\w\s,]*', snippet)
+        if addr_match:
+            address = addr_match.group().strip()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": address,
+            "city": city,
+            "rating": rating,
+            "source": "Google Maps",
+        })
+
+    print(f"    Google Maps: {len(leads)} resultados")
+    return leads
+
+
+def scrape_facebook_search(niche: str, city: str) -> list:
+    """Find Facebook business pages via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Facebook: {niche} in {city}...")
+
+    results = search_ddg(f"site:facebook.com {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "facebook.com" not in link:
+            continue
+
+        # Skip personal profiles, groups, marketplace
+        if any(skip in link for skip in ["/groups/", "/marketplace/", "/people/", "/events/"]):
+            continue
+
+        # Clean name
+        name = re.sub(r'\s*[-–|]\s*(Facebook|Posts|Reviews|Photos|Videos).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": "",
+            "city": city,
+            "source": "Facebook",
+        })
+
+    print(f"    Facebook: {len(leads)} resultados")
+    return leads
+
+
+def scrape_angi_search(niche: str, city: str) -> list:
+    """Find Angi (Angie's List) listings via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Angi: {niche} in {city}...")
+
+    results = search_ddg(f"site:angi.com {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "angi.com" not in link:
+            continue
+
+        # Clean name
+        name = re.sub(r'\s*[-–|]\s*(Angi|Angie|Reviews|Ratings|Cost).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": "",
+            "city": city,
+            "source": "Angi",
+        })
+
+    print(f"    Angi: {len(leads)} resultados")
+    return leads
+
+
+def scrape_thumbtack_search(niche: str, city: str) -> list:
+    """Find Thumbtack listings via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Thumbtack: {niche} in {city}...")
+
+    results = search_ddg(f"site:thumbtack.com {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "thumbtack.com" not in link:
+            continue
+
+        # Clean name
+        name = re.sub(r'\s*[-–|]\s*(Thumbtack|Reviews|Cost|Prices).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": "",
+            "city": city,
+            "source": "Thumbtack",
+        })
+
+    print(f"    Thumbtack: {len(leads)} resultados")
+    return leads
+
+
+def scrape_manta_search(niche: str, city: str) -> list:
+    """Find Manta business listings via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Manta: {niche} in {city}...")
+
+    results = search_ddg(f"site:manta.com {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "manta.com" not in link:
+            continue
+
+        # Clean name
+        name = re.sub(r'\s*[-–|]\s*(Manta|Company Profile|Reviews).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        address = ""
+        addr_match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct)[\w\s,]*', snippet)
+        if addr_match:
+            address = addr_match.group().strip()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": address,
+            "city": city,
+            "source": "Manta",
+        })
+
+    print(f"    Manta: {len(leads)} resultados")
+    return leads
+
+
 # ==================== INVESTIGATION ====================
 
 def extract_emails_from_website(url: str, client: httpx.Client) -> list:
@@ -871,6 +1097,21 @@ def find_leads(niche: str, city: str):
         random_delay(1, 3)
 
         all_leads.extend(scrape_indeed_hiring(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_google_maps_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_facebook_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_angi_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_thumbtack_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_manta_search(niche, search_city))
         random_delay(2, 4)
 
     # Deduplicate by name
