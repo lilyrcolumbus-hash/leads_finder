@@ -628,9 +628,19 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
     """Write leads to a specific tab in the Sheet."""
     worksheet = get_or_create_tab(spreadsheet, tab_name)
 
-    # Get existing rows to avoid duplicates
+    # Get existing names from ALL tabs to avoid duplicates across industries
+    existing_names = set()
+    for ws in spreadsheet.worksheets():
+        try:
+            rows = ws.get_all_values()
+            for row in rows[1:]:
+                if len(row) > 2 and row[2].strip():
+                    existing_names.add(row[2].lower())
+        except Exception:
+            pass
+
+    # Also get current tab rows to know where to append
     existing = worksheet.get_all_values()
-    existing_names = {row[2].lower() for row in existing[1:] if len(row) > 2} if len(existing) > 1 else set()
 
     # Prepare new rows
     new_rows = []
