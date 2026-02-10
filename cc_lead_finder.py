@@ -856,57 +856,74 @@ def scrape_complaints_search(niche: str, city: str) -> list:
 
 # ==================== INVESTIGATION ====================
 
-def extract_emails_from_website(url: str, client: httpx.Client) -> list:
-    """Visit a website and extract email addresses."""
+def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", city: str = "") -> list:
+    """Extract emails from website + DuckDuckGo search as fallback."""
     emails = set()
     skip_sites = [
         "yelp.com", "yellowpages.com", "bbb.org", "google.com",
         "facebook.com", "linkedin.com", "indeed.com", "angi.com",
         "thumbtack.com", "manta.com", "nextdoor.com", "craigslist.org",
     ]
-    if not url or any(d in url for d in skip_sites):
-        return list(emails)
 
-    pages_to_check = [url]
-    try:
-        resp = client.get(url)
-        soup = BeautifulSoup(resp.text, "lxml")
+    has_own_website = url and not any(d in url for d in skip_sites)
 
-        # Find contact/about pages
-        for a in soup.select("a[href]"):
-            href = a.get("href", "").lower()
-            text = a.get_text(strip=True).lower()
-            if any(kw in href or kw in text for kw in ["contact", "about", "contacto"]):
-                full_url = urljoin(url, a["href"])
-                if full_url not in pages_to_check:
-                    pages_to_check.append(full_url)
-
-    except Exception:
-        pass
-
-    for page in pages_to_check[:3]:
+    # Method 1: Scrape website directly (home + contact + about pages)
+    if has_own_website:
+        pages_to_check = [url]
         try:
-            resp = client.get(page)
-            text = resp.text
+            resp = client.get(url)
+            soup = BeautifulSoup(resp.text, "lxml")
 
-            # Regex for emails
-            found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
-            for email in found:
-                domain = email.split("@")[1].lower()
-                if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
-                    emails.add(email.lower())
+            # Find contact/about/team pages
+            for a in soup.select("a[href]"):
+                href = a.get("href", "").lower()
+                text = a.get_text(strip=True).lower()
+                if any(kw in href or kw in text for kw in ["contact", "about", "contacto", "team", "staff"]):
+                    full_url = urljoin(url, a["href"])
+                    if full_url not in pages_to_check:
+                        pages_to_check.append(full_url)
 
-            # Mailto links
-            soup = BeautifulSoup(text, "lxml")
-            for a in soup.select("a[href^='mailto:']"):
-                email = a["href"].replace("mailto:", "").split("?")[0].strip()
-                if email and "@" in email:
+        except Exception:
+            pass
+
+        for page in pages_to_check[:4]:
+            try:
+                resp = client.get(page)
+                text = resp.text
+
+                # Regex for emails
+                found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
+                for email in found:
                     domain = email.split("@")[1].lower()
-                    if domain not in JUNK_DOMAINS:
+                    if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
                         emails.add(email.lower())
 
-            random_delay(0.5, 1)
+                # Mailto links
+                soup = BeautifulSoup(text, "lxml")
+                for a in soup.select("a[href^='mailto:']"):
+                    email = a["href"].replace("mailto:", "").split("?")[0].strip()
+                    if email and "@" in email:
+                        domain = email.split("@")[1].lower()
+                        if domain not in JUNK_DOMAINS:
+                            emails.add(email.lower())
 
+                random_delay(0.3, 0.8)
+
+            except Exception:
+                pass
+
+    # Method 2: DuckDuckGo search for email (always, as fallback or complement)
+    if name:
+        try:
+            results = search_ddg(f'"{name}" {city} email contact @', max_results=8)
+            for r in results:
+                text = r.get("body", "") + " " + r.get("title", "")
+                found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
+                for email in found:
+                    domain = email.split("@")[1].lower()
+                    if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
+                        emails.add(email.lower())
+            random_delay(0.5, 1)
         except Exception:
             pass
 
@@ -984,16 +1001,10 @@ def search_reviews_for_pain(name: str, city: str) -> dict:
         "platforms_found": [],
     }
 
-    # Search across all major review platforms for this specific business
+    # 2 smart queries: reviews + complaints (fast, no redundancy)
     queries = [
-        f'"{name}" {city} reviews',
-        f'"{name}" {city} "no answer" OR "never call back" OR "poor communication"',
-        f'site:yelp.com "{name}" {city}',
-        f'site:google.com "{name}" {city} reviews',
-        f'site:bbb.org "{name}" {city}',
-        f'site:facebook.com "{name}" {city}',
-        f'site:angi.com "{name}" {city}',
-        f'"{name}" {city} "voicemail" OR "hold" OR "wait time" OR "rude"',
+        f'"{name}" {city} reviews rating',
+        f'"{name}" {city} "no answer" OR "never call back" OR "voicemail" OR "poor communication"',
     ]
 
     for query_text in queries:
@@ -1366,8 +1377,9 @@ def find_leads(niche: str, city: str):
         name = lead["name"]
         print(f"  [{i+1}/{len(unique_leads)}] Investigando: {name}...")
 
-        # Extract emails from website
-        emails = extract_emails_from_website(lead.get("website", ""), client)
+        # Extract emails from website + DuckDuckGo search
+        lead_city = lead.get("city", city)
+        emails = extract_emails_from_website(lead.get("website", ""), client, name, lead_city)
         random_delay(0.5, 1)
 
         # Analyze website quality
