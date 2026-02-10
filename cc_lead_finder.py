@@ -63,6 +63,30 @@ def get_headers():
         "Cache-Control": "max-age=0",
     }
 
+# Nearby cities/towns for expanded area search
+# Add more areas as needed - format: "main city state" -> [list of nearby towns]
+AREA_EXPANSIONS = {
+    "lima ohio": [
+        "Lima Ohio",
+        "Allen County Ohio",
+        "Elida Ohio",
+        "Delphos Ohio",
+        "Spencerville Ohio",
+        "Bluffton Ohio",
+        "Cairo Ohio",
+        "Harrod Ohio",
+        "Lafayette Ohio",
+        "Beaverdam Ohio",
+        "Wapakoneta Ohio",
+        "Findlay Ohio",
+        "Sidney Ohio",
+        "Van Wert Ohio",
+        "Kenton Ohio",
+        "Celina Ohio",
+        "St Marys Ohio",
+    ],
+}
+
 # Column headers for the Sheet
 SHEET_HEADERS = [
     "Fecha",
@@ -190,6 +214,7 @@ def scrape_general_search(niche: str, city: str) -> list:
                 "phone": phone,
                 "website": link,
                 "address": address,
+                "city": city,
                 "snippet": snippet,
                 "source": "Web Search",
             })
@@ -233,6 +258,7 @@ def scrape_yelp_search(niche: str, city: str) -> list:
             "phone": phone,
             "website": link,
             "address": "",
+            "city": city,
             "source": "Yelp",
         })
 
@@ -278,6 +304,7 @@ def scrape_yellowpages_search(niche: str, city: str) -> list:
             "phone": phone,
             "website": link,
             "address": address,
+            "city": city,
             "source": "Yellow Pages",
         })
 
@@ -318,6 +345,7 @@ def scrape_bbb_search(niche: str, city: str) -> list:
             "phone": phone,
             "website": link,
             "address": "",
+            "city": city,
             "source": "BBB",
         })
 
@@ -691,29 +719,36 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
 def find_leads(niche: str, city: str):
     """Main function: find leads, investigate, write to Sheet."""
 
+    # Check if we have expanded area for this city
+    city_key = city.lower().strip()
+    search_cities = AREA_EXPANSIONS.get(city_key, [city])
+
     print(f"\n{'='*60}")
     print(f"  CC LEAD FINDER - by Claude Code")
     print(f"  Industria: {niche}")
-    print(f"  Ciudad: {city}")
+    print(f"  Area: {city} ({len(search_cities)} zonas)")
     print(f"{'='*60}\n")
 
-    # Step 1: Scrape multiple sources
-    print("[1/4] BUSCANDO EMPRESAS...\n")
+    # Step 1: Scrape multiple sources across all cities in area
+    print(f"[1/4] BUSCANDO EMPRESAS EN {len(search_cities)} ZONAS...\n")
 
     client = get_client()
     all_leads = []
 
-    # Scrape from multiple sources
-    all_leads.extend(scrape_general_search(niche, city))
-    random_delay(1, 3)
+    for ci, search_city in enumerate(search_cities):
+        print(f"  --- Zona {ci+1}/{len(search_cities)}: {search_city} ---")
 
-    all_leads.extend(scrape_yelp_search(niche, city))
-    random_delay(1, 3)
+        all_leads.extend(scrape_general_search(niche, search_city))
+        random_delay(1, 3)
 
-    all_leads.extend(scrape_yellowpages_search(niche, city))
-    random_delay(1, 3)
+        all_leads.extend(scrape_yelp_search(niche, search_city))
+        random_delay(1, 3)
 
-    all_leads.extend(scrape_bbb_search(niche, city))
+        all_leads.extend(scrape_yellowpages_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_bbb_search(niche, search_city))
+        random_delay(2, 4)
 
     # Deduplicate by name
     seen = set()
@@ -747,11 +782,12 @@ def find_leads(niche: str, city: str):
         random_delay(0.5, 1)
 
         # Search reviews for communication pain
-        reviews = search_reviews_for_pain(name, city)
+        lead_city = lead.get("city", city)
+        reviews = search_reviews_for_pain(name, lead_city)
         random_delay(1, 2)
 
         # Check social media
-        social = check_social_media(name, city)
+        social = check_social_media(name, lead_city)
         random_delay(0.5, 1)
 
         # Determine AI Receptionist need
