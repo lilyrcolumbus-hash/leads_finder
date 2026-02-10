@@ -182,6 +182,9 @@ def scrape_general_search(niche: str, city: str) -> list:
     queries = [
         f"{niche} in {city} phone number",
         f"best {niche} {city} contact",
+        f"emergency {niche} {city}",
+        f"24 hour {niche} {city}",
+        f"{niche} near {city} Ohio",
     ]
 
     print(f"  Buscando negocios: {niche} in {city}...")
@@ -231,7 +234,12 @@ def scrape_yelp_search(niche: str, city: str) -> list:
 
     print(f"  Buscando en Yelp: {niche} in {city}...")
 
-    results = search_ddg(f"site:yelp.com {niche} {city}", max_results=15)
+    all_results = []
+    for q in [f"site:yelp.com {niche} {city}", f"site:yelp.com best {niche} near {city}"]:
+        all_results.extend(search_ddg(q, max_results=15))
+        random_delay(0.5, 1)
+
+    results = all_results
 
     for r in results:
         title = r.get("title", "")
@@ -272,7 +280,12 @@ def scrape_yellowpages_search(niche: str, city: str) -> list:
 
     print(f"  Buscando en Yellow Pages: {niche} in {city}...")
 
-    results = search_ddg(f"site:yellowpages.com {niche} {city}", max_results=15)
+    all_results = []
+    for q in [f"site:yellowpages.com {niche} {city}", f"site:yellowpages.com {niche} near {city} Ohio"]:
+        all_results.extend(search_ddg(q, max_results=15))
+        random_delay(0.5, 1)
+
+    results = all_results
 
     for r in results:
         title = r.get("title", "")
@@ -313,12 +326,23 @@ def scrape_yellowpages_search(niche: str, city: str) -> list:
 
 
 def scrape_bbb_search(niche: str, city: str) -> list:
-    """Find BBB listings via DuckDuckGo."""
+    """Find BBB listings and complaints via DuckDuckGo."""
     leads = []
 
     print(f"  Buscando en BBB: {niche} in {city}...")
 
-    results = search_ddg(f"site:bbb.org {niche} {city}", max_results=15)
+    queries = [
+        f"site:bbb.org {niche} {city}",
+        f"site:bbb.org {niche} {city} complaints",
+        f"site:bbb.org {niche} {city} customer reviews",
+    ]
+
+    all_results = []
+    for q in queries:
+        all_results.extend(search_ddg(q, max_results=10))
+        random_delay(0.5, 1)
+
+    results = all_results
 
     for r in results:
         title = r.get("title", "")
@@ -405,6 +429,10 @@ def scrape_indeed_hiring(niche: str, city: str) -> list:
         f"site:indeed.com \"customer service\" {niche} {city}",
         f"site:indeed.com \"front desk\" {niche} {city}",
         f"site:indeed.com \"phone\" {niche} {city} hiring",
+        f"site:indeed.com \"office assistant\" {niche} {city}",
+        f"site:indeed.com \"office manager\" {niche} {city}",
+        f"site:indeed.com \"answering service\" OR \"call center\" {niche} {city}",
+        f"site:indeed.com \"secretary\" OR \"dispatcher\" {niche} {city}",
     ]
 
     for query_text in queries:
@@ -435,7 +463,7 @@ def scrape_indeed_hiring(niche: str, city: str) -> list:
 
             # Detect what they're hiring for
             hiring_role = ""
-            for keyword in ["receptionist", "customer service", "front desk", "phone operator", "office manager", "secretary", "answering"]:
+            for keyword in ["receptionist", "customer service", "front desk", "phone operator", "office manager", "secretary", "answering", "office assistant", "dispatcher", "call center"]:
                 if keyword in title.lower() or keyword in snippet.lower():
                     hiring_role = keyword
                     break
@@ -691,12 +719,152 @@ def scrape_manta_search(niche: str, city: str) -> list:
     return leads
 
 
+def scrape_nextdoor_search(niche: str, city: str) -> list:
+    """Find Nextdoor recommendations/complaints via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Nextdoor: {niche} in {city}...")
+
+    results = search_ddg(f"site:nextdoor.com {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "nextdoor.com" not in link:
+            continue
+
+        # Clean name - Nextdoor titles are often recommendations
+        name = re.sub(r'\s*[-–|]\s*(Nextdoor|Neighborhood|Recommend).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": "",
+            "city": city,
+            "source": "Nextdoor",
+        })
+
+    print(f"    Nextdoor: {len(leads)} resultados")
+    return leads
+
+
+def scrape_craigslist_search(niche: str, city: str) -> list:
+    """Find Craigslist service ads via DuckDuckGo."""
+    leads = []
+
+    print(f"  Buscando en Craigslist: {niche} in {city}...")
+
+    results = search_ddg(f"site:craigslist.org {niche} {city}", max_results=15)
+
+    for r in results:
+        title = r.get("title", "")
+        link = r.get("href", "")
+        snippet = r.get("body", "")
+
+        if "craigslist.org" not in link:
+            continue
+
+        name = re.sub(r'\s*[-–|]\s*(Craigslist|CL).*$', '', title, flags=re.IGNORECASE).strip()
+        name = re.sub(r'^\d+\.\s*', '', name).strip()
+        # Remove price patterns
+        name = re.sub(r'\$[\d,.]+', '', name).strip()
+
+        if not name or len(name) < 3:
+            continue
+
+        phone = ""
+        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+        if phone_match:
+            phone = phone_match.group()
+
+        leads.append({
+            "name": name,
+            "phone": phone,
+            "website": link,
+            "address": "",
+            "city": city,
+            "source": "Craigslist",
+        })
+
+    print(f"    Craigslist: {len(leads)} resultados")
+    return leads
+
+
+def scrape_complaints_search(niche: str, city: str) -> list:
+    """Search specifically for businesses with communication complaints."""
+    leads = []
+
+    print(f"  Buscando quejas de comunicacion: {niche} in {city}...")
+
+    queries = [
+        f'{niche} {city} "never answer" OR "don\'t answer" OR "no answer"',
+        f'{niche} {city} "never call back" OR "didn\'t call back" OR "won\'t return calls"',
+        f'{niche} {city} "can\'t reach" OR "hard to reach" OR "unreachable"',
+        f'{niche} {city} "poor communication" OR "terrible communication" OR "no communication"',
+        f'{niche} {city} "left voicemail" OR "went to voicemail" OR "straight to voicemail"',
+    ]
+
+    for query_text in queries:
+        try:
+            results = search_ddg(query_text, max_results=10)
+
+            for r in results:
+                title = r.get("title", "")
+                link = r.get("href", "")
+                snippet = r.get("body", "")
+
+                # Skip non-business pages
+                if any(skip in link for skip in ["youtube.com", "wikipedia.org", "reddit.com/r/"]):
+                    continue
+
+                phone = ""
+                phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
+                if phone_match:
+                    phone = phone_match.group()
+
+                leads.append({
+                    "name": title,
+                    "phone": phone,
+                    "website": link,
+                    "address": "",
+                    "city": city,
+                    "snippet": snippet,
+                    "source": "Complaints Search",
+                    "has_complaint": True,
+                })
+
+            random_delay(1, 2)
+
+        except Exception:
+            pass
+
+    print(f"    Quejas encontradas: {len(leads)} resultados")
+    return leads
+
+
 # ==================== INVESTIGATION ====================
 
 def extract_emails_from_website(url: str, client: httpx.Client) -> list:
     """Visit a website and extract email addresses."""
     emails = set()
-    if not url or "yelp.com" in url or "yellowpages.com" in url or "bbb.org" in url:
+    skip_sites = [
+        "yelp.com", "yellowpages.com", "bbb.org", "google.com",
+        "facebook.com", "linkedin.com", "indeed.com", "angi.com",
+        "thumbtack.com", "manta.com", "nextdoor.com", "craigslist.org",
+    ]
+    if not url or any(d in url for d in skip_sites):
         return list(emails)
 
     pages_to_check = [url]
@@ -747,7 +915,12 @@ def extract_emails_from_website(url: str, client: httpx.Client) -> list:
 
 def analyze_website_quality(url: str, client: httpx.Client) -> str:
     """Analyze website quality."""
-    if not url or any(d in url for d in ["yelp.com", "yellowpages.com", "bbb.org", "google.com"]):
+    directory_sites = [
+        "yelp.com", "yellowpages.com", "bbb.org", "google.com",
+        "facebook.com", "linkedin.com", "indeed.com", "angi.com",
+        "thumbtack.com", "manta.com", "nextdoor.com", "craigslist.org",
+    ]
+    if not url or any(d in url for d in directory_sites):
         return "Sin website propio"
 
     try:
@@ -880,7 +1053,7 @@ def check_social_media(name: str, city: str) -> str:
         return ", ".join(issues)
 
 
-def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: str, hiring_role: str = "") -> tuple:
+def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: str, hiring_role: str = "", has_complaint: bool = False) -> tuple:
     """Determine if business needs AI Receptionist. Returns (level, evidence)."""
     score = 0
     evidence = []
@@ -889,6 +1062,11 @@ def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: 
     if hiring_role:
         score += 10
         evidence.append(f"CONTRATANDO: {hiring_role} (Indeed)")
+
+    # Found via complaint search (very strong signal)
+    if has_complaint:
+        score += 6
+        evidence.append("Encontrado en busqueda de quejas de comunicacion")
 
     # Client complaints about communication (strongest signal)
     if reviews["client_complaints"]:
@@ -914,6 +1092,11 @@ def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: 
                 evidence.append(f"Rating: {rating} estrellas")
         except ValueError:
             pass
+
+    # No website at all (strong signal - small business, no tech)
+    if "Sin website propio" in website_quality:
+        score += 2
+        evidence.append("Sin website propio - negocio pequeno sin tecnologia")
 
     # Website issues
     if "Sin chat" in website_quality:
@@ -1112,6 +1295,15 @@ def find_leads(niche: str, city: str):
         random_delay(1, 3)
 
         all_leads.extend(scrape_manta_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_nextdoor_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_craigslist_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_complaints_search(niche, search_city))
         random_delay(2, 4)
 
     # Deduplicate by name
@@ -1156,7 +1348,8 @@ def find_leads(niche: str, city: str):
 
         # Determine AI Receptionist need
         hiring_role = lead.get("hiring_role", "")
-        need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, social, hiring_role)
+        has_complaint = lead.get("has_complaint", False)
+        need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, social, hiring_role, has_complaint)
 
         # Suggest other services
         other_services = suggest_other_services(website_quality, social)
