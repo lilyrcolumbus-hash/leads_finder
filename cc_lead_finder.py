@@ -975,25 +975,39 @@ def analyze_website_quality(url: str, client: httpx.Client) -> str:
 
 
 def search_reviews_for_pain(name: str, city: str) -> dict:
-    """Search for reviews mentioning communication problems."""
+    """Search for reviews/complaints across multiple platforms."""
     result = {
         "rating": "",
         "total_reviews": "",
         "client_complaints": [],
         "business_complaints": [],
+        "platforms_found": [],
     }
 
+    # Search across all major review platforms for this specific business
     queries = [
         f'"{name}" {city} reviews',
         f'"{name}" {city} "no answer" OR "never call back" OR "poor communication"',
+        f'site:yelp.com "{name}" {city}',
+        f'site:google.com "{name}" {city} reviews',
+        f'site:bbb.org "{name}" {city}',
+        f'site:facebook.com "{name}" {city}',
+        f'site:angi.com "{name}" {city}',
+        f'"{name}" {city} "voicemail" OR "hold" OR "wait time" OR "rude"',
     ]
 
     for query_text in queries:
         try:
-            search_results = search_ddg(query_text, max_results=10)
+            search_results = search_ddg(query_text, max_results=8)
 
             for r in search_results:
                 text = (r.get("body", "") + " " + r.get("title", "")).lower()
+                link = r.get("href", "").lower()
+
+                # Track which platforms this business appears on
+                for platform in ["yelp.com", "google.com", "bbb.org", "facebook.com", "angi.com", "thumbtack.com"]:
+                    if platform in link and platform not in result["platforms_found"]:
+                        result["platforms_found"].append(platform)
 
                 # Extract rating
                 if not result["rating"]:
@@ -1021,7 +1035,7 @@ def search_reviews_for_pain(name: str, city: str) -> dict:
                             result["business_complaints"].append(complaint)
                         break
 
-            random_delay(1, 2)
+            random_delay(0.5, 1.5)
 
         except Exception:
             pass
@@ -1030,27 +1044,42 @@ def search_reviews_for_pain(name: str, city: str) -> dict:
 
 
 def check_social_media(name: str, city: str) -> str:
-    """Quick check for social media presence."""
-    issues = []
+    """Check social media presence across multiple platforms."""
+    found = []
+    missing = []
 
     try:
-        results = search_ddg(f'"{name}" {city} facebook instagram', max_results=5)
+        results = search_ddg(f'"{name}" {city} facebook instagram linkedin google', max_results=10)
         all_text = " ".join([r.get("href", "") + " " + r.get("body", "") for r in results]).lower()
 
-        if "facebook.com" not in all_text:
-            issues.append("Sin Facebook")
-        if "instagram.com" not in all_text:
-            issues.append("Sin Instagram")
+        checks = [
+            ("facebook.com", "Facebook"),
+            ("instagram.com", "Instagram"),
+            ("linkedin.com", "LinkedIn"),
+            ("twitter.com", "Twitter/X"),
+            ("x.com", "Twitter/X"),
+            ("tiktok.com", "TikTok"),
+        ]
+
+        for domain, name_platform in checks:
+            if domain in all_text:
+                if name_platform not in found:
+                    found.append(name_platform)
+            else:
+                if name_platform not in missing and name_platform not in found:
+                    missing.append(name_platform)
 
         random_delay(0.5, 1)
 
     except Exception:
-        issues = ["No se pudo verificar"]
+        return "No se pudo verificar"
 
-    if not issues:
-        return "Tiene Facebook e Instagram"
-    else:
-        return ", ".join(issues)
+    parts = []
+    if found:
+        parts.append(f"Tiene: {', '.join(found)}")
+    if missing:
+        parts.append(f"Sin: {', '.join(missing)}")
+    return " | ".join(parts) if parts else "No se encontraron redes"
 
 
 def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: str, hiring_role: str = "", has_complaint: bool = False) -> tuple:
@@ -1067,6 +1096,14 @@ def determine_ai_receptionist_need(reviews: dict, website_quality: str, social: 
     if has_complaint:
         score += 6
         evidence.append("Encontrado en busqueda de quejas de comunicacion")
+
+    # Low online presence (not found on review platforms = small, needs help)
+    platforms = reviews.get("platforms_found", [])
+    if len(platforms) == 0:
+        score += 1
+        evidence.append("Presencia online minima - no encontrado en plataformas de reviews")
+    elif len(platforms) >= 3:
+        evidence.append(f"Presente en: {', '.join(platforms)}")
 
     # Client complaints about communication (strongest signal)
     if reviews["client_complaints"]:
@@ -1379,7 +1416,9 @@ def find_leads(niche: str, city: str):
 
         # Print quick status
         icon = "!!!" if need_level == "ALTO" else "!" if need_level == "MEDIO" else "-"
-        print(f"    AI Receptionist: {need_level} {icon}")
+        platforms = reviews.get("platforms_found", [])
+        platform_str = f" | Encontrado en: {', '.join(platforms)}" if platforms else ""
+        print(f"    AI Receptionist: {need_level} {icon}{platform_str}")
 
     # Step 3: Sort by priority
     print(f"\n[3/4] ORGANIZANDO RESULTADOS...\n")
