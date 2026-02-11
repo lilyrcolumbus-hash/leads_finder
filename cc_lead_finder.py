@@ -69,21 +69,10 @@ AREA_EXPANSIONS = {
     "lima ohio": [
         "Lima Ohio",
         "Allen County Ohio",
-        "Elida Ohio",
-        "Delphos Ohio",
-        "Spencerville Ohio",
-        "Bluffton Ohio",
-        "Cairo Ohio",
-        "Harrod Ohio",
-        "Lafayette Ohio",
-        "Beaverdam Ohio",
         "Wapakoneta Ohio",
         "Findlay Ohio",
         "Sidney Ohio",
         "Van Wert Ohio",
-        "Kenton Ohio",
-        "Celina Ohio",
-        "St Marys Ohio",
     ],
 }
 
