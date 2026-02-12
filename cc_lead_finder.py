@@ -164,6 +164,64 @@ def search_ddg(query: str, max_results: int = 25) -> list:
         return []
 
 
+# Words that indicate a list/aggregator page, not an individual business
+LIST_SKIP_WORDS = [
+    "top 10", "top 5", "top 15", "top 20", "top 25", "top 50",
+    "best 10", "best 20", "best 30", "best of",
+    "top rated", "near me", "directory", "listing",
+    "companies in", "services in", "contractors in",
+    "how to", "what is", "how much", "cost of", "vs ",
+    "plumbers in", "hvac in", "dentists in", "lawyers in",
+]
+
+
+def is_list_page(title: str) -> bool:
+    """Check if a title is a list/aggregator page instead of a real business."""
+    title_lower = title.lower()
+    return any(skip in title_lower for skip in LIST_SKIP_WORDS)
+
+
+def clean_business_name(title: str) -> str:
+    """Clean a business name from a search result title."""
+    # Remove common suffixes from search engines and directories
+    name = re.sub(r'\s*[-–|:]\s*(Yelp|Google|BBB|Better Business|Yellow Pages|YP|Facebook|'
+                  r'Angi|Angie|Thumbtack|Manta|LinkedIn|Indeed|Nextdoor|Craigslist|'
+                  r'Reviews|Updated|Bing|Yahoo|Maps|Company Profile|Overview|'
+                  r'Ratings|Cost|Prices|Photos|Videos|Posts).*$', '', title, flags=re.IGNORECASE).strip()
+    # Remove leading numbers
+    name = re.sub(r'^\d+\.\s*', '', name).strip()
+    # Remove parenthetical info
+    name = re.sub(r'\s*\(.*?\)\s*', ' ', name).strip()
+    # Remove price patterns
+    name = re.sub(r'\$[\d,.]+', '', name).strip()
+    # Remove extra whitespace
+    name = re.sub(r'\s+', ' ', name).strip()
+    return name
+
+
+def extract_phone_from_text(text: str) -> str:
+    """Extract a US phone number from text."""
+    match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', text)
+    return match.group() if match else ""
+
+
+def extract_email_from_text(text: str) -> str:
+    """Extract an email from text."""
+    match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
+    if match:
+        email = match.group().lower()
+        domain = email.split("@")[1]
+        if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
+            return email
+    return ""
+
+
+def extract_address_from_text(text: str) -> str:
+    """Extract a US street address from text."""
+    match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct|Pkwy|Hwy)[\w\s,]*', text)
+    return match.group().strip() if match else ""
+
+
 def scrape_general_search(niche: str, city: str) -> list:
     """Find businesses via DuckDuckGo text search."""
     leads = []
@@ -186,26 +244,24 @@ def scrape_general_search(niche: str, city: str) -> list:
             link = r.get("href", "")
             snippet = r.get("body", "")
 
-            # Skip aggregators
-            if any(skip in link for skip in ["youtube.com", "wikipedia.org", "facebook.com", "mapquest.com", "nextdoor.com"]):
+            # Skip aggregator sites
+            if any(skip in link for skip in ["youtube.com", "wikipedia.org", "facebook.com", "mapquest.com", "nextdoor.com", "homeadvisor.com/rated"]):
                 continue
 
-            phone = ""
-            phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-            if phone_match:
-                phone = phone_match.group()
+            # Skip list pages
+            if is_list_page(title):
+                continue
 
-            # Extract address hints
-            address = ""
-            addr_match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct|Pkwy|Hwy)[\w\s,]*', snippet)
-            if addr_match:
-                address = addr_match.group().strip()
+            name = clean_business_name(title)
+            if not name or len(name) < 3 or len(name) > 80:
+                continue
 
             leads.append({
-                "name": title,
-                "phone": phone,
+                "name": name,
+                "phone": extract_phone_from_text(snippet),
+                "email_snippet": extract_email_from_text(snippet),
                 "website": link,
-                "address": address,
+                "address": extract_address_from_text(snippet),
                 "city": city,
                 "snippet": snippet,
                 "source": "Web Search",
@@ -237,24 +293,18 @@ def scrape_yelp_search(niche: str, city: str) -> list:
 
         if "yelp.com/biz/" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–]\s*(Yelp|Reviews|Updated).*$', '', title).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
-            "address": "",
+            "address": extract_address_from_text(snippet),
             "city": city,
             "source": "Yelp",
         })
@@ -283,29 +333,18 @@ def scrape_yellowpages_search(niche: str, city: str) -> list:
 
         if "yellowpages.com" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(Yellow Pages|YP|Reviews).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
-
-        address = ""
-        addr_match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct)[\w\s,]*', snippet)
-        if addr_match:
-            address = addr_match.group().strip()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
-            "address": address,
+            "address": extract_address_from_text(snippet),
             "city": city,
             "source": "Yellow Pages",
         })
@@ -340,24 +379,18 @@ def scrape_bbb_search(niche: str, city: str) -> list:
 
         if "bbb.org" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(BBB|Better Business|Reviews|Accredited|Bureau).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
-            "address": "",
+            "address": extract_address_from_text(snippet),
             "city": city,
             "source": "BBB",
         })
@@ -381,22 +414,16 @@ def scrape_linkedin_search(niche: str, city: str) -> list:
 
         if "linkedin.com" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(LinkedIn|Company|Overview|Profile).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
             "address": "",
             "city": city,
@@ -497,18 +524,12 @@ def scrape_google_maps_search(niche: str, city: str) -> list:
 
         if "google.com" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–·]\s*(Google Maps|Maps|Reviews).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         # Extract rating from snippet
         rating = ""
@@ -516,16 +537,11 @@ def scrape_google_maps_search(niche: str, city: str) -> list:
         if rating_match:
             rating = rating_match.group(1)
 
-        address = ""
-        addr_match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct|Pkwy|Hwy)[\w\s,]*', snippet)
-        if addr_match:
-            address = addr_match.group().strip()
-
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
-            "address": address,
+            "address": extract_address_from_text(snippet),
             "city": city,
             "rating": rating,
             "source": "Google Maps",
@@ -554,22 +570,16 @@ def scrape_facebook_search(niche: str, city: str) -> list:
         # Skip personal profiles, groups, marketplace
         if any(skip in link for skip in ["/groups/", "/marketplace/", "/people/", "/events/"]):
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(Facebook|Posts|Reviews|Photos|Videos).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
             "address": "",
             "city": city,
@@ -595,22 +605,16 @@ def scrape_angi_search(niche: str, city: str) -> list:
 
         if "angi.com" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(Angi|Angie|Reviews|Ratings|Cost).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
             "address": "",
             "city": city,
@@ -636,22 +640,16 @@ def scrape_thumbtack_search(niche: str, city: str) -> list:
 
         if "thumbtack.com" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(Thumbtack|Reviews|Cost|Prices).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
             "address": "",
             "city": city,
@@ -677,29 +675,18 @@ def scrape_manta_search(niche: str, city: str) -> list:
 
         if "manta.com" not in link:
             continue
-
-        # Clean name
-        name = re.sub(r'\s*[-–|]\s*(Manta|Company Profile|Reviews).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
-
-        address = ""
-        addr_match = re.search(r'\d+\s+[\w\s]+(?:St|Ave|Rd|Dr|Blvd|Ln|Way|Ct)[\w\s,]*', snippet)
-        if addr_match:
-            address = addr_match.group().strip()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
-            "address": address,
+            "address": extract_address_from_text(snippet),
             "city": city,
             "source": "Manta",
         })
@@ -723,22 +710,16 @@ def scrape_nextdoor_search(niche: str, city: str) -> list:
 
         if "nextdoor.com" not in link:
             continue
-
-        # Clean name - Nextdoor titles are often recommendations
-        name = re.sub(r'\s*[-–|]\s*(Nextdoor|Neighborhood|Recommend).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
             "address": "",
             "city": city,
@@ -764,23 +745,16 @@ def scrape_craigslist_search(niche: str, city: str) -> list:
 
         if "craigslist.org" not in link:
             continue
-
-        name = re.sub(r'\s*[-–|]\s*(Craigslist|CL).*$', '', title, flags=re.IGNORECASE).strip()
-        name = re.sub(r'^\d+\.\s*', '', name).strip()
-        # Remove price patterns
-        name = re.sub(r'\$[\d,.]+', '', name).strip()
-
-        if not name or len(name) < 3:
+        if is_list_page(title):
             continue
 
-        phone = ""
-        phone_match = re.search(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', snippet)
-        if phone_match:
-            phone = phone_match.group()
+        name = clean_business_name(title)
+        if not name or len(name) < 3 or len(name) > 80:
+            continue
 
         leads.append({
             "name": name,
-            "phone": phone,
+            "phone": extract_phone_from_text(snippet),
             "website": link,
             "address": "",
             "city": city,
