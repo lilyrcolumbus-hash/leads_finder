@@ -134,6 +134,56 @@ JUNK_DOMAINS = [
     "wixsite.com", "squarespace.com", "wordpress.com",
     "facebook.com", "instagram.com", "twitter.com",
     "yelp.com", "google.com", "bbb.org",
+    "sentry.io", "sentry.wixpress.com",
+    "onmschina.cn", "partner.onmschina.cn",
+    "fourthcoffee.partner.onmschina.cn",
+    "indeed.com", "linkedin.com",
+    "protection.outlook.com",
+]
+
+# Junk email patterns - emails that are never from a real local business
+JUNK_EMAIL_PATTERNS = [
+    r"@.*\.gov$",        # Government emails
+    r"@.*\.edu$",        # University emails
+    r"@.*\.mil$",        # Military emails
+    r"noreply@", r"no-reply@", r"donotreply@",
+    r"@example\.", r"@test\.", r"@localhost",
+    r"@.*onmschina", r"@.*fourthcoffee",
+    r"marketing@.*wdn\.", r"editor@", r"webmaster@",
+    r"abuse@", r"postmaster@", r"hostmaster@",
+    r"@.*sentry\.", r"@.*wixpress\.",
+]
+
+# URLs from these domains are NEVER a real local business - always skip
+SKIP_URL_DOMAINS = [
+    "amazon.com", "amazon.co", "ebay.com", "walmart.com", "target.com",
+    "homedepot.com", "lowes.com", "menards.com", "costco.com",
+    "tiktok.com", "pinterest.com", "reddit.com", "quora.com",
+    "wikipedia.org", "wikihow.com", "britannica.com",
+    "youtube.com", "vimeo.com", "dailymotion.com",
+    "nytimes.com", "washingtonpost.com", "cnn.com", "foxnews.com",
+    "bbc.com", "bbc.co.uk", "usatoday.com", "npr.org",
+    "indeed.com/career-advice", "indeed.com/q-", "glassdoor.com",
+    "ziprecruiter.com", "monster.com", "careerbuilder.com",
+    "tripadvisor.com", "zillow.com", "realtor.com", "redfin.com",
+    "irs.gov", "sba.gov", "usa.gov", "ohio.gov", "state.oh.us",
+    "census.gov", "bls.gov", "osha.gov",
+    "ashley", "wayfair.com", "overstock.com", "ikea.com",
+    "arbys.com", "mcdonalds.com", "wendys.com", "subway.com",
+    "dating", "match.com", "tinder.com",
+    "webmd.com", "healthline.com", "mayoclinic.org",
+    "twitter.com", "x.com", "instagram.com",
+    "forbes.com", "inc.com", "entrepreneur.com", "businessinsider.com",
+    "medium.com", "blogspot.com", "tumblr.com",
+    "coursera.org", "udemy.com", "edu/",
+    "apple.com", "microsoft.com", "samsung.com",
+    "mapquest.com", "waze.com",
+    "dmv", "bmv", "ezpass", "e-zpass",
+    "crimegrade.org", "neighborhoodscout.com", "areavibes.com",
+    "salary.com", "payscale.com", "zippia.com",
+    "prnewswire.com", "globenewswire.com", "accesswire.com",
+    "patch.com", "news", "gazette", "herald", "tribune",
+    "onmschina.cn", "partner.onmschina",
 ]
 
 
@@ -222,6 +272,47 @@ def is_list_page(title: str) -> bool:
     return False
 
 
+# Keywords that indicate a business is relevant to each niche
+NICHE_KEYWORDS = {
+    "plumbers": ["plumb", "plumber", "plumbing", "drain", "sewer", "pipe", "water heater",
+                  "faucet", "toilet", "septic", "backflow", "rooter", "hydro jetting"],
+    "hvac": ["hvac", "heating", "cooling", "air condition", "furnace", "heat pump",
+             "ventilation", "duct", "ac repair", "boiler"],
+    "dentists": ["dent", "dental", "orthodont", "oral", "tooth", "teeth", "implant",
+                 "periodon", "endodon", "prosthodon"],
+    "lawyers": ["law", "lawyer", "attorney", "legal", "firm", "counsel", "litigation",
+                "paralegal", "solicitor"],
+    "electricians": ["electric", "electrician", "wiring", "panel", "circuit", "voltage",
+                     "generator", "lighting"],
+    "roofers": ["roof", "roofing", "gutter", "shingle", "siding"],
+    "painters": ["paint", "painting", "stain", "coat", "drywall"],
+    "landscapers": ["landscap", "lawn", "mowing", "tree service", "irrigation", "garden"],
+    "pest control": ["pest", "exterminator", "termite", "rodent", "bug", "insect"],
+    "cleaners": ["clean", "cleaning", "janitorial", "maid", "housekeep", "carpet clean"],
+}
+
+
+def is_relevant_to_niche(name: str, snippet: str, niche: str) -> bool:
+    """Check if a business name or snippet is actually relevant to the niche."""
+    niche_lower = niche.lower().strip()
+    text = (name + " " + snippet).lower()
+
+    # Get keywords for this niche
+    keywords = NICHE_KEYWORDS.get(niche_lower, [])
+
+    # If niche not in our dictionary, use the niche word itself
+    if not keywords:
+        keywords = [niche_lower.rstrip("s"), niche_lower]
+
+    return any(kw in text for kw in keywords)
+
+
+def should_skip_url(url: str) -> bool:
+    """Check if a URL belongs to a non-business site that should always be skipped."""
+    url_lower = url.lower()
+    return any(domain in url_lower for domain in SKIP_URL_DOMAINS)
+
+
 def clean_business_name(title: str) -> str:
     """Clean a business name from a search result title."""
     # Remove common suffixes from search engines and directories
@@ -246,13 +337,23 @@ def extract_phone_from_text(text: str) -> str:
     return match.group() if match else ""
 
 
+def is_junk_email(email: str) -> bool:
+    """Check if an email is junk (government, generic, fake, etc.)."""
+    email_lower = email.lower()
+    domain = email_lower.split("@")[1] if "@" in email_lower else ""
+    if domain in JUNK_DOMAINS:
+        return True
+    if email_lower.endswith(".png") or email_lower.endswith(".jpg"):
+        return True
+    return any(re.search(pat, email_lower) for pat in JUNK_EMAIL_PATTERNS)
+
+
 def extract_email_from_text(text: str) -> str:
     """Extract an email from text."""
     match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
     if match:
         email = match.group().lower()
-        domain = email.split("@")[1]
-        if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
+        if not is_junk_email(email):
             return email
     return ""
 
@@ -285,8 +386,8 @@ def scrape_general_search(niche: str, city: str) -> list:
             link = r.get("href", "")
             snippet = r.get("body", "")
 
-            # Skip aggregator sites
-            if any(skip in link for skip in ["youtube.com", "wikipedia.org", "facebook.com", "mapquest.com", "nextdoor.com", "homeadvisor.com/rated"]):
+            # Skip non-business sites
+            if should_skip_url(link):
                 continue
 
             # Skip list pages
@@ -503,19 +604,40 @@ def scrape_indeed_hiring(niche: str, city: str) -> list:
             if "indeed.com" not in link:
                 continue
 
+            # Skip Indeed search pages, career advice, company reviews pages, and salary pages
+            if any(skip in link.lower() for skip in [
+                "indeed.com/q-", "indeed.com/jobs?", "indeed.com/career-advice",
+                "indeed.com/career", "indeed.com/salaries", "indeed.com/companies",
+                "indeed.com/hire", "indeed.com/l-", "/pagead/", "indeed.com/cmp",
+            ]):
+                continue
+
+            # Skip generic Indeed titles that aren't actual job postings
+            title_lower = title.lower()
+            if any(skip in title_lower for skip in [
+                "indeed.com", "jobs in", "job search", "career advice",
+                "salary", "how to", "what is", "interview questions",
+                "resume", "cover letter",
+            ]):
+                continue
+
             # Try to extract company name from Indeed title format: "Job Title - Company Name"
             name = ""
             if " - " in title:
                 parts = title.split(" - ")
                 if len(parts) >= 2:
-                    # Company is usually the second part
-                    name = re.sub(r'\s*[-–|]\s*(Indeed|Job|Review).*$', '', parts[1], flags=re.IGNORECASE).strip()
+                    # Company is usually the second part; strip Indeed suffixes
+                    candidate = parts[1].strip()
+                    candidate = re.sub(r'\s*[-–|]\s*(Indeed|Job|Review|Hiring|Salary).*$', '', candidate, flags=re.IGNORECASE).strip()
+                    # Skip if the "company" is just Indeed or a location
+                    if candidate.lower() not in ["indeed", "indeed.com", ""] and len(candidate) >= 3:
+                        name = candidate
 
             if not name or len(name) < 3:
-                # Try from snippet
-                name = re.sub(r'\s*[-–|]\s*(Indeed|Job|Review).*$', '', title, flags=re.IGNORECASE).strip()
+                continue
 
-            if not name or len(name) < 3:
+            # Skip if name looks like a generic Indeed page title
+            if any(skip in name.lower() for skip in ["indeed", "job search", "career"]):
                 continue
 
             # Detect what they're hiring for
@@ -565,11 +687,22 @@ def scrape_google_maps_search(niche: str, city: str) -> list:
 
         if "google.com" not in link:
             continue
+        # Skip Google Maps utility/search pages (not individual business pages)
+        if any(skip in link.lower() for skip in [
+            "google.com/maps/search", "google.com/maps/place/@",
+            "google.com/maps/dir", "google.com/maps?", "google.com/search",
+            "support.google.com", "about.google.com",
+        ]):
+            continue
         if is_list_page(title):
             continue
 
         name = clean_business_name(title)
         if not name or len(name) < 3 or len(name) > 80:
+            continue
+
+        # Skip if name looks like a Google product page
+        if any(skip in name.lower() for skip in ["google maps", "google search", "google my business"]):
             continue
 
         # Extract rating from snippet
@@ -786,11 +919,21 @@ def scrape_craigslist_search(niche: str, city: str) -> list:
 
         if "craigslist.org" not in link:
             continue
+        # Skip Craigslist search/category listing pages
+        if any(skip in link.lower() for skip in ["/search/", "/d/", "?query="]):
+            continue
         if is_list_page(title):
             continue
 
         name = clean_business_name(title)
         if not name or len(name) < 3 or len(name) > 80:
+            continue
+
+        # Craigslist posts must mention the niche to be relevant
+        combined = (title + " " + snippet).lower()
+        niche_lower = niche.lower().strip()
+        niche_kws = NICHE_KEYWORDS.get(niche_lower, [niche_lower.rstrip("s"), niche_lower])
+        if not any(kw in combined for kw in niche_kws):
             continue
 
         leads.append({
@@ -829,8 +972,30 @@ def scrape_complaints_search(niche: str, city: str) -> list:
                 link = r.get("href", "")
                 snippet = r.get("body", "")
 
-                # Skip non-business pages
-                if any(skip in link for skip in ["youtube.com", "wikipedia.org", "reddit.com/r/"]):
+                # Skip non-business sites globally
+                if should_skip_url(link):
+                    continue
+
+                # Skip generic articles/blogs that aren't about a specific business
+                title_lower = title.lower()
+                if any(skip in title_lower for skip in [
+                    "how to", "what is", "why do", "tips for", "guide",
+                    "troubleshoot", "fix your", "solved", "tutorial",
+                    "scam", "spam", "virus", "malware",
+                    "voicemail setup", "voicemail greeting", "voicemail not working",
+                    "phone not working", "phone settings",
+                ]):
+                    continue
+
+                # Must be somewhat relevant to the niche
+                combined_text = (title + " " + snippet).lower()
+                niche_lower = niche.lower().strip()
+                niche_kws = NICHE_KEYWORDS.get(niche_lower, [niche_lower.rstrip("s"), niche_lower])
+                if not any(kw in combined_text for kw in niche_kws):
+                    continue
+
+                name = clean_business_name(title)
+                if not name or len(name) < 3:
                     continue
 
                 phone = ""
@@ -839,7 +1004,7 @@ def scrape_complaints_search(niche: str, city: str) -> list:
                     phone = phone_match.group()
 
                 leads.append({
-                    "name": title,
+                    "name": name,
                     "phone": phone,
                     "website": link,
                     "address": "",
@@ -901,18 +1066,15 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
                 # Regex for emails
                 found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
                 for email in found:
-                    domain = email.split("@")[1].lower()
-                    if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
+                    if not is_junk_email(email):
                         emails.add(email.lower())
 
                 # Mailto links
                 soup = BeautifulSoup(text, "lxml")
                 for a in soup.select("a[href^='mailto:']"):
                     email = a["href"].replace("mailto:", "").split("?")[0].strip()
-                    if email and "@" in email:
-                        domain = email.split("@")[1].lower()
-                        if domain not in JUNK_DOMAINS:
-                            emails.add(email.lower())
+                    if email and "@" in email and not is_junk_email(email):
+                        emails.add(email.lower())
 
                 random_delay(0.3, 0.8)
 
@@ -941,8 +1103,7 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
                     text = r.get("body", "") + " " + r.get("title", "")
                     found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
                     for email in found:
-                        domain = email.split("@")[1].lower()
-                        if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
+                        if not is_junk_email(email):
                             emails.add(email.lower())
                 random_delay(0.5, 1)
             except Exception:
@@ -1378,16 +1539,24 @@ def find_leads(niche: str, city: str):
         all_leads.extend(scrape_complaints_search(niche, search_city))
         random_delay(2, 4)
 
-    # Deduplicate by name
+    # Deduplicate by name + filter relevant to niche
     seen = set()
     unique_leads = []
+    skipped_irrelevant = 0
     for lead in all_leads:
         name_key = lead["name"].lower().strip()
         if name_key and name_key not in seen and len(name_key) > 3:
+            # Check if business is actually relevant to the niche
+            if not is_relevant_to_niche(lead["name"], lead.get("snippet", ""), niche):
+                skipped_irrelevant += 1
+                continue
             seen.add(name_key)
             unique_leads.append(lead)
 
-    print(f"\n  Total empresas unicas encontradas: {len(unique_leads)}\n")
+    print(f"\n  Total empresas unicas encontradas: {len(unique_leads)}")
+    if skipped_irrelevant:
+        print(f"  Filtradas por no ser relevantes a '{niche}': {skipped_irrelevant}")
+    print()
 
     if not unique_leads:
         print("  No se encontraron resultados. Intenta con otra busqueda.")
@@ -1450,7 +1619,7 @@ def find_leads(niche: str, city: str):
         lead_data = {
             "name": name,
             "phone": lead.get("phone", ""),
-            "email": ", ".join(emails) if emails else "Not found - try website contact form",
+            "email": ", ".join(emails) if emails else "",
             "website": lead.get("website", ""),
             "address": lead.get("address", ""),
             "city": city,
