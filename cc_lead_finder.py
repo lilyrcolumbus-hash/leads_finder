@@ -878,22 +878,9 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
             except Exception:
                 pass
 
-        # Method 2: Try common email patterns based on domain
-        if not emails and has_own_website:
-            try:
-                from urllib.parse import urlparse
-                domain = urlparse(url).netloc.replace("www.", "")
-                if domain and "." in domain:
-                    # These are common patterns - we add them as guesses
-                    common = [f"info@{domain}", f"contact@{domain}", f"office@{domain}"]
-                    # Only add if domain looks legit (not a directory)
-                    if len(domain.split(".")) <= 3:
-                        for guess in common:
-                            emails.add(guess)
-            except Exception:
-                pass
+        # Method 2 removed: no fake/guessed emails
 
-    # Method 3: DuckDuckGo search for email (multiple queries)
+    # Method 2: DuckDuckGo search for email (multiple queries)
     if name:
         ddg_queries = [
             f'"{name}" {city} email',
@@ -1410,7 +1397,7 @@ def find_leads(niche: str, city: str):
         investigated_leads.append({
             "name": name,
             "phone": lead.get("phone", ""),
-            "email": ", ".join(emails) if emails else "",
+            "email": ", ".join(emails) if emails else "Not found - try website contact form",
             "website": lead.get("website", ""),
             "address": lead.get("address", ""),
             "city": city,
