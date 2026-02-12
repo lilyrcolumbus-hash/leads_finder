@@ -1369,6 +1369,11 @@ def find_leads(niche: str, city: str):
         # Generate personalized message
         message = generate_message(name, need_level, evidence, niche)
 
+        # Combine emails: from website scrape + from snippet
+        snippet_email = lead.get("email_snippet", "")
+        if snippet_email and snippet_email not in emails:
+            emails.append(snippet_email)
+
         investigated_leads.append({
             "name": name,
             "phone": lead.get("phone", ""),
