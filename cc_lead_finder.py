@@ -168,17 +168,58 @@ def search_ddg(query: str, max_results: int = 25) -> list:
 LIST_SKIP_WORDS = [
     "top 10", "top 5", "top 15", "top 20", "top 25", "top 50",
     "best 10", "best 20", "best 30", "best of",
-    "top rated", "near me", "directory", "listing",
+    "top rated", "near me", "directory", "listing", "listings",
     "companies in", "services in", "contractors in",
     "how to", "what is", "how much", "cost of", "vs ",
     "plumbers in", "hvac in", "dentists in", "lawyers in",
+    "electricians in", "roofers in", "painters in",
+    " near ", "results for", "search results",
+    "find a ", "find the best", "hire a ",
+    "fixtures near", "supplies near", "parts near",
+    "all plumb", "all hvac", "all dent",
+    "category", "categories",
+    "tips for", "guide to", "advice",
+    "compare ", "comparison", "alternatives",
+    "jobs in", "careers in", "salary",
+    "review of", "reviews of",
+    "map of", "locations in",
+    "free estimates", "get quotes",
+    "certified ", "licensed ",
+    "wikipedia", "wiki",
+]
+
+# Patterns like "Plumber near Lima" or "HVAC Services Lima OH"
+LIST_SKIP_PATTERNS = [
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+(near|in|around|for)\s+',
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+services?\s*$',
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+services?\s+(in|near|around)\s+',
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+compan',
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+contractor',
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+repair',
+    r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+fixture',
+    r'^\d+\s+(best|top|cheap|affordable|rated)',
+    r'better business bureau',
+    r'bbb\.org',
+    r'yelp\.com',
+    r'yellowpages\.com',
+    r'angi\.com|angieslist',
+    r'thumbtack\.com',
 ]
 
 
 def is_list_page(title: str) -> bool:
     """Check if a title is a list/aggregator page instead of a real business."""
-    title_lower = title.lower()
-    return any(skip in title_lower for skip in LIST_SKIP_WORDS)
+    title_lower = title.lower().strip()
+    # Check skip words
+    if any(skip in title_lower for skip in LIST_SKIP_WORDS):
+        return True
+    # Check regex patterns
+    if any(re.search(pat, title_lower) for pat in LIST_SKIP_PATTERNS):
+        return True
+    # Too short to be a real business name
+    if len(title_lower) < 4:
+        return True
+    return False
 
 
 def clean_business_name(title: str) -> str:
@@ -1352,10 +1393,23 @@ def find_leads(niche: str, city: str):
         print("  No se encontraron resultados. Intenta con otra busqueda.")
         return
 
-    # Step 2: Investigate each lead
-    print(f"[2/4] INVESTIGANDO {len(unique_leads)} EMPRESAS...\n")
+    # Connect to Google Sheets early so we can write progressively
+    spreadsheet = None
+    tab_name = niche.title()
+    try:
+        spreadsheet = connect_to_sheets()
+        print(f"  Conectado a Google Sheets - tab: {tab_name}\n")
+    except Exception as e:
+        print(f"  No se pudo conectar a Sheets: {e}")
+        print(f"  Se guardara en CSV al final.\n")
+
+    # Step 2: Investigate each lead and write to Sheet every 10
+    print(f"[2/3] INVESTIGANDO {len(unique_leads)} EMPRESAS...\n")
 
     investigated_leads = []
+    batch = []
+    total_written = 0
+
     for i, lead in enumerate(unique_leads):
         name = lead["name"]
         print(f"  [{i+1}/{len(unique_leads)}] Investigando: {name}...")
@@ -1370,7 +1424,6 @@ def find_leads(niche: str, city: str):
         random_delay(0.5, 1)
 
         # Search reviews for communication pain
-        lead_city = lead.get("city", city)
         reviews = search_reviews_for_pain(name, lead_city)
         random_delay(1, 2)
 
@@ -1394,7 +1447,7 @@ def find_leads(niche: str, city: str):
         if snippet_email and snippet_email not in emails:
             emails.append(snippet_email)
 
-        investigated_leads.append({
+        lead_data = {
             "name": name,
             "phone": lead.get("phone", ""),
             "email": ", ".join(emails) if emails else "Not found - try website contact form",
@@ -1412,42 +1465,55 @@ def find_leads(niche: str, city: str):
             "other_services": other_services,
             "message": message,
             "source": lead.get("source", ""),
-        })
+        }
+
+        investigated_leads.append(lead_data)
+        batch.append(lead_data)
 
         # Print quick status
         icon = "!!!" if need_level == "ALTO" else "!" if need_level == "MEDIO" else "-"
         platforms = reviews.get("platforms_found", [])
-        platform_str = f" | Encontrado en: {', '.join(platforms)}" if platforms else ""
+        platform_str = f" | Found on: {', '.join(platforms)}" if platforms else ""
         print(f"    AI Receptionist: {need_level} {icon}{platform_str}")
 
-    # Step 3: Sort by priority
-    print(f"\n[3/4] ORGANIZANDO RESULTADOS...\n")
+        # Write to Sheet every 10 businesses
+        if len(batch) >= 10 and spreadsheet:
+            try:
+                written = write_leads_to_sheet(spreadsheet, tab_name, batch)
+                total_written += written
+                print(f"\n    >>> {written} leads written to Sheet (total: {total_written}) <<<\n")
+                batch = []
+            except Exception as e:
+                print(f"\n    >>> Error writing to Sheet: {e} <<<\n")
 
-    priority_order = {"ALTO": 0, "MEDIO": 1, "BAJO": 2}
-    investigated_leads.sort(key=lambda x: priority_order.get(x["need_level"], 3))
+    # Write remaining batch
+    if batch and spreadsheet:
+        try:
+            written = write_leads_to_sheet(spreadsheet, tab_name, batch)
+            total_written += written
+            print(f"\n    >>> {written} final leads written to Sheet (total: {total_written}) <<<\n")
+        except Exception as e:
+            print(f"\n    >>> Error writing final batch: {e} <<<\n")
+
+    # Step 3: Summary
+    print(f"\n[3/3] RESUMEN\n")
 
     alto = sum(1 for l in investigated_leads if l["need_level"] == "ALTO")
     medio = sum(1 for l in investigated_leads if l["need_level"] == "MEDIO")
     bajo = sum(1 for l in investigated_leads if l["need_level"] == "BAJO")
 
-    print(f"  ALTO (contactar ya):    {alto}")
-    print(f"  MEDIO (vale la pena):   {medio}")
-    print(f"  BAJO (skip o vende otro): {bajo}")
+    print(f"  ALTO (contact now):     {alto}")
+    print(f"  MEDIO (worth it):       {medio}")
+    print(f"  BAJO (skip or sell other): {bajo}")
 
-    # Step 4: Write to Google Sheets
-    print(f"\n[4/4] ESCRIBIENDO EN GOOGLE SHEETS...\n")
-
-    try:
-        spreadsheet = connect_to_sheets()
-        tab_name = niche.title()
-        written = write_leads_to_sheet(spreadsheet, tab_name, investigated_leads)
-        print(f"  {written} leads nuevos escritos en tab '{tab_name}'")
-        print(f"\n  Abre tu Sheet para ver los resultados!")
-    except Exception as e:
-        print(f"  Error escribiendo en Sheet: {e}")
-        print(f"  Guardando en CSV como respaldo...")
-
+    if spreadsheet:
+        print(f"\n  Total written to Sheet: {total_written}")
+        print(f"  Tab: {tab_name}")
+        print(f"\n  Open your Sheet to see results!")
+    else:
         # Fallback to CSV
+        print(f"\n  Saving to CSV...")
+
         import csv
         csv_file = f"leads_{niche}_{city}_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
         with open(csv_file, "w", newline="", encoding="utf-8") as f:
@@ -1474,15 +1540,15 @@ def find_leads(niche: str, city: str):
                     "Other Services Possible": lead["other_services"],
                     "Suggested Message": lead["message"],
                 })
-        print(f"  Guardado en: {csv_file}")
+        print(f"  Saved to: {csv_file}")
 
-    # Summary
+    # Final summary
     print(f"\n{'='*60}")
-    print(f"  RESUMEN")
+    print(f"  DONE")
     print(f"  Total leads: {len(investigated_leads)}")
-    print(f"  ALTO prioridad: {alto}")
-    print(f"  MEDIO prioridad: {medio}")
-    print(f"  BAJO prioridad: {bajo}")
+    print(f"  ALTO: {alto}")
+    print(f"  MEDIO: {medio}")
+    print(f"  BAJO: {bajo}")
     print(f"{'='*60}\n")
 
 
