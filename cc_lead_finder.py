@@ -820,7 +820,7 @@ def scrape_complaints_search(niche: str, city: str) -> list:
 # ==================== INVESTIGATION ====================
 
 def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", city: str = "") -> list:
-    """Extract emails from website + DuckDuckGo search as fallback."""
+    """Extract emails aggressively from website + multiple DuckDuckGo searches."""
     emails = set()
     skip_sites = [
         "yelp.com", "yellowpages.com", "bbb.org", "google.com",
@@ -830,18 +830,21 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
 
     has_own_website = url and not any(d in url for d in skip_sites)
 
-    # Method 1: Scrape website directly (home + contact + about pages)
+    # Method 1: Scrape website directly (home + contact + about + team + footer pages)
     if has_own_website:
         pages_to_check = [url]
         try:
             resp = client.get(url)
             soup = BeautifulSoup(resp.text, "lxml")
 
-            # Find contact/about/team pages
+            # Find contact/about/team/footer pages
             for a in soup.select("a[href]"):
                 href = a.get("href", "").lower()
                 text = a.get_text(strip=True).lower()
-                if any(kw in href or kw in text for kw in ["contact", "about", "contacto", "team", "staff"]):
+                if any(kw in href or kw in text for kw in [
+                    "contact", "about", "team", "staff", "footer",
+                    "locations", "email", "reach", "connect", "support",
+                ]):
                     full_url = urljoin(url, a["href"])
                     if full_url not in pages_to_check:
                         pages_to_check.append(full_url)
@@ -849,7 +852,7 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
         except Exception:
             pass
 
-        for page in pages_to_check[:4]:
+        for page in pages_to_check[:5]:
             try:
                 resp = client.get(page)
                 text = resp.text
@@ -875,20 +878,50 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
             except Exception:
                 pass
 
-    # Method 2: DuckDuckGo search for email (always, as fallback or complement)
+        # Method 2: Try common email patterns based on domain
+        if not emails and has_own_website:
+            try:
+                from urllib.parse import urlparse
+                domain = urlparse(url).netloc.replace("www.", "")
+                if domain and "." in domain:
+                    # These are common patterns - we add them as guesses
+                    common = [f"info@{domain}", f"contact@{domain}", f"office@{domain}"]
+                    # Only add if domain looks legit (not a directory)
+                    if len(domain.split(".")) <= 3:
+                        for guess in common:
+                            emails.add(guess)
+            except Exception:
+                pass
+
+    # Method 3: DuckDuckGo search for email (multiple queries)
     if name:
-        try:
-            results = search_ddg(f'"{name}" {city} email contact @', max_results=8)
-            for r in results:
-                text = r.get("body", "") + " " + r.get("title", "")
-                found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
-                for email in found:
-                    domain = email.split("@")[1].lower()
-                    if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
-                        emails.add(email.lower())
-            random_delay(0.5, 1)
-        except Exception:
-            pass
+        ddg_queries = [
+            f'"{name}" {city} email',
+            f'"{name}" {city} contact email @',
+        ]
+        # If no emails found yet, try harder
+        if not emails:
+            ddg_queries.extend([
+                f'"{name}" email address',
+                f'"{name}" {city} gmail OR yahoo OR hotmail OR outlook',
+            ])
+
+        for q in ddg_queries:
+            try:
+                results = search_ddg(q, max_results=8)
+                for r in results:
+                    text = r.get("body", "") + " " + r.get("title", "")
+                    found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
+                    for email in found:
+                        domain = email.split("@")[1].lower()
+                        if domain not in JUNK_DOMAINS and not email.endswith(".png") and not email.endswith(".jpg"):
+                            emails.add(email.lower())
+                random_delay(0.5, 1)
+            except Exception:
+                pass
+            # Stop searching if we found something
+            if emails:
+                break
 
     return list(emails)
 
