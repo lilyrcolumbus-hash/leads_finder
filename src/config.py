@@ -63,6 +63,36 @@ class Settings(BaseSettings):
         '"scheduling nightmare" business owner'
     ]
 
+    # Indeed job search queries (receptionist/customer service roles)
+    indeed_job_queries: List[str] = [
+        "receptionist",
+        "front desk receptionist",
+        "customer service representative",
+        "phone answering",
+        "call center representative",
+        "office receptionist",
+        "medical receptionist",
+        "dental receptionist",
+        "salon receptionist",
+        "hotel front desk",
+        "virtual receptionist",
+        "answering service",
+    ]
+
+    # Indeed target locations (US cities/states with high small business density)
+    indeed_locations: List[str] = [
+        "New York, NY",
+        "Los Angeles, CA",
+        "Houston, TX",
+        "Miami, FL",
+        "Chicago, IL",
+        "Phoenix, AZ",
+        "Dallas, TX",
+        "Atlanta, GA",
+        "Denver, CO",
+        "San Diego, CA",
+    ]
+
     # Batch sizes
     max_leads_per_source: int = 50
     ai_filter_batch_size: int = 10
