@@ -1509,11 +1509,11 @@ def find_leads(niche: str, city: str):
         all_leads.extend(scrape_bbb_search(niche, search_city))
         random_delay(1, 3)
 
-        all_leads.extend(scrape_linkedin_search(niche, search_city))
-        random_delay(1, 3)
-
-        all_leads.extend(scrape_indeed_hiring(niche, search_city))
-        random_delay(1, 3)
+        # LinkedIn e Indeed desactivados - son para otra sheet (contrataciones)
+        # all_leads.extend(scrape_linkedin_search(niche, search_city))
+        # random_delay(1, 3)
+        # all_leads.extend(scrape_indeed_hiring(niche, search_city))
+        # random_delay(1, 3)
 
         all_leads.extend(scrape_google_maps_search(niche, search_city))
         random_delay(1, 3)
