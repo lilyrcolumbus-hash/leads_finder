@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadSource
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -262,7 +262,8 @@ def show_home():
         ("📱 Reddit", "Subreddits de negocios"),
         ("💻 Hacker News", "Discusiones de startups"),
         ("🔍 Google", "Búsquedas específicas"),
-        ("🚀 Product Hunt", "Founders activos")
+        ("🚀 Product Hunt", "Founders activos"),
+        ("💼 Indeed", "Empresas contratando recepcionistas"),
     ]
 
     for icon_name, desc in sources:
@@ -303,6 +304,7 @@ def show_search():
     use_hn = st.checkbox("💻 Hacker News", value=True)
     use_google = st.checkbox("🔍 Google Search", value=bool(settings.google_api_key))
     use_ph = st.checkbox("🚀 Product Hunt", value=True)
+    use_indeed = st.checkbox("💼 Indeed (Empresas contratando recepcionistas)", value=True)
 
     st.markdown("---")
 
@@ -331,6 +333,8 @@ def show_search():
             scrapers.append(("Google Search", GoogleScraper))
         if use_ph:
             scrapers.append(("Product Hunt", ProductHuntScraper))
+        if use_indeed:
+            scrapers.append(("Indeed", IndeedScraper))
 
         if not scrapers:
             st.warning("⚠️ Selecciona al menos una fuente")

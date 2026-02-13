@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadBatch
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper
+from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, IndeedScraper
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 
@@ -79,6 +79,7 @@ def run_scraping() -> List[Lead]:
         ("Hacker News", HackerNewsScraper),
         ("Google Search", GoogleScraper),
         ("Product Hunt", ProductHuntScraper),
+        ("Indeed", IndeedScraper),
     ]
 
     with Progress(
@@ -156,8 +157,9 @@ def menu_search_leads():
     console.print("  [3] Solo Hacker News")
     console.print("  [4] Solo Google Search")
     console.print("  [5] Solo Product Hunt")
+    console.print("  [6] Solo Indeed (empresas contratando recepcionistas)")
 
-    source = Prompt.ask("Opcion", choices=["1", "2", "3", "4", "5"], default="1")
+    source = Prompt.ask("Opcion", choices=["1", "2", "3", "4", "5", "6"], default="1")
 
     # Run scraping
     leads = run_scraping() if source == "1" else run_single_source(source)
@@ -188,6 +190,7 @@ def run_single_source(source: str) -> List[Lead]:
         "3": ("Hacker News", HackerNewsScraper),
         "4": ("Google", GoogleScraper),
         "5": ("Product Hunt", ProductHuntScraper),
+        "6": ("Indeed", IndeedScraper),
     }
 
     name, ScraperClass = scrapers.get(source, ("Reddit", RedditScraper))
