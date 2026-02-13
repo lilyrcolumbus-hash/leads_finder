@@ -218,24 +218,36 @@ def search_ddg(query: str, max_results: int = 25) -> list:
 LIST_SKIP_WORDS = [
     "top 10", "top 5", "top 15", "top 20", "top 25", "top 50",
     "best 10", "best 20", "best 30", "best of",
-    "top rated", "near me", "directory", "listing", "listings",
-    "companies in", "services in", "contractors in",
+    "the best", "the top", "the most",
+    "best plumb", "best hvac", "best dent", "best law", "best electric",
+    "best roof", "best paint", "best landscap", "best pest", "best clean",
+    "top rated", "highest rated", "most trusted", "most reliable",
+    "near me", "near you", "in your area",
+    "directory", "listing", "listings",
+    "companies in", "services in", "contractors in", "providers in",
     "how to", "what is", "how much", "cost of", "vs ",
     "plumbers in", "hvac in", "dentists in", "lawyers in",
     "electricians in", "roofers in", "painters in",
     " near ", "results for", "search results",
-    "find a ", "find the best", "hire a ",
+    "find a ", "find the best", "hire a ", "call a ",
+    "choosing a ", "choosing the", "picking a ",
     "fixtures near", "supplies near", "parts near",
     "all plumb", "all hvac", "all dent",
     "category", "categories",
-    "tips for", "guide to", "advice",
+    "tips for", "guide to", "advice", "things to know",
     "compare ", "comparison", "alternatives",
     "jobs in", "careers in", "salary",
     "review of", "reviews of",
     "map of", "locations in",
-    "free estimates", "get quotes",
+    "free estimates", "get quotes", "request a quote",
     "certified ", "licensed ",
     "wikipedia", "wiki",
+    "what to look for", "questions to ask",
+    "signs you need", "when to call", "when to hire",
+    "average cost", "price range", "pricing guide",
+    "do you need", "should you", "why you need",
+    "emergency plumb", "emergency hvac", "emergency electric",
+    "24/7 plumb", "24/7 hvac", "24 hour plumb", "24 hour hvac",
 ]
 
 # Patterns like "Plumber near Lima" or "HVAC Services Lima OH"
@@ -248,6 +260,8 @@ LIST_SKIP_PATTERNS = [
     r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+repair',
     r'^(plumb|hvac|dent|law|electric|roof|paint|carpet|landscap|pest|clean)\w*\s+fixture',
     r'^\d+\s+(best|top|cheap|affordable|rated)',
+    r'^the\s+\d+\s+(best|top|most)',
+    r'^(best|top|cheap|affordable|reliable|trusted|expert)\s+(plumb|hvac|dent|law|electric|roof|paint|landscap|pest|clean)',
     r'better business bureau',
     r'bbb\.org',
     r'yelp\.com',
@@ -311,6 +325,42 @@ def should_skip_url(url: str) -> bool:
     """Check if a URL belongs to a non-business site that should always be skipped."""
     url_lower = url.lower()
     return any(domain in url_lower for domain in SKIP_URL_DOMAINS)
+
+
+def is_generic_name(name: str) -> bool:
+    """Check if a cleaned name is a generic phrase, not an actual business name."""
+    n = name.lower().strip()
+    # Generic article/listicle phrases
+    generic_starts = [
+        "the best ", "the top ", "the most ", "best ", "top ",
+        "cheap ", "cheapest ", "affordable ", "reliable ", "trusted ",
+        "expert ", "professional ", "quality ", "emergency ",
+        "24 hour ", "24/7 ", "local ", "nearby ",
+        "how to ", "what to ", "when to ", "why ", "where to ",
+        "find ", "hire ", "call ", "choose ", "choosing ",
+        "signs you", "do you need", "should you", "things to",
+    ]
+    if any(n.startswith(prefix) for prefix in generic_starts):
+        return True
+    # Generic endings that indicate an article, not a business
+    generic_ends = [
+        " near me", " near you", " in your area",
+        " you can trust", " to call", " to hire",
+        " for your home", " for your business",
+        " worth the money", " this year",
+    ]
+    if any(n.endswith(suffix) for suffix in generic_ends):
+        return True
+    # Name is ONLY a niche word (e.g. "Plumbing", "Plumber", "Plumbing Services")
+    only_niche = re.match(
+        r'^(plumb\w*|hvac|heat\w*|cool\w*|dent\w*|law\w*|attorney\w*|electric\w*|'
+        r'roof\w*|paint\w*|landscap\w*|pest\w*|clean\w*|drain\w*|sewer\w*|septic\w*)'
+        r'(\s+(services?|repair|company|contractors?|inc|llc|pro|pros|experts?|specialists?|solutions?))*\s*$',
+        n, re.IGNORECASE
+    )
+    if only_niche:
+        return True
+    return False
 
 
 def clean_business_name(title: str) -> str:
@@ -395,7 +445,7 @@ def scrape_general_search(niche: str, city: str) -> list:
                 continue
 
             name = clean_business_name(title)
-            if not name or len(name) < 3 or len(name) > 80:
+            if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
                 continue
 
             leads.append({
@@ -439,7 +489,7 @@ def scrape_yelp_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -479,7 +529,7 @@ def scrape_yellowpages_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -525,7 +575,7 @@ def scrape_bbb_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -560,7 +610,7 @@ def scrape_linkedin_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -633,7 +683,7 @@ def scrape_indeed_hiring(niche: str, city: str) -> list:
                     if candidate.lower() not in ["indeed", "indeed.com", ""] and len(candidate) >= 3:
                         name = candidate
 
-            if not name or len(name) < 3:
+            if not name or len(name) < 3 or is_generic_name(name):
                 continue
 
             # Skip if name looks like a generic Indeed page title
@@ -698,7 +748,7 @@ def scrape_google_maps_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         # Skip if name looks like a Google product page
@@ -748,7 +798,7 @@ def scrape_facebook_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -783,7 +833,7 @@ def scrape_angi_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -818,7 +868,7 @@ def scrape_thumbtack_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -853,7 +903,7 @@ def scrape_manta_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -888,7 +938,7 @@ def scrape_nextdoor_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         leads.append({
@@ -926,7 +976,7 @@ def scrape_craigslist_search(niche: str, city: str) -> list:
             continue
 
         name = clean_business_name(title)
-        if not name or len(name) < 3 or len(name) > 80:
+        if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
             continue
 
         # Craigslist posts must mention the niche to be relevant
@@ -995,7 +1045,7 @@ def scrape_complaints_search(niche: str, city: str) -> list:
                     continue
 
                 name = clean_business_name(title)
-                if not name or len(name) < 3:
+                if not name or len(name) < 3 or is_generic_name(name):
                     continue
 
                 phone = ""
