@@ -93,9 +93,6 @@ SHEET_HEADERS = [
     "Communication Complaints (Clients)",
     "Business Complaints",
     "Website Quality",
-    "Social Media",
-    "Other Services Possible",
-    "Suggested Message",
 ]
 
 # Keywords that indicate communication pain
@@ -1551,9 +1548,6 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
                 lead.get("client_complaints", ""),
                 lead.get("business_complaints", ""),
                 lead.get("website_quality", ""),
-                lead.get("social_media", ""),
-                lead.get("other_services", ""),
-                lead.get("message", ""),
             ])
 
     if new_rows:
@@ -1718,20 +1712,10 @@ def find_leads(niche: str, city: str, limit: int = 0):
         reviews = search_reviews_for_pain(name, lead_city)
         random_delay(1, 2)
 
-        # Check social media
-        social = check_social_media(name, lead_city)
-        random_delay(0.5, 1)
-
-        # Determine AI Receptionist need
+        # Determine AI Receptionist need (without social media)
         hiring_role = lead.get("hiring_role", "")
         has_complaint = lead.get("has_complaint", False)
-        need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, social, hiring_role, has_complaint)
-
-        # Suggest other services
-        other_services = suggest_other_services(website_quality, social)
-
-        # Generate personalized message
-        message = generate_message(name, need_level, evidence, niche)
+        need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, "", hiring_role, has_complaint)
 
         # Combine emails: from website scrape + from snippet
         snippet_email = lead.get("email_snippet", "")
@@ -1752,9 +1736,6 @@ def find_leads(niche: str, city: str, limit: int = 0):
             "client_complaints": " | ".join(reviews["client_complaints"][:3]),
             "business_complaints": " | ".join(reviews["business_complaints"][:2]),
             "website_quality": website_quality,
-            "social_media": social,
-            "other_services": other_services,
-            "message": message,
             "source": lead.get("source", ""),
         }
 
@@ -1827,9 +1808,6 @@ def find_leads(niche: str, city: str, limit: int = 0):
                     "Communication Complaints (Clients)": lead["client_complaints"],
                     "Business Complaints": lead["business_complaints"],
                     "Website Quality": lead["website_quality"],
-                    "Social Media": lead["social_media"],
-                    "Other Services Possible": lead["other_services"],
-                    "Suggested Message": lead["message"],
                 })
         print(f"  Saved to: {csv_file}")
 
