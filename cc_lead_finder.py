@@ -1133,17 +1133,21 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
 
         # Method 2 removed: no fake/guessed emails
 
-    # Method 2: DuckDuckGo search for email (multiple queries)
+    # Method 2: DuckDuckGo search for email (multiple queries - dig deep)
     if name:
         ddg_queries = [
             f'"{name}" {city} email',
             f'"{name}" {city} contact email @',
+            f'"{name}" email address',
+            f'"{name}" {city} gmail OR yahoo OR hotmail OR outlook',
         ]
-        # If no emails found yet, try harder
+        # If STILL no emails, try even harder with variations
         if not emails:
             ddg_queries.extend([
-                f'"{name}" email address',
-                f'"{name}" {city} gmail OR yahoo OR hotmail OR outlook',
+                f'"{name}" contact us email',
+                f'"{name}" owner email',
+                f'"{name}" Ohio email OR contact',
+                f'{name} {city} "@" email',
             ])
 
         for q in ddg_queries:
@@ -1158,7 +1162,36 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
                 random_delay(0.5, 1)
             except Exception:
                 pass
-            # Stop searching if we found something
+            # Only stop early if we found a GOOD email (not after first 2 queries)
+            if emails and ddg_queries.index(q) >= 3:
+                break
+
+    # Method 3: If still no email, try scraping directory pages (BBB, Manta, etc.)
+    if not emails and name:
+        directory_queries = [
+            f'site:bbb.org "{name}"',
+            f'site:manta.com "{name}"',
+            f'site:chamberofcommerce.com "{name}"',
+            f'site:mapquest.com "{name}" {city}',
+        ]
+        for q in directory_queries:
+            try:
+                results = search_ddg(q, max_results=3)
+                for r in results:
+                    page_url = r.get("href", "")
+                    if not page_url:
+                        continue
+                    try:
+                        resp = client.get(page_url)
+                        found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', resp.text)
+                        for email in found:
+                            if not is_junk_email(email):
+                                emails.add(email.lower())
+                    except Exception:
+                        pass
+                random_delay(0.5, 1)
+            except Exception:
+                pass
             if emails:
                 break
 
