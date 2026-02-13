@@ -1558,7 +1558,7 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
 
 # ==================== MAIN ====================
 
-def find_leads(niche: str, city: str):
+def find_leads(niche: str, city: str, limit: int = 0):
     """Main function: find leads, investigate, write to Sheet."""
 
     # Check if we have expanded area for this city
@@ -1639,6 +1639,12 @@ def find_leads(niche: str, city: str):
     print(f"\n  Total empresas unicas encontradas: {len(unique_leads)}")
     if skipped_irrelevant:
         print(f"  Filtradas por no ser relevantes a '{niche}': {skipped_irrelevant}")
+
+    # Apply limit if set
+    if limit and limit > 0 and len(unique_leads) > limit:
+        print(f"  MODO PRUEBA: limitando a {limit} negocios")
+        unique_leads = unique_leads[:limit]
+
     print()
 
     if not unique_leads:
@@ -1808,6 +1814,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="CC Lead Finder - by Claude Code")
     parser.add_argument("niche", help="Industria a buscar (ej: plomeros, hvac, dentistas)")
     parser.add_argument("city", help="Ciudad (ej: Miami, Houston, 'Los Angeles')")
+    parser.add_argument("--limit", type=int, default=0, help="Limite de negocios a investigar (0=sin limite)")
 
     args = parser.parse_args()
-    find_leads(args.niche, args.city)
+    find_leads(args.niche, args.city, limit=args.limit)
