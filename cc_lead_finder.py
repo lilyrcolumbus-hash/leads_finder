@@ -221,7 +221,11 @@ LIST_SKIP_WORDS = [
     "the best", "the top", "the most",
     "best plumb", "best hvac", "best dent", "best law", "best electric",
     "best roof", "best paint", "best landscap", "best pest", "best clean",
-    "top rated", "highest rated", "most trusted", "most reliable",
+    "top rated", "top-rated", "highest rated", "highest-rated",
+    "most trusted", "most reliable",
+    "homeadvisor", "home advisor", "homeguide", "porch.com",
+    "networx", "house method", "angi list",
+    "services provided by", "services experts",
     "near me", "near you", "in your area",
     "directory", "listing", "listings",
     "companies in", "services in", "contractors in", "providers in",
@@ -351,14 +355,26 @@ def is_generic_name(name: str) -> bool:
     ]
     if any(n.endswith(suffix) for suffix in generic_ends):
         return True
-    # Name is ONLY a niche word (e.g. "Plumbing", "Plumber", "Plumbing Services")
+    # Name is ONLY a niche word + optional city/state (e.g. "Plumbing Lima OH", "Plumber Services")
     only_niche = re.match(
         r'^(plumb\w*|hvac|heat\w*|cool\w*|dent\w*|law\w*|attorney\w*|electric\w*|'
         r'roof\w*|paint\w*|landscap\w*|pest\w*|clean\w*|drain\w*|sewer\w*|septic\w*)'
-        r'(\s+(services?|repair|company|contractors?|inc|llc|pro|pros|experts?|specialists?|solutions?))*\s*$',
+        r'(\s+(services?|repair|company|contractors?|inc|llc|pro|pros|experts?|specialists?|solutions?'
+        r'|in|near|around|of|\w{2,15}))*\s*$',
         n, re.IGNORECASE
     )
     if only_niche:
+        return True
+    # Non-English content (common foreign words from directories)
+    foreign_words = ["aadress", "telefon", "lahtiolekuajad", "öppettider", "horario",
+                     "adresse", "telefonnummer", "adresa", "numéro", "indirizzo"]
+    if any(fw in n for fw in foreign_words):
+        return True
+    # "Home - Something" or "Home | Something" (usually not a business name)
+    if n.startswith("home ") and len(n.split()) <= 5:
+        return True
+    # "Services provided by..." pattern
+    if "services provided by" in n or "services experts" in n:
         return True
     return False
 
@@ -369,7 +385,10 @@ def clean_business_name(title: str) -> str:
     name = re.sub(r'\s*[-–|:]\s*(Yelp|Google|BBB|Better Business|Yellow Pages|YP|Facebook|'
                   r'Angi|Angie|Thumbtack|Manta|LinkedIn|Indeed|Nextdoor|Craigslist|'
                   r'Reviews|Updated|Bing|Yahoo|Maps|Company Profile|Overview|'
-                  r'Ratings|Cost|Prices|Photos|Videos|Posts).*$', '', title, flags=re.IGNORECASE).strip()
+                  r'Ratings|Cost|Prices|Photos|Videos|Posts|HomeAdvisor|Porch|'
+                  r'Networx|Houzz|Expertise|Bark|TaskRabbit).*$', '', title, flags=re.IGNORECASE).strip()
+    # Remove "aadress, telefon..." (foreign directory suffixes)
+    name = re.sub(r'\s*[-–—,]\s*(aadress|telefon|öppettider|horario|adresse|numéro).*$', '', name, flags=re.IGNORECASE).strip()
     # Remove leading numbers
     name = re.sub(r'^\d+\.\s*', '', name).strip()
     # Remove parenthetical info
@@ -1488,7 +1507,7 @@ def get_or_create_tab(spreadsheet, tab_name: str):
         return worksheet
     except gspread.exceptions.WorksheetNotFound:
         worksheet = spreadsheet.add_worksheet(title=tab_name, rows=1000, cols=len(SHEET_HEADERS))
-        worksheet.update("A1", [SHEET_HEADERS])
+        worksheet.update(values=[SHEET_HEADERS], range_name="A1")
         # Bold headers
         worksheet.format("A1:R1", {"textFormat": {"bold": True}})
         return worksheet
@@ -1540,7 +1559,7 @@ def write_leads_to_sheet(spreadsheet, tab_name: str, leads_data: list):
     if new_rows:
         # Append after last row
         next_row = len(existing) + 1
-        worksheet.update(f"A{next_row}", new_rows)
+        worksheet.update(values=new_rows, range_name=f"A{next_row}")
 
         # Color code the NECESITA AI RECEPTIONIST column (Column K, index 10)
         for i, row in enumerate(new_rows):
@@ -1623,11 +1642,25 @@ def find_leads(niche: str, city: str, limit: int = 0):
         random_delay(2, 4)
 
     # Deduplicate by name + filter relevant to niche
+    # Normalize names for dedup: lowercase, strip punctuation, strip city/state suffixes
+    def normalize_for_dedup(name: str) -> str:
+        n = name.lower().strip()
+        # Remove punctuation (apostrophes, commas, periods, pipes, dashes)
+        n = re.sub(r"['\",.|:;!?&\-–—]", "", n)
+        # Remove common suffixes: LLC, Inc, Ltd, city names, state, phone numbers
+        n = re.sub(r'\b(llc|inc|ltd|corp|co)\b', '', n)
+        n = re.sub(r'\b(oh|ohio)\b', '', n)
+        # Remove phone numbers
+        n = re.sub(r'\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}', '', n)
+        # Remove extra whitespace
+        n = re.sub(r'\s+', ' ', n).strip()
+        return n
+
     seen = set()
     unique_leads = []
     skipped_irrelevant = 0
     for lead in all_leads:
-        name_key = lead["name"].lower().strip()
+        name_key = normalize_for_dedup(lead["name"])
         if name_key and name_key not in seen and len(name_key) > 3:
             # Check if business is actually relevant to the niche
             if not is_relevant_to_niche(lead["name"], lead.get("snippet", ""), niche):
