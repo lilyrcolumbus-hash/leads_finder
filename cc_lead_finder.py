@@ -76,6 +76,33 @@ AREA_EXPANSIONS = {
     ],
 }
 
+# Cities/states that indicate a result is NOT from our target area
+WRONG_LOCATION_KEYWORDS = [
+    "philadelphia", "new york", "nyc", "brooklyn", "manhattan", "queens", "bronx",
+    "los angeles", "san francisco", "san diego", "san jose", "sacramento",
+    "chicago", "houston", "dallas", "austin", "san antonio",
+    "miami", "tampa", "orlando", "jacksonville",
+    "atlanta", "seattle", "portland", "denver", "phoenix", "tucson",
+    "boston", "detroit", "minneapolis", "st. louis", "st louis",
+    "nashville", "memphis", "charlotte", "raleigh",
+    "las vegas", "honolulu", "anchorage", "albuquerque",
+    "new jersey", "california", "texas", "florida", "georgia",
+    "arizona", "nevada", "colorado", "washington state",
+    "pennsylvania", " pa ", " nj ", " ny ", " ca ", " tx ", " fl ",
+    " ga ", " az ", " nv ", " co ", " wa ",
+    "dubai", "al barsha", "london", "toronto", "mexico",
+]
+
+# Words that confirm the result IS from our target area
+VALID_LOCATION_KEYWORDS = [
+    "lima", "ohio", " oh", "allen county", "wapakoneta", "findlay",
+    "sidney", "van wert", "celina", "delphos", "st. marys", "st marys",
+    "bluffton", "elida", "spencerville", "ottawa", "defiance",
+    "auglaize", "mercer county", "hancock county", "shelby county",
+    "45801", "45802", "45804", "45805", "45806", "45807",
+    "45895", "45840", "45365", "45891",
+]
+
 # Column headers for the Sheet
 SHEET_HEADERS = [
     "Date",
@@ -1833,6 +1860,7 @@ def find_leads(niche: str, city: str, limit: int = 0):
     seen = set()
     unique_leads = []
     skipped_irrelevant = 0
+    skipped_location = 0
     for lead in all_leads:
         name_key = normalize_for_dedup(lead["name"])
         if name_key and name_key not in seen and len(name_key) > 3:
@@ -1840,12 +1868,23 @@ def find_leads(niche: str, city: str, limit: int = 0):
             if not is_relevant_to_niche(lead["name"], lead.get("snippet", ""), niche):
                 skipped_irrelevant += 1
                 continue
+
+            # Check location: skip if clearly from wrong area
+            check_text = (lead["name"] + " " + lead.get("snippet", "") + " " + lead.get("website", "")).lower()
+            is_wrong_location = any(loc in check_text for loc in WRONG_LOCATION_KEYWORDS)
+            is_valid_location = any(loc in check_text for loc in VALID_LOCATION_KEYWORDS)
+            if is_wrong_location and not is_valid_location:
+                skipped_location += 1
+                continue
+
             seen.add(name_key)
             unique_leads.append(lead)
 
     print(f"\n  Total empresas unicas encontradas: {len(unique_leads)}")
     if skipped_irrelevant:
         print(f"  Filtradas por no ser relevantes a '{niche}': {skipped_irrelevant}")
+    if skipped_location:
+        print(f"  Filtradas por ubicacion incorrecta: {skipped_location}")
 
     # Apply limit if set
     if limit and limit > 0 and len(unique_leads) > limit:
