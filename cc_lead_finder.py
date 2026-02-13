@@ -128,14 +128,32 @@ PAIN_KEYWORDS_BUSINESS = [
 JUNK_DOMAINS = [
     "gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
     "aol.com", "mail.com", "icloud.com", "example.com",
-    "wixsite.com", "squarespace.com", "wordpress.com",
-    "facebook.com", "instagram.com", "twitter.com",
-    "yelp.com", "google.com", "bbb.org",
-    "sentry.io", "sentry.wixpress.com",
+    "wixsite.com", "squarespace.com", "wordpress.com", "weebly.com",
+    "facebook.com", "instagram.com", "twitter.com", "x.com",
+    "yelp.com", "google.com", "bbb.org", "bing.com",
+    "sentry.io", "sentry.wixpress.com", "wixpress.com",
     "onmschina.cn", "partner.onmschina.cn",
     "fourthcoffee.partner.onmschina.cn",
     "indeed.com", "linkedin.com",
     "protection.outlook.com",
+    # Third-party services embedded in websites
+    "cloudflare.com", "cloudflareinsights.com",
+    "googleapis.com", "googletagmanager.com", "google-analytics.com",
+    "gstatic.com", "googlesyndication.com", "googleadservices.com",
+    "doubleclick.net", "googleusercontent.com",
+    "facebook.net", "fbcdn.net",
+    "amazonaws.com", "awscloud.com",
+    "jsdelivr.net", "cdnjs.cloudflare.com",
+    "fontawesome.com", "bootstrapcdn.com",
+    "jquery.com", "unpkg.com",
+    "schema.org", "w3.org",
+    "gravatar.com", "wp.com",
+    "mailchimp.com", "constantcontact.com", "sendgrid.net",
+    "hubspot.com", "hubspotusercontent.com",
+    "zendesk.com", "intercom.io", "tawk.to",
+    "recaptcha.net", "gstatic.com",
+    "stripe.com", "paypal.com",
+    "youtube.com", "vimeo.com",
 ]
 
 # Junk email patterns - emails that are never from a real local business
@@ -143,12 +161,19 @@ JUNK_EMAIL_PATTERNS = [
     r"@.*\.gov$",        # Government emails
     r"@.*\.edu$",        # University emails
     r"@.*\.mil$",        # Military emails
-    r"noreply@", r"no-reply@", r"donotreply@",
+    r"noreply@", r"no-reply@", r"donotreply@", r"do-not-reply@",
+    r"^info@(wix|squarespace|wordpress|weebly|godaddy)",
     r"@example\.", r"@test\.", r"@localhost",
     r"@.*onmschina", r"@.*fourthcoffee",
     r"marketing@.*wdn\.", r"editor@", r"webmaster@",
     r"abuse@", r"postmaster@", r"hostmaster@",
     r"@.*sentry\.", r"@.*wixpress\.",
+    r"@.*cloudflare", r"@.*googleapis", r"@.*google-analytics",
+    r"@.*amazonaws", r"@.*mailchimp", r"@.*sendgrid",
+    r"@.*hubspot", r"@.*zendesk", r"@.*intercom",
+    r"@.*\.min\.js", r"@.*\.css",  # From minified code
+    r"support@(wix|squarespace|wordpress|godaddy|shopify)",
+    r"^(admin|root|daemon|www-data|nobody)@",
 ]
 
 # URLs from these domains are NEVER a real local business - always skip
@@ -1109,38 +1134,58 @@ def extract_emails_from_website(url: str, client: httpx.Client, name: str = "", 
             resp = client.get(url)
             soup = BeautifulSoup(resp.text, "lxml")
 
-            # Find contact/about/team/footer pages
+            # Find contact/about/team pages via links on the page
             for a in soup.select("a[href]"):
                 href = a.get("href", "").lower()
                 text = a.get_text(strip=True).lower()
                 if any(kw in href or kw in text for kw in [
-                    "contact", "about", "team", "staff", "footer",
+                    "contact", "about", "team", "staff",
                     "locations", "email", "reach", "connect", "support",
+                    "get-in-touch", "get in touch", "write-us", "write us",
                 ]):
                     full_url = urljoin(url, a["href"])
                     if full_url not in pages_to_check:
                         pages_to_check.append(full_url)
 
+            # Also try common contact page URLs directly
+            for path in ["/contact", "/contact-us", "/about", "/about-us"]:
+                guess_url = url.rstrip("/") + path
+                if guess_url not in pages_to_check:
+                    pages_to_check.append(guess_url)
+
         except Exception:
             pass
 
-        for page in pages_to_check[:5]:
+        for page in pages_to_check[:8]:
             try:
                 resp = client.get(page)
-                text = resp.text
+                soup = BeautifulSoup(resp.text, "lxml")
 
-                # Regex for emails
-                found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
-                for email in found:
-                    if not is_junk_email(email):
-                        emails.add(email.lower())
-
-                # Mailto links
-                soup = BeautifulSoup(text, "lxml")
+                # Priority 1: Mailto links (most reliable - these are intentional contact emails)
                 for a in soup.select("a[href^='mailto:']"):
                     email = a["href"].replace("mailto:", "").split("?")[0].strip()
                     if email and "@" in email and not is_junk_email(email):
                         emails.add(email.lower())
+
+                # Priority 2: Visible text only (not scripts/styles/hidden elements)
+                # Remove script, style, noscript, svg, and hidden elements
+                for tag in soup.select("script, style, noscript, svg, [style*='display:none'], [style*='display: none'], [hidden]"):
+                    tag.decompose()
+                visible_text = soup.get_text(separator=" ")
+                found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', visible_text)
+                for email in found:
+                    if not is_junk_email(email):
+                        emails.add(email.lower())
+
+                # Priority 3: Check HTML attributes (href, data-email, value, content)
+                if not emails:
+                    for attr in ["href", "data-email", "data-mail", "value", "content"]:
+                        for tag in soup.select(f"[{attr}]"):
+                            val = tag.get(attr, "")
+                            found = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', val)
+                            for email in found:
+                                if not is_junk_email(email):
+                                    emails.add(email.lower())
 
                 random_delay(0.3, 0.8)
 
