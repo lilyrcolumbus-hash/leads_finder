@@ -1,0 +1,85 @@
+Tier,Industria,Negocio,Ciudad,Direccion,Telefono,Sitio Web,Contratando,Posicion Abierta,Salario,Nota de Venta
+Tier 1,Ortopedia/Medica,Orthopaedic Institute of Ohio,Lima OH,801 Medical Drive Suite A Lima OH 45804,(419) 222-6622,orthoohio.com,SI,Appointment Scheduler,,24 medicos - 200+ staff - ALTO volumen de llamadas
+Tier 1,Quiropractica,Rabe Chiropractic,Lima OH,3075 W Elm St Lima OH 45805,(419) 224-5678,rabefamilychiropractic.com,SI,Recepcionista medio tiempo,,Necesitan cobertura medio tiempo - IA cubre el resto 24/7
+Tier 1,Quiropractica,Integrity Chiropractic & Wellness,Findlay OH,2113 Tiffin Ave Ste 101 Findlay OH 45840,(419) 424-0100,ihcare.com,SI,Asistente Quiropractico/Recepcion,$18-$20/hr,Pagando $37K-$41K/ano por recepcionista - IA ahorra significativamente
+Tier 1,Bufete de Abogados,Mielke Law Office,St. Marys OH,425 East Spring Street St. Marys OH 45885,(419) 300-8585,mielkelaw.com,SI,Recepcionista/Admin,,Bufete pequeno - IA maneja llamadas y programa consultas
+Tier 1,Veterinaria,Diamond M Veterinary Clinic,Kenton OH,13450 State Route 292 Kenton OH 43326,(419) 673-0426,diamondmvetclinic.com,SI,Recepcionista medio/tiempo completo,,Alto volumen de llamadas - IA maneja sin fatiga
+Tier 1,Seguros,Bryan Weimerskirch - State Farm,Delphos OH,201 N Main St Delphos OH 45833,(419) 692-1626,sfagentbryan.com,SI,Recepcionista,,Agencia de seguros - necesita manejar citas y comunicaciones
+Tier 1,Audiologia/Medica,The Hearing & Balance Center,Lima OH,545 West Market Street Suite #333 Lima OH 45801,(419) 222-9010,limahearingandbalance.com,SI,Front Desk,,Pacientes tercera edad que llaman por telefono
+Tier 1,Urologia/Medica,Crossroads Urology,Lima OH,2751 Fort Amanda Rd Lima OH 45805,(567) 529-9000,crossroadsurology.com,SI,Office Worker,,Practica especializada nueva en crecimiento
+Tier 1,Dental/Salud Comunitaria,Health Partners of Western Ohio,Lima OH,441 East 8th Street Lima OH 45804,(419) 221-3072,hpwohio.org,SI,Recepcionista Dental,$17.50/hr,Centro comunitario multiples ubicaciones - potencial escalar
+Tier 1,Reparacion Automotriz,Autobahn Collision Center,Wapakoneta OH,851 Industrial Drive Wapakoneta OH 45895,(419) 738-8772,autobahncollisioncenter.com,SI,Recepcionista/Admin,,Taller familiar - IA maneja llamadas de seguros y citas
+Tier 1,Sistema Hospitalario,Lima Memorial Health System,Lima OH y Wapakoneta OH,,,limamemorial.org,SI,Recepcionista OB/GYN - ENT - Scheduler Phone Room,,Multiples posiciones - potencial contrato empresarial
+Tier 1,OB/GYN,Blanchard Valley OB/GYN,Findlay OH,,,,SI,Secretaria/Recepcionista,,Consultorios OB/GYN reciben muchas llamadas de programacion
+Tier 1,Atencion Medica,NOMS Healthcare,Findlay OH,,,,SI,Secretaria Medica,,Prefieren experiencia en recepcion en salud
+Tier 1,Dental,Affordable Dentures & Implants,Lima OH,1951 Bellefontaine Rd Lima OH 45804,(419) 228-6680,affordabledentures.com,SI,Dental Front Office Assistant,,Experiencia con Dentrix y facturacion de seguros
+Tier 1,Gobierno/Servicios,Hancock County Job and Family Services,Findlay OH,,,,SI,Recepcionista,,Gobierno - potencial contrato estable
+Tier 1,Salud Comunitaria,Family Resource Center of NW Ohio,Lima OH,,(419) 222-1168,frcohio.com,SI,Front Desk Medico,,Centro de recursos familiares
+Tier 1,Medica,First Care Medical,Lima OH,,,,SI,Recepcionista Medica,,Clinica medica local
+Tier 2,Dental,Burns Dental Inc. (Dra. Alyson K. Amerson),Lima OH,459 S. Main St. Lima OH 45805,(419) 228-5502,burnsdentalinc.com,NO,,,Consultorio dental independiente
+Tier 2,Dental,Whole Health Dentistry,Lima OH,,(419) 228-2233,wholehealthdentistry.com,NO,,,Consultorio dental independiente
+Tier 2,Dental,Lima Community Dental,Lima OH,,(419) 741-9903,limacommunitydental.com,NO,,,Consultorio dental comunitario
+Tier 2,Dental,Pure Smiles - Lima,Lima OH,,(419) 863-5483,puresmiles.com/lima,NO,,,Cadena dental
+Tier 2,Dental,Dr. Jon Stocker DDS,Lima OH,,(419) 222-8856,jonstockerdds.com,NO,,,Consultorio independiente
+Tier 2,Dental,Dan G. Wilker DDS,Lima OH,,,danwilkerdds.com,NO,,,Consultorio independiente
+Tier 2,Dental,Michael D. Terveer DDS,Lima OH,,,drterveerdds.com,NO,,,Consultorio independiente
+Tier 2,Dental,Aspen Dental - Lima,Lima OH,3292 Elida Rd Lima OH 45805,(419) 228-5000,aspendental.com,NO,,,Cadena nacional
+Tier 2,Dental,DeClerck Family Dental,Findlay OH,,(419) 422-8972,declerckfamilydental.com,NO,,,Consultorio dental familiar
+Tier 2,Dental,Mutchler & Lewis Family Dental Care,Findlay OH,,,findlaydentalteam.com,NO,,,Consultorio dental familiar
+Tier 2,Dental,Phillips Dental Care Center,Findlay OH,,,phillipsdentalcc.com,NO,,,2 ubicaciones
+Tier 2,Dental,Anderson Family Dentist,Findlay OH,,(419) 427-1500,andersondentalfindlay.com,NO,,,Consultorio dental familiar
+Tier 2,Dental,Pure Smiles - Findlay,Findlay OH,,(419) 664-3283,puresmiles.com/findlay,NO,,,Cadena dental
+Tier 2,Quiropractica,Gillis Chiropractic Clinic,Lima OH,,(419) 228-0000,gillischiropractic.com,NO,,,3 ubicaciones - potencial multi-sede
+Tier 2,Quiropractica,Emergency Care Chiropractic of Lima,Lima OH,,(419) 296-6804,emergencycarechirolima.com,NO,,,Walk-in - atencion despues de horas
+Tier 2,Quiropractica,Stemen Chiropractic Clinic,Lima OH,,(419) 227-8700,stemenchiro.com,NO,,,Consultorio quiropractico
+Tier 2,Quiropractica,Feltz Chiropractic,Lima OH,,(419) 222-4000,feltzchiropractic.com,NO,,,Consultorio quiropractico
+Tier 2,Quiropractica,Wilcox Family Chiropractic,Lima OH,,(419) 229-2225,wilcoxfamchiropractic.com,NO,,,Consultorio quiropractico familiar
+Tier 2,Medica,Family Physician's of Lima,Lima OH,,,famdox.com,NO,,,30+ anos de servicio
+Tier 2,Medica,Leahy Family Care & Wellness Center,Lima OH,,,leahyfamilycare.com,NO,,,Practica independiente
+Tier 2,Medica,Dermatologists of Central States (DOCS),St. Marys OH,,,docsdermgroup.com,NO,,,$15-$19.75/hr para recepcionista
+Tier 2,Bufete de Abogados,Dodson Law Office LLC,Lima OH,,(419) 999-9000,limalawyer.com,NO,,,Horario extendido noches/fines de semana
+Tier 2,Bufete de Abogados,Reese Elliott & Williams,Lima OH,,,lima-law.com,NO,,,Practica dirigida por mujeres - 70+ anos exp
+Tier 2,Bufete de Abogados,Huffman Kelley Brock & Gottschalk LLC,Lima OH,,,540westmarket.com,NO,,,250+ anos exp combinada
+Tier 2,Veterinaria,Heidt Veterinary Hospital,Lima OH,,,heidtvet.com,NO,,,Desde 1958
+Tier 2,Veterinaria,Shawnee Veterinary Hospital,Lima OH,,,shawneevethospital.com,NO,,,Servicio completo
+Tier 2,Veterinaria,Metz Petz Veterinary Clinics,Ada y Lima OH,,,metzpetz.net,NO,,,Multiples ubicaciones
+Tier 2,Veterinaria,Lima Veterinary Center,Lima OH,,(585) 582-3131,limaveterinarycenter.com,NO,,,Animales pequenos + unidad movil
+Tier 2,Veterinaria,Midwest Animal Clinic,Lima OH,,(419) 224-9000,,NO,,,7540 Harding Hwy
+Tier 2,HVAC/Plomeria,Lippincott Plumbing Heating & Electrical,Lima OH,,,lippincottplumbing.com,NO,,,40+ anos - servicio 24 horas
+Tier 2,HVAC/Plomeria,Alltek Plumbing,Lima y Findlay OH,,(419) 228-2708,alltekplumbing.com,NO,,,60+ anos - 2 ubicaciones
+Tier 2,HVAC/Plomeria,Washam Plumbing Heating & AC,Lima OH,,,washamplumbing.com,NO,,,Residencial y comercial
+Tier 2,HVAC/Plomeria,Creps Plumbing Heating & AC LLC,Lima OH,,,crepsplumbing.com,NO,,,60+ anos - servicio 24 horas
+Tier 2,HVAC/Plomeria,Grothouse Plumbing & Heating,Delphos OH,,,,NO,,,Negocio familiar
+Tier 2,HVAC/Plomeria,Consolidated Hunter Heating Plumbing & AC,Celina OH,,,consolidatedhunter.com,NO,,,Familiar desde 1985
+Tier 2,HVAC/Plomeria,Jack's Heating AC & Plumbing,Findlay OH,,,jacksheating.com,NO,,,Servicio 24 hrs - Carrier authorized
+Tier 2,HVAC/Plomeria,Knueve & Sons,Kalida OH,,(419) 532-3699,knueve.com,NO,,,Desde 1970 - multiples servicios
+Tier 2,HVAC/Plomeria,Ayers Mechanical Group,Van Wert OH,,,ayersmechanical.com,NO,,,Desde 1984
+Tier 2,HVAC/Plomeria,Campbell Inc.,Findlay OH,,(800) 482-2911,campbellinc.com,NO,,,3ra generacion - 80+ empleados
+Tier 2,Funeraria,Chamberlain Huckeriede Funeral Home,Lima OH,,(419) 229-2300,chamberlainhuckeriede.com,NO,,,Familiar desde 1992 - necesidad 24/7
+Tier 2,Funeraria,Chiles-Laman Funeral & Cremation,Lima OH,,(419) 228-5474,chiles-lamanfh.com,NO,,,2 ubicaciones - necesidad 24/7
+Tier 2,Funeraria,Jones-Clark Funeral Home,Lima OH,,(419) 225-5741,jonesclarkfh.com,NO,,,Necesidad 24/7
+Tier 2,Funeraria,Hanneman-Siferd Funeral Home,Lima OH,,(419) 224-2010,,NO,,,Necesidad 24/7
+Tier 2,Funeraria,Bayliff & Son Funeral Home,Cridersville OH,,(419) 645-4501,,NO,,,Necesidad 24/7
+Tier 3,Seguros,Eastside Insurance Agency,Lima OH,,,eastsideinsurance.com,NO,,,5 estrellas - 12 resenas
+Tier 3,Seguros,Mel Butterfield & Son Insurance Agency,Lima OH,,,butterfieldinsuranceagency.com,NO,,,80+ anos - negocio familiar 3ra-4ta generacion
+Tier 3,Seguros,Sullivan Insurance,Lima OH,,,sullivaninsuranceinc.com,NO,,,Negocio Pequeno del Ano 2022
+Tier 3,Seguros,CoverLink Insurance Agency,Lima OH,,,coverlink.com,NO,,,Casi 100 anos de experiencia
+Tier 3,Seguros,Kesner Insurance Agency Inc.,Lima OH,1240 W Market St Lima OH 45805,,,NO,,,Agencia independiente
+Tier 3,Seguros,Creps Insurance Agency,Lima OH,806 Bellefontaine Ave Lima OH 45801,,,NO,,,Agencia independiente
+Tier 3,Seguros,Webb Insurance Agency Inc.,Lima OH,212 W High St Lima OH 45801,,,NO,,,Agencia independiente
+Tier 3,Seguros,Wenger Insurance Agency Inc,Lima OH,200 W North St Ste A Lima OH 45801,,,NO,,,Agencia independiente
+Tier 3,Bienes Raices,Ron Spencer Real Estate,Lima OH,,,rsre.com,NO,,,45+ anos - multiples oficinas
+Tier 3,Bienes Raices,CCR Realtors,Lima OH,,(419) 222-0555,ccrrealtors.com,NO,,,Multiples oficinas - lider local
+Tier 3,Bienes Raices,Cowan Realtors,Lima OH,,,cowanrealtors.com,NO,,,30+ anos
+Tier 3,Bienes Raices,Superior PLUS Realtors,Lima OH,,,superiorrealtors.com,NO,,,Servicio integral (realty mortgage insurance title)
+Tier 3,Bienes Raices,Howard Hanna Real Estate - Lima,Lima OH,,,howardhanna.com,NO,,,Oficina regional
+Tier 3,Automotriz,Tom Ahl Family of Dealerships,Lima OH,,(877) 748-4017,tomahl.com,NO,,,Chrysler/Dodge/Jeep/RAM/FIAT/Hyundai/GMC/Buick
+Tier 3,Automotriz,White's Honda Toyota of Lima,Lima OH,,,whiteslima.com,NO,,,Sirve todo NW Ohio
+Tier 3,Automotriz,Lima Chevrolet,Lima OH,,(419) 993-6000,limaautomall.com,NO,,,100+ anos de servicio
+Tier 3,Automotriz,Roger's Automotive,Lima OH,,(419) 222-8880,rogersautomotive.net,NO,,,Desde 1996
+Tier 3,Automotriz,Auto Medic of Ohio LLC,Lima OH,,,automedicofohio.com,NO,,,Garantia 2 anos/24000 millas
+Tier 3,Salon/Spa,LOX Salon & Spa,Lima OH,,(567) 204-0322,,NO,,,Estilistas independientes
+Tier 3,Salon/Spa,Beauty by Jill Salon & Spa,Lima OH,,,vagaro.com/beautybyjillsalonandspa,NO,,,Servicios completos
+Tier 3,Salon/Spa,JJ's Hair & Daughters Spa,Lima OH,,,,NO,,,7 estilistas - masajista - manicurista
+Tier 3,Salon/Spa,Steven Michael's The Hair Studio,Lima OH,,,,NO,,,Top rated
+Tier 3,Salon/Spa,Chapter 2 Salon & Spa,Lima OH,,,chapter-2-salon-spa.square.site,NO,,,Salon y spa
