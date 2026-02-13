@@ -428,6 +428,79 @@ def extract_phone_from_text(text: str) -> str:
     return match.group() if match else ""
 
 
+def extract_phone_from_website(url: str, client: httpx.Client, name: str = "", city: str = "") -> str:
+    """Extract phone number from website + DuckDuckGo search."""
+    skip_sites = [
+        "yelp.com", "yellowpages.com", "bbb.org", "google.com",
+        "facebook.com", "linkedin.com", "indeed.com", "angi.com",
+        "thumbtack.com", "manta.com", "nextdoor.com", "craigslist.org",
+    ]
+
+    has_own_website = url and not any(d in url for d in skip_sites)
+
+    # Method 1: Scrape website for phone numbers
+    if has_own_website:
+        pages = [url]
+        try:
+            resp = client.get(url)
+            soup = BeautifulSoup(resp.text, "lxml")
+            # Find contact page
+            for a in soup.select("a[href]"):
+                href = a.get("href", "").lower()
+                text_link = a.get_text(strip=True).lower()
+                if any(kw in href or kw in text_link for kw in ["contact", "about", "locations"]):
+                    full_url = urljoin(url, a["href"])
+                    if full_url not in pages:
+                        pages.append(full_url)
+        except Exception:
+            pass
+
+        # Also try common contact URLs
+        for path in ["/contact", "/contact-us"]:
+            guess = url.rstrip("/") + path
+            if guess not in pages:
+                pages.append(guess)
+
+        for page in pages[:4]:
+            try:
+                resp = client.get(page)
+                soup = BeautifulSoup(resp.text, "lxml")
+
+                # Check tel: links first (most reliable)
+                for a in soup.select("a[href^='tel:']"):
+                    tel = a["href"].replace("tel:", "").strip()
+                    tel = re.sub(r'[^\d]', '', tel)
+                    if len(tel) == 10:
+                        return f"({tel[:3]}) {tel[3:6]}-{tel[6:]}"
+                    elif len(tel) == 11 and tel.startswith("1"):
+                        return f"({tel[1:4]}) {tel[4:7]}-{tel[7:]}"
+
+                # Check visible text
+                for tag in soup.select("script, style, noscript, svg"):
+                    tag.decompose()
+                visible = soup.get_text(separator=" ")
+                phone = extract_phone_from_text(visible)
+                if phone:
+                    return phone
+
+            except Exception:
+                pass
+
+    # Method 2: DDG search for phone
+    if name:
+        try:
+            results = search_ddg(f'"{name}" {city} phone number', max_results=5)
+            for r in results:
+                text = r.get("body", "") + " " + r.get("title", "")
+                phone = extract_phone_from_text(text)
+                if phone:
+                    return phone
+        except Exception:
+            pass
+
+    return ""
+
+
 def is_junk_email(email: str) -> bool:
     """Check if an email is junk (government, generic, fake, etc.)."""
     email_lower = email.lower()
@@ -1749,6 +1822,12 @@ def find_leads(niche: str, city: str, limit: int = 0):
         emails = extract_emails_from_website(lead.get("website", ""), client, name, lead_city)
         random_delay(0.5, 1)
 
+        # Extract phone - use snippet phone, or search website/DDG if empty
+        phone = lead.get("phone", "")
+        if not phone:
+            phone = extract_phone_from_website(lead.get("website", ""), client, name, lead_city)
+            random_delay(0.3, 0.5)
+
         # Analyze website quality
         website_quality = analyze_website_quality(lead.get("website", ""), client)
         random_delay(0.5, 1)
@@ -1769,7 +1848,7 @@ def find_leads(niche: str, city: str, limit: int = 0):
 
         lead_data = {
             "name": name,
-            "phone": lead.get("phone", ""),
+            "phone": phone,
             "email": ", ".join(emails) if emails else "",
             "website": lead.get("website", ""),
             "address": lead.get("address", ""),
