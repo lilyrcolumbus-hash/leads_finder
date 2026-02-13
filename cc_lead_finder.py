@@ -154,6 +154,12 @@ JUNK_DOMAINS = [
     "recaptcha.net", "gstatic.com",
     "stripe.com", "paypal.com",
     "youtube.com", "vimeo.com",
+    # Directory/aggregator sites (their emails, not business emails)
+    "mapquest.com", "chamberofcommerce.com",
+    "mailmeteor.com", "selective.com",
+    "nearmelocalservices.com", "homeadvisor.com",
+    "networx.com", "porch.com", "homeguide.com",
+    "bark.com", "taskrabbit.com", "houzz.com",
 ]
 
 # Junk email patterns - emails that are never from a real local business
@@ -161,8 +167,11 @@ JUNK_EMAIL_PATTERNS = [
     r"@.*\.gov$",        # Government emails
     r"@.*\.edu$",        # University emails
     r"@.*\.mil$",        # Military emails
+    r"@.*\.state\..*\.us$",  # State government (com.state.oh.us)
+    r"@.*\.oh\.us$",     # Ohio government
     r"noreply@", r"no-reply@", r"donotreply@", r"do-not-reply@",
     r"^info@(wix|squarespace|wordpress|weebly|godaddy)",
+    r"^(help|support|contact|contactus|news|editor|sales|marketing|admin)@(?!.*plumb)",  # Generic prefixes unless plumbing domain
     r"@example\.", r"@test\.", r"@localhost",
     r"@.*onmschina", r"@.*fourthcoffee",
     r"marketing@.*wdn\.", r"editor@", r"webmaster@",
@@ -248,6 +257,13 @@ LIST_SKIP_WORDS = [
     "homeadvisor", "home advisor", "homeguide", "porch.com",
     "networx", "house method", "angi list",
     "services provided by", "services experts",
+    "last update", "last updated",
+    "water heater repair", "water leak detection",
+    "drain sewer cleaning", "drain cleaning in",
+    "septic system repair", "toilet repair",
+    "can anyone", "does anyone", "anyone recommend",
+    "good morning", "i have a ", "i need a",
+    "who can provide", "looking for",
     "near me", "near you", "in your area",
     "directory", "listing", "listings",
     "companies in", "services in", "contractors in", "providers in",
@@ -411,6 +427,8 @@ def clean_business_name(title: str) -> str:
                   r'Networx|Houzz|Expertise|Bark|TaskRabbit).*$', '', title, flags=re.IGNORECASE).strip()
     # Remove "aadress, telefon..." (foreign directory suffixes)
     name = re.sub(r'\s*[-–—,]\s*(aadress|telefon|öppettider|horario|adresse|numéro).*$', '', name, flags=re.IGNORECASE).strip()
+    # Remove leading "Contact -", "Home -", "About -" etc.
+    name = re.sub(r'^(Contact|Home|About|Services|Welcome to|Welcome)\s*[-–|:]\s*', '', name, flags=re.IGNORECASE).strip()
     # Remove leading numbers
     name = re.sub(r'^\d+\.\s*', '', name).strip()
     # Remove parenthetical info
@@ -505,9 +523,14 @@ def is_junk_email(email: str) -> bool:
     """Check if an email is junk (government, generic, fake, etc.)."""
     email_lower = email.lower()
     domain = email_lower.split("@")[1] if "@" in email_lower else ""
+    # Exact domain match
     if domain in JUNK_DOMAINS:
         return True
-    if email_lower.endswith(".png") or email_lower.endswith(".jpg"):
+    # Subdomain match: richmond.bbb.org should match bbb.org
+    for junk in JUNK_DOMAINS:
+        if domain.endswith("." + junk):
+            return True
+    if email_lower.endswith(".png") or email_lower.endswith(".jpg") or email_lower.endswith(".svg"):
         return True
     return any(re.search(pat, email_lower) for pat in JUNK_EMAIL_PATTERNS)
 
@@ -1048,11 +1071,30 @@ def scrape_nextdoor_search(niche: str, city: str) -> list:
 
         if "nextdoor.com" not in link:
             continue
+        # Skip community discussion pages, only keep business pages
+        if "/pages/" not in link:
+            continue
         if is_list_page(title):
             continue
 
-        name = clean_business_name(title)
+        # Nextdoor titles are often URLs or "Neighborhood - Topic" - extract from URL slug instead
+        name = ""
+        # Try to get business name from URL slug: /pages/business-name-city
+        slug_match = re.search(r'/pages/([^/?]+)', link)
+        if slug_match:
+            slug = slug_match.group(1)
+            # Convert slug to name: "copper-pipe-plumbing-lima" -> "Copper Pipe Plumbing Lima"
+            name = slug.replace("-", " ").title()
+            # Remove trailing city/state words
+            name = re.sub(r'\s+(oh|ohio|lima|findlay|wapakoneta|celina|sidney|van wert)\s*$', '', name, flags=re.IGNORECASE).strip()
+
+        if not name:
+            name = clean_business_name(title)
+
         if not name or len(name) < 3 or len(name) > 80 or is_generic_name(name):
+            continue
+        # Skip if name looks like a URL
+        if "nextdoor.com" in name.lower() or "/" in name:
             continue
 
         leads.append({
@@ -1148,6 +1190,26 @@ def scrape_complaints_search(niche: str, city: str) -> list:
                     "scam", "spam", "virus", "malware",
                     "voicemail setup", "voicemail greeting", "voicemail not working",
                     "phone not working", "phone settings",
+                ]):
+                    continue
+
+                # Skip forum questions and community posts (not business names)
+                if any(skip in title_lower for skip in [
+                    "can anyone", "does anyone", "anyone know", "anyone recommend",
+                    "looking for", "need a ", "i need", "i have a ",
+                    "good morning", "help me", "who can", "where can",
+                    "recommend a", "recommendation", "suggestions",
+                    "plumber near me", "plumber in ", "plumbers in ",
+                    "reputation", "under investigation", "arrested",
+                    "last update", "last updated",
+                ]):
+                    continue
+
+                # Must come from a review/business site, not a random forum
+                if not any(site in link.lower() for site in [
+                    "yelp.com", "bbb.org", "google.com", "facebook.com",
+                    "angi.com", "thumbtack.com", "manta.com",
+                    "yellowpages.com", "mapquest.com",
                 ]):
                     continue
 
