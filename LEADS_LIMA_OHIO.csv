@@ -1,85 +1,18 @@
-Tier,Industry,Business,City,Address,Phone,Website,Hiring,Open Position,Salary,Sales Note
-Tier 1,Orthopedics/Medical,Orthopaedic Institute of Ohio,Lima OH,801 Medical Drive Suite A Lima OH 45804,(419) 222-6622,orthoohio.com,YES,Appointment Scheduler,,24 doctors - 200+ staff - HIGH call volume
-Tier 1,Chiropractic,Rabe Chiropractic,Lima OH,3075 W Elm St Lima OH 45805,(419) 224-5678,rabefamilychiropractic.com,YES,Part-time Receptionist,,Need part-time coverage - AI covers the rest 24/7
-Tier 1,Chiropractic,Integrity Chiropractic & Wellness,Findlay OH,2113 Tiffin Ave Ste 101 Findlay OH 45840,(419) 424-0100,ihcare.com,YES,Chiropractic Assistant/Reception,$18-$20/hr,Paying $37K-$41K/year for receptionist - AI saves significantly
-Tier 1,Law Firm,Mielke Law Office,St. Marys OH,425 East Spring Street St. Marys OH 45885,(419) 300-8585,mielkelaw.com,YES,Receptionist/Admin,,Small firm - AI handles calls and schedules consultations
-Tier 1,Veterinary,Diamond M Veterinary Clinic,Kenton OH,13450 State Route 292 Kenton OH 43326,(419) 673-0426,diamondmvetclinic.com,YES,Part/Full-time Receptionist,,High call volume - AI handles without fatigue
-Tier 1,Insurance,Bryan Weimerskirch - State Farm,Delphos OH,201 N Main St Delphos OH 45833,(419) 692-1626,sfagentbryan.com,YES,Receptionist,,Insurance agency - needs appointment and communication management
-Tier 1,Audiology/Medical,The Hearing & Balance Center,Lima OH,545 West Market Street Suite #333 Lima OH 45801,(419) 222-9010,limahearingandbalance.com,YES,Front Desk,,Senior patients who prefer calling by phone
-Tier 1,Urology/Medical,Crossroads Urology,Lima OH,2751 Fort Amanda Rd Lima OH 45805,(567) 529-9000,crossroadsurology.com,YES,Office Worker,,New growing specialty practice - ideal for AI from the start
-Tier 1,Dental/Community Health,Health Partners of Western Ohio,Lima OH,441 East 8th Street Lima OH 45804,(419) 221-3072,hpwohio.org,YES,Dental Receptionist,$17.50/hr,Community center with multiple locations - scalable AI potential
-Tier 1,Auto Repair/Collision,Autobahn Collision Center,Wapakoneta OH,851 Industrial Drive Wapakoneta OH 45895,(419) 738-8772,autobahncollisioncenter.com,YES,Receptionist/Admin,,Family shop - AI handles insurance calls and scheduling
-Tier 1,Hospital System,Lima Memorial Health System,Lima OH and Wapakoneta OH,,,limamemorial.org,YES,Receptionist OB/GYN - ENT - Phone Room Scheduler,,Multiple positions - enterprise contract potential
-Tier 1,OB/GYN,Blanchard Valley OB/GYN,Findlay OH,,,,YES,Secretary/Receptionist,,OB/GYN offices receive high volume scheduling calls
-Tier 1,Healthcare,NOMS Healthcare,Findlay OH,,,,YES,Medical Secretary,,Prefer experience in healthcare reception
-Tier 1,Dental,Affordable Dentures & Implants,Lima OH,1951 Bellefontaine Rd Lima OH 45804,(419) 228-6680,affordabledentures.com,YES,Dental Front Office Assistant,,Experience with Dentrix and insurance billing
-Tier 1,Government/Social Services,Hancock County Job and Family Services,Findlay OH,,,,YES,Receptionist,,Government - stable contract potential
-Tier 1,Community Health,Family Resource Center of NW Ohio,Lima OH,,(419) 222-1168,frcohio.com,YES,Medical Front Desk,,Family resource center
-Tier 1,Medical,First Care Medical,Lima OH,,,,YES,Medical Receptionist,,Local medical clinic
-Tier 2,Dental,Burns Dental Inc. (Dr. Alyson K. Amerson),Lima OH,459 S. Main St. Lima OH 45805,(419) 228-5502,burnsdentalinc.com,NO,,,Independent dental office
-Tier 2,Dental,Whole Health Dentistry,Lima OH,,(419) 228-2233,wholehealthdentistry.com,NO,,,Independent dental office
-Tier 2,Dental,Lima Community Dental,Lima OH,,(419) 741-9903,limacommunitydental.com,NO,,,Community dental office
-Tier 2,Dental,Pure Smiles - Lima,Lima OH,,(419) 863-5483,puresmiles.com/lima,NO,,,Dental chain
-Tier 2,Dental,Dr. Jon Stocker DDS,Lima OH,,(419) 222-8856,jonstockerdds.com,NO,,,Independent practice
-Tier 2,Dental,Dan G. Wilker DDS,Lima OH,,,danwilkerdds.com,NO,,,Independent practice
-Tier 2,Dental,Michael D. Terveer DDS,Lima OH,,,drterveerdds.com,NO,,,Independent practice
-Tier 2,Dental,Aspen Dental - Lima,Lima OH,3292 Elida Rd Lima OH 45805,(419) 228-5000,aspendental.com,NO,,,National chain
-Tier 2,Dental,DeClerck Family Dental,Findlay OH,,(419) 422-8972,declerckfamilydental.com,NO,,,Family dental practice
-Tier 2,Dental,Mutchler & Lewis Family Dental Care,Findlay OH,,,findlaydentalteam.com,NO,,,Family dental practice
-Tier 2,Dental,Phillips Dental Care Center,Findlay OH,,,phillipsdentalcc.com,NO,,,2 locations
-Tier 2,Dental,Anderson Family Dentist,Findlay OH,,(419) 427-1500,andersondentalfindlay.com,NO,,,Family dental practice
-Tier 2,Dental,Pure Smiles - Findlay,Findlay OH,,(419) 664-3283,puresmiles.com/findlay,NO,,,Dental chain
-Tier 2,Chiropractic,Gillis Chiropractic Clinic,Lima OH,,(419) 228-0000,gillischiropractic.com,NO,,,3 locations - multi-site potential
-Tier 2,Chiropractic,Emergency Care Chiropractic of Lima,Lima OH,,(419) 296-6804,emergencycarechirolima.com,NO,,,Walk-in - after hours care
-Tier 2,Chiropractic,Stemen Chiropractic Clinic,Lima OH,,(419) 227-8700,stemenchiro.com,NO,,,Chiropractic office
-Tier 2,Chiropractic,Feltz Chiropractic,Lima OH,,(419) 222-4000,feltzchiropractic.com,NO,,,Chiropractic office
-Tier 2,Chiropractic,Wilcox Family Chiropractic,Lima OH,,(419) 229-2225,wilcoxfamchiropractic.com,NO,,,Family chiropractic office
-Tier 2,Medical,Family Physician's of Lima,Lima OH,,,famdox.com,NO,,,30+ years of service
-Tier 2,Medical,Leahy Family Care & Wellness Center,Lima OH,,,leahyfamilycare.com,NO,,,Independent practice
-Tier 2,Medical,Dermatologists of Central States (DOCS),St. Marys OH,,,docsdermgroup.com,NO,,,$15-$19.75/hr for receptionist
-Tier 2,Law Firm,Dodson Law Office LLC,Lima OH,,(419) 999-9000,limalawyer.com,NO,,,Extended hours evenings/weekends
-Tier 2,Law Firm,Reese Elliott & Williams,Lima OH,,,lima-law.com,NO,,,Women-led practice - 70+ years combined experience
-Tier 2,Law Firm,Huffman Kelley Brock & Gottschalk LLC,Lima OH,,,540westmarket.com,NO,,,250+ years combined experience
-Tier 2,Veterinary,Heidt Veterinary Hospital,Lima OH,,,heidtvet.com,NO,,,Since 1958
-Tier 2,Veterinary,Shawnee Veterinary Hospital,Lima OH,,,shawneevethospital.com,NO,,,Full service
-Tier 2,Veterinary,Metz Petz Veterinary Clinics,Ada and Lima OH,,,metzpetz.net,NO,,,Multiple locations
-Tier 2,Veterinary,Lima Veterinary Center,Lima OH,,(585) 582-3131,limaveterinarycenter.com,NO,,,Small animals + large mobile unit
-Tier 2,Veterinary,Midwest Animal Clinic,Lima OH,,(419) 224-9000,,NO,,,7540 Harding Hwy
-Tier 2,HVAC/Plumbing,Lippincott Plumbing Heating & Electrical,Lima OH,,,lippincottplumbing.com,NO,,,40+ years - 24 hour service
-Tier 2,HVAC/Plumbing,Alltek Plumbing,Lima and Findlay OH,,(419) 228-2708,alltekplumbing.com,NO,,,60+ years - 2 locations
-Tier 2,HVAC/Plumbing,Washam Plumbing Heating & AC,Lima OH,,,washamplumbing.com,NO,,,Residential and commercial
-Tier 2,HVAC/Plumbing,Creps Plumbing Heating & AC LLC,Lima OH,,,crepsplumbing.com,NO,,,60+ years - 24 hour service
-Tier 2,HVAC/Plumbing,Grothouse Plumbing & Heating,Delphos OH,,,,NO,,,Family business
-Tier 2,HVAC/Plumbing,Consolidated Hunter Heating Plumbing & AC,Celina OH,,,consolidatedhunter.com,NO,,,Family owned since 1985
-Tier 2,HVAC/Plumbing,Jack's Heating AC & Plumbing,Findlay OH,,,jacksheating.com,NO,,,24 hr service - Carrier authorized
-Tier 2,HVAC/Plumbing,Knueve & Sons,Kalida OH,,(419) 532-3699,knueve.com,NO,,,Since 1970 - multiple services
-Tier 2,HVAC/Plumbing,Ayers Mechanical Group,Van Wert OH,,,ayersmechanical.com,NO,,,Since 1984
-Tier 2,HVAC/Plumbing,Campbell Inc.,Findlay OH,,(800) 482-2911,campbellinc.com,NO,,,3rd generation - 80+ employees
-Tier 2,Funeral Home,Chamberlain Huckeriede Funeral Home,Lima OH,,(419) 229-2300,chamberlainhuckeriede.com,NO,,,Family owned since 1992 - 24/7 need
-Tier 2,Funeral Home,Chiles-Laman Funeral & Cremation,Lima OH,,(419) 228-5474,chiles-lamanfh.com,NO,,,2 locations - 24/7 need
-Tier 2,Funeral Home,Jones-Clark Funeral Home,Lima OH,,(419) 225-5741,jonesclarkfh.com,NO,,,24/7 need
-Tier 2,Funeral Home,Hanneman-Siferd Funeral Home,Lima OH,,(419) 224-2010,,NO,,,24/7 need
-Tier 2,Funeral Home,Bayliff & Son Funeral Home,Cridersville OH,,(419) 645-4501,,NO,,,24/7 need
-Tier 3,Insurance,Eastside Insurance Agency,Lima OH,,,eastsideinsurance.com,NO,,,5 stars - 12 reviews
-Tier 3,Insurance,Mel Butterfield & Son Insurance Agency,Lima OH,,,butterfieldinsuranceagency.com,NO,,,80+ years - 3rd-4th generation family business
-Tier 3,Insurance,Sullivan Insurance,Lima OH,,,sullivaninsuranceinc.com,NO,,,Small Business of the Year 2022
-Tier 3,Insurance,CoverLink Insurance Agency,Lima OH,,,coverlink.com,NO,,,Nearly 100 years of experience
-Tier 3,Insurance,Kesner Insurance Agency Inc.,Lima OH,1240 W Market St Lima OH 45805,,,NO,,,Independent agency
-Tier 3,Insurance,Creps Insurance Agency,Lima OH,806 Bellefontaine Ave Lima OH 45801,,,NO,,,Independent agency
-Tier 3,Insurance,Webb Insurance Agency Inc.,Lima OH,212 W High St Lima OH 45801,,,NO,,,Independent agency
-Tier 3,Insurance,Wenger Insurance Agency Inc,Lima OH,200 W North St Ste A Lima OH 45801,,,NO,,,Independent agency
-Tier 3,Real Estate,Ron Spencer Real Estate,Lima OH,,,rsre.com,NO,,,45+ years - multiple offices
-Tier 3,Real Estate,CCR Realtors,Lima OH,,(419) 222-0555,ccrrealtors.com,NO,,,Multiple offices - local leader
-Tier 3,Real Estate,Cowan Realtors,Lima OH,,,cowanrealtors.com,NO,,,30+ years
-Tier 3,Real Estate,Superior PLUS Realtors,Lima OH,,,superiorrealtors.com,NO,,,Full service (realty mortgage insurance title)
-Tier 3,Real Estate,Howard Hanna Real Estate - Lima,Lima OH,,,howardhanna.com,NO,,,Regional office
-Tier 3,Automotive,Tom Ahl Family of Dealerships,Lima OH,,(877) 748-4017,tomahl.com,NO,,,Chrysler/Dodge/Jeep/RAM/FIAT/Hyundai/GMC/Buick
-Tier 3,Automotive,White's Honda Toyota of Lima,Lima OH,,,whiteslima.com,NO,,,Serves all NW Ohio
-Tier 3,Automotive,Lima Chevrolet,Lima OH,,(419) 993-6000,limaautomall.com,NO,,,100+ years of service
-Tier 3,Automotive,Roger's Automotive,Lima OH,,(419) 222-8880,rogersautomotive.net,NO,,,Since 1996
-Tier 3,Automotive,Auto Medic of Ohio LLC,Lima OH,,,automedicofohio.com,NO,,,2 year/24000 mile warranty
-Tier 3,Salon/Spa,LOX Salon & Spa,Lima OH,,(567) 204-0322,,NO,,,Independent stylists
-Tier 3,Salon/Spa,Beauty by Jill Salon & Spa,Lima OH,,,vagaro.com/beautybyjillsalonandspa,NO,,,Full services
-Tier 3,Salon/Spa,JJ's Hair & Daughters Spa,Lima OH,,,,NO,,,7 stylists - massage therapist - manicurist
-Tier 3,Salon/Spa,Steven Michael's The Hair Studio,Lima OH,,,,NO,,,Top rated
-Tier 3,Salon/Spa,Chapter 2 Salon & Spa,Lima OH,,,chapter-2-salon-spa.square.site,NO,,,Salon and spa
+Industry,Business,City,Address,Phone,Website,Open Position,Salary,Sales Note
+Orthopedics/Medical,Orthopaedic Institute of Ohio,Lima OH,801 Medical Drive Suite A Lima OH 45804,(419) 222-6622,orthoohio.com,Appointment Scheduler,,24 doctors - 200+ staff - HIGH call volume
+Chiropractic,Rabe Chiropractic,Lima OH,3075 W Elm St Lima OH 45805,(419) 224-5678,rabefamilychiropractic.com,Part-time Receptionist,,Need part-time coverage - AI covers the rest 24/7
+Chiropractic,Integrity Chiropractic & Wellness,Findlay OH,2113 Tiffin Ave Ste 101 Findlay OH 45840,(419) 424-0100,ihcare.com,Chiropractic Assistant/Reception,$18-$20/hr,Paying $37K-$41K/year for receptionist - AI saves significantly
+Law Firm,Mielke Law Office,St. Marys OH,425 East Spring Street St. Marys OH 45885,(419) 300-8585,mielkelaw.com,Receptionist/Admin,,Small firm - AI handles calls and schedules consultations
+Veterinary,Diamond M Veterinary Clinic,Kenton OH,13450 State Route 292 Kenton OH 43326,(419) 673-0426,diamondmvetclinic.com,Part/Full-time Receptionist,,High call volume - AI handles without fatigue
+Insurance,Bryan Weimerskirch - State Farm,Delphos OH,201 N Main St Delphos OH 45833,(419) 692-1626,sfagentbryan.com,Receptionist,,Insurance agency - needs appointment and communication management
+Audiology/Medical,The Hearing & Balance Center,Lima OH,545 West Market Street Suite #333 Lima OH 45801,(419) 222-9010,limahearingandbalance.com,Front Desk,,Senior patients who prefer calling by phone
+Urology/Medical,Crossroads Urology,Lima OH,2751 Fort Amanda Rd Lima OH 45805,(567) 529-9000,crossroadsurology.com,Office Worker,,New growing specialty practice - ideal for AI from the start
+Dental/Community Health,Health Partners of Western Ohio,Lima OH,441 East 8th Street Lima OH 45804,(419) 221-3072,hpwohio.org,Dental Receptionist,$17.50/hr,Community center with multiple locations - scalable AI potential
+Auto Repair/Collision,Autobahn Collision Center,Wapakoneta OH,851 Industrial Drive Wapakoneta OH 45895,(419) 738-8772,autobahncollisioncenter.com,Receptionist/Admin,,Family shop - AI handles insurance calls and scheduling
+Hospital System,Lima Memorial Health System,Lima OH and Wapakoneta OH,,,limamemorial.org,Receptionist OB/GYN - ENT - Phone Room Scheduler,,Multiple positions - enterprise contract potential
+OB/GYN,Blanchard Valley OB/GYN,Findlay OH,,,,Secretary/Receptionist,,OB/GYN offices receive high volume scheduling calls
+Healthcare,NOMS Healthcare,Findlay OH,,,,Medical Secretary,,Prefer experience in healthcare reception
+Dental,Affordable Dentures & Implants,Lima OH,1951 Bellefontaine Rd Lima OH 45804,(419) 228-6680,affordabledentures.com,Dental Front Office Assistant,,Experience with Dentrix and insurance billing
+Government/Social Services,Hancock County Job and Family Services,Findlay OH,,,,Receptionist,,Government - stable contract potential
+Community Health,Family Resource Center of NW Ohio,Lima OH,,(419) 222-1168,frcohio.com,Medical Front Desk,,Family resource center
+Medical,First Care Medical,Lima OH,,,,Medical Receptionist,,Local medical clinic
