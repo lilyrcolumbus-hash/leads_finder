@@ -206,12 +206,18 @@ def send_to_hubspot(leads: List[Lead]) -> None:
 
 
 def sync_to_google_sheets(leads: List[Lead]) -> None:
-    """Send leads to Google Sheets via Apps Script webhook (batches of 10)."""
+    """Send leads to Google Sheets via Apps Script webhook (only leads with real emails)."""
     sheets = GoogleSheetsSync()
     if not sheets.is_configured():
         return
 
-    console.print("\n[cyan]Sincronizando leads a Google Sheets...[/cyan]")
+    # Count leads with real emails upfront
+    with_email = sum(1 for l in leads if l.email and not l.email.endswith("@leadgen.placeholder"))
+    without_email = len(leads) - with_email
+
+    console.print(f"\n[cyan]Sincronizando leads a Google Sheets (solo con email real)...[/cyan]")
+    if without_email:
+        console.print(f"[yellow]  Omitiendo {without_email} leads sin email real[/yellow]")
 
     try:
         with sheets:
@@ -219,7 +225,7 @@ def sync_to_google_sheets(leads: List[Lead]) -> None:
             # flush() is called automatically on __exit__
 
         stats = sheets.get_stats()
-        console.print(f"[green]Google Sheets: {stats['total_sent']} enviados, {stats['total_failed']} fallidos[/green]")
+        console.print(f"[green]Google Sheets: {stats['total_sent']} enviados con email real[/green]")
 
     except Exception as e:
         console.print(f"[red]Error sincronizando Google Sheets: {e}[/red]")

@@ -300,25 +300,121 @@ class GoogleMapsScraper(BaseScraper):
                 matched.append(keyword)
         return matched
 
+    # Emails to ignore (generic, CMS-generated, or not real business emails)
+    _JUNK_EMAIL_DOMAINS = {
+        "example.com", "test.com", "sentry.io", "wixpress.com",
+        "squarespace.com", "wordpress.com", "godaddy.com",
+        "mailchimp.com", "hubspot.com", "googleapis.com",
+        "googleusercontent.com", "gstatic.com", "schema.org",
+        "w3.org", "facebook.com", "twitter.com", "instagram.com",
+        "change.org", "gravatar.com",
+    }
+    _JUNK_EMAIL_PREFIXES = {
+        "noreply", "no-reply", "donotreply", "do-not-reply",
+        "mailer-daemon", "postmaster", "webmaster", "hostmaster",
+        "admin@wix", "username", "email@", "your@", "name@",
+        "example", "test@", "null@",
+    }
+
+    # Sub-pages likely to contain contact emails
+    _CONTACT_PATHS = [
+        "", "/contact", "/contact-us", "/contacto",
+        "/about", "/about-us", "/sobre-nosotros",
+    ]
+
+    def _is_real_email(self, email: str) -> bool:
+        """Check if an email looks like a real business email (not junk)."""
+        email_lower = email.lower().strip()
+
+        # Reject placeholder pattern
+        if email_lower.endswith("@leadgen.placeholder"):
+            return False
+
+        # Reject emails with junk domains
+        domain = email_lower.split("@")[-1]
+        for junk_domain in self._JUNK_EMAIL_DOMAINS:
+            if domain == junk_domain or domain.endswith("." + junk_domain):
+                return False
+
+        # Reject emails with junk prefixes
+        local_part = email_lower.split("@")[0]
+        for prefix in self._JUNK_EMAIL_PREFIXES:
+            if local_part.startswith(prefix):
+                return False
+
+        # Reject if domain has no dot or is too short
+        if "." not in domain or len(domain) < 4:
+            return False
+
+        # Reject if local part is too short or looks auto-generated
+        if len(local_part) < 2:
+            return False
+
+        return True
+
+    def _extract_all_emails(self, html: str) -> List[str]:
+        """Extract all unique email addresses from HTML text."""
+        import re
+        pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+        found = set(re.findall(pattern, html))
+        return [e for e in found if self._is_real_email(e)]
+
+    def _pick_best_email(self, emails: List[str]) -> Optional[str]:
+        """Pick the best email from a list, preferring business-contact ones."""
+        if not emails:
+            return None
+        if len(emails) == 1:
+            return emails[0]
+
+        # Preferred prefixes for a business contact email
+        preferred = ["info", "contact", "hello", "hola", "office", "sales",
+                      "enquiries", "inquiries", "service", "support"]
+        for pref in preferred:
+            for email in emails:
+                if email.lower().startswith(pref):
+                    return email
+
+        # Fall back to the first one found
+        return emails[0]
+
     def _extract_email_from_website(self, website: str) -> Optional[str]:
         """
-        Attempt to extract email from business website.
+        Extract a real business email by crawling the website homepage
+        and common contact/about pages.
 
-        Note: This is a basic implementation. For production, consider
-        using a dedicated web scraping approach with proper rate limiting.
+        Returns the best real email found, or None.
         """
         if not website:
             return None
 
-        try:
-            # Simple attempt to fetch homepage and find email
-            response = self.client.get(website, timeout=10.0, follow_redirects=True)
-            if response.status_code == 200:
-                return self.extract_email(response.text)
-        except Exception:
-            pass  # Website fetch failed, return None
+        # Normalise base URL
+        base = website.rstrip("/")
+        all_emails: List[str] = []
 
-        return None
+        for path in self._CONTACT_PATHS:
+            url = base + path
+            try:
+                response = self.client.get(url, timeout=10.0, follow_redirects=True)
+                if response.status_code == 200:
+                    page_emails = self._extract_all_emails(response.text)
+                    all_emails.extend(page_emails)
+            except Exception:
+                continue
+
+            # Short delay between requests to the same site
+            if path != self._CONTACT_PATHS[-1]:
+                time.sleep(0.3)
+
+        # Deduplicate while preserving order
+        seen = set()
+        unique: List[str] = []
+        for e in all_emails:
+            lower = e.lower()
+            if lower not in seen:
+                seen.add(lower)
+                unique.append(e)
+
+        return self._pick_best_email(unique)
 
     def scrape_single_location(self, location: str) -> LeadBatch:
         """
