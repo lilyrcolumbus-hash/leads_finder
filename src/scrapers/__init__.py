@@ -5,6 +5,7 @@ from .hackernews_scraper import HackerNewsScraper
 from .google_scraper import GoogleScraper
 from .producthunt_scraper import ProductHuntScraper
 from .indeed_scraper import IndeedScraper
+from .indeed_search import IndeedSearchScraper, IndeedSearchParams
 from .base_scraper import BaseScraper
 
 __all__ = [
@@ -14,4 +15,6 @@ __all__ = [
     "GoogleScraper",
     "ProductHuntScraper",
     "IndeedScraper",
+    "IndeedSearchScraper",
+    "IndeedSearchParams",
 ]
