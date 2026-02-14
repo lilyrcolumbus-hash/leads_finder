@@ -1830,13 +1830,23 @@ def find_leads(niche: str, city: str, limit: int = 0):
         all_leads.extend(scrape_manta_search(niche, search_city))
         random_delay(1, 3)
 
-        # Desactivados - no traen emails reales de negocios
-        # all_leads.extend(scrape_facebook_search(niche, search_city))
-        # all_leads.extend(scrape_angi_search(niche, search_city))
-        # all_leads.extend(scrape_thumbtack_search(niche, search_city))
-        # all_leads.extend(scrape_nextdoor_search(niche, search_city))
-        # all_leads.extend(scrape_craigslist_search(niche, search_city))
-        # all_leads.extend(scrape_complaints_search(niche, search_city))
+        all_leads.extend(scrape_facebook_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_angi_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_thumbtack_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_nextdoor_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_craigslist_search(niche, search_city))
+        random_delay(1, 3)
+
+        all_leads.extend(scrape_complaints_search(niche, search_city))
+        random_delay(2, 4)
 
     # Deduplicate by name + filter relevant to niche
     # Normalize names for dedup: lowercase, strip punctuation, strip city/state suffixes
