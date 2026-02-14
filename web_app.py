@@ -38,6 +38,7 @@ from src.scrapers import (
 )
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
+from src.sheets import GoogleSheetsSync
 
 # ============================================
 # TRANSLATIONS / TRADUCCIONES
@@ -4958,6 +4959,23 @@ def show_search():
 
     st.divider()
 
+    # Custom Business Type for Google Maps
+    st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">🔧 Business Type for Google Maps <span style="color: #6B7280; font-size: 13px; font-style: italic;">(optional)</span></p>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;">
+        <p style="margin: 0; color: #475569; font-size: 13px;">
+            Type any business type to search on Google Maps. Examples: <b>tattoo shop</b>, <b>roofing</b>, <b>dog groomer</b>, <b>restaurant</b>, <b>tax preparer</b>, etc.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    custom_business_type = st.text_input(
+        "Business type (any industry)",
+        placeholder="e.g. tattoo shop, roofing, dog groomer, tax preparer...",
+        key="custom_biz_type"
+    )
+
+    st.divider()
+
     # AI Option (supports OpenAI, Anthropic, or Gemini)
     ai_available = bool(settings.openai_api_key or settings.anthropic_api_key or settings.gemini_api_key)
 
@@ -5070,8 +5088,15 @@ def show_search():
 
                 try:
                     with Scraper() as s:
-                        # Pass location to location-aware scrapers
-                        if name in ["Indeed", "Yelp", "LinkedIn", "Google Maps"] and search_location:
+                        # Pass location and category to location-aware scrapers
+                        if name == "Google Maps":
+                            kwargs = {"time_filter": selected_time}
+                            if search_location:
+                                kwargs["location"] = search_location
+                            if custom_business_type:
+                                kwargs["category"] = custom_business_type.strip()
+                            batch = s.scrape(**kwargs)
+                        elif name in ["Indeed", "Yelp", "LinkedIn"] and search_location:
                             batch = s.scrape(time_filter=selected_time, location=search_location)
                         else:
                             batch = s.scrape(time_filter=selected_time)
@@ -5177,6 +5202,30 @@ def show_search():
             if saved_count > 0:
                 with results:
                     st.success(f"Auto-saved {saved_count} new leads to database")
+
+            # AUTO-SYNC LEADS WITH REAL EMAILS TO GOOGLE SHEETS
+            sheets_sync = GoogleSheetsSync()
+            if sheets_sync.is_configured() and all_leads:
+                status.markdown("""
+                <div class="loading-box">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Sending leads with real emails to Google Sheets...</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                try:
+                    with sheets_sync:
+                        sheets_sync.add_leads(all_leads)
+                    stats = sheets_sync.get_stats()
+                    if stats['total_sent'] > 0:
+                        with results:
+                            st.success(f"Google Sheets: {stats['total_sent']} leads with real emails sent")
+                    else:
+                        with results:
+                            st.info("Google Sheets: No leads with real emails to send")
+                except Exception as e:
+                    with results:
+                        st.warning(f"Google Sheets sync error: {str(e)[:50]}")
 
             # AUTO-SYNC ALL LEADS TO HUBSPOT (with AI qualification data)
             with HubSpotCRM() as crm:

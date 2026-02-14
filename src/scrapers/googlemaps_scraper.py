@@ -318,49 +318,102 @@ class GoogleMapsScraper:
 
         return leads
 
+    # Emails to ignore (generic, CMS-generated, or not real business emails)
+    _JUNK_EMAIL_DOMAINS = {
+        "example.com", "test.com", "sentry.io", "wixpress.com",
+        "squarespace.com", "wordpress.com", "godaddy.com",
+        "mailchimp.com", "hubspot.com", "googleapis.com",
+        "googleusercontent.com", "gstatic.com", "schema.org",
+        "w3.org", "facebook.com", "twitter.com", "instagram.com",
+        "change.org", "gravatar.com",
+    }
+    _JUNK_EMAIL_PREFIXES = {
+        "noreply", "no-reply", "donotreply", "do-not-reply",
+        "mailer-daemon", "postmaster", "webmaster", "hostmaster",
+        "username", "email@", "your@", "name@",
+        "example", "test@", "null@",
+    }
+
+    _PREFERRED_PREFIXES = [
+        "info", "contact", "hello", "hola", "office", "sales",
+        "enquiries", "inquiries", "service", "support",
+    ]
+
+    def _is_real_email(self, email: str) -> bool:
+        """Check if an email looks like a real business email (not junk)."""
+        email_lower = email.lower().strip()
+
+        domain = email_lower.split("@")[-1]
+        for junk_domain in self._JUNK_EMAIL_DOMAINS:
+            if domain == junk_domain or domain.endswith("." + junk_domain):
+                return False
+
+        local_part = email_lower.split("@")[0]
+        for prefix in self._JUNK_EMAIL_PREFIXES:
+            if local_part.startswith(prefix):
+                return False
+
+        if "." not in domain or len(domain) < 4:
+            return False
+        if len(local_part) < 2:
+            return False
+
+        # Skip image file extensions embedded in emails
+        if any(ext in email_lower for ext in ['.png', '.jpg', '.gif', '.svg', '.webp']):
+            return False
+
+        return True
+
+    def _pick_best_email(self, emails: list) -> Optional[str]:
+        """Pick the best email from a list, preferring business-contact ones."""
+        if not emails:
+            return None
+        if len(emails) == 1:
+            return emails[0]
+
+        for pref in self._PREFERRED_PREFIXES:
+            for email in emails:
+                if email.lower().startswith(pref):
+                    return email
+
+        return emails[0]
+
     def _find_email_on_website(self, url: str) -> Optional[str]:
-        """Scrape a website to find email addresses."""
+        """Scrape a website homepage and contact/about pages to find real emails."""
         try:
-            # Add protocol if missing
             if not url.startswith('http'):
                 url = 'https://' + url
 
-            response = self.session.get(url, timeout=10)
+            base = url.rstrip('/')
+            all_emails: list = []
 
-            if response.status_code != 200:
-                return None
+            pages = ['', '/contact', '/contact-us', '/contacto',
+                     '/about', '/about-us', '/sobre-nosotros']
 
-            # Find emails using regex
-            email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-            emails = re.findall(email_pattern, response.text)
-
-            # Filter out common false positives
-            valid_emails = []
-            for email in emails:
-                email_lower = email.lower()
-                # Skip image files, example emails, etc.
-                if not any(x in email_lower for x in ['example.com', '.png', '.jpg', '.gif', 'wixpress', 'sentry']):
-                    valid_emails.append(email)
-
-            # Return first valid email (usually the main contact)
-            if valid_emails:
-                return valid_emails[0]
-
-            # Also check common contact pages
-            contact_pages = ['/contact', '/contact-us', '/about', '/about-us']
-            for page in contact_pages:
+            for page in pages:
                 try:
-                    contact_url = url.rstrip('/') + page
-                    contact_response = self.session.get(contact_url, timeout=5)
-                    if contact_response.status_code == 200:
-                        contact_emails = re.findall(email_pattern, contact_response.text)
-                        for email in contact_emails:
-                            if not any(x in email.lower() for x in ['example.com', '.png', '.jpg']):
-                                return email
-                except:
+                    page_url = base + page
+                    response = self.session.get(page_url, timeout=10)
+                    if response.status_code == 200:
+                        found = re.findall(
+                            r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
+                            response.text
+                        )
+                        all_emails.extend(e for e in found if self._is_real_email(e))
+                except Exception:
                     continue
+                time.sleep(0.3)
 
-            return None
+            # Deduplicate preserving order
+            seen = set()
+            unique = []
+            for e in all_emails:
+                lower = e.lower()
+                if lower not in seen:
+                    seen.add(lower)
+                    unique.append(e)
+
+            return self._pick_best_email(unique)
 
         except Exception as e:
             logger.debug(f"Error fetching {url}: {e}")
