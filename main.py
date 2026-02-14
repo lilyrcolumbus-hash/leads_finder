@@ -37,6 +37,7 @@ from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 from src.database import LeadDatabase
 from src.enrichment import HunterClient
+from src.sheets import GoogleSheetsSync
 
 # Initialize
 console = Console()
@@ -144,6 +145,9 @@ def run_scraping() -> List[Lead]:
         result = db.save_leads(all_leads)
         console.print(f"[green]Guardados: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
 
+        # Auto-sync to Google Sheets (every 10 leads)
+        sync_to_google_sheets(all_leads)
+
     # Show summary
     console.print(f"\n[bold]Total leads encontrados: {len(all_leads)}[/bold]")
 
@@ -199,6 +203,27 @@ def send_to_hubspot(leads: List[Lead]) -> None:
         console.print(f"\n[green]Creados: {results['created']}[/green]")
         console.print(f"[yellow]Ya existentes: {results['existing']}[/yellow]")
         console.print(f"[red]Fallidos: {results['failed']}[/red]")
+
+
+def sync_to_google_sheets(leads: List[Lead]) -> None:
+    """Send leads to Google Sheets via Apps Script webhook (batches of 10)."""
+    sheets = GoogleSheetsSync()
+    if not sheets.is_configured():
+        return
+
+    console.print("\n[cyan]Sincronizando leads a Google Sheets...[/cyan]")
+
+    try:
+        with sheets:
+            sheets.add_leads(leads)
+            # flush() is called automatically on __exit__
+
+        stats = sheets.get_stats()
+        console.print(f"[green]Google Sheets: {stats['total_sent']} enviados, {stats['total_failed']} fallidos[/green]")
+
+    except Exception as e:
+        console.print(f"[red]Error sincronizando Google Sheets: {e}[/red]")
+        logger.error(f"Google Sheets sync error: {e}")
 
 
 def menu_search_leads():
@@ -272,9 +297,10 @@ def menu_view_local_leads():
     console.print("  [6] Enviar pendientes a HubSpot")
     console.print("  [7] Exportar a CSV")
     console.print("  [8] Buscar emails (Hunter.io)")
+    console.print("  [9] Enviar a Google Sheets")
     console.print("  [0] Volver")
 
-    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8"], default="1")
+    choice = Prompt.ask("Opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], default="1")
 
     if choice == "0":
         return
@@ -367,6 +393,30 @@ Leads encontrados hoy: [green]{stats['leads_today']}[/green]
     elif choice == "8":
         # Enrich leads with Hunter.io
         enrich_leads_with_hunter()
+
+    elif choice == "9":
+        # Send to Google Sheets
+        sheets = GoogleSheetsSync()
+        if not sheets.is_configured():
+            console.print("[red]Google Sheets no configurado. Agrega GOOGLE_SHEETS_WEBHOOK_URL en .env[/red]")
+            return
+
+        console.print("\n[bold]Enviar a Google Sheets:[/bold]")
+        console.print("  [1] Todos los leads")
+        console.print("  [2] Solo calificados")
+
+        sheet_choice = Prompt.ask("Opcion", choices=["1", "2"], default="2")
+        if sheet_choice == "1":
+            leads = db.get_all_leads(limit=200)
+        else:
+            leads = db.get_qualified_leads(limit=200)
+
+        if not leads:
+            console.print("[yellow]No hay leads para enviar[/yellow]")
+            return
+
+        if Confirm.ask(f"Enviar {len(leads)} leads a Google Sheets?"):
+            sync_to_google_sheets(leads)
 
 
 def enrich_leads_with_hunter():
@@ -682,6 +732,7 @@ def menu_configuration():
     console.print(f"  OpenAI:    {'[green]Configurado[/green]' if settings.openai_api_key else '[red]No configurado[/red]'}")
     console.print(f"  Anthropic: {'[green]Configurado[/green]' if settings.anthropic_api_key else '[red]No configurado[/red]'}")
     console.print(f"  Hunter.io: {'[green]Configurado[/green]' if settings.hunter_api_key else '[red]No configurado[/red]'}")
+    console.print(f"  G. Sheets: {'[green]Configurado[/green]' if settings.google_sheets_webhook_url else '[red]No configurado[/red]'}")
 
     # Database info
     console.print(f"\n[bold]Base de datos local:[/bold]")

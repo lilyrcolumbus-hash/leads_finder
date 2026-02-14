@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
     facebook_access_token: str = Field(default="", alias="FACEBOOK_ACCESS_TOKEN")
 
+    # Google Sheets sync (Apps Script Web App URL)
+    google_sheets_webhook_url: str = Field(default="", alias="GOOGLE_SHEETS_WEBHOOK_URL")
+    google_sheets_batch_size: int = Field(default=10, alias="GOOGLE_SHEETS_BATCH_SIZE")
+
     # Reddit subreddits to search - Active business communities
     subreddits: List[str] = [
         "smallbusiness",
