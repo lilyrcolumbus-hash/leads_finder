@@ -187,6 +187,9 @@ JUNK_DOMAINS = [
     "nearmelocalservices.com", "homeadvisor.com",
     "networx.com", "porch.com", "homeguide.com",
     "bark.com", "taskrabbit.com", "houzz.com",
+    # BBB local chapter emails (toledobbb.org, richmondBBB.org, etc.)
+    "toledobbb.org", "richmondbbb.org", "bbbsoutheast.org",
+    "bbbinc.org", "bbbfoundation.org",
 ]
 
 # Junk email patterns - emails that are never from a real local business
@@ -210,6 +213,9 @@ JUNK_EMAIL_PATTERNS = [
     r"@.*\.min\.js", r"@.*\.css",  # From minified code
     r"support@(wix|squarespace|wordpress|godaddy|shopify)",
     r"^(admin|root|daemon|www-data|nobody)@",
+    # BBB local chapter emails (toledobbb.org, richmondBBB.org, etc.)
+    r"@.*bbb",  # Any domain containing 'bbb'
+    r"@.*betterbus",  # Better Business Bureau variants
 ]
 
 # URLs from these domains are NEVER a real local business - always skip
@@ -1821,26 +1827,16 @@ def find_leads(niche: str, city: str, limit: int = 0):
         all_leads.extend(scrape_google_maps_search(niche, search_city))
         random_delay(1, 3)
 
-        all_leads.extend(scrape_facebook_search(niche, search_city))
-        random_delay(1, 3)
-
-        all_leads.extend(scrape_angi_search(niche, search_city))
-        random_delay(1, 3)
-
-        all_leads.extend(scrape_thumbtack_search(niche, search_city))
-        random_delay(1, 3)
-
         all_leads.extend(scrape_manta_search(niche, search_city))
         random_delay(1, 3)
 
-        all_leads.extend(scrape_nextdoor_search(niche, search_city))
-        random_delay(1, 3)
-
-        all_leads.extend(scrape_craigslist_search(niche, search_city))
-        random_delay(1, 3)
-
-        all_leads.extend(scrape_complaints_search(niche, search_city))
-        random_delay(2, 4)
+        # Desactivados - no traen emails reales de negocios
+        # all_leads.extend(scrape_facebook_search(niche, search_city))
+        # all_leads.extend(scrape_angi_search(niche, search_city))
+        # all_leads.extend(scrape_thumbtack_search(niche, search_city))
+        # all_leads.extend(scrape_nextdoor_search(niche, search_city))
+        # all_leads.extend(scrape_craigslist_search(niche, search_city))
+        # all_leads.extend(scrape_complaints_search(niche, search_city))
 
     # Deduplicate by name + filter relevant to niche
     # Normalize names for dedup: lowercase, strip punctuation, strip city/state suffixes
@@ -1913,6 +1909,9 @@ def find_leads(niche: str, city: str, limit: int = 0):
     investigated_leads = []
     batch = []
     total_written = 0
+    seen_emails = set()  # Track emails to avoid duplicates
+    skipped_no_email = 0
+    skipped_dup_email = 0
 
     for i, lead in enumerate(unique_leads):
         name = lead["name"]
@@ -1922,6 +1921,25 @@ def find_leads(niche: str, city: str, limit: int = 0):
         lead_city = lead.get("city", city)
         emails = extract_emails_from_website(lead.get("website", ""), client, name, lead_city)
         random_delay(0.5, 1)
+
+        # Combine emails: from website scrape + from snippet
+        snippet_email = lead.get("email_snippet", "")
+        if snippet_email and snippet_email not in emails:
+            emails.append(snippet_email)
+
+        # FILTRO CLAVE: Si no tiene email real, saltar este negocio
+        if not emails:
+            skipped_no_email += 1
+            print(f"    SALTADO - sin email real encontrado")
+            continue
+
+        # Deduplicar por email: si ya vimos este email, saltar
+        email_key = emails[0].lower().strip()
+        if email_key in seen_emails:
+            skipped_dup_email += 1
+            print(f"    SALTADO - email duplicado: {email_key}")
+            continue
+        seen_emails.add(email_key)
 
         # Extract phone - use snippet phone, or search website/DDG if empty
         phone = lead.get("phone", "")
@@ -1942,15 +1960,10 @@ def find_leads(niche: str, city: str, limit: int = 0):
         has_complaint = lead.get("has_complaint", False)
         need_level, evidence = determine_ai_receptionist_need(reviews, website_quality, "", hiring_role, has_complaint)
 
-        # Combine emails: from website scrape + from snippet
-        snippet_email = lead.get("email_snippet", "")
-        if snippet_email and snippet_email not in emails:
-            emails.append(snippet_email)
-
         lead_data = {
             "name": name,
             "phone": phone,
-            "email": ", ".join(emails) if emails else "",
+            "email": ", ".join(emails),
             "website": lead.get("website", ""),
             "address": lead.get("address", ""),
             "city": city,
@@ -1971,7 +1984,7 @@ def find_leads(niche: str, city: str, limit: int = 0):
         icon = "!!!" if need_level == "ALTO" else "!" if need_level == "MEDIO" else "-"
         platforms = reviews.get("platforms_found", [])
         platform_str = f" | Found on: {', '.join(platforms)}" if platforms else ""
-        print(f"    AI Receptionist: {need_level} {icon}{platform_str}")
+        print(f"    Email: {emails[0]} | AI Receptionist: {need_level} {icon}{platform_str}")
 
         # Write to Sheet every 10 businesses
         if len(batch) >= 10 and spreadsheet:
@@ -1994,6 +2007,12 @@ def find_leads(niche: str, city: str, limit: int = 0):
 
     # Step 3: Summary
     print(f"\n[3/3] RESUMEN\n")
+
+    if skipped_no_email:
+        print(f"  Negocios saltados sin email: {skipped_no_email}")
+    if skipped_dup_email:
+        print(f"  Negocios saltados email duplicado: {skipped_dup_email}")
+    print()
 
     alto = sum(1 for l in investigated_leads if l["need_level"] == "ALTO")
     medio = sum(1 for l in investigated_leads if l["need_level"] == "MEDIO")
