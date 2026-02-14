@@ -3,6 +3,8 @@
 ## What is this project?
 A lead generation platform that finds local businesses (plumbers, HVAC, dentists, lawyers, etc.) and investigates them to determine if they need AI Receptionist services or other digital services. Results are written to Google Sheets for sales outreach.
 
+**REGLA PRINCIPAL: Solo se escriben en la Sheet negocios que tengan email REAL verificado. Sin email = no se incluye.**
+
 ## Owner
 - Communicates in Spanish but ALL code comments and output can be in Spanish
 - Business brand: **NEXUS Voice** (AI Receptionist service built with Vapi)
@@ -15,8 +17,11 @@ A lead generation platform that finds local businesses (plumbers, HVAC, dentists
 - Standalone script that finds leads, investigates them deeply, and writes to Google Sheets
 - Usage: `python cc_lead_finder.py "plumbers" "Lima Ohio"`
 - Uses `ddgs` package (DuckDuckGo search) - the ONLY search method that works from GitHub Codespace
-- Searches 4 sources: Web Search, Yelp, Yellow Pages, BBB (all via DuckDuckGo)
-- Investigates each business: website quality, reviews/complaints, social media, email extraction
+- Searches 12 sources: Web Search, Yelp, Yellow Pages, BBB, Google Maps, Manta, Facebook, Angi, Thumbtack, Nextdoor, Craigslist, Complaints (all via DuckDuckGo)
+- Investigates each business: website quality, reviews/complaints, email extraction
+- **Solo incluye negocios con email real** - sin email = se salta
+- **Deduplica por email** - si el mismo email ya se encontro, no se repite
+- **Filtra emails basura**: BBB chapters (toledobbb.org, cualquier dominio con "bbb"), emails genericos, gobierno, etc.
 - Scores AI Receptionist need: ALTO/MEDIO/BAJO with evidence
 - Writes to Google Sheets with color coding (red=ALTO, yellow=MEDIO, green=BAJO)
 - Creates industry-specific tabs (Plumbers, Hvac, Dentists, etc.)
@@ -38,6 +43,28 @@ A lead generation platform that finds local businesses (plumbers, HVAC, dentists
 - Credentials file: `credentials/google_sheets.json` (gitignored)
 - Required APIs enabled: Google Sheets API + Google Drive API
 
+## Filtros de Email (CRITICO)
+El sistema filtra agresivamente emails falsos/genericos para que solo queden emails reales de negocios:
+
+### Dominios bloqueados (JUNK_DOMAINS)
+- Redes sociales: gmail, yahoo, hotmail, facebook, instagram, linkedin, etc.
+- Directorios: yelp, bbb.org, yellowpages, mapquest, homeadvisor, etc.
+- BBB locales: toledobbb.org, richmondbbb.org, bbbsoutheast.org, etc.
+- Servicios tech: cloudflare, googleapis, amazonaws, mailchimp, hubspot, etc.
+
+### Patrones bloqueados (JUNK_EMAIL_PATTERNS)
+- `@.*bbb` - cualquier dominio que contenga "bbb"
+- `@.*betterbus` - Better Business Bureau variantes
+- Gobierno (.gov, .edu, .mil)
+- noreply@, admin@, support@, webmaster@, etc.
+
+### Logica de filtrado en la investigacion
+1. Busca email en website del negocio (mailto links, texto visible, atributos HTML)
+2. Busca email via DuckDuckGo (multiples queries)
+3. Busca en directorios (BBB, Manta, Chamber of Commerce)
+4. **Si no encuentra email real despues de todo -> SALTA el negocio**
+5. **Si el email ya se vio en otro negocio -> SALTA (duplicado)**
+
 ## Tech Details
 - Search library: `ddgs` (formerly `duckduckgo-search`, was renamed)
 - Import with fallback: `from ddgs import DDGS` with fallback to `from duckduckgo_search import DDGS`
@@ -50,6 +77,7 @@ A lead generation platform that finds local businesses (plumbers, HVAC, dentists
 - NEVER modify the UI or add features not requested
 - credentials/ directory is gitignored - never commit credentials
 - Script runs from GitHub Codespace (not from Claude Code sandbox due to SSL issues)
+- **Solo negocios con email REAL van a la Sheet** - esta es la regla #1
 
 ## Related Projects
 - **nexus-voice-app** (separate repo) - NEXUS Voice business platform (Next.js + Supabase + Vercel)
@@ -62,4 +90,4 @@ Industries searched so far (update as new searches are run):
 ## Known Issues
 - SSL certificate errors when running from Claude Code sandbox - must run from Codespace
 - DuckDuckGo may rate-limit after many consecutive searches - delays are built into the script
-- Some businesses will have sparse data (no email, no reviews) - they still get written to Sheet
+- Nextdoor/Craigslist/Facebook rara vez traen emails reales, pero se mantienen activos por si encuentran negocios cuyos emails se extraen de su website propio
