@@ -4990,17 +4990,14 @@ def show_search():
     </div>
     """, unsafe_allow_html=True)
 
-    use_ai = st.checkbox("✅ Enable AI Qualification (Recommended)", value=ai_available, key="ai_check",
-                         help="AI will analyze and score each lead based on relevance, pain points, and conversion potential")
-
     if ai_available:
-        # Show which AI is configured
+        use_ai = st.checkbox("✅ Enable AI Qualification (Recommended)", value=True, key="ai_check",
+                             help="AI will analyze and score each lead based on relevance, pain points, and conversion potential")
         ai_provider = "Gemini" if settings.gemini_api_key else ("OpenAI" if settings.openai_api_key else "Anthropic")
         st.success(f"🎯 Connected to **{ai_provider}** - AI will score and qualify your leads")
-    elif use_ai:
-        st.warning("⚠️ No AI configured. Go to **Settings** to add OpenAI, Anthropic, or Gemini API key")
     else:
-        st.info("💡 Enable AI qualification for better lead scoring (configure API key in Settings)")
+        use_ai = False
+        st.warning("⚠️ No AI API key configured. Leads will be scored by keyword matching only. Go to **Settings** to add OpenAI, Anthropic, or Gemini API key for real AI qualification.")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -5153,8 +5150,8 @@ def show_search():
             st.session_state.leads = all_leads
             st.session_state.raw_leads = all_leads.copy()  # Store raw leads before AI filter
 
-            # AI QUALIFICATION FIRST (before HubSpot sync so leads have scores)
-            if use_ai and all_leads:
+            # AI QUALIFICATION (only when real AI API keys are configured)
+            if use_ai and ai_available and all_leads:
                 status.markdown("""
                 <div class="loading-box">
                     <div class="spinner"></div>
@@ -5164,10 +5161,8 @@ def show_search():
 
                 try:
                     ai_filter = AILeadFilter()
-                    # AI scores ALL leads (doesn't filter them out)
                     all_leads = ai_filter.filter_leads(all_leads)
 
-                    # Count by category
                     pain_count = len([l for l in all_leads if l.lead_category == LeadCategory.PAIN])
                     opportunity_count = len([l for l in all_leads if l.lead_category == LeadCategory.OPPORTUNITY])
                     cold_count = len([l for l in all_leads if l.lead_category == LeadCategory.COLD])
@@ -5179,6 +5174,20 @@ def show_search():
                 except Exception as e:
                     with results:
                         st.warning(f"AI qualification error: {str(e)[:50]} - Continuing with all leads")
+            elif all_leads:
+                # No AI available: assign basic keyword-based categories (no fake AI scores)
+                for lead in all_leads:
+                    kw_count = len(lead.keywords_matched) if lead.keywords_matched else 0
+                    if kw_count >= 3:
+                        lead.lead_category = LeadCategory.PAIN
+                        lead.is_qualified = True
+                    elif kw_count >= 1:
+                        lead.lead_category = LeadCategory.OPPORTUNITY
+                        lead.is_qualified = True
+                    else:
+                        lead.lead_category = LeadCategory.COLD
+                        lead.is_qualified = False
+                    # Do NOT set ai_score - leave it as None to indicate no AI was used
 
             # GEMINI BUSINESS ANALYSIS (software needs detection)
             if settings.gemini_api_key and all_leads:
@@ -5628,8 +5637,9 @@ def show_search():
 
             for i, lead in enumerate(st.session_state.raw_leads):
                 is_qualified = getattr(lead, 'is_qualified', False)
+                has_ai = getattr(lead, 'ai_score', None) is not None
                 status_icon = "✅" if is_qualified else "❌"
-                status_text = "AI Qualified" if is_qualified else "AI Rejected"
+                status_text = ("AI Qualified" if has_ai else "Qualified") if is_qualified else ("AI Rejected" if has_ai else "Low Match")
 
                 with st.container():
                     col1, col2 = st.columns([4, 1])
@@ -5640,7 +5650,7 @@ def show_search():
                                     border-radius: 8px; border-left: 3px solid {'#10B981' if is_qualified else '#EF4444'};">
                             <strong>{status_icon} {safe_t}</strong><br>
                             <small style="color: #6B7280;">
-                                Source: {html_module.escape(lead.source.value)} | AI Score: {f'{lead.ai_score:.0%}' if lead.ai_score is not None else 'N/A'} | {status_text}
+                                Source: {html_module.escape(lead.source.value)} | {f'AI: {lead.ai_score:.0%}' if lead.ai_score is not None else f'{len(lead.keywords_matched or [])} keywords'} | {status_text}
                             </small>
                         </div>
                         """, unsafe_allow_html=True)
@@ -6108,8 +6118,9 @@ def show_leads():
                     content_text = lead.content[:200] + "..." if len(lead.content) > 200 else lead.content
                     content_display = html.escape(content_text)
                 industry_html = f'<span style="color: #6B7280; font-size: 13px;">🏢 {html.escape(lead.industry)}</span>' if lead.industry else ''
-                ai_score_display = f'{lead.ai_score:.2f}' if lead.ai_score else 'N/A'
+                ai_score_display = f'{lead.ai_score:.0%}' if lead.ai_score else None
                 keywords_count = len(lead.keywords_matched) if lead.keywords_matched else 0
+                score_badge = f'🤖 AI: {ai_score_display}' if ai_score_display else f'🔑 {keywords_count} keywords'
 
                 # Build card HTML
                 st.markdown(f"""
@@ -6117,7 +6128,7 @@ def show_leads():
                     <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">🤖 AI Score: {ai_score_display}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{score_badge}</span>
                         <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {html.escape(lead.source.value)}</span>
                         {industry_html}
                     </div>
@@ -6269,7 +6280,9 @@ def show_leads():
                 source = lead_dict.get('source', 'unknown')
                 pain_score = lead_dict.get('pain_score', 0)
                 ai_score = lead_dict.get('ai_score')
-                ai_score_display = f'{ai_score:.2f}' if ai_score else 'N/A'
+                ai_score_display = f'{ai_score:.0%}' if ai_score else None
+                keywords_count = len(lead_dict.get('keywords_matched', []))
+                score_badge = f'🤖 AI: {ai_score_display}' if ai_score_display else f'🔑 {keywords_count} keywords'
                 url = lead_dict.get('url', '#')
                 saved_at = lead_dict.get('saved_at', '')[:10] if lead_dict.get('saved_at') else ''
                 saved_at_html = f'<span style="color: #9CA3AF; font-size: 12px;">📅 {saved_at}</span>' if saved_at else ''
@@ -6279,7 +6292,7 @@ def show_leads():
                     <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">🤖 AI Score: {ai_score_display}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{score_badge}</span>
                         <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {source}</span>
                         {industry_html}
                         {saved_at_html}

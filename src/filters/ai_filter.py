@@ -96,21 +96,19 @@ Return a JSON array of these objects. Example:
             return []
 
         if not self.openai_client and not self.anthropic_client and not self.gemini_model:
-            self.logger.warning("No AI client available. Returning leads with default categories.")
-            # Assign default categories based on keywords
+            self.logger.warning("No AI client available. Returning leads with keyword-based categories.")
+            # Assign categories based on keyword count only (no ai_score set)
             for lead in leads:
                 if len(lead.keywords_matched) >= 3:
                     lead.lead_category = LeadCategory.PAIN
                     lead.is_qualified = True
-                    lead.ai_score = 0.7
                 elif len(lead.keywords_matched) >= 1:
                     lead.lead_category = LeadCategory.OPPORTUNITY
                     lead.is_qualified = True
-                    lead.ai_score = 0.4
                 else:
                     lead.lead_category = LeadCategory.COLD
                     lead.is_qualified = False
-                    lead.ai_score = 0.2
+                # ai_score stays None to indicate no real AI was used
             return leads
 
         self.logger.info(f"Analyzing {len(leads)} leads with AI")
