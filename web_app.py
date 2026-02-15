@@ -4663,7 +4663,7 @@ def show_dashboard():
                     text-align: center;">
             <div style="font-size: 24px; margin-bottom: 12px;">🚀</div>
             <h4 style="margin: 0 0 8px 0; color: #1F2937; font-size: 16px; font-weight: 700;">Ready to find leads?</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 14px;">Go to <strong>Find Leads</strong> to start searching across 12 sources</p>
+            <p style="margin: 0; color: #6B7280; font-size: 14px;">Go to <strong>Find Leads</strong> to start searching across 4 sources</p>
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -4704,44 +4704,6 @@ def show_dashboard():
 
     with src_col1:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
-                    border: 2px solid #FCA5A5;
-                    border-radius: 12px;
-                    padding: 16px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
-                    min-height: 140px;">
-            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
-                        background: linear-gradient(135deg, #FF4500 0%, #FF6347 100%);
-                        box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);">
-                <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">R</span>
-            </div>
-            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Reddit</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Business Feeds</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with src_col2:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FFF7ED 100%);
-                    border: 2px solid #FDBA74;
-                    border-radius: 12px;
-                    padding: 16px;
-                    text-align: center;
-                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
-                    min-height: 140px;">
-            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
-                        background: linear-gradient(135deg, #FF6600 0%, #FF8C00 100%);
-                        box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);">
-                <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">Y</span>
-            </div>
-            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Hacker News</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Tech Startups</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with src_col3:
-        st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #EFF6FF 100%);
                     border: 2px solid #93C5FD;
                     border-radius: 12px;
@@ -4754,12 +4716,31 @@ def show_dashboard():
                         box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);">
                 <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">G</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Google</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Web Search</p>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Google Maps</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Local Businesses</p>
         </div>
         """, unsafe_allow_html=True)
 
-    with src_col4:
+    with src_col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+                    border: 2px solid #FCA5A5;
+                    border-radius: 12px;
+                    padding: 16px;
+                    text-align: center;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+                    min-height: 140px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
+                        background: linear-gradient(135deg, #D32323 0%, #FF4040 100%);
+                        box-shadow: 0 4px 12px rgba(211, 35, 35, 0.3);">
+                <span style="font-size: 22px; line-height: 1; color: white; font-weight: bold;">Y</span>
+            </div>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Yelp</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Business Reviews</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with src_col3:
         st.markdown("""
         <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FEF3C7 100%);
                     border: 2px solid #FCD34D;
@@ -4769,12 +4750,31 @@ def show_dashboard():
                     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
                     min-height: 140px;">
             <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
-                        background: linear-gradient(135deg, #2557A7 0%, #3B82F6 100%);
-                        box-shadow: 0 4px 12px rgba(37, 87, 167, 0.3);">
-                <span style="font-size: 20px; line-height: 1; color: white; font-weight: bold;">In</span>
+                        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+                        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                <span style="font-size: 20px; line-height: 1; color: white; font-weight: bold;">YP</span>
             </div>
-            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Indeed</h4>
-            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Job Postings</p>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">Yellow Pages</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Business Directory</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with src_col4:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+                    border: 2px solid #86EFAC;
+                    border-radius: 12px;
+                    padding: 16px;
+                    text-align: center;
+                    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+                    min-height: 140px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto;
+                        background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
+                        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
+                <span style="font-size: 20px; line-height: 1; color: white; font-weight: bold;">B</span>
+            </div>
+            <h4 style="margin: 0 0 4px 0; color: #1F2937; font-size: 14px; font-weight: 700;">BBB</h4>
+            <p style="margin: 0; color: #6B7280; font-size: 12px; line-height: 1.3;">Accredited Businesses</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -4859,9 +4859,9 @@ def show_search():
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <span style="font-size: 20px;">💡</span>
             <div>
-                <strong style="color: #166534; font-size: 15px;">9 fuentes GRATIS - No necesitan API</strong>
+                <strong style="color: #166534; font-size: 15px;">4 fuentes GRATIS - No necesitan API</strong>
                 <p style="margin: 4px 0 0 0; color: #15803D; font-size: 13px;">
-                    Reddit, HN, Product Hunt, Yelp, Google Maps, Indeed, Yellow Pages, BBB, Craigslist
+                    Google Maps, Yelp, Yellow Pages, BBB
                 </p>
             </div>
         </div>
@@ -4886,7 +4886,7 @@ def show_search():
     st.divider()
 
     # Location Filter
-    st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📍 Location Filter <span style="color: #6B7280; font-size: 13px; font-style: italic;">(optional - for Indeed & Yelp)</span></p>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📍 Location Filter <span style="color: #6B7280; font-size: 13px; font-style: italic;">(optional - for Google Maps, Yelp, Yellow Pages & BBB)</span></p>', unsafe_allow_html=True)
 
     import re
 
@@ -8885,25 +8885,6 @@ def show_config():
             else:
                 st.warning("⚠️ Google not configured")
 
-    # Second row of connection tests
-    col_test4, col_test5, col_test6 = st.columns(3)
-
-    with col_test4:
-        if st.button("🧪 Test Facebook", use_container_width=True, key="test_facebook_conn"):
-            if settings.facebook_access_token:
-                with st.spinner("Testing Facebook..."):
-                    try:
-                        with FacebookScraper() as fb:
-                            result = fb.test_connection()
-                            if result['success']:
-                                st.success(f"✅ {result['message']}")
-                            else:
-                                st.error(f"❌ {result['message']}")
-                    except Exception as e:
-                        st.error(f"❌ {str(e)[:80]}")
-            else:
-                st.warning("⚠️ Facebook not configured")
-
     st.markdown("---")
 
     # System Status Section
@@ -8972,27 +8953,6 @@ def show_config():
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # Subreddits Section
-    st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%); border: 1px solid #E2E8F0; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-            <div>
-                <h3 style="margin: 0 0 4px 0; color: #1E293B; font-size: 18px; font-weight: 700;">📱 Reddit Sources</h3>
-                <p style="margin: 0; color: #64748B; font-size: 13px;">Subreddits monitored for leads</p>
-            </div>
-            <div style="background: linear-gradient(135deg, #FF4500 0%, #FF6B35 100%); color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">
-                {len(settings.subreddits)} subreddits
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    with st.expander("View all subreddits"):
-        sub_cols = st.columns(5)
-        for i, s in enumerate(settings.subreddits):
-            with sub_cols[i % 5]:
-                st.markdown(f"• r/{s}")
 
     # Keywords Section
     st.markdown(f"""
@@ -9189,13 +9149,10 @@ def show_ai_assistant():
         # Sources status
         st.markdown("### 🔌 Fuentes Activas")
         sources = [
-            ("🔴 Reddit", True),
-            ("🟠 Hacker News", True),
-            ("💼 Indeed", True),
-            ("⭐ Yelp", True),
             ("📍 Google Maps", True),
-            ("🔷 LinkedIn", bool(settings.google_api_key)),
-            ("🔵 Google Search", bool(settings.google_api_key)),
+            ("⭐ Yelp", True),
+            ("📒 Yellow Pages", True),
+            ("🏢 BBB", True),
         ]
         for name, active in sources:
             status = "✅" if active else "❌"
@@ -9302,31 +9259,26 @@ CRITICAL: Detect the language of the user's message and ALWAYS respond in the SA
 
 YOUR PLATFORM KNOWLEDGE:
 
-AVAILABLE SEARCH SOURCES (8 total):
-1. Reddit (FREE) - Searches business subreddits like smallbusiness, entrepreneur
-2. Hacker News (FREE) - Searches startups and tech companies
-3. Product Hunt (FREE) - Finds new products and their makers
-4. Indeed (FREE) - Companies hiring receptionists = they need your solution
-5. Yelp (FREE) - Local service businesses
-6. Google Maps (FREE) - Local businesses with phone, website, email
-7. LinkedIn (uses Google API) - Decision makers and business owners
-8. Google Search (uses Google API) - Complaints about phones and customer service
+AVAILABLE SEARCH SOURCES (4 total):
+1. Google Maps (FREE) - Local businesses with phone, website, email
+2. Yelp (FREE) - Local service businesses with reviews
+3. Yellow Pages (FREE) - Business directory with contact info
+4. BBB (FREE) - Accredited businesses with verified info
 
 TARGET INDUSTRIES for AI Receptionist:
 - Dental (dentists, orthodontists) / Dental (dentistas, ortodoncistas)
-- HVAC (air conditioning, heating) / HVAC (aire acondicionado, calefacción)
+- HVAC (air conditioning, heating) / HVAC (aire acondicionado, calefaccion)
 - Legal (lawyers, law firms) / Legal (abogados, bufetes)
-- Medical (clinics, doctor offices) / Medical (clínicas, consultorios)
+- Medical (clinics, doctor offices) / Medical (clinicas, consultorios)
 - Beauty (salons, spas) / Beauty (salones, spas)
 - Auto (repair shops, dealerships) / Auto (talleres, concesionarios)
 - Real Estate (realtors) / Real Estate (inmobiliarias)
 - Insurance (agents, brokers) / Insurance (seguros)
 
 SEARCH TIPS:
-- Use location filter for Indeed, Yelp, Google Maps, LinkedIn
-- Companies hiring receptionists = perfect opportunity
+- Use location filter for Google Maps, Yelp, Yellow Pages, BBB
 - Businesses with bad reviews about "don't answer the phone" = hot leads
-- LinkedIn finds decision makers directly
+- Use Business Type filter to target specific industries on Google Maps
 
 OUTREACH STRATEGIES:
 - Cold email: Personalize with the business's specific pain point
@@ -9380,39 +9332,39 @@ def get_fallback_response(user_message: str) -> str:
             return """<b>Para conseguir más leads:</b><br><br>
 1. <b>Activa Google Maps</b> - Es gratis y encuentra negocios locales con teléfono y email<br>
 2. <b>Usa filtro de ubicación</b> - Enfócate en ciudades específicas (Miami, LA, Houston)<br>
-3. <b>Indeed es oro</b> - Empresas contratando recepcionistas = necesitan tu solución<br>
-4. <b>LinkedIn</b> - Encuentra dueños de negocios directamente (necesita Google API)<br><br>
-💡 <b>Tip:</b> Combina Indeed + Google Maps + Yelp para la misma ciudad = leads locales con datos completos."""
+3. <b>Activa Yelp</b> - Negocios de servicios con reviews y datos de contacto<br>
+4. <b>Yellow Pages + BBB</b> - Directorios con negocios verificados<br><br>
+💡 <b>Tip:</b> Combina Google Maps + Yelp + Yellow Pages para la misma ciudad = leads locales con datos completos."""
         else:
             return """<b>To get more leads:</b><br><br>
 1. <b>Enable Google Maps</b> - It's free and finds local businesses with phone and email<br>
 2. <b>Use location filter</b> - Focus on specific cities (Miami, LA, Houston)<br>
-3. <b>Indeed is gold</b> - Companies hiring receptionists = they need your solution<br>
-4. <b>LinkedIn</b> - Find business owners directly (requires Google API)<br><br>
-💡 <b>Tip:</b> Combine Indeed + Google Maps + Yelp for the same city = local leads with complete data."""
+3. <b>Enable Yelp</b> - Service businesses with reviews and contact data<br>
+4. <b>Yellow Pages + BBB</b> - Directories with verified businesses<br><br>
+💡 <b>Tip:</b> Combine Google Maps + Yelp + Yellow Pages for the same city = local leads with complete data."""
 
     # SOURCES - Best sources
     elif any(word in message_lower for word in ["fuente", "mejor", "cuál usar", "qué fuente", "source", "best", "which", "recommend"]):
         if is_spanish:
             return """<b>Mejores fuentes para AI Receptionist:</b><br><br>
-🥇 <b>Indeed</b> - Empresas contratando recepcionistas NECESITAN tu producto<br>
-🥈 <b>Google Maps</b> - Dentistas, HVAC, abogados con teléfono directo<br>
-🥉 <b>Yelp</b> - Negocios de servicios con reviews<br><br>
+🥇 <b>Google Maps</b> - Dentistas, HVAC, abogados con teléfono directo<br>
+🥈 <b>Yelp</b> - Negocios de servicios con reviews<br>
+🥉 <b>Yellow Pages</b> - Directorio amplio de negocios locales<br><br>
 <b>Por industria:</b><br>
 • Dental → Google Maps + Yelp<br>
-• HVAC → Google Maps + Indeed<br>
-• Legal → LinkedIn + Google Maps<br><br>
-💡 Las fuentes GRATIS (Indeed, Yelp, Google Maps) no gastan créditos de API."""
+• HVAC → Google Maps + Yellow Pages<br>
+• Legal → Google Maps + BBB<br><br>
+💡 Todas las fuentes son GRATIS y no gastan créditos de API."""
         else:
             return """<b>Best sources for AI Receptionist:</b><br><br>
-🥇 <b>Indeed</b> - Companies hiring receptionists NEED your product<br>
-🥈 <b>Google Maps</b> - Dentists, HVAC, lawyers with direct phone<br>
-🥉 <b>Yelp</b> - Service businesses with reviews<br><br>
+🥇 <b>Google Maps</b> - Dentists, HVAC, lawyers with direct phone<br>
+🥈 <b>Yelp</b> - Service businesses with reviews<br>
+🥉 <b>Yellow Pages</b> - Broad local business directory<br><br>
 <b>By industry:</b><br>
 • Dental → Google Maps + Yelp<br>
-• HVAC → Google Maps + Indeed<br>
-• Legal → LinkedIn + Google Maps<br><br>
-💡 FREE sources (Indeed, Yelp, Google Maps) don't use API credits."""
+• HVAC → Google Maps + Yellow Pages<br>
+• Legal → Google Maps + BBB<br><br>
+💡 All sources are FREE and don't use API credits."""
 
     # LOCATION - How to use location filter
     elif any(word in message_lower for word in ["ubicación", "location", "ciudad", "filtro", "city", "filter", "area"]):
@@ -9423,10 +9375,10 @@ def get_fallback_response(user_message: str) -> str:
 3. Selecciona el estado del dropdown<br>
 4. Opcional: agrega código postal para más precisión<br><br>
 <b>Fuentes que usan ubicación:</b><br>
-✅ Indeed - Busca empleos en esa ciudad<br>
-✅ Yelp - Busca negocios en esa área<br>
 ✅ Google Maps - Busca negocios locales<br>
-✅ LinkedIn - Filtra perfiles por ubicación<br><br>
+✅ Yelp - Busca negocios en esa área<br>
+✅ Yellow Pages - Busca en directorio local<br>
+✅ BBB - Negocios acreditados en la zona<br><br>
 💡 <b>Tip:</b> Empieza con ciudades grandes (Miami, LA, Houston, Dallas) para más resultados."""
         else:
             return """<b>How to use the location filter:</b><br><br>
@@ -9435,10 +9387,10 @@ def get_fallback_response(user_message: str) -> str:
 3. Select the state from dropdown<br>
 4. Optional: add zip code for more precision<br><br>
 <b>Sources that use location:</b><br>
-✅ Indeed - Searches jobs in that city<br>
-✅ Yelp - Searches businesses in that area<br>
 ✅ Google Maps - Searches local businesses<br>
-✅ LinkedIn - Filters profiles by location<br><br>
+✅ Yelp - Searches businesses in that area<br>
+✅ Yellow Pages - Searches local directory<br>
+✅ BBB - Accredited businesses in the area<br><br>
 💡 <b>Tip:</b> Start with large cities (Miami, LA, Houston, Dallas) for more results."""
 
     # INDUSTRY - What industries to target
@@ -9452,7 +9404,7 @@ def get_fallback_response(user_message: str) -> str:
 💇 <b>Salones/Spas</b> - Reservaciones constantes<br>
 🚗 <b>Auto Repair</b> - Clientes llaman para emergencias<br><br>
 <b>Señales de que necesitan tu producto:</b><br>
-• Contratan recepcionistas (Indeed)<br>
+• Reviews quejándose de "no contestan el teléfono"<br>
 • Reviews quejándose de que "no contestan"<br>
 • Negocios pequeños (1-20 empleados)"""
         else:
@@ -9464,7 +9416,7 @@ def get_fallback_response(user_message: str) -> str:
 💇 <b>Salons/Spas</b> - Constant reservations<br>
 🚗 <b>Auto Repair</b> - Customers call for emergencies<br><br>
 <b>Signs they need your product:</b><br>
-• Hiring receptionists (Indeed)<br>
+• Reviews complaining about "no one answers the phone"<br>
 • Reviews complaining "no one answers"<br>
 • Small businesses (1-20 employees)"""
 
@@ -9478,7 +9430,7 @@ def get_fallback_response(user_message: str) -> str:
 3. <b>Solución</b> - "Nuestro AI atiende 24/7, agenda citas automáticamente"<br>
 4. <b>CTA</b> - "¿15 minutos para una demo esta semana?"<br><br>
 <b>Ejemplo:</b><br>
-<i>"Hola [Nombre], vi en Indeed que buscan recepcionista para [Empresa]. ¿Sabías que el 67% de los clientes cuelgan si no contestan en 3 rings? Tengo una solución de IA que atiende 24/7. ¿Tienes 15 min para verlo?"</i><br><br>
+<i>"Hola [Nombre], vi en Google Maps que [Empresa] tiene varias reseñas mencionando problemas para comunicarse. ¿Sabías que el 67% de los clientes cuelgan si no contestan en 3 rings? Tengo una solución de IA que atiende 24/7. ¿Tienes 15 min para verlo?"</i><br><br>
 💡 <b>Hormozi Tip:</b> Usa "admisión dañina" - "No reemplazamos humanos al 100%, pero cubrimos cuando no están"."""
         else:
             return """<b>How to write effective cold emails:</b><br><br>
@@ -9488,7 +9440,7 @@ def get_fallback_response(user_message: str) -> str:
 3. <b>Solution</b> - "Our AI answers 24/7, schedules appointments automatically"<br>
 4. <b>CTA</b> - "15 minutes for a demo this week?"<br><br>
 <b>Example:</b><br>
-<i>"Hi [Name], I saw on Indeed you're hiring a receptionist for [Company]. Did you know 67% of customers hang up if not answered in 3 rings? I have an AI solution that answers 24/7. Do you have 15 min to see it?"</i><br><br>
+<i>"Hi [Name], I noticed on Google Maps that [Company] has several reviews mentioning communication issues. Did you know 67% of customers hang up if not answered in 3 rings? I have an AI solution that answers 24/7. Do you have 15 min to see it?"</i><br><br>
 💡 <b>Hormozi Tip:</b> Use "damaging admission" - "We don't replace humans 100%, but we cover when they're not available"."""
 
     # COST - API credits
@@ -9496,29 +9448,19 @@ def get_fallback_response(user_message: str) -> str:
         if is_spanish:
             return """<b>Costos de la plataforma:</b><br><br>
 <b>GRATIS (sin límite):</b><br>
-✅ Reddit - RSS feeds<br>
-✅ Hacker News - API pública<br>
-✅ Product Hunt - RSS feeds<br>
-✅ Indeed - Web scraping<br>
+✅ Google Maps - Web scraping<br>
 ✅ Yelp - Web scraping<br>
-✅ Google Maps - Web scraping<br><br>
-<b>Usan Google API (100 gratis/día):</b><br>
-• LinkedIn - ~5 queries por búsqueda<br>
-• Google Search - ~15 queries por búsqueda<br><br>
-💡 <b>Tip:</b> Usa solo las fuentes gratis para búsquedas ilimitadas."""
+✅ Yellow Pages - Web scraping<br>
+✅ BBB - Web scraping<br><br>
+💡 <b>Tip:</b> Todas las fuentes son gratuitas. No necesitas API keys para buscar leads."""
         else:
             return """<b>Platform costs:</b><br><br>
 <b>FREE (unlimited):</b><br>
-✅ Reddit - RSS feeds<br>
-✅ Hacker News - Public API<br>
-✅ Product Hunt - RSS feeds<br>
-✅ Indeed - Web scraping<br>
+✅ Google Maps - Web scraping<br>
 ✅ Yelp - Web scraping<br>
-✅ Google Maps - Web scraping<br><br>
-<b>Use Google API (100 free/day):</b><br>
-• LinkedIn - ~5 queries per search<br>
-• Google Search - ~15 queries per search<br><br>
-💡 <b>Tip:</b> Use only free sources for unlimited searches."""
+✅ Yellow Pages - Web scraping<br>
+✅ BBB - Web scraping<br><br>
+💡 <b>Tip:</b> All sources are free. No API keys needed to search for leads."""
 
     # GREETING
     elif any(word in message_lower for word in ["hola", "hey", "buenos", "qué tal", "hello", "hi", "good morning", "good afternoon"]):
@@ -9546,7 +9488,7 @@ What do you need today?"""
 <b>Para mejores resultados:</b><br>
 1. Usa el <b>filtro de ubicación</b> para enfocarte en ciudades específicas<br>
 2. Activa <b>Google Maps</b> para obtener teléfonos y emails<br>
-3. <b>Indeed</b> encuentra empresas que necesitan tu producto<br>
+3. Combina <b>Yelp + Yellow Pages + BBB</b> para datos más completos<br>
 4. Revisa los leads en <b>My Leads</b> antes de contactar<br><br>
 ¿Hay algo específico sobre la plataforma o estrategias de lead generation en lo que pueda ayudarte?"""
         else:
@@ -9554,7 +9496,7 @@ What do you need today?"""
 <b>For better results:</b><br>
 1. Use the <b>location filter</b> to focus on specific cities<br>
 2. Enable <b>Google Maps</b> to get phones and emails<br>
-3. <b>Indeed</b> finds companies that need your product<br>
+3. Combine <b>Yelp + Yellow Pages + BBB</b> for more complete data<br>
 4. Review leads in <b>My Leads</b> before contacting<br><br>
 Is there anything specific about the platform or lead generation strategies I can help you with?"""
 
