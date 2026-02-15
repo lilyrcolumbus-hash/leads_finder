@@ -4832,39 +4832,26 @@ def show_search():
     # Active Sources Section
     st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📡 Active Sources <span style="color: #DC2626;">*</span> <span style="color: #6B7280; font-size: 13px;">(Select at least one)</span></p>', unsafe_allow_html=True)
 
-    # Local business sources (search by type + location)
-    st.markdown('<p style="color: #166534; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Local Business Directories (search by type + location):</p>', unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
+    # Sources that find real business contacts with email extraction
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         use_gmaps = st.checkbox("📍 Google Maps", value=True, key="gmaps_check")
-        use_yelp = st.checkbox("⭐ Yelp", value=True, key="yelp_check")
     with col2:
-        use_yellowpages = st.checkbox("📒 Yellow Pages", value=True, key="yp_check")
-        use_bbb = st.checkbox("🏢 BBB (Quejas)", value=True, key="bbb_check")
+        use_yelp = st.checkbox("⭐ Yelp", value=True, key="yelp_check")
     with col3:
-        use_craigslist = st.checkbox("📋 Craigslist", value=True, key="cl_check")
-        use_indeed = st.checkbox("💼 Indeed", value=True, key="indeed_check")
-
-    # Generic sources (search pain keywords, NOT business type)
-    st.markdown('<p style="color: #6B7280; font-size: 13px; font-weight: 600; margin-bottom: 4px; margin-top: 12px;">Community Sources (generic pain keywords, skipped when business type is set):</p>', unsafe_allow_html=True)
-    col4, col5, col6 = st.columns(3)
+        use_yellowpages = st.checkbox("📒 Yellow Pages", value=True, key="yp_check")
     with col4:
-        use_reddit = st.checkbox("🔴 Reddit", value=False, key="reddit_check")
-        use_hn = st.checkbox("🟠 Hacker News", value=False, key="hn_check")
-    with col5:
-        use_ph = st.checkbox("🟣 Product Hunt", value=False, key="ph_check")
-        use_google = st.checkbox("🔵 Google Search", value=False, key="google_check")
-    with col6:
-        use_linkedin = st.checkbox("🔷 LinkedIn", value=False, key="linkedin_check")
-        use_facebook = st.checkbox("📘 Facebook", value=False, key="facebook_check")
+        use_bbb = st.checkbox("🏢 BBB", value=True, key="bbb_check")
 
-    # Show warnings for sources that need API keys
-    if use_google and not settings.google_api_key:
-        st.warning("⚠️ Google Search requires API key")
-    if use_linkedin and not settings.google_api_key:
-        st.warning("⚠️ LinkedIn requires Google API key")
-    if use_facebook and not settings.facebook_access_token:
-        st.warning("⚠️ Facebook requires Access Token")
+    # These are not shown but set to False so downstream code doesn't break
+    use_reddit = False
+    use_hn = False
+    use_ph = False
+    use_indeed = False
+    use_craigslist = False
+    use_google = False
+    use_linkedin = False
+    use_facebook = False
 
     st.markdown("""
     <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
@@ -5066,44 +5053,12 @@ def show_search():
             status = st.empty()
             results = st.container()
 
-            # Sources that search for specific business types by location
-            local_sources = {"Google Maps", "Yellow Pages", "Craigslist", "BBB", "Yelp", "Indeed"}
-            # Sources that search generic pain keywords (NOT business-specific)
-            generic_sources = {"Reddit", "Hacker News", "Product Hunt"}
-
             scrapers = []
-            skipped_sources = []
-
-            # Free scrapers (no API needed)
-            if use_reddit: scrapers.append(("Reddit", RedditScraper))
-            if use_hn: scrapers.append(("Hacker News", HackerNewsScraper))
-            if use_ph: scrapers.append(("Product Hunt", ProductHuntScraper))
-            if use_indeed: scrapers.append(("Indeed", IndeedScraper))
+            # Local business directory scrapers (all extract emails from websites)
+            if use_gmaps: scrapers.append(("Google Maps", GoogleMapsWebScraper))
             if use_yelp: scrapers.append(("Yelp", YelpScraper))
-            if use_gmaps: scrapers.append(("Google Maps", GoogleMapsWebScraper))  # Web scraping version
             if use_yellowpages: scrapers.append(("Yellow Pages", YellowPagesScraper))
             if use_bbb: scrapers.append(("BBB", BBBScraper))
-            if use_craigslist: scrapers.append(("Craigslist", CraigslistScraper))
-            # API-required scrapers
-            if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
-            if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
-            if use_facebook and settings.facebook_access_token: scrapers.append(("Facebook", FacebookScraper))
-
-            # Smart source filtering: when searching for a specific business type,
-            # skip sources that don't support business-specific search (Reddit, HN, etc.)
-            # because they return irrelevant generic results
-            if custom_business_type and custom_business_type.strip():
-                filtered_scrapers = []
-                for name, scraper_cls in scrapers:
-                    if name in generic_sources:
-                        skipped_sources.append(name)
-                    else:
-                        filtered_scrapers.append((name, scraper_cls))
-                scrapers = filtered_scrapers
-
-                if skipped_sources:
-                    with results:
-                        st.info(f"Skipped {', '.join(skipped_sources)} (these sources search generic pain keywords, not specific business types like '{custom_business_type.strip()}')")
 
             if not scrapers:
                 st.warning("Select at least one source")
@@ -5320,20 +5275,15 @@ def show_search():
                 except Exception:
                     pass
 
-            # Store search summary
+            # Store search summary (only active local business sources)
+            source_counts = {}
+            for lead in all_leads:
+                src_name = lead.source.value.replace("_", " ").title()
+                source_counts[src_name] = source_counts.get(src_name, 0) + 1
             st.session_state.last_search_results = {
                 'total_found': len(all_leads),
                 'qualified_count': len([l for l in all_leads if getattr(l, 'is_qualified', False)]),
-                'sources': {
-                    'Reddit': len([l for l in all_leads if l.source.value == 'reddit']),
-                    'Hacker News': len([l for l in all_leads if l.source.value == 'hacker_news']),
-                    'Google': len([l for l in all_leads if l.source.value == 'google_search']),
-                    'Product Hunt': len([l for l in all_leads if l.source.value == 'product_hunt']),
-                    'LinkedIn': len([l for l in all_leads if l.source.value == 'linkedin']),
-                    'Indeed': len([l for l in all_leads if l.source.value == 'indeed']),
-                    'Yelp': len([l for l in all_leads if l.source.value == 'yelp']),
-                    'Google Maps': len([l for l in all_leads if l.source.value == 'google_maps']),
-                }
+                'sources': source_counts,
             }
 
             # Save search history

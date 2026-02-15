@@ -234,6 +234,15 @@ class YellowPagesScraper(BaseScraper):
                     except:
                         rating = None
 
+            # Try to extract email from business website
+            email = None
+            website = url if url and "yellowpages.com" not in url else None
+            if website:
+                try:
+                    email = self.extract_email_from_website(website)
+                except Exception:
+                    pass
+
             lead = Lead(
                 id=self.generate_id("yp", f"{name}-{location}"),
                 source=self.source,
@@ -242,6 +251,8 @@ class YellowPagesScraper(BaseScraper):
                 url=url,
                 phone=phone,
                 address=address,
+                website=website,
+                email=email,
                 rating=rating,
                 business_type=business_type,
                 keywords_matched=[f"category:{business_type}", f"location:{location}"],
@@ -308,6 +319,14 @@ class YellowPagesScraper(BaseScraper):
                 href = link_elem.get('href', '')
                 url = f"https://www.yellowpages.com{href}" if href.startswith('/') else href
 
+            # Crawl business website for real email
+            email = None
+            if website:
+                try:
+                    email = self.extract_email_from_website(website)
+                except Exception:
+                    pass
+
             lead = Lead(
                 id=self.generate_id("yp", f"{name}-{location}"),
                 source=self.source,
@@ -317,6 +336,7 @@ class YellowPagesScraper(BaseScraper):
                 phone=phone,
                 address=address,
                 website=website,
+                email=email,
                 business_type=business_type,
                 keywords_matched=[f"category:{business_type}", f"location:{location}"],
                 has_pain=True,

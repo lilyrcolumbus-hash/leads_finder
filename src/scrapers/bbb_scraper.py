@@ -169,6 +169,22 @@ class BBBScraper(BaseScraper):
             if link:
                 url = f"https://www.bbb.org{link.get('href', '')}"
 
+            # Extract business website from listing
+            website = None
+            website_elem = listing.find('a', href=re.compile(r'^https?://(?!www\.bbb\.org)'))
+            if website_elem:
+                href = website_elem.get('href', '')
+                if href and 'bbb.org' not in href:
+                    website = href
+
+            # Crawl business website for real email
+            email = None
+            if website:
+                try:
+                    email = self.extract_email_from_website(website)
+                except Exception:
+                    pass
+
             content = f"{business_type} in {location}."
             if complaints > 0:
                 content += f" Has {complaints} complaints on BBB."
@@ -182,6 +198,8 @@ class BBBScraper(BaseScraper):
                 url=url,
                 phone=phone,
                 address=address,
+                website=website,
+                email=email,
                 rating=rating,
                 business_type=business_type,
                 location=location.replace("-", ", ").title(),

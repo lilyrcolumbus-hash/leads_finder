@@ -219,7 +219,7 @@ class GoogleMapsScraper(BaseScraper):
                 phone=phone,
                 address=address,
                 website=website,
-                email=self._extract_email_from_website(website) if website else None,
+                email=self.extract_email_from_website(website) if website else None,
                 # Google Maps specific
                 rating=rating,
                 review_count=review_count,

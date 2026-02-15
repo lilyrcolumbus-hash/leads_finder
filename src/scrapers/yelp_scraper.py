@@ -190,6 +190,15 @@ class YelpScraper(BaseScraper):
 
             rating = data.get("aggregateRating", {}).get("ratingValue", "")
 
+            # Try to extract email from business website (not Yelp URL)
+            email = None
+            website = url if url and "yelp.com" not in url else None
+            if website:
+                try:
+                    email = self.extract_email_from_website(website)
+                except Exception:
+                    pass
+
             lead = Lead(
                 id=self.generate_id("yelp", name, location),
                 source=self.source,
@@ -199,6 +208,8 @@ class YelpScraper(BaseScraper):
                 company=name,
                 phone=phone,
                 address=address,
+                website=website,
+                email=email,
                 rating=float(rating) if rating else None,
                 keywords_matched=[f"category:{category}", f"location:{location}"],
                 has_pain=True,
