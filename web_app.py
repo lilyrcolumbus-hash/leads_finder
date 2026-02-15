@@ -4832,21 +4832,29 @@ def show_search():
     # Active Sources Section
     st.markdown('<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">📡 Active Sources <span style="color: #DC2626;">*</span> <span style="color: #6B7280; font-size: 13px;">(Select at least one)</span></p>', unsafe_allow_html=True)
 
-    col1, col2, col3, col4 = st.columns(4)
+    # Local business sources (search by type + location)
+    st.markdown('<p style="color: #166534; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Local Business Directories (search by type + location):</p>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
     with col1:
-        use_reddit = st.checkbox("🔴 Reddit", value=True, key="reddit_check")
-        use_hn = st.checkbox("🟠 Hacker News", value=True, key="hn_check")
-        use_ph = st.checkbox("🟣 Product Hunt", value=True, key="ph_check")
-    with col2:
-        use_yelp = st.checkbox("⭐ Yelp", value=True, key="yelp_check")
         use_gmaps = st.checkbox("📍 Google Maps", value=True, key="gmaps_check")
-        use_indeed = st.checkbox("💼 Indeed", value=True, key="indeed_check")
-    with col3:
+        use_yelp = st.checkbox("⭐ Yelp", value=True, key="yelp_check")
+    with col2:
         use_yellowpages = st.checkbox("📒 Yellow Pages", value=True, key="yp_check")
         use_bbb = st.checkbox("🏢 BBB (Quejas)", value=True, key="bbb_check")
+    with col3:
         use_craigslist = st.checkbox("📋 Craigslist", value=True, key="cl_check")
+        use_indeed = st.checkbox("💼 Indeed", value=True, key="indeed_check")
+
+    # Generic sources (search pain keywords, NOT business type)
+    st.markdown('<p style="color: #6B7280; font-size: 13px; font-weight: 600; margin-bottom: 4px; margin-top: 12px;">Community Sources (generic pain keywords, skipped when business type is set):</p>', unsafe_allow_html=True)
+    col4, col5, col6 = st.columns(3)
     with col4:
+        use_reddit = st.checkbox("🔴 Reddit", value=False, key="reddit_check")
+        use_hn = st.checkbox("🟠 Hacker News", value=False, key="hn_check")
+    with col5:
+        use_ph = st.checkbox("🟣 Product Hunt", value=False, key="ph_check")
         use_google = st.checkbox("🔵 Google Search", value=False, key="google_check")
+    with col6:
         use_linkedin = st.checkbox("🔷 LinkedIn", value=False, key="linkedin_check")
         use_facebook = st.checkbox("📘 Facebook", value=False, key="facebook_check")
 
@@ -5058,7 +5066,14 @@ def show_search():
             status = st.empty()
             results = st.container()
 
+            # Sources that search for specific business types by location
+            local_sources = {"Google Maps", "Yellow Pages", "Craigslist", "BBB", "Yelp", "Indeed"}
+            # Sources that search generic pain keywords (NOT business-specific)
+            generic_sources = {"Reddit", "Hacker News", "Product Hunt"}
+
             scrapers = []
+            skipped_sources = []
+
             # Free scrapers (no API needed)
             if use_reddit: scrapers.append(("Reddit", RedditScraper))
             if use_hn: scrapers.append(("Hacker News", HackerNewsScraper))
@@ -5073,6 +5088,22 @@ def show_search():
             if use_google and settings.google_api_key: scrapers.append(("Google", GoogleScraper))
             if use_linkedin and settings.google_api_key: scrapers.append(("LinkedIn", LinkedInScraper))
             if use_facebook and settings.facebook_access_token: scrapers.append(("Facebook", FacebookScraper))
+
+            # Smart source filtering: when searching for a specific business type,
+            # skip sources that don't support business-specific search (Reddit, HN, etc.)
+            # because they return irrelevant generic results
+            if custom_business_type and custom_business_type.strip():
+                filtered_scrapers = []
+                for name, scraper_cls in scrapers:
+                    if name in generic_sources:
+                        skipped_sources.append(name)
+                    else:
+                        filtered_scrapers.append((name, scraper_cls))
+                scrapers = filtered_scrapers
+
+                if skipped_sources:
+                    with results:
+                        st.info(f"Skipped {', '.join(skipped_sources)} (these sources search generic pain keywords, not specific business types like '{custom_business_type.strip()}')")
 
             if not scrapers:
                 st.warning("Select at least one source")
@@ -5451,7 +5482,7 @@ def show_search():
 
         import html as html_module
 
-        for lead in st.session_state.filtered_leads[:5]:
+        for lead in st.session_state.filtered_leads[:20]:
             # Get lead grade based on total score
             total_score = getattr(lead, 'total_score', lead.pain_score) or lead.pain_score
             pain_score = lead.pain_score or 0
