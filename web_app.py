@@ -4991,13 +4991,13 @@ def show_search():
     """, unsafe_allow_html=True)
 
     if ai_available:
-        use_ai = st.checkbox("✅ Enable AI Qualification (Recommended)", value=True, key="ai_check",
-                             help="AI will analyze and score each lead based on relevance, pain points, and conversion potential")
-        ai_provider = "Gemini" if settings.gemini_api_key else ("OpenAI" if settings.openai_api_key else "Anthropic")
-        st.success(f"🎯 Connected to **{ai_provider}** - AI will score and qualify your leads")
+        use_ai = st.checkbox("🤖 Enable AI Qualification (Optional)", value=False, key="ai_check",
+                             help="AI will analyze and score each lead based on relevance, pain points, and conversion potential. Not needed if you only want contacts with complete data.")
+        if use_ai:
+            ai_provider = "Gemini" if settings.gemini_api_key else ("OpenAI" if settings.openai_api_key else "Anthropic")
+            st.success(f"🎯 Connected to **{ai_provider}** - AI will score and qualify your leads")
     else:
         use_ai = False
-        st.warning("⚠️ No AI API key configured. Leads will be scored by keyword matching only. Go to **Settings** to add OpenAI, Anthropic, or Gemini API key for real AI qualification.")
 
     st.markdown("<div style='height: 24px'></div>", unsafe_allow_html=True)
 
@@ -5245,8 +5245,8 @@ def show_search():
                         lead.is_qualified = False
                     # Do NOT set ai_score - leave it as None to indicate no AI was used
 
-            # GEMINI BUSINESS ANALYSIS (software needs detection)
-            if settings.gemini_api_key and all_leads:
+            # GEMINI BUSINESS ANALYSIS (software needs detection - only when AI enabled)
+            if use_ai and settings.gemini_api_key and all_leads:
                 gmaps_leads = [l for l in all_leads if l.source.value == 'google_maps']
                 if gmaps_leads:
                     status.markdown("""
@@ -6071,19 +6071,31 @@ def show_leads():
             """, unsafe_allow_html=True)
 
             # Filters
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
-                filter_category = st.selectbox("Filter by Category", ["All", "🔴 Pain", "🟡 Opportunity", "⚪ Cold"])
+                filter_completeness = st.selectbox("Contact Data", ["All", "Complete (Phone+Email)", "Has Phone", "Has Email", "Has Website"])
             with col2:
-                filter_urgency = st.selectbox("Filter by Score", ["All", "Hot (70+)", "High (50+)", "Medium (25+)"])
+                filter_category = st.selectbox("Filter by Category", ["All", "🔴 Pain", "🟡 Opportunity", "⚪ Cold"])
             with col3:
+                filter_urgency = st.selectbox("Filter by Score", ["All", "Hot (70+)", "High (50+)", "Medium (25+)"])
+            with col4:
                 industries_found = list(set(l.industry for l in st.session_state.filtered_leads if l.industry))
                 filter_industry = st.selectbox("Filter by Industry", ["All"] + industries_found)
-            with col4:
-                sort_by = st.selectbox("Sort by", ["Pain Score", "Category", "Date Found", "AI Score"])
+            with col5:
+                sort_by = st.selectbox("Sort by", ["Data Completeness", "Pain Score", "Category", "Date Found", "AI Score"])
 
             # Apply filters
             filtered = st.session_state.filtered_leads.copy()
+
+            # Completeness filter
+            if filter_completeness == "Complete (Phone+Email)":
+                filtered = [l for l in filtered if l.phone and l.email and l.email not in ("", None) and "@leadgen.placeholder" not in (l.email or "")]
+            elif filter_completeness == "Has Phone":
+                filtered = [l for l in filtered if l.phone]
+            elif filter_completeness == "Has Email":
+                filtered = [l for l in filtered if l.email and l.email not in ("", None) and "@leadgen.placeholder" not in (l.email or "")]
+            elif filter_completeness == "Has Website":
+                filtered = [l for l in filtered if l.website]
 
             # Category filter
             if filter_category == "🔴 Pain":
@@ -6105,7 +6117,17 @@ def show_leads():
                 filtered = [l for l in filtered if l.industry == filter_industry]
 
             # Sort
-            if sort_by == "Pain Score":
+            if sort_by == "Data Completeness":
+                def completeness_score(lead):
+                    score = 0
+                    if lead.phone: score += 3
+                    if lead.email and "@leadgen.placeholder" not in (lead.email or ""): score += 3
+                    if lead.website: score += 2
+                    if lead.address: score += 1
+                    if lead.company: score += 1
+                    return score
+                filtered = sorted(filtered, key=completeness_score, reverse=True)
+            elif sort_by == "Pain Score":
                 filtered = sorted(filtered, key=lambda x: x.pain_score, reverse=True)
             elif sort_by == "Category":
                 # Sort by category priority: Pain > Opportunity > Cold
