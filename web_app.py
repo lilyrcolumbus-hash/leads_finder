@@ -7401,10 +7401,11 @@ Best regards'''
                 # Show leads
                 for idx, lead in enumerate(stage_leads[:8]):
                     lead_hash = lead.get('hash') or ''
-                    # Safe string handling
-                    lead_title = (lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown Lead')[:30]
-                    lead_company = (lead.get('company') or '')[:20]
-                    lead_email = lead.get('email') or ''
+                    # Safe string handling with HTML escaping
+                    import html as html_mod
+                    lead_title = html_mod.escape((lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown Lead')[:30])
+                    lead_company = html_mod.escape((lead.get('company') or '')[:20])
+                    lead_email = html_mod.escape(lead.get('email') or '')
                     pain_score = lead.get('pain_score') or 0
 
                     # Lead card

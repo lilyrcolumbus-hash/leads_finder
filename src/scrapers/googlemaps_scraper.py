@@ -224,7 +224,7 @@ class GoogleMapsScraper:
                 id=f"gmaps_{hash(f'{name}{phone}{location}')}",
                 source=LeadSource.GOOGLE_MAPS,
                 title=name,
-                content=f"{category.title()} business in {location}. {address or ''}",
+                content=f"{category.title()} business in {location}." + (f"\nAddress: {address}" if address else ""),
                 url=f"https://www.google.com/search?q={quote_plus(name + ' ' + location)}",
                 company=name,
                 phone=phone,

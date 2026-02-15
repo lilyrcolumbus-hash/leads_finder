@@ -188,7 +188,8 @@ class YelpScraper(BaseScraper):
             if "address" in data:
                 addr = data["address"]
                 if isinstance(addr, dict):
-                    address = f"{addr.get('streetAddress', '')}, {addr.get('addressLocality', '')}, {addr.get('addressRegion', '')}"
+                    address_parts = [addr.get('streetAddress', ''), addr.get('addressLocality', ''), addr.get('addressRegion', '')]
+                    address = ", ".join(p for p in address_parts if p and p.strip())
 
             rating = data.get("aggregateRating", {}).get("ratingValue", "")
 
@@ -205,7 +206,7 @@ class YelpScraper(BaseScraper):
                 id=self.generate_id("yelp", name, location),
                 source=self.source,
                 title=f"{name} - {category.title()}",
-                content=f"{name} is a {category} business in {location}. Rating: {rating}/5. {address}",
+                content=f"{name} is a {category} business in {location}." + (f" Rating: {rating}/5." if rating else "") + (f"\nAddress: {address}" if address else ""),
                 url=url,
                 company=name,
                 phone=phone,
