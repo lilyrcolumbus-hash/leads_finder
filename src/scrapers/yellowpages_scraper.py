@@ -62,13 +62,14 @@ class YellowPagesScraper(BaseScraper):
             "Cache-Control": "max-age=0",
         }
 
-    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None, category: str = None) -> LeadBatch:
         """Scrape Yellow Pages for business listings."""
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
         locations = [location] if location else self.LOCATIONS[:3]
-        business_types = self.BUSINESS_TYPES[:5]
+        # Use custom category if provided, otherwise default list
+        business_types = [category] if category else self.BUSINESS_TYPES[:5]
 
         self.logger.info(f"Starting Yellow Pages scrape for {len(business_types)} business types")
 

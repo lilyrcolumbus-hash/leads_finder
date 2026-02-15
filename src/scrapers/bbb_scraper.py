@@ -45,7 +45,7 @@ class BBBScraper(BaseScraper):
     def __init__(self):
         super().__init__()
 
-    def scrape(self, time_filter: str = None, location: str = None) -> LeadBatch:
+    def scrape(self, time_filter: str = None, location: str = None, category: str = None) -> LeadBatch:
         """
         Scrape BBB for businesses (especially those with complaints).
 
@@ -59,8 +59,14 @@ class BBBScraper(BaseScraper):
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
 
-        locations = self.LOCATIONS[:4]
-        business_types = self.BUSINESS_TYPES[:5]
+        # Use user-provided location or fall back to defaults
+        if location:
+            # Format for BBB URL: "lima-oh", "houston-tx"
+            locations = [location.replace(", ", "-").replace(" ", "-").lower()]
+        else:
+            locations = self.LOCATIONS[:4]
+        # Use custom category if provided, otherwise default list
+        business_types = [category] if category else self.BUSINESS_TYPES[:5]
 
         self.logger.info(f"Starting BBB scrape for {len(business_types)} categories")
 

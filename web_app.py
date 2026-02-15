@@ -5074,21 +5074,18 @@ def show_search():
 
                 try:
                     with Scraper() as s:
-                        # Pass location and category to location-aware scrapers
-                        if name == "Google Maps":
-                            kwargs = {"time_filter": selected_time}
-                            # Always pass location if available
-                            if search_location:
-                                kwargs["location"] = search_location
-                                with results:
-                                    st.info(f"Google Maps: Searching in **{search_location}**")
-                            if custom_business_type:
-                                kwargs["category"] = custom_business_type.strip()
-                            batch = s.scrape(**kwargs)
-                        elif name in ["Indeed", "Yelp", "LinkedIn"] and search_location:
-                            batch = s.scrape(time_filter=selected_time, location=search_location)
-                        else:
-                            batch = s.scrape(time_filter=selected_time)
+                        # Build kwargs: all scrapers get location + category
+                        kwargs = {"time_filter": selected_time}
+                        if search_location:
+                            kwargs["location"] = search_location
+                        if custom_business_type and custom_business_type.strip():
+                            kwargs["category"] = custom_business_type.strip()
+
+                        if name == "Google Maps" and search_location:
+                            with results:
+                                st.info(f"Google Maps: Searching in **{search_location}**")
+
+                        batch = s.scrape(**kwargs)
                         all_leads.extend(batch.leads)
                         with results:
                             st.success(f"{name}: {len(batch.leads)} leads")

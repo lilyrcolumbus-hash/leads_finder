@@ -44,13 +44,14 @@ class YelpScraper(BaseScraper):
             "Upgrade-Insecure-Requests": "1",
         }
 
-    def scrape(self, time_filter: str = "week", location: str = "") -> LeadBatch:
+    def scrape(self, time_filter: str = "week", location: str = "", category: str = None) -> LeadBatch:
         """
         Scrape Yelp for businesses.
 
         Args:
             time_filter: Time range (not used by Yelp, but kept for API consistency)
             location: Location to search (city, state, zip code)
+            category: Custom business type to search for (e.g., "electrician")
         """
         batch = LeadBatch(source=self.source)
         all_leads: List[Lead] = []
@@ -59,8 +60,9 @@ class YelpScraper(BaseScraper):
         location_msg = f" in {location}" if location else ""
         self.logger.info(f"Starting Yelp scrape for businesses{location_msg}")
 
-        # Search businesses in target categories
-        for category in self.categories[:5]:
+        # Use custom category if provided, otherwise default list
+        categories = [category] if category else self.categories[:5]
+        for category in categories:
             try:
                 leads = self._search_category(category, location)
                 all_leads.extend(leads)
