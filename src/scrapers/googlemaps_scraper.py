@@ -379,7 +379,7 @@ class GoogleMapsScraper:
         return emails[0]
 
     def _find_email_on_website(self, url: str) -> Optional[str]:
-        """Scrape a website homepage and contact/about pages to find real emails."""
+        """Scrape a website homepage and many sub-pages to find real emails."""
         try:
             if not url.startswith('http'):
                 url = 'https://' + url
@@ -387,19 +387,65 @@ class GoogleMapsScraper:
             base = url.rstrip('/')
             all_emails: list = []
 
-            pages = ['', '/contact', '/contact-us', '/contacto',
-                     '/about', '/about-us', '/sobre-nosotros']
+            # Expanded list of pages to crawl for emails
+            pages = [
+                '', '/contact', '/contact-us', '/contacto',
+                '/about', '/about-us', '/sobre-nosotros',
+                '/team', '/our-team', '/staff',
+                '/support', '/help', '/faq',
+                '/locations', '/location',
+                '/services', '/our-services',
+                '/get-in-touch', '/reach-us',
+                '/connect', '/info', '/company',
+            ]
 
             for page in pages:
                 try:
                     page_url = base + page
-                    response = self.session.get(page_url, timeout=10)
+                    response = self.session.get(page_url, timeout=8, allow_redirects=True)
                     if response.status_code == 200:
+                        html = response.text
+
+                        # Standard email regex
                         found = re.findall(
                             r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
-                            response.text
+                            html
                         )
                         all_emails.extend(e for e in found if self._is_real_email(e))
+
+                        # Also check mailto: links
+                        mailto_matches = re.findall(r'mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})', html)
+                        all_emails.extend(e for e in mailto_matches if self._is_real_email(e))
+
+                        # Check for emails in JSON-LD structured data
+                        try:
+                            from bs4 import BeautifulSoup
+                            soup = BeautifulSoup(html, 'html.parser')
+                            for script in soup.find_all('script', {'type': 'application/ld+json'}):
+                                if script.string:
+                                    import json
+                                    ld_data = json.loads(script.string)
+                                    items = ld_data if isinstance(ld_data, list) else [ld_data]
+                                    for item in items:
+                                        if isinstance(item, dict):
+                                            for key in ['email', 'contactPoint']:
+                                                val = item.get(key)
+                                                if isinstance(val, str) and '@' in val:
+                                                    clean = val.replace('mailto:', '')
+                                                    if self._is_real_email(clean):
+                                                        all_emails.append(clean)
+                                                elif isinstance(val, dict) and val.get('email'):
+                                                    clean = val['email'].replace('mailto:', '')
+                                                    if self._is_real_email(clean):
+                                                        all_emails.append(clean)
+                        except Exception:
+                            pass
+
+                        # If we found good emails, no need to crawl more pages
+                        real_so_far = [e for e in all_emails if self._is_real_email(e)]
+                        if len(set(e.lower() for e in real_so_far)) >= 2:
+                            break
+
                 except Exception:
                     continue
                 time.sleep(0.3)

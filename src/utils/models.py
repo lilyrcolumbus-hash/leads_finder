@@ -102,6 +102,12 @@ class Lead(BaseModel):
     lead_category: Optional[LeadCategory] = Field(default=None, description="Category: pain, opportunity, or cold")
     has_explicit_pain: bool = Field(default=False, description="Whether lead has explicit pain/problem")
 
+    # Gemini Business Analysis - Software needs detection
+    software_needs: Optional[str] = Field(default=None, description="Software needs detected by Gemini (e.g., 'Needs chatbot, no social media')")
+    has_website: Optional[bool] = Field(default=None, description="Whether business has a website")
+    has_social_media: Optional[bool] = Field(default=None, description="Whether business has social media presence")
+    gemini_analysis: Optional[str] = Field(default=None, description="Full Gemini analysis of business needs")
+
     # Tracking
     found_at: datetime = Field(default_factory=datetime.utcnow)
     sent_to_crm: bool = Field(default=False)

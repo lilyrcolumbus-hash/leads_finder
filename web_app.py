@@ -36,7 +36,7 @@ from src.scrapers import (
     IndeedScraper, YelpScraper, LinkedInScraper, GoogleMapsScraper, FacebookScraper,
     YellowPagesScraper, BBBScraper, CraigslistScraper, GoogleMapsWebScraper
 )
-from src.filters import AILeadFilter
+from src.filters import AILeadFilter, GeminiBusinessAnalyzer
 from src.crm import HubSpotCRM, LeadStage
 from src.sheets import GoogleSheetsSync
 
@@ -4458,7 +4458,7 @@ def render_sidebar():
         st.markdown(f'<div class="nav-label">{nav_label}</div>', unsafe_allow_html=True)
 
         # Navigation
-        pages = ["Dashboard", "Find Leads", "My Leads", "Lead Warming", "CRM", "Analytics", "AI Assistant", "Settings"]
+        pages = ["Dashboard", "Find Leads", "Spreadsheet", "My Leads", "Lead Warming", "CRM", "Analytics", "AI Assistant", "Settings"]
         current_index = pages.index(st.session_state.nav_page) if st.session_state.nav_page in pages else 0
 
         page = st.radio(
@@ -5193,6 +5193,26 @@ def show_search():
                 except Exception as e:
                     with results:
                         st.warning(f"AI qualification error: {str(e)[:50]} - Continuing with all leads")
+
+            # GEMINI BUSINESS ANALYSIS (software needs detection)
+            if settings.gemini_api_key and all_leads:
+                gmaps_leads = [l for l in all_leads if l.source.value == 'google_maps']
+                if gmaps_leads:
+                    status.markdown("""
+                    <div class="loading-box">
+                        <div class="spinner"></div>
+                        <span class="loading-text">Gemini analyzing businesses for software needs...</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    try:
+                        analyzer = GeminiBusinessAnalyzer()
+                        analyzer.analyze_leads(gmaps_leads)
+                        analyzed = len([l for l in gmaps_leads if l.software_needs and l.software_needs != "Analysis unavailable"])
+                        with results:
+                            st.success(f"Gemini analyzed {analyzed} businesses for software needs")
+                    except Exception as e:
+                        with results:
+                            st.warning(f"Gemini analysis: {str(e)[:50]}")
 
             # ALL leads go to filtered_leads (qualified AND non-qualified)
             st.session_state.filtered_leads = all_leads
@@ -10380,6 +10400,222 @@ def show_lead_warming():
             st.rerun()
 
 
+def show_spreadsheet():
+    """Business Database Spreadsheet - Clean table of businesses with Gemini analysis."""
+    st.title("Business Database")
+    st.caption("Search businesses by location and type. Gemini analyzes each one for software needs.")
+
+    st.divider()
+
+    # Search form
+    col1, col2 = st.columns(2)
+    with col1:
+        sp_city = st.text_input("City", placeholder="Miami, Houston, Los Angeles...", key="sp_city")
+    with col2:
+        us_states = [
+            "All States", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+            "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+            "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+            "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+            "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+        ]
+        sp_state = st.selectbox("State", us_states, key="sp_state")
+
+    sp_business = st.text_input(
+        "Business Type",
+        placeholder="dentist, plumber, lawyer, restaurant, tattoo shop...",
+        key="sp_business"
+    )
+
+    if not sp_business:
+        st.info("Enter a business type to start searching.")
+        return
+
+    # Build location
+    location_parts = []
+    if sp_city:
+        location_parts.append(sp_city.strip())
+    if sp_state and sp_state != "All States":
+        location_parts.append(sp_state)
+    sp_location = ", ".join(location_parts) if location_parts else ""
+
+    # Gemini toggle
+    gemini_available = bool(settings.gemini_api_key)
+    use_gemini = st.checkbox(
+        "Analyze with Gemini (detect software needs per business)",
+        value=gemini_available,
+        key="sp_gemini"
+    )
+    if use_gemini and not gemini_available:
+        st.warning("Gemini API key not configured. Add GEMINI_API_KEY in Settings.")
+        use_gemini = False
+
+    st.divider()
+
+    if st.button("Search Businesses", type="primary", use_container_width=True, key="sp_search_btn"):
+        progress = st.progress(0)
+        status = st.empty()
+
+        # Step 1: Scrape Google Maps
+        status.info("Searching businesses on Google Maps...")
+        try:
+            with GoogleMapsWebScraper() as scraper:
+                kwargs = {}
+                if sp_location:
+                    kwargs["location"] = sp_location
+                if sp_business:
+                    kwargs["category"] = sp_business.strip()
+                batch = scraper.scrape(**kwargs)
+                leads = batch.leads
+        except Exception as e:
+            st.error(f"Search error: {str(e)[:100]}")
+            return
+
+        progress.progress(0.4)
+
+        if not leads:
+            st.warning("No businesses found. Try a different location or business type.")
+            return
+
+        status.info(f"Found {len(leads)} businesses. Extracting emails...")
+        progress.progress(0.5)
+
+        # Step 2: Gemini analysis
+        if use_gemini and leads:
+            status.info(f"Gemini is analyzing {len(leads)} businesses for software needs...")
+            try:
+                analyzer = GeminiBusinessAnalyzer()
+                def update_progress(current, total):
+                    pct = 0.5 + (current / total) * 0.4
+                    progress.progress(min(pct, 0.9))
+                leads = analyzer.analyze_leads(leads, progress_callback=update_progress)
+            except Exception as e:
+                st.warning(f"Gemini analysis error: {str(e)[:80]}. Showing results without analysis.")
+
+        progress.progress(0.95)
+
+        # Step 3: Auto-sync to Google Sheets
+        sheets_sync = GoogleSheetsSync()
+        if sheets_sync.is_configured():
+            status.info("Sending leads to Google Sheets...")
+            try:
+                with sheets_sync:
+                    sheets_sync.add_leads(leads)
+                stats = sheets_sync.get_stats()
+                if stats['total_sent'] > 0:
+                    st.success(f"Google Sheets: {stats['total_sent']} leads sent")
+            except Exception as e:
+                st.warning(f"Sheets sync: {str(e)[:50]}")
+
+        # Step 4: Auto-sync to HubSpot
+        with HubSpotCRM() as crm:
+            if crm.is_configured():
+                status.info("Syncing to HubSpot...")
+                synced = 0
+                for lead in leads:
+                    try:
+                        result = crm.create_contact(lead)
+                        if result:
+                            synced += 1
+                    except Exception:
+                        pass
+                if synced > 0:
+                    st.success(f"HubSpot: {synced} leads synced")
+
+        progress.progress(1.0)
+        status.empty()
+
+        # Save to session
+        st.session_state.spreadsheet_leads = leads
+
+        # Summary
+        emails_found = len([l for l in leads if l.email])
+        analyzed = len([l for l in leads if l.software_needs and l.software_needs not in ("Analysis unavailable", "Analysis format error")])
+        st.success(f"Found {len(leads)} businesses | {emails_found} with email | {analyzed} analyzed by Gemini")
+
+    # Display results as spreadsheet
+    leads = st.session_state.get('spreadsheet_leads', [])
+    if not leads:
+        return
+
+    st.divider()
+    st.subheader(f"Results: {len(leads)} businesses")
+
+    # Build dataframe
+    rows = []
+    for lead in leads:
+        rows.append({
+            "Date": lead.found_at.strftime("%Y-%m-%d") if lead.found_at else "",
+            "Business Name": lead.company or lead.title or "",
+            "Industry": lead.industry or "",
+            "Email": lead.email or "",
+            "Phone": lead.phone or "",
+            "Address": lead.address or (lead.extra_data.get('address', '') if lead.extra_data else ''),
+            "Website": lead.website or "",
+            "Rating": lead.rating or (lead.extra_data.get('rating', '') if lead.extra_data else ''),
+            "Software Needs": lead.software_needs or "Not analyzed",
+            "Gemini Analysis": lead.gemini_analysis or "",
+            "Has Website": "Yes" if lead.has_website else ("No" if lead.has_website is False else "?"),
+            "Has Social Media": "Yes" if lead.has_social_media else ("No" if lead.has_social_media is False else "?"),
+        })
+
+    df = pd.DataFrame(rows)
+
+    # Filters
+    filter_col1, filter_col2 = st.columns(2)
+    with filter_col1:
+        show_with_email = st.checkbox("Only with email", value=False, key="sp_filter_email")
+    with filter_col2:
+        show_analyzed = st.checkbox("Only Gemini analyzed", value=False, key="sp_filter_analyzed")
+
+    if show_with_email:
+        df = df[df["Email"] != ""]
+    if show_analyzed:
+        df = df[~df["Software Needs"].isin(["Not analyzed", "Analysis unavailable", "Analysis format error", ""])]
+
+    st.markdown(f"**Showing {len(df)} of {len(rows)} businesses**")
+
+    # Display as editable dataframe (spreadsheet style)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        height=600,
+        column_config={
+            "Date": st.column_config.TextColumn("Date", width="small"),
+            "Business Name": st.column_config.TextColumn("Business", width="medium"),
+            "Industry": st.column_config.TextColumn("Industry", width="small"),
+            "Email": st.column_config.TextColumn("Email", width="medium"),
+            "Phone": st.column_config.TextColumn("Phone", width="small"),
+            "Address": st.column_config.TextColumn("Address", width="medium"),
+            "Website": st.column_config.LinkColumn("Website", width="medium"),
+            "Rating": st.column_config.TextColumn("Rating", width="small"),
+            "Software Needs": st.column_config.TextColumn("Software Needs", width="large"),
+            "Gemini Analysis": st.column_config.TextColumn("Analysis", width="large"),
+            "Has Website": st.column_config.TextColumn("Web?", width="small"),
+            "Has Social Media": st.column_config.TextColumn("Social?", width="small"),
+        }
+    )
+
+    # Export buttons
+    st.divider()
+    export_col1, export_col2 = st.columns(2)
+    with export_col1:
+        csv_data = df.to_csv(index=False)
+        st.download_button(
+            "Download CSV",
+            data=csv_data,
+            file_name=f"businesses_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+            mime="text/csv",
+            use_container_width=True,
+            type="primary"
+        )
+    with export_col2:
+        # Save to lead storage
+        if st.button("Save to Database", use_container_width=True, key="sp_save_btn"):
+            saved = lead_manager.save_leads(leads)
+            st.success(f"Saved {saved} leads to database")
+
+
 def main():
     render_sidebar()
 
@@ -10395,6 +10631,8 @@ def main():
         show_dashboard()
     elif page == "Find Leads":
         show_search()
+    elif page == "Spreadsheet":
+        show_spreadsheet()
     elif page == "My Leads":
         show_leads()
     elif page == "Lead Warming":
