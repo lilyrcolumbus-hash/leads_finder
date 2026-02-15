@@ -2215,12 +2215,9 @@ st.markdown("""
         letter-spacing: 0.02em;
     }
 
-    .lead-source-badge.reddit { background: #FF45000D; color: #FF4500; border: 1px solid #FF450033; }
-    .lead-source-badge.hackernews { background: #FF66000D; color: #FF6600; border: 1px solid #FF660033; }
-    .lead-source-badge.google { background: #4285F40D; color: #4285F4; border: 1px solid #4285F433; }
-    .lead-source-badge.indeed { background: #2164F30D; color: #2164F3; border: 1px solid #2164F333; }
+    .lead-source-badge.maps { background: #4285F40D; color: #4285F4; border: 1px solid #4285F433; }
     .lead-source-badge.yelp { background: #D324150D; color: #D32415; border: 1px solid #D3241533; }
-    .lead-source-badge.maps { background: #34A8530D; color: #34A853; border: 1px solid #34A85333; }
+    .lead-source-badge.google { background: #F59E0B0D; color: #F59E0B; border: 1px solid #F59E0B33; }
 
     /* Pain detection badges for Google Maps leads */
     .lead-pain-badge {
@@ -5518,21 +5515,16 @@ def show_search():
 
             # Determine source badge class
             source_value = lead.source.value.lower()
-            source_class = "reddit" if "reddit" in source_value else \
-                          "hackernews" if "hacker" in source_value else \
-                          "google" if "google" in source_value else \
-                          "indeed" if "indeed" in source_value else \
+            source_class = "maps" if "maps" in source_value else \
                           "yelp" if "yelp" in source_value else \
-                          "maps" if "maps" in source_value else "google"
+                          "google" if "google" in source_value else \
+                          "maps"
 
             # Source icons
             source_icons = {
-                "reddit": "🔴",
-                "hackernews": "🟠",
-                "google": "🔵",
-                "indeed": "💼",
+                "maps": "📍",
                 "yelp": "⭐",
-                "maps": "📍"
+                "google": "📒",
             }
             source_icon = source_icons.get(source_class, "🌐")
 
@@ -6604,16 +6596,12 @@ def show_analytics():
                 source_name = l.source.value if hasattr(l.source, 'value') else str(l.source)
                 source_counts[source_name] = source_counts.get(source_name, 0) + 1
 
-            # Source styling
+            # Source styling - only active sources
             source_colors = {
-                'reddit': ('#FF4500', '🔴'),
-                'google': ('#4285F4', '🔵'),
-                'hackernews': ('#FF6600', '🟠'),
-                'apollo': ('#5B5FC7', '🚀'),
-                'hunter': ('#F5A623', '🎯'),
-                'manual': ('#6B7280', '✏️'),
-                'producthunt': ('#DA552F', '🟤'),
-                'linkedin': ('#0A66C2', '🔷')
+                'google_maps': ('#4285F4', '📍', 'Google Maps'),
+                'yelp': ('#D32323', '⭐', 'Yelp'),
+                'yellow_pages': ('#F59E0B', '📒', 'Yellow Pages'),
+                'bbb': ('#16A34A', '🏢', 'BBB'),
             }
 
             # Build modern bar chart
@@ -6621,15 +6609,16 @@ def show_analytics():
             chart_html = '<div style="background: linear-gradient(135deg, rgba(35, 30, 25, 0.95) 0%, rgba(25, 22, 18, 0.98) 100%); border: 1px solid rgba(232, 93, 4, 0.2); border-radius: 16px; padding: 24px;">'
 
             for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
-                color, icon = source_colors.get(source.lower(), ('#6B7280', '📊'))
+                source_info = source_colors.get(source.lower(), ('#6B7280', '📊', source.replace('_', ' ').title()))
+                color, icon, display_name = source_info
                 width_pct = (count / max_count * 100) if max_count > 0 else 0
                 pct_of_total = (count / total_leads * 100) if total_leads > 0 else 0
 
                 chart_html += f"""
                 <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                    <div style="width: 120px; display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 140px; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 20px;">{icon}</span>
-                        <span style="font-size: 14px; font-weight: 600; color: #E8DFD5; text-transform: capitalize;">{source}</span>
+                        <span style="font-size: 14px; font-weight: 600; color: #E8DFD5;">{display_name}</span>
                     </div>
                     <div style="flex: 1; margin: 0 20px;">
                         <div style="background: rgba(60, 50, 40, 0.5); border-radius: 8px; height: 28px; overflow: hidden;">
