@@ -5117,6 +5117,45 @@ def show_search():
 
                 progress.progress((i + 1) / len(scrapers))
 
+            # Post-scrape location filtering: remove leads that don't match user's location
+            if search_location:
+                location_parts_lower = [p.strip().lower() for p in search_location.split(",")]
+                city_lower = location_parts_lower[0] if location_parts_lower else ""
+                state_lower = location_parts_lower[1].strip() if len(location_parts_lower) > 1 else ""
+
+                def lead_matches_location(lead):
+                    """Check if lead's address/location matches the searched location."""
+                    # Check address and location fields
+                    check_fields = []
+                    if lead.address:
+                        check_fields.append(lead.address.lower())
+                    if lead.location:
+                        check_fields.append(lead.location.lower())
+                    if lead.title:
+                        check_fields.append(lead.title.lower())
+
+                    if not check_fields:
+                        return True  # Keep leads with no location data (can't verify)
+
+                    combined = " ".join(check_fields)
+                    # Match city name
+                    if city_lower and city_lower in combined:
+                        return True
+                    # Match state abbreviation
+                    if state_lower and state_lower in combined:
+                        return True
+                    # No location data found in lead - keep it (benefit of the doubt)
+                    if not lead.address and not lead.location:
+                        return True
+                    return False
+
+                before_count = len(all_leads)
+                all_leads = [l for l in all_leads if lead_matches_location(l)]
+                filtered_out = before_count - len(all_leads)
+                if filtered_out > 0:
+                    with results:
+                        st.info(f"Filtered out {filtered_out} leads outside of {search_location}")
+
             # Enrich leads with Pain Score and Industry
             status.markdown("""
             <div class="loading-box">
@@ -5145,7 +5184,24 @@ def show_search():
             # Filter by industry if selected
             if selected_industry != "All Industries":
                 industry_subreddits = settings.industries.get(selected_industry, [])
-                all_leads = [l for l in all_leads if l.subreddit and l.subreddit.lower() in [s.lower() for s in industry_subreddits] or l.industry == selected_industry]
+                selected_industry_lower = selected_industry.lower()
+
+                def matches_industry(lead):
+                    # Check subreddit match (for Reddit-based leads)
+                    if lead.subreddit and industry_subreddits:
+                        if lead.subreddit.lower() in [s.lower() for s in industry_subreddits]:
+                            return True
+                    # Check detected industry (case-insensitive, partial match)
+                    if lead.industry:
+                        lead_industry_lower = lead.industry.lower()
+                        if lead_industry_lower == selected_industry_lower:
+                            return True
+                        # Partial match: "Electrical" matches "Electrical Services"
+                        if selected_industry_lower in lead_industry_lower or lead_industry_lower in selected_industry_lower:
+                            return True
+                    return False
+
+                all_leads = [l for l in all_leads if matches_industry(l)]
 
             st.session_state.leads = all_leads
             st.session_state.raw_leads = all_leads.copy()  # Store raw leads before AI filter
@@ -5488,7 +5544,7 @@ def show_search():
                 else:
                     pain_badge_html = '<span class="lead-pain-badge no-pain">🟢 No Pain</span>'
 
-            # AI qualification badge
+            # AI qualification badge - only show when real AI was used (ai_score is set)
             ai_badge_html = ""
             if getattr(lead, 'ai_score', None) is not None:
                 ai_pct = f"{lead.ai_score:.0%}"
@@ -5496,6 +5552,11 @@ def show_search():
                     ai_badge_html = f'<span style="background: #D1FAE5; color: #065F46; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🤖 AI: {ai_pct}</span>'
                 else:
                     ai_badge_html = f'<span style="background: #FEE2E2; color: #991B1B; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🤖 AI: {ai_pct}</span>'
+            else:
+                # No AI - show keyword-based badge instead
+                kw_count = len(lead.keywords_matched) if lead.keywords_matched else 0
+                if kw_count > 0:
+                    ai_badge_html = f'<span style="background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🔑 {kw_count} keywords</span>'
 
             # Escape ALL user-generated text to prevent HTML breakage
             safe_title = html_module.escape(lead.title[:80]) + ('...' if len(lead.title) > 80 else '')
@@ -5514,10 +5575,17 @@ def show_search():
             if len(lead.content) > 300:
                 content_preview += "..."
 
-            # Build the modern lead card HTML
+            # Build industry tag separately to avoid nested f-string issues
+            industry_tag_html = f'<span class="lead-industry-tag">🏭 {safe_industry}</span>' if safe_industry else ''
+
+            # Build keywords section separately
+            keywords_section_html = ""
+            if keywords_html:
+                keywords_section_html = f'<div class="lead-keywords-section"><div class="lead-keywords-title">Matched Keywords</div><div>{keywords_html}</div></div>'
+
+            # Build the modern lead card HTML (no HTML comments - they break Streamlit rendering)
             st.markdown(f"""
             <div class="lead-card">
-                <!-- Card Header -->
                 <div class="lead-card-header">
                     <div class="lead-card-grade" style="background: {grade_bg}; border: 2px solid {grade_color}; color: {grade_color};">
                         {total_score}
@@ -5528,14 +5596,11 @@ def show_search():
                             <span class="lead-source-badge {source_class}">{source_icon} {safe_source}</span>
                             {ai_badge_html}
                             {pain_badge_html}
-                            {f'<span class="lead-industry-tag">🏭 {safe_industry}</span>' if safe_industry else ''}
+                            {industry_tag_html}
                         </div>
                     </div>
                 </div>
-
-                <!-- Card Body -->
                 <div class="lead-card-body">
-                    <!-- Triple Score Row -->
                     <div class="lead-scores-row">
                         <div class="lead-score-mini pain">
                             <div class="lead-score-mini-icon">😣</div>
@@ -5553,20 +5618,11 @@ def show_search():
                             <div class="lead-score-mini-label">Fit</div>
                         </div>
                     </div>
-
-                    <!-- Keywords Section -->
-                    {f'''<div class="lead-keywords-section">
-                        <div class="lead-keywords-title">Matched Keywords</div>
-                        <div>{keywords_html}</div>
-                    </div>''' if keywords_html else ''}
-
-                    <!-- Content Preview -->
+                    {keywords_section_html}
                     <div class="lead-content-preview">
                         <p class="lead-content-text">{content_preview}</p>
                     </div>
                 </div>
-
-                <!-- Card Footer -->
                 <div class="lead-card-footer">
                     <div class="lead-action-text" style="color: {grade_color};">
                         <span>{grade_emoji}</span>
@@ -6120,7 +6176,12 @@ def show_leads():
                 industry_html = f'<span style="color: #6B7280; font-size: 13px;">🏢 {html.escape(lead.industry)}</span>' if lead.industry else ''
                 ai_score_display = f'{lead.ai_score:.0%}' if lead.ai_score else None
                 keywords_count = len(lead.keywords_matched) if lead.keywords_matched else 0
-                score_badge = f'🤖 AI: {ai_score_display}' if ai_score_display else f'🔑 {keywords_count} keywords'
+                if ai_score_display:
+                    score_badge = f'🤖 AI: {ai_score_display}'
+                    score_badge_bg = "#F97316"  # Orange for AI
+                else:
+                    score_badge = f'🔑 {keywords_count} keywords'
+                    score_badge_bg = "#6366F1"  # Indigo for keyword-based
 
                 # Build card HTML
                 st.markdown(f"""
@@ -6128,7 +6189,7 @@ def show_leads():
                     <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{score_badge}</span>
+                        <span style="background: {score_badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{score_badge}</span>
                         <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {html.escape(lead.source.value)}</span>
                         {industry_html}
                     </div>
@@ -6277,22 +6338,27 @@ def show_leads():
                 phone_display = html.escape(lead_dict.get('phone', 'No phone') or 'No phone')
                 industry = lead_dict.get('industry', '')
                 industry_html = f'<span style="color: #6B7280; font-size: 13px;">🏢 {html.escape(industry)}</span>' if industry else ''
-                source = lead_dict.get('source', 'unknown')
+                source = html.escape(lead_dict.get('source', 'unknown'))
                 pain_score = lead_dict.get('pain_score', 0)
                 ai_score = lead_dict.get('ai_score')
                 ai_score_display = f'{ai_score:.0%}' if ai_score else None
                 keywords_count = len(lead_dict.get('keywords_matched', []))
-                score_badge = f'🤖 AI: {ai_score_display}' if ai_score_display else f'🔑 {keywords_count} keywords'
-                url = lead_dict.get('url', '#')
+                if ai_score_display:
+                    score_badge = f'🤖 AI: {ai_score_display}'
+                    score_badge_bg = "#F97316"  # Orange for AI
+                else:
+                    score_badge = f'🔑 {keywords_count} keywords'
+                    score_badge_bg = "#6366F1"  # Indigo for keyword-based
+                url = html.escape(lead_dict.get('url', '#'))
                 saved_at = lead_dict.get('saved_at', '')[:10] if lead_dict.get('saved_at') else ''
-                saved_at_html = f'<span style="color: #9CA3AF; font-size: 12px;">📅 {saved_at}</span>' if saved_at else ''
+                saved_at_html = f'<span style="color: #9CA3AF; font-size: 12px;">📅 {html.escape(saved_at)}</span>' if saved_at else ''
 
                 st.markdown(f"""
                 <div style="background: {card_bg}; border: 2px solid {card_border}; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-family: Inter, -apple-system, sans-serif;">
                     <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{score_badge}</span>
+                        <span style="background: {score_badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{score_badge}</span>
                         <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {source}</span>
                         {industry_html}
                         {saved_at_html}
