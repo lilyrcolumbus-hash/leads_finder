@@ -5420,19 +5420,28 @@ def show_search():
 
     # Preview - Modern Lead Cards
     if st.session_state.scraping_done and st.session_state.filtered_leads:
+        # Sort: qualified leads first, then by ai_score descending
+        sorted_leads = sorted(
+            st.session_state.filtered_leads,
+            key=lambda l: (getattr(l, 'is_qualified', False), getattr(l, 'ai_score', 0) or 0),
+            reverse=True
+        )
+        qualified_total = len([l for l in sorted_leads if getattr(l, 'is_qualified', False)])
+        total_leads = len(sorted_leads)
+
         # Results section header
         st.markdown(f"""
         <div class="results-section-header">
             <div class="results-section-title">
-                <h2>Qualified Leads</h2>
-                <span class="results-count-badge">{len(st.session_state.filtered_leads)} leads found</span>
+                <h2>Search Results</h2>
+                <span class="results-count-badge">{qualified_total} qualified / {total_leads} total</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         import html as html_module
 
-        for lead in st.session_state.filtered_leads[:20]:
+        for lead in sorted_leads[:20]:
             # Get lead grade based on total score
             total_score = getattr(lead, 'total_score', lead.pain_score) or lead.pain_score
             pain_score = lead.pain_score or 0
@@ -5473,6 +5482,15 @@ def show_search():
                 else:
                     pain_badge_html = '<span class="lead-pain-badge no-pain">🟢 No Pain</span>'
 
+            # AI qualification badge
+            ai_badge_html = ""
+            if getattr(lead, 'ai_score', None) is not None:
+                ai_pct = f"{lead.ai_score:.0%}"
+                if getattr(lead, 'is_qualified', False):
+                    ai_badge_html = f'<span style="background: #D1FAE5; color: #065F46; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🤖 AI: {ai_pct}</span>'
+                else:
+                    ai_badge_html = f'<span style="background: #FEE2E2; color: #991B1B; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🤖 AI: {ai_pct}</span>'
+
             # Escape ALL user-generated text to prevent HTML breakage
             safe_title = html_module.escape(lead.title[:80]) + ('...' if len(lead.title) > 80 else '')
             safe_industry = html_module.escape(lead.industry) if lead.industry else ''
@@ -5502,6 +5520,7 @@ def show_search():
                         <h3 class="lead-card-title">{safe_title}</h3>
                         <div class="lead-card-meta">
                             <span class="lead-source-badge {source_class}">{source_icon} {safe_source}</span>
+                            {ai_badge_html}
                             {pain_badge_html}
                             {f'<span class="lead-industry-tag">🏭 {safe_industry}</span>' if safe_industry else ''}
                         </div>
@@ -5592,8 +5611,8 @@ def show_search():
         st.divider()
 
         raw_count = len(st.session_state.raw_leads)
-        filtered_count = len(st.session_state.filtered_leads)
-        rejected_count = raw_count - filtered_count
+        qualified_count = len([l for l in st.session_state.filtered_leads if getattr(l, 'is_qualified', False)])
+        rejected_count = raw_count - qualified_count
 
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
@@ -5601,8 +5620,8 @@ def show_search():
             <h3 style="margin: 0 0 8px 0; color: #92400E;">📋 Review All Results</h3>
             <p style="margin: 0; color: #78350F;">
                 Found <strong>{raw_count}</strong> total leads |
-                AI Qualified: <strong>{filtered_count}</strong> |
-                Rejected: <strong>{rejected_count}</strong>
+                AI Qualified: <strong>{qualified_count}</strong> |
+                Not Qualified: <strong>{rejected_count}</strong>
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -5611,7 +5630,7 @@ def show_search():
             st.info("These are ALL leads found, including those rejected by AI. Review manually to ensure nothing was missed.")
 
             for i, lead in enumerate(st.session_state.raw_leads):
-                is_qualified = lead in st.session_state.filtered_leads
+                is_qualified = getattr(lead, 'is_qualified', False)
                 status_icon = "✅" if is_qualified else "❌"
                 status_text = "AI Qualified" if is_qualified else "AI Rejected"
 
@@ -5624,7 +5643,7 @@ def show_search():
                                     border-radius: 8px; border-left: 3px solid {'#10B981' if is_qualified else '#EF4444'};">
                             <strong>{status_icon} {safe_t}</strong><br>
                             <small style="color: #6B7280;">
-                                Source: {html_module.escape(lead.source.value)} | Score: {lead.pain_score} | {status_text}
+                                Source: {html_module.escape(lead.source.value)} | AI Score: {f'{lead.ai_score:.0%}' if lead.ai_score is not None else 'N/A'} | {status_text}
                             </small>
                         </div>
                         """, unsafe_allow_html=True)
@@ -6101,7 +6120,7 @@ def show_leads():
                     <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">Score: {lead.pain_score}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">🤖 AI Score: {ai_score_display}</span>
                         <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {html.escape(lead.source.value)}</span>
                         {industry_html}
                     </div>
@@ -6109,7 +6128,6 @@ def show_leads():
                         <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📧 {html.escape(email_display)}</span>
                         <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📱 {html.escape(phone_display)}</span>
                         <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">🔑 {keywords_count} keywords</span>
-                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">🤖 AI: {ai_score_display}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -6264,7 +6282,7 @@ def show_leads():
                     <h3 style="margin: 0 0 8px 0; color: #1F2937; font-size: 18px; font-weight: 700; font-family: Inter, -apple-system, sans-serif;">{title_display}</h3>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
-                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">Score: {pain_score}</span>
+                        <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">🤖 AI Score: {ai_score_display}</span>
                         <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {source}</span>
                         {industry_html}
                         {saved_at_html}
@@ -6272,7 +6290,6 @@ def show_leads():
                     <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
                         <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📧 {email_display}</span>
                         <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">📱 {phone_display}</span>
-                        <span style="color: #374151; font-size: 14px; font-family: Inter, sans-serif;">🤖 AI: {ai_score_display}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
