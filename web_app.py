@@ -5449,6 +5449,8 @@ def show_search():
         </div>
         """, unsafe_allow_html=True)
 
+        import html as html_module
+
         for lead in st.session_state.filtered_leads[:5]:
             # Get lead grade based on total score
             total_score = getattr(lead, 'total_score', lead.pain_score) or lead.pain_score
@@ -5490,13 +5492,20 @@ def show_search():
                 else:
                     pain_badge_html = '<span class="lead-pain-badge no-pain">🟢 No Pain</span>'
 
-            # Keywords tags HTML
+            # Escape ALL user-generated text to prevent HTML breakage
+            safe_title = html_module.escape(lead.title[:80]) + ('...' if len(lead.title) > 80 else '')
+            safe_industry = html_module.escape(lead.industry) if lead.industry else ''
+            safe_source = html_module.escape(lead.source.value)
+            safe_action = html_module.escape(grade.get('action', ''))
+            safe_url = html_module.escape(lead.url)
+
+            # Keywords tags HTML (escape each keyword)
             keywords_html = ""
             if lead.keywords_matched:
-                keywords_html = "".join([f'<span class="lead-keyword-tag">{kw}</span>' for kw in lead.keywords_matched[:5]])
+                keywords_html = "".join([f'<span class="lead-keyword-tag">{html_module.escape(kw)}</span>' for kw in lead.keywords_matched[:5]])
 
             # Clean content for preview
-            content_preview = lead.content[:300].replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+            content_preview = html_module.escape(lead.content[:300])
             if len(lead.content) > 300:
                 content_preview += "..."
 
@@ -5509,11 +5518,11 @@ def show_search():
                         {total_score}
                     </div>
                     <div class="lead-card-title-area">
-                        <h3 class="lead-card-title">{lead.title[:80]}{'...' if len(lead.title) > 80 else ''}</h3>
+                        <h3 class="lead-card-title">{safe_title}</h3>
                         <div class="lead-card-meta">
-                            <span class="lead-source-badge {source_class}">{source_icon} {lead.source.value}</span>
+                            <span class="lead-source-badge {source_class}">{source_icon} {safe_source}</span>
                             {pain_badge_html}
-                            {f'<span class="lead-industry-tag">🏭 {lead.industry}</span>' if lead.industry else ''}
+                            {f'<span class="lead-industry-tag">🏭 {safe_industry}</span>' if safe_industry else ''}
                         </div>
                     </div>
                 </div>
@@ -5555,9 +5564,9 @@ def show_search():
                 <div class="lead-card-footer">
                     <div class="lead-action-text" style="color: {grade_color};">
                         <span>{grade_emoji}</span>
-                        <span>{grade['action']}</span>
+                        <span>{safe_action}</span>
                     </div>
-                    <a href="{lead.url}" target="_blank" class="lead-view-btn">
+                    <a href="{safe_url}" target="_blank" class="lead-view-btn">
                         View Original ↗
                     </a>
                 </div>
@@ -5628,12 +5637,13 @@ def show_search():
                 with st.container():
                     col1, col2 = st.columns([4, 1])
                     with col1:
+                        safe_t = html_module.escape(lead.title[:70]) + ('...' if len(lead.title) > 70 else '')
                         st.markdown(f"""
                         <div style="padding: 8px; margin: 4px 0; background: {'#D1FAE5' if is_qualified else '#FEE2E2'};
                                     border-radius: 8px; border-left: 3px solid {'#10B981' if is_qualified else '#EF4444'};">
-                            <strong>{status_icon} {lead.title[:70]}{'...' if len(lead.title) > 70 else ''}</strong><br>
+                            <strong>{status_icon} {safe_t}</strong><br>
                             <small style="color: #6B7280;">
-                                Source: {lead.source.value} | Score: {lead.pain_score} | {status_text}
+                                Source: {html_module.escape(lead.source.value)} | Score: {lead.pain_score} | {status_text}
                             </small>
                         </div>
                         """, unsafe_allow_html=True)
@@ -6111,7 +6121,7 @@ def show_leads():
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;">
                         <span style="background: {badge_bg}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">{category_badge}</span>
                         <span style="background: #F97316; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;">Score: {lead.pain_score}</span>
-                        <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {lead.source.value}</span>
+                        <span style="color: #6B7280; font-size: 13px; font-family: Inter, sans-serif;">📂 {html.escape(lead.source.value)}</span>
                         {industry_html}
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
