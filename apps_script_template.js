@@ -17,8 +17,12 @@
  * 9. Paste the URL in your .env as GOOGLE_SHEETS_WEBHOOK_URL
  */
 
-// Column headers (must match first row of your sheet)
-var HEADERS = ["Nombre", "Email", "Telefono", "Empresa", "Fuente", "URL", "AI Score", "Fecha"];
+// Column headers (must match the data sent from the Python app)
+var HEADERS = [
+  "Nombre", "Email", "Telefono", "Empresa", "Website", "Direccion",
+  "Industria", "Rating", "Fuente", "URL", "Pain Score", "AI Score",
+  "Software Needs", "Gemini Analysis", "Has Website", "Has Social Media", "Fecha"
+];
 
 function doPost(e) {
   try {
@@ -27,8 +31,9 @@ function doPost(e) {
     // Create headers if sheet is empty
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(HEADERS);
-      // Bold headers
+      // Bold headers and freeze first row
       sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
+      sheet.setFrozenRows(1);
     }
 
     var data = JSON.parse(e.postData.contents);
@@ -42,9 +47,18 @@ function doPost(e) {
         lead.email || "",
         lead.telefono || "",
         lead.empresa || "",
+        lead.website || "",
+        lead.direccion || "",
+        lead.industria || "",
+        lead.rating || "",
         lead.fuente || "",
         lead.url || "",
+        lead.pain_score || "",
         lead.ai_score || 0,
+        lead.software_needs || "",
+        lead.gemini_analysis || "",
+        lead.has_website || "",
+        lead.has_social_media || "",
         new Date().toLocaleString()
       ]);
       count++;

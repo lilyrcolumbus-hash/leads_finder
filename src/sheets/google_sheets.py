@@ -70,7 +70,8 @@ class GoogleSheetsSync:
         """Convert a Lead to a flat dict matching spreadsheet columns.
 
         Columns: Nombre, Email, Telefono, Empresa, Website, Direccion,
-                 Industria, Rating, Fuente, URL, Pain Score, AI Score
+                 Industria, Rating, Fuente, URL, Pain Score, AI Score,
+                 Software Needs, Gemini Analysis, Has Website, Has Social Media
         """
         name = lead.name or lead.company or lead.title or lead.username or ""
         email = lead.email or ""
@@ -91,6 +92,10 @@ class GoogleSheetsSync:
             "url": lead.url,
             "pain_score": lead.pain_score or "",
             "ai_score": round((lead.ai_score or 0) * 100),
+            "software_needs": lead.software_needs or "",
+            "gemini_analysis": lead.gemini_analysis or "",
+            "has_website": "Yes" if lead.has_website else ("No" if lead.has_website is False else ""),
+            "has_social_media": "Yes" if lead.has_social_media else ("No" if lead.has_social_media is False else ""),
         }
 
     def _has_contact_info(self, lead: Lead) -> bool:
