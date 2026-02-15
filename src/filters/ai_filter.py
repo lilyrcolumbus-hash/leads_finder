@@ -3,6 +3,8 @@
 import json
 from typing import List, Tuple
 
+import httpx
+
 from src.config import settings
 from src.utils.logger import get_logger
 from src.utils.models import Lead
@@ -50,19 +52,16 @@ Return a JSON array of these objects. Example:
         self.openai_client = None
         self.anthropic_client = None
         self.gemini_model = None
+        self.gemini_api_key = None
         self._init_clients()
 
     def _init_clients(self):
         """Initialize AI clients based on available API keys."""
-        # Try Gemini first (user's preferred)
+        # Try Gemini first (user's preferred) - uses REST API directly
         if settings.gemini_api_key:
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=settings.gemini_api_key)
-                self.gemini_model = genai.GenerativeModel('gemini-2.0-flash')
-                self.logger.info("Initialized Google Gemini client")
-            except Exception as e:
-                self.logger.warning(f"Failed to initialize Gemini: {e}")
+            self.gemini_api_key = settings.gemini_api_key
+            self.gemini_model = "gemini-2.0-flash"
+            self.logger.info("Initialized Google Gemini client (REST API)")
 
         if settings.openai_api_key:
             try:
@@ -188,11 +187,31 @@ Return a JSON array of these objects. Example:
         return self._parse_ai_response(response_text, leads)
 
     def _call_gemini(self, prompt: str) -> str | None:
-        """Call Google Gemini API."""
+        """Call Google Gemini API via REST (avoids gRPC SSL issues)."""
         try:
-            full_prompt = f"{self.SYSTEM_PROMPT}\n\n{prompt}"
-            response = self.gemini_model.generate_content(full_prompt)
-            return response.text
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.gemini_model}:generateContent"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": f"{self.SYSTEM_PROMPT}\n\n{prompt}"}
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.3,
+                    "maxOutputTokens": 4000
+                }
+            }
+            response = httpx.post(
+                url,
+                params={"key": self.gemini_api_key},
+                json=payload,
+                timeout=60
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
         except Exception as e:
             self.logger.error(f"Gemini API error: {e}")
             return None
