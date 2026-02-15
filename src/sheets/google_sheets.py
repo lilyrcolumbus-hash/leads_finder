@@ -3,6 +3,9 @@
 Sends leads to a Google Sheet by POSTing JSON data to a deployed
 Google Apps Script web app endpoint. Buffers leads and flushes
 every N leads (default 10).
+
+Sends ALL leads (with or without email) - local businesses often
+have phone numbers but no email, and those are still valuable contacts.
 """
 
 import time
@@ -66,9 +69,10 @@ class GoogleSheetsSync:
     def _lead_to_row(self, lead: Lead) -> Dict[str, Any]:
         """Convert a Lead to a flat dict matching spreadsheet columns.
 
-        Columns: Nombre, Email, Telefono, Empresa, Fuente, URL, AI Score
+        Columns: Nombre, Email, Telefono, Empresa, Website, Direccion,
+                 Industria, Rating, Fuente, URL, Pain Score, AI Score
         """
-        name = lead.name or lead.username or ""
+        name = lead.name or lead.company or lead.title or lead.username or ""
         email = lead.email or ""
         # Skip placeholder emails
         if email.endswith("@leadgen.placeholder"):
@@ -78,34 +82,40 @@ class GoogleSheetsSync:
             "nombre": name,
             "email": email,
             "telefono": lead.phone or "",
-            "empresa": lead.company or "",
+            "empresa": lead.company or lead.title or "",
+            "website": lead.website or "",
+            "direccion": lead.address or lead.location or "",
+            "industria": lead.industry or lead.business_type or "",
+            "rating": lead.rating or "",
             "fuente": lead.source.value,
             "url": lead.url,
+            "pain_score": lead.pain_score or "",
             "ai_score": round((lead.ai_score or 0) * 100),
         }
 
-    def _has_real_email(self, lead: Lead) -> bool:
-        """Check if lead has a real email (not empty, not placeholder)."""
-        if not lead.email:
-            return False
-        email = lead.email.strip()
-        if not email:
-            return False
-        if email.endswith("@leadgen.placeholder"):
-            return False
-        # Basic format check
-        return "@" in email and "." in email.split("@")[-1]
+    def _has_contact_info(self, lead: Lead) -> bool:
+        """Check if lead has any useful contact info (email, phone, or website)."""
+        if lead.email and not lead.email.endswith("@leadgen.placeholder"):
+            return True
+        if lead.phone:
+            return True
+        if lead.website:
+            return True
+        # Even if no contact info, the business name + address is useful
+        if lead.company or lead.title:
+            return True
+        return False
 
     def add_lead(self, lead: Lead) -> None:
-        """Add a lead to the buffer (only if it has a real email).
+        """Add a lead to the buffer.
 
-        Leads without a verified email are silently skipped.
+        Sends all leads that have any useful info (name, phone, email, website).
 
         Args:
             lead: Lead to buffer for sending.
         """
-        if not self._has_real_email(lead):
-            logger.debug(f"Skipped lead {lead.id} (no real email)")
+        if not self._has_contact_info(lead):
+            logger.debug(f"Skipped lead {lead.id} (no contact info at all)")
             return
 
         self._buffer.append(lead)
@@ -113,7 +123,7 @@ class GoogleSheetsSync:
             self.flush()
 
     def add_leads(self, leads: List[Lead]) -> None:
-        """Add multiple leads to the buffer (only those with real emails).
+        """Add multiple leads to the buffer.
 
         Args:
             leads: List of leads to buffer.
@@ -135,7 +145,7 @@ class GoogleSheetsSync:
         return result
 
     def send_leads(self, leads: List[Lead]) -> Dict[str, int]:
-        """Send a list of leads directly (no buffering). Only leads with real emails.
+        """Send a list of leads directly (no buffering).
 
         Args:
             leads: Leads to send immediately.
@@ -143,15 +153,15 @@ class GoogleSheetsSync:
         Returns:
             Dict with 'sent' and 'failed' counts.
         """
-        real_email_leads = [l for l in leads if self._has_real_email(l)]
-        skipped = len(leads) - len(real_email_leads)
+        valid_leads = [l for l in leads if self._has_contact_info(l)]
+        skipped = len(leads) - len(valid_leads)
         if skipped:
-            logger.info(f"Skipped {skipped} leads without real email")
+            logger.info(f"Skipped {skipped} leads without any contact info")
 
-        if not real_email_leads:
+        if not valid_leads:
             return {"sent": 0, "failed": 0}
 
-        return self._post_leads(real_email_leads)
+        return self._post_leads(valid_leads)
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
     def _post_leads(self, leads: List[Lead]) -> Dict[str, int]:
