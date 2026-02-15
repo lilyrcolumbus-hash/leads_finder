@@ -5091,8 +5091,11 @@ def show_search():
                         # Pass location and category to location-aware scrapers
                         if name == "Google Maps":
                             kwargs = {"time_filter": selected_time}
+                            # Always pass location if available
                             if search_location:
                                 kwargs["location"] = search_location
+                                with results:
+                                    st.info(f"Google Maps: Searching in **{search_location}**")
                             if custom_business_type:
                                 kwargs["category"] = custom_business_type.strip()
                             batch = s.scrape(**kwargs)

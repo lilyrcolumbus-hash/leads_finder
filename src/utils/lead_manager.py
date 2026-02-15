@@ -56,15 +56,20 @@ class LeadManager:
                 pass
 
     def deduplicate(self, leads: List[Lead]) -> List[Lead]:
-        """Remove duplicate leads based on URL, title, and author."""
+        """Remove duplicate leads within the current batch only.
+
+        Only removes duplicates within this session's results.
+        Does NOT compare against historical leads, so re-found
+        businesses always appear in results.
+        """
         unique_leads = []
         session_hashes = set()
 
         for lead in leads:
             lead_hash = self._generate_hash(lead)
 
-            # Skip if already seen in storage or this session
-            if lead_hash in self._seen_hashes or lead_hash in session_hashes:
+            # Only skip if duplicated within THIS session/batch
+            if lead_hash in session_hashes:
                 continue
 
             session_hashes.add(lead_hash)
@@ -1094,13 +1099,13 @@ class LeadManager:
             self.storage_path.unlink()
 
     def get_duplicate_count(self, leads: List[Lead]) -> int:
-        """Count how many leads are duplicates."""
+        """Count how many leads are duplicates within the current batch."""
         duplicates = 0
         session_hashes = set()
 
         for lead in leads:
             lead_hash = self._generate_hash(lead)
-            if lead_hash in self._seen_hashes or lead_hash in session_hashes:
+            if lead_hash in session_hashes:
                 duplicates += 1
             else:
                 session_hashes.add(lead_hash)

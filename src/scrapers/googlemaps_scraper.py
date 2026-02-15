@@ -97,10 +97,16 @@ class GoogleMapsScraper:
         all_leads = []
 
         # Determine locations to search
-        locations = [location] if location else self.default_cities[:3]
+        # Only use defaults if NO location was provided at all
+        if location and location.strip():
+            locations = [location.strip()]
+            logger.info(f"Google Maps: Using user location: '{location.strip()}'")
+        else:
+            locations = self.default_cities[:3]
+            logger.info(f"Google Maps: No location provided, using defaults: {locations}")
 
         # Determine categories to search
-        categories = [category] if category else self.business_categories[:4]
+        categories = [category.strip()] if category and category.strip() else self.business_categories[:4]
 
         logger.info(f"Google Maps Scraper: Searching {len(categories)} categories in {len(locations)} locations")
 
@@ -117,8 +123,8 @@ class GoogleMapsScraper:
         # Deduplicate by phone number or name
         unique_leads = self._deduplicate(all_leads)
 
-        # Try to find emails for businesses with websites
-        unique_leads = self._enrich_with_emails(unique_leads[:20])  # Limit to 20 for speed
+        # Try to find emails for businesses with websites (all of them)
+        unique_leads = self._enrich_with_emails(unique_leads)
 
         logger.info(f"Google Maps Scraper: Found {len(unique_leads)} unique businesses")
 
