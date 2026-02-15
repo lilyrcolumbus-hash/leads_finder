@@ -5,6 +5,8 @@ import re
 import json
 from typing import List
 from urllib.parse import quote
+
+import httpx
 from bs4 import BeautifulSoup
 
 from src.config import settings
@@ -105,7 +107,7 @@ class YellowPagesScraper(BaseScraper):
         url = f"https://www.yellowpages.com/{loc_formatted}/{search_term}"
 
         try:
-            response = self.session.get(url, headers=self.headers, timeout=15)
+            response = self.client.get(url, headers=self.headers, timeout=15.0, follow_redirects=True)
 
             if response.status_code != 200:
                 self.logger.debug(f"Yellow Pages returned {response.status_code}")
@@ -151,8 +153,10 @@ class YellowPagesScraper(BaseScraper):
                 if lead:
                     leads.append(lead)
 
+        except (httpx.TransportError, ConnectionError, OSError) as e:
+            self.logger.warning(f"Yellow Pages connection blocked for {business_type} in {location} (proxy/firewall restriction)")
         except Exception as e:
-            self.logger.debug(f"Yellow Pages search failed: {e}")
+            self.logger.warning(f"Yellow Pages search failed: {e}")
 
         return leads
 

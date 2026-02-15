@@ -3,6 +3,8 @@
 import time
 import re
 from typing import List
+
+import httpx
 from bs4 import BeautifulSoup
 
 from src.config import settings
@@ -98,7 +100,8 @@ class BBBScraper(BaseScraper):
         url = f"https://www.bbb.org/search?find_country=USA&find_loc={location}&find_text={business_type.replace(' ', '%20')}&page=1&touched=1"
 
         try:
-            response = self.fetch_url(url)
+            response = self.client.get(url, timeout=15.0, follow_redirects=True)
+            response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
 
             # Find business cards
@@ -115,8 +118,10 @@ class BBBScraper(BaseScraper):
                 if lead:
                     leads.append(lead)
 
+        except (httpx.TransportError, ConnectionError, OSError) as e:
+            self.logger.warning(f"BBB connection blocked for {business_type} in {location} (proxy/firewall restriction)")
         except Exception as e:
-            self.logger.debug(f"BBB search failed: {e}")
+            self.logger.warning(f"BBB search failed: {e}")
 
         return leads
 

@@ -171,6 +171,8 @@ class GoogleMapsScraper:
             json_leads = self._extract_from_jsonld(soup, category, location)
             leads.extend(json_leads)
 
+        except (ConnectionError, OSError) as e:
+            logger.warning(f"Google Maps connection blocked for '{category}' in {location} (proxy/firewall restriction)")
         except Exception as e:
             logger.error(f"Error fetching Google Maps: {e}")
 

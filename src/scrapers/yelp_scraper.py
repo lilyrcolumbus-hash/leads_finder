@@ -6,6 +6,7 @@ import json
 from typing import List
 from urllib.parse import quote
 
+import httpx
 from bs4 import BeautifulSoup
 
 from src.config import settings
@@ -96,7 +97,7 @@ class YelpScraper(BaseScraper):
             url = f"{self.BASE_URL}?find_desc={quote(category)}&find_loc={quote(location)}"
 
             try:
-                response = self.session.get(url, headers=self.headers, timeout=15)
+                response = self.client.get(url, headers=self.headers, timeout=15.0, follow_redirects=True)
 
                 if response.status_code != 200:
                     self.logger.debug(f"Yelp returned {response.status_code} for {category} in {location}")
@@ -116,8 +117,11 @@ class YelpScraper(BaseScraper):
 
                 time.sleep(1)
 
+            except (httpx.TransportError, ConnectionError, OSError) as e:
+                self.logger.warning(f"Yelp connection blocked for '{category}' in {location} (proxy/firewall restriction)")
+                break  # No point retrying other locations if network is blocked
             except Exception as e:
-                self.logger.debug(f"Yelp search failed for '{category}' in {location}: {e}")
+                self.logger.warning(f"Yelp search failed for '{category}' in {location}: {e}")
 
         return leads
 
