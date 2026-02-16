@@ -60,13 +60,13 @@ _MIGRATION_COLUMNS = [
 class LeadDatabase:
     """SQLite database for storing and managing leads locally."""
 
-    def __init__(self, db_path: Optional[Path] = None):
+    def __init__(self, db_path=None):
         """Initialize database connection.
 
         Args:
             db_path: Path to SQLite database file. Defaults to data/leads.db
         """
-        self.db_path = db_path or DEFAULT_DB_PATH
+        self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()
 
