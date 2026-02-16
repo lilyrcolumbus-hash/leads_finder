@@ -6,6 +6,7 @@ Modern, Clean, Professional Design
 Run with: streamlit run web_app.py
 """
 
+import html
 import sys
 from pathlib import Path
 
@@ -3938,16 +3939,6 @@ if 'is_loading' not in st.session_state:
 # VISUAL ENHANCEMENT HELPER FUNCTIONS
 # ============================================
 
-def show_toast(title: str, message: str, toast_type: str = "info"):
-    """Show a toast notification using JavaScript."""
-    st.markdown(f"""
-    <script>
-        if (typeof showToast === 'function') {{
-            showToast("{title}", "{message}", "{toast_type}");
-        }}
-    </script>
-    """, unsafe_allow_html=True)
-
 def add_activity(title: str, description: str, activity_type: str = "action"):
     """Add an activity to the timeline."""
     activity = {
@@ -3959,49 +3950,6 @@ def add_activity(title: str, description: str, activity_type: str = "action"):
     st.session_state.activity_timeline.insert(0, activity)
     # Keep only last 50 activities
     st.session_state.activity_timeline = st.session_state.activity_timeline[:50]
-
-def render_skeleton(skeleton_type: str = "card", count: int = 3):
-    """Render skeleton loading placeholders."""
-    skeletons = ""
-    for _ in range(count):
-        if skeleton_type == "card":
-            skeletons += '<div class="skeleton skeleton-card"></div>'
-        elif skeleton_type == "metric":
-            skeletons += '<div class="skeleton skeleton-metric"></div>'
-        elif skeleton_type == "text":
-            skeletons += '''
-                <div class="skeleton skeleton-text"></div>
-                <div class="skeleton skeleton-text medium"></div>
-                <div class="skeleton skeleton-text short"></div>
-            '''
-    st.markdown(f'<div class="skeleton-container">{skeletons}</div>', unsafe_allow_html=True)
-
-def render_view_toggle():
-    """Render the view mode toggle (expanded/compact)."""
-    current_mode = st.session_state.card_view_mode
-    expanded_active = "active" if current_mode == "expanded" else ""
-    compact_active = "active" if current_mode == "compact" else ""
-
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        toggle_col1, toggle_col2 = st.columns(2)
-        with toggle_col1:
-            if st.button("📋 Expanded", key="view_expanded", use_container_width=True):
-                st.session_state.card_view_mode = "expanded"
-                st.rerun()
-        with toggle_col2:
-            if st.button("📑 Compact", key="view_compact", use_container_width=True):
-                st.session_state.card_view_mode = "compact"
-                st.rerun()
-
-def render_theme_toggle():
-    """Render the dark/light theme toggle."""
-    is_dark = st.session_state.dark_mode
-    theme_label = "🌙 Dark Mode" if is_dark else "☀️ Light Mode"
-
-    if st.button(theme_label, key="theme_toggle"):
-        st.session_state.dark_mode = not is_dark
-        st.rerun()
 
 def render_kanban_board(leads: list):
     """Render a Kanban board with leads organized by stage."""
@@ -4017,8 +3965,8 @@ def render_kanban_board(leads: list):
     # Distribute leads to stages (simplified logic)
     for i, lead in enumerate(leads):
         stage_key = 'new'
-        if hasattr(lead, 'stage'):
-            stage_key = lead.stage.lower() if lead.stage.lower() in stages else 'new'
+        if hasattr(lead, 'status') and lead.status:
+            stage_key = lead.status.lower() if lead.status.lower() in stages else 'new'
         elif i % 6 == 0:
             stage_key = 'contacted'
         elif i % 6 == 1:
@@ -4104,54 +4052,6 @@ def render_animated_metric(label: str, value: int, prefix: str = "", suffix: str
             </div>
         </div>
     ''', unsafe_allow_html=True)
-
-def render_plotly_chart(chart_type: str, data: dict, title: str = ""):
-    """Render interactive Plotly charts."""
-    # Define holographic color scheme
-    colors = ['#E85D04', '#F48C06', '#00FF88', '#FFB800', '#FF3366', '#DC2F02']
-
-    fig = None
-
-    if chart_type == "pie":
-        fig = px.pie(
-            values=list(data.values()),
-            names=list(data.keys()),
-            color_discrete_sequence=colors,
-            hole=0.4
-        )
-    elif chart_type == "bar":
-        fig = px.bar(
-            x=list(data.keys()),
-            y=list(data.values()),
-            color_discrete_sequence=colors
-        )
-    elif chart_type == "line":
-        fig = px.line(
-            x=list(data.keys()),
-            y=list(data.values()),
-            markers=True
-        )
-        fig.update_traces(line_color='#E85D04')
-
-    if fig:
-        # Apply holographic styling
-        fig.update_layout(
-            title=title,
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family='Rajdhani', color='#E0F7FF'),
-            title_font=dict(family='Orbitron', size=16, color='#E85D04'),
-            legend=dict(
-                bgcolor='rgba(0,20,40,0.6)',
-                bordercolor='rgba(0,255,255,0.3)',
-                borderwidth=1
-            ),
-            margin=dict(l=20, r=20, t=40, b=20)
-        )
-        fig.update_xaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#E8DFD5'))
-        fig.update_yaxes(gridcolor='rgba(0,255,255,0.1)', tickfont=dict(color='#E8DFD5'))
-
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 def add_error_notification(title: str, message: str, error_type: str = "error", source: str = "System"):
     """Add an error notification to the queue.
@@ -5498,8 +5398,6 @@ def show_search():
         </div>
         """, unsafe_allow_html=True)
 
-        import html as html_module
-
         for lead in sorted_leads[:20]:
             # Get lead grade based on total score
             total_score = getattr(lead, 'total_score', lead.pain_score) or lead.pain_score
@@ -5551,19 +5449,19 @@ def show_search():
                     ai_badge_html = f'<span style="background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🔑 {kw_count} keywords</span>'
 
             # Escape ALL user-generated text to prevent HTML breakage
-            safe_title = html_module.escape(lead.title[:80]) + ('...' if len(lead.title) > 80 else '')
-            safe_industry = html_module.escape(lead.industry) if lead.industry else ''
-            safe_source = html_module.escape(lead.source.value)
-            safe_action = html_module.escape(grade.get('action', ''))
-            safe_url = html_module.escape(lead.url)
+            safe_title = html.escape(lead.title[:80]) + ('...' if len(lead.title) > 80 else '')
+            safe_industry = html.escape(lead.industry) if lead.industry else ''
+            safe_source = html.escape(lead.source.value)
+            safe_action = html.escape(grade.get('action', ''))
+            safe_url = html.escape(lead.url)
 
             # Keywords tags HTML (escape each keyword)
             keywords_html = ""
             if lead.keywords_matched:
-                keywords_html = "".join([f'<span class="lead-keyword-tag">{html_module.escape(kw)}</span>' for kw in lead.keywords_matched[:5]])
+                keywords_html = "".join([f'<span class="lead-keyword-tag">{html.escape(kw)}</span>' for kw in lead.keywords_matched[:5]])
 
             # Clean content for preview
-            content_preview = html_module.escape(lead.content[:300])
+            content_preview = html.escape(lead.content[:300])
             if len(lead.content) > 300:
                 content_preview += "..."
 
@@ -5692,13 +5590,13 @@ def show_search():
                 with st.container():
                     col1, col2 = st.columns([4, 1])
                     with col1:
-                        safe_t = html_module.escape(lead.title[:70]) + ('...' if len(lead.title) > 70 else '')
+                        safe_t = html.escape(lead.title[:70]) + ('...' if len(lead.title) > 70 else '')
                         st.markdown(f"""
                         <div style="padding: 8px; margin: 4px 0; background: {'#D1FAE5' if is_qualified else '#FEE2E2'};
                                     border-radius: 8px; border-left: 3px solid {'#10B981' if is_qualified else '#EF4444'};">
                             <strong>{status_icon} {safe_t}</strong><br>
                             <small style="color: #6B7280;">
-                                Source: {html_module.escape(lead.source.value)} | {f'AI: {lead.ai_score:.0%}' if lead.ai_score is not None else f'{len(lead.keywords_matched or [])} keywords'} | {status_text}
+                                Source: {html.escape(lead.source.value)} | {f'AI: {lead.ai_score:.0%}' if lead.ai_score is not None else f'{len(lead.keywords_matched or [])} keywords'} | {status_text}
                             </small>
                         </div>
                         """, unsafe_allow_html=True)
@@ -6180,7 +6078,6 @@ def show_leads():
                 phone_display = lead.phone if lead.phone else "No phone"
 
                 # Prepare display values (escape HTML in content)
-                import html
                 title_display = lead.title[:60] + '...' if len(lead.title) > 60 else lead.title
                 title_display = html.escape(title_display)
                 content_display = ""
@@ -6345,7 +6242,6 @@ def show_leads():
                     card_bg = "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)"
                     badge_bg = "#6B7280"
 
-                import html
                 title = lead_dict.get('title', 'No title')
                 title_display = html.escape(str(title)[:60] + '...' if len(str(title)) > 60 else str(title))
                 email_display = html.escape(lead_dict.get('email', 'No email') or 'No email')
@@ -7391,10 +7287,9 @@ Best regards'''
                 for idx, lead in enumerate(stage_leads[:8]):
                     lead_hash = lead.get('hash') or ''
                     # Safe string handling with HTML escaping
-                    import html as html_mod
-                    lead_title = html_mod.escape((lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown Lead')[:30])
-                    lead_company = html_mod.escape((lead.get('company') or '')[:20])
-                    lead_email = html_mod.escape(lead.get('email') or '')
+                    lead_title = html.escape((lead.get('title') or lead.get('author') or lead.get('company') or 'Unknown Lead')[:30])
+                    lead_company = html.escape((lead.get('company') or '')[:20])
+                    lead_email = html.escape(lead.get('email') or '')
                     pain_score = lead.get('pain_score') or 0
 
                     # Lead card

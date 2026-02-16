@@ -1,19 +1,60 @@
 """SQLite database for persisting leads locally."""
 
 import csv
+import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from contextlib import contextmanager
 
-from ..utils.models import Lead, LeadSource
-from ..utils.logger import setup_logger
+from ..utils.models import Lead, LeadSource, LeadUrgency, LeadCategory
+from ..utils.logger import get_logger
 
-logger = setup_logger("database")
+logger = get_logger("database")
 
 # Default database path
 DEFAULT_DB_PATH = Path(__file__).parent.parent.parent / "data" / "leads.db"
+
+# Columns that need migration (added after initial schema)
+_MIGRATION_COLUMNS = [
+    ("linkedin", "TEXT"),
+    ("twitter", "TEXT"),
+    ("position", "TEXT"),
+    ("author", "TEXT"),
+    ("employees", "TEXT"),
+    ("revenue", "TEXT"),
+    ("country", "TEXT"),
+    ("industry", "TEXT"),
+    ("pain_score", "REAL"),
+    ("intent_score", "REAL"),
+    ("fit_score", "REAL"),
+    ("total_score", "REAL"),
+    ("urgency", "TEXT"),
+    ("urgency_keywords_json", "TEXT"),
+    ("score_breakdown_json", "TEXT"),
+    ("address", "TEXT"),
+    ("review_count", "INTEGER"),
+    ("business_type", "TEXT"),
+    ("place_id", "TEXT"),
+    ("has_pain", "INTEGER DEFAULT 0"),
+    ("pain_reviews_json", "TEXT"),
+    ("pain_summary", "TEXT"),
+    ("lead_category", "TEXT"),
+    ("has_explicit_pain", "INTEGER DEFAULT 0"),
+    ("software_needs", "TEXT"),
+    ("has_website", "INTEGER"),
+    ("has_social_media", "INTEGER"),
+    ("gemini_analysis", "TEXT"),
+    ("posted_at", "TEXT"),
+    ("location", "TEXT"),
+    ("website", "TEXT"),
+    ("rating", "REAL"),
+    ("status", "TEXT DEFAULT 'new'"),
+    ("notes", "TEXT"),
+    ("tags_json", "TEXT"),
+    ("extra_data_json", "TEXT"),
+]
 
 
 class LeadDatabase:
@@ -80,14 +121,20 @@ class LeadDatabase:
                 CREATE INDEX IF NOT EXISTS idx_leads_found_at ON leads(found_at);
             """)
 
-            # Migration: Add phone column if it doesn't exist
-            try:
-                conn.execute("ALTER TABLE leads ADD COLUMN phone TEXT")
-                logger.info("Added phone column to leads table")
-            except sqlite3.OperationalError:
-                pass  # Column already exists
+            # Run column migrations for existing databases
+            self._run_migrations(conn)
 
             logger.info(f"Database initialized at {self.db_path}")
+
+    def _run_migrations(self, conn):
+        """Add missing columns to existing databases."""
+        for col_name, col_type in _MIGRATION_COLUMNS:
+            try:
+                conn.execute(f"ALTER TABLE leads ADD COLUMN {col_name} {col_type}")
+                logger.debug(f"Added column {col_name} to leads table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column" not in str(e).lower():
+                    logger.warning(f"Migration error for column {col_name}: {e}")
 
     @contextmanager
     def _get_connection(self):
@@ -133,8 +180,33 @@ class LeadDatabase:
                     id, source, username, email, phone, name, company,
                     title, content, url, subreddit,
                     ai_score, ai_reasoning, is_qualified,
-                    sent_to_crm, hubspot_id, found_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    sent_to_crm, hubspot_id, found_at, updated_at,
+                    linkedin, twitter, position, author,
+                    employees, revenue, country, industry,
+                    pain_score, intent_score, fit_score, total_score,
+                    urgency, urgency_keywords_json, score_breakdown_json,
+                    address, review_count, business_type, place_id,
+                    has_pain, pain_reviews_json, pain_summary,
+                    lead_category, has_explicit_pain,
+                    software_needs, has_website, has_social_media, gemini_analysis,
+                    posted_at, location, website, rating,
+                    status, notes, tags_json, extra_data_json
+                ) VALUES (
+                    ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?,
+                    ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?
+                )
             """, (
                 lead.id,
                 lead.source.value,
@@ -153,7 +225,52 @@ class LeadDatabase:
                 1 if lead.sent_to_crm else 0,
                 lead.hubspot_id,
                 lead.found_at.isoformat(),
-                now
+                now,
+                # Professional & Social
+                lead.linkedin,
+                lead.twitter,
+                lead.position,
+                lead.author,
+                # Company info
+                lead.employees,
+                lead.revenue,
+                lead.country,
+                lead.industry,
+                # Scoring
+                lead.pain_score,
+                lead.intent_score,
+                lead.fit_score,
+                lead.total_score,
+                lead.urgency.value if lead.urgency else None,
+                json.dumps(lead.urgency_keywords_matched) if lead.urgency_keywords_matched else None,
+                json.dumps(lead.score_breakdown) if lead.score_breakdown else None,
+                # Google Maps
+                lead.address,
+                lead.review_count,
+                lead.business_type,
+                lead.place_id,
+                # Pain detection
+                1 if lead.has_pain else 0,
+                json.dumps(lead.pain_reviews) if lead.pain_reviews else None,
+                lead.pain_summary,
+                # AI category
+                lead.lead_category.value if lead.lead_category else None,
+                1 if lead.has_explicit_pain else 0,
+                # Gemini
+                lead.software_needs,
+                1 if lead.has_website else (0 if lead.has_website is not None else None),
+                1 if lead.has_social_media else (0 if lead.has_social_media is not None else None),
+                lead.gemini_analysis,
+                # Tracking
+                lead.posted_at.isoformat() if lead.posted_at else None,
+                lead.location,
+                lead.website,
+                lead.rating,
+                # CRM
+                lead.status,
+                lead.notes,
+                json.dumps(lead.tags) if lead.tags else None,
+                json.dumps(lead.extra_data) if lead.extra_data else None,
             ))
 
             # Save keywords
@@ -189,6 +306,15 @@ class LeadDatabase:
 
     # ==================== READ OPERATIONS ====================
 
+    def _safe_get(self, row: sqlite3.Row, key: str, default=None):
+        """Safely get a value from a row, returning default if column doesn't exist."""
+        try:
+            if key in row.keys():
+                return row[key]
+        except Exception:
+            pass
+        return default
+
     def _row_to_lead(self, row: sqlite3.Row) -> Lead:
         """Convert a database row to a Lead object."""
         # Get keywords for this lead
@@ -198,12 +324,87 @@ class LeadDatabase:
                 (row["id"],)
             ).fetchall()
 
+        # Parse JSON fields safely
+        urgency_keywords = []
+        raw = self._safe_get(row, "urgency_keywords_json")
+        if raw:
+            try:
+                urgency_keywords = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        score_breakdown = None
+        raw = self._safe_get(row, "score_breakdown_json")
+        if raw:
+            try:
+                score_breakdown = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        pain_reviews = []
+        raw = self._safe_get(row, "pain_reviews_json")
+        if raw:
+            try:
+                pain_reviews = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        tags = []
+        raw = self._safe_get(row, "tags_json")
+        if raw:
+            try:
+                tags = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        extra_data = {}
+        raw = self._safe_get(row, "extra_data_json")
+        if raw:
+            try:
+                extra_data = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        # Parse urgency enum
+        urgency = None
+        raw_urgency = self._safe_get(row, "urgency")
+        if raw_urgency:
+            try:
+                urgency = LeadUrgency(raw_urgency)
+            except ValueError:
+                pass
+
+        # Parse lead_category enum
+        lead_category = None
+        raw_cat = self._safe_get(row, "lead_category")
+        if raw_cat:
+            try:
+                lead_category = LeadCategory(raw_cat)
+            except ValueError:
+                pass
+
+        # Parse posted_at datetime
+        posted_at = None
+        raw_posted = self._safe_get(row, "posted_at")
+        if raw_posted:
+            try:
+                posted_at = datetime.fromisoformat(raw_posted)
+            except (ValueError, TypeError):
+                pass
+
+        # Parse has_website / has_social_media (nullable booleans)
+        has_website_raw = self._safe_get(row, "has_website")
+        has_website = bool(has_website_raw) if has_website_raw is not None else None
+
+        has_social_raw = self._safe_get(row, "has_social_media")
+        has_social_media = bool(has_social_raw) if has_social_raw is not None else None
+
         return Lead(
             id=row["id"],
             source=LeadSource(row["source"]),
             username=row["username"],
             email=row["email"],
-            phone=row["phone"] if "phone" in row.keys() else None,
+            phone=self._safe_get(row, "phone"),
             name=row["name"],
             company=row["company"],
             title=row["title"],
@@ -216,7 +417,52 @@ class LeadDatabase:
             is_qualified=bool(row["is_qualified"]),
             sent_to_crm=bool(row["sent_to_crm"]),
             hubspot_id=row["hubspot_id"],
-            found_at=datetime.fromisoformat(row["found_at"])
+            found_at=datetime.fromisoformat(row["found_at"]),
+            # Professional & Social
+            linkedin=self._safe_get(row, "linkedin"),
+            twitter=self._safe_get(row, "twitter"),
+            position=self._safe_get(row, "position"),
+            author=self._safe_get(row, "author"),
+            # Company info
+            employees=self._safe_get(row, "employees"),
+            revenue=self._safe_get(row, "revenue"),
+            country=self._safe_get(row, "country"),
+            industry=self._safe_get(row, "industry"),
+            # Scoring
+            pain_score=self._safe_get(row, "pain_score"),
+            intent_score=self._safe_get(row, "intent_score"),
+            fit_score=self._safe_get(row, "fit_score"),
+            total_score=self._safe_get(row, "total_score"),
+            urgency=urgency,
+            urgency_keywords_matched=urgency_keywords,
+            score_breakdown=score_breakdown,
+            # Google Maps
+            address=self._safe_get(row, "address"),
+            review_count=self._safe_get(row, "review_count"),
+            business_type=self._safe_get(row, "business_type"),
+            place_id=self._safe_get(row, "place_id"),
+            # Pain detection
+            has_pain=bool(self._safe_get(row, "has_pain", 0)),
+            pain_reviews=pain_reviews,
+            pain_summary=self._safe_get(row, "pain_summary"),
+            # AI
+            lead_category=lead_category,
+            has_explicit_pain=bool(self._safe_get(row, "has_explicit_pain", 0)),
+            # Gemini
+            software_needs=self._safe_get(row, "software_needs"),
+            has_website=has_website,
+            has_social_media=has_social_media,
+            gemini_analysis=self._safe_get(row, "gemini_analysis"),
+            # Tracking
+            posted_at=posted_at,
+            location=self._safe_get(row, "location"),
+            website=self._safe_get(row, "website"),
+            rating=self._safe_get(row, "rating"),
+            # CRM
+            status=self._safe_get(row, "status", "new"),
+            notes=self._safe_get(row, "notes"),
+            tags=tags,
+            extra_data=extra_data,
         )
 
     def get_lead(self, lead_id: str) -> Optional[Lead]:
@@ -315,7 +561,10 @@ class LeadDatabase:
         """
         allowed_fields = {
             "ai_score", "ai_reasoning", "is_qualified", "sent_to_crm",
-            "hubspot_id", "email", "name", "company"
+            "hubspot_id", "email", "name", "company", "phone",
+            "pain_score", "intent_score", "fit_score", "total_score",
+            "lead_category", "has_explicit_pain", "status", "notes",
+            "software_needs", "has_website", "has_social_media", "gemini_analysis",
         }
 
         updates = {k: v for k, v in kwargs.items() if k in allowed_fields}
@@ -323,9 +572,14 @@ class LeadDatabase:
             return False
 
         # Convert booleans to integers for SQLite
-        for key in ["is_qualified", "sent_to_crm"]:
+        for key in ["is_qualified", "sent_to_crm", "has_explicit_pain", "has_website", "has_social_media"]:
             if key in updates:
                 updates[key] = 1 if updates[key] else 0
+
+        # Convert enums to values
+        if "lead_category" in updates and updates["lead_category"] is not None:
+            if hasattr(updates["lead_category"], "value"):
+                updates["lead_category"] = updates["lead_category"].value
 
         updates["updated_at"] = datetime.utcnow().isoformat()
 
@@ -501,7 +755,9 @@ class LeadDatabase:
             fieldnames = [
                 "id", "source", "title", "url", "email", "phone", "company",
                 "username", "name", "keywords", "ai_score", "is_qualified",
-                "sent_to_crm", "hubspot_id", "found_at", "subreddit"
+                "sent_to_crm", "hubspot_id", "found_at", "subreddit",
+                "industry", "pain_score", "intent_score", "fit_score", "total_score",
+                "lead_category", "location", "website", "rating", "status", "notes",
             ]
 
             with open(filepath, "w", newline="", encoding="utf-8") as f:

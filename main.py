@@ -32,7 +32,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead, LeadBatch
-from src.scrapers import RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, GoogleMapsScraper
+from src.scrapers import (
+    RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, GoogleMapsScraper,
+    IndeedScraper, YelpScraper, LinkedInScraper, FacebookScraper,
+    YellowPagesScraper, BBBScraper, CraigslistScraper, GoogleMapsWebScraper
+)
 from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 from src.database import LeadDatabase
@@ -98,6 +102,13 @@ def run_scraping() -> List[Lead]:
         ("Google Search", GoogleScraper),
         ("Product Hunt", ProductHuntScraper),
         ("Google Maps", GoogleMapsScraper),
+        ("Indeed", IndeedScraper),
+        ("Yelp", YelpScraper),
+        ("LinkedIn", LinkedInScraper),
+        ("Facebook", FacebookScraper),
+        ("Yellow Pages", YellowPagesScraper),
+        ("BBB", BBBScraper),
+        ("Craigslist", CraigslistScraper),
     ]
 
     # Record scrape run
@@ -108,7 +119,7 @@ def run_scraping() -> List[Lead]:
     start_time = time.time()
 
     # Show initial status
-    console.print("[cyan]Ejecutando 4 scrapers en paralelo...[/cyan]")
+    console.print(f"[cyan]Ejecutando {len(scrapers)} scrapers en paralelo...[/cyan]")
     for name, _ in scrapers:
         console.print(f"  [dim]- {name}[/dim]")
     console.print()
@@ -128,12 +139,12 @@ def run_scraping() -> List[Lead]:
             completed += 1
 
             if error:
-                console.print(f"  [red][{completed}/4] {name}: Error - {error}[/red]")
+                console.print(f"  [red][{completed}/{len(scrapers)}] {name}: Error - {error}[/red]")
                 errors.append(f"{name}: {error}")
             else:
                 all_leads.extend(batch.leads)
                 errors.extend(batch.errors)
-                console.print(f"  [green][{completed}/4] {name}: {len(batch.leads)} leads encontrados[/green]")
+                console.print(f"  [green][{completed}/{len(scrapers)}] {name}: {len(batch.leads)} leads encontrados[/green]")
 
     # Calculate time taken
     elapsed = time.time() - start_time

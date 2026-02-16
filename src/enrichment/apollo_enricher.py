@@ -21,14 +21,14 @@ Each enrichment uses 1 credit.
 
 import os
 import time
-import logging
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 import requests
 
 from src.utils.models import Lead
+from src.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -306,7 +306,7 @@ class ApolloEnricher:
         return ApolloContact(
             email=person.get("email"),
             email_status=person.get("email_status"),
-            phone=person.get("phone_numbers", [{}])[0].get("sanitized_number") if person.get("phone_numbers") else None,
+            phone=person["phone_numbers"][0].get("sanitized_number") if isinstance(person.get("phone_numbers"), list) and person["phone_numbers"] else None,
             mobile_phone=person.get("mobile_phone"),
             first_name=person.get("first_name"),
             last_name=person.get("last_name"),

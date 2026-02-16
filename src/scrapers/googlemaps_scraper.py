@@ -223,7 +223,7 @@ class GoogleMapsScraper:
             industry = self._map_category_to_industry(category)
 
             lead = Lead(
-                id=f"gmaps_{hash(f'{name}{phone}{location}')}",
+                id=f"gmaps_web_{abs(hash(f'{name}{phone}{location}')) % 10**12}",
                 source=LeadSource.GOOGLE_MAPS,
                 title=name,
                 content=f"{category.title()} business in {location}." + (f"\nAddress: {address}" if address else ""),
@@ -233,9 +233,7 @@ class GoogleMapsScraper:
                 website=website,
                 industry=industry,
                 found_at=datetime.now(),
-                pain_score=50,  # Base score for local businesses
                 keywords_matched=[category],
-                is_qualified=True,
                 extra_data={
                     'address': address,
                     'rating': rating,
@@ -281,7 +279,7 @@ class GoogleMapsScraper:
                                 address = f"{address_obj.get('streetAddress', '')} {address_obj.get('addressLocality', '')} {address_obj.get('addressRegion', '')}"
 
                             lead = Lead(
-                                id=f"gmaps_json_{hash(f'{name}{phone}')}",
+                                id=f"gmaps_json_{abs(hash(f'{name}{phone}')) % 10**12}",
                                 source=LeadSource.GOOGLE_MAPS,
                                 title=name,
                                 content=f"{category.title()} in {location}",
@@ -291,9 +289,7 @@ class GoogleMapsScraper:
                                 website=website,
                                 industry=self._map_category_to_industry(category),
                                 found_at=datetime.now(),
-                                pain_score=50,
                                 keywords_matched=[category],
-                                is_qualified=True,
                                 extra_data={
                                     'address': address,
                                     'rating': item.get('aggregateRating', {}).get('ratingValue'),

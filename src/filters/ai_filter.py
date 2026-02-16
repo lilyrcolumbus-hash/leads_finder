@@ -1,7 +1,7 @@
 """AI-powered lead filtering using OpenAI, Anthropic, or Google Gemini."""
 
 import json
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import httpx
 
@@ -186,7 +186,7 @@ Return a JSON array of these objects. Example:
         # Parse response and update leads
         return self._parse_ai_response(response_text, leads)
 
-    def _call_gemini(self, prompt: str) -> str | None:
+    def _call_gemini(self, prompt: str) -> Optional[str]:
         """Call Google Gemini API via REST (avoids gRPC SSL issues)."""
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.gemini_model}:generateContent"
@@ -216,7 +216,7 @@ Return a JSON array of these objects. Example:
             self.logger.error(f"Gemini API error: {e}")
             return None
 
-    def _call_openai(self, prompt: str) -> str | None:
+    def _call_openai(self, prompt: str) -> Optional[str]:
         """Call OpenAI API."""
         try:
             response = self.openai_client.chat.completions.create(
@@ -233,7 +233,7 @@ Return a JSON array of these objects. Example:
             self.logger.error(f"OpenAI API error: {e}")
             return None
 
-    def _call_anthropic(self, prompt: str) -> str | None:
+    def _call_anthropic(self, prompt: str) -> Optional[str]:
         """Call Anthropic API."""
         try:
             response = self.anthropic_client.messages.create(

@@ -163,7 +163,7 @@ class LinkedInScraper:
 
             # Create lead
             lead = Lead(
-                id=f"linkedin_{hash(url)}",
+                id=f"linkedin_{abs(hash(url)) % 10**12}",
                 source=LeadSource.LINKEDIN,
                 title=name or title,
                 content=snippet,
@@ -173,9 +173,7 @@ class LinkedInScraper:
                 company=company,
                 industry=industry,
                 found_at=datetime.now(),
-                pain_score=0,
                 keywords_matched=[],
-                is_qualified=True,  # LinkedIn profiles are generally higher quality
                 extra_data={
                     'job_title': job_title,
                     'location': location,

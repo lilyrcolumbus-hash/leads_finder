@@ -1,9 +1,13 @@
-"""Gemini-powered business analyzer - investigates websites and detects software needs."""
+"""Gemini-powered business analyzer - investigates websites and detects software needs.
+
+Uses REST API directly (not the Python SDK) to avoid gRPC/SSL issues.
+"""
 
 import json
 import re
 import time
 import requests
+import httpx
 from typing import List, Optional
 
 from src.config import settings
@@ -17,6 +21,8 @@ class GeminiBusinessAnalyzer:
 
     Investigates: website quality, social media presence, chatbot, automation,
     online booking, and other software gaps.
+
+    Uses REST API directly (not the Python SDK) to avoid gRPC/SSL issues.
     """
 
     ANALYSIS_PROMPT = """You are a business technology analyst. Analyze this business and determine what software/technology they need.
@@ -50,7 +56,8 @@ Respond ONLY with valid JSON:
 
     def __init__(self):
         self.logger = get_logger("GeminiAnalyzer")
-        self.model = None
+        self.gemini_api_key = None
+        self.gemini_model = None
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -58,15 +65,41 @@ Respond ONLY with valid JSON:
         self._init_gemini()
 
     def _init_gemini(self):
-        """Initialize Gemini client."""
+        """Initialize Gemini REST API settings."""
         if settings.gemini_api_key:
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=settings.gemini_api_key)
-                self.model = genai.GenerativeModel('gemini-2.0-flash')
-                self.logger.info("Gemini Business Analyzer initialized")
-            except Exception as e:
-                self.logger.warning(f"Failed to initialize Gemini: {e}")
+            self.gemini_api_key = settings.gemini_api_key
+            self.gemini_model = "gemini-2.0-flash"
+            self.logger.info("Gemini Business Analyzer initialized (REST API)")
+
+    def _call_gemini_rest(self, prompt: str) -> Optional[str]:
+        """Call Google Gemini API via REST (avoids gRPC SSL issues)."""
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.gemini_model}:generateContent"
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt}
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "temperature": 0.3,
+                    "maxOutputTokens": 2000
+                }
+            }
+            response = httpx.post(
+                url,
+                params={"key": self.gemini_api_key},
+                json=payload,
+                timeout=60
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception as e:
+            self.logger.error(f"Gemini REST API error: {e}")
+            return None
 
     def analyze_leads(self, leads: List[Lead], progress_callback=None) -> List[Lead]:
         """
@@ -79,7 +112,7 @@ Respond ONLY with valid JSON:
         Returns:
             List of leads with software_needs populated
         """
-        if not self.model:
+        if not self.gemini_api_key:
             self.logger.warning("Gemini not available - skipping business analysis")
             return leads
 
@@ -116,13 +149,17 @@ Respond ONLY with valid JSON:
             industry=lead.industry or "Unknown",
             website=lead.website or "None",
             phone=lead.phone or "None",
-            address=lead.address or lead.extra_data.get('address', 'Unknown') if lead.extra_data else "Unknown",
+            address=lead.address or (lead.extra_data.get('address', 'Unknown') if lead.extra_data else "Unknown"),
             web_content=web_content[:2000]  # Limit content size
         )
 
         try:
-            response = self.model.generate_content(prompt)
-            result_text = response.text.strip()
+            result_text = self._call_gemini_rest(prompt)
+            if not result_text:
+                lead.software_needs = "Analysis unavailable"
+                return
+
+            result_text = result_text.strip()
 
             # Clean markdown code blocks
             if result_text.startswith("```"):
