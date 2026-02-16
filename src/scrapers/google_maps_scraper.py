@@ -34,9 +34,16 @@ class GoogleMapsScraper(BaseScraper):
         self.max_reviews = settings.google_maps_max_reviews_per_business
         self.min_reviews = settings.google_maps_min_reviews
 
-    def scrape(self) -> LeadBatch:
+    def scrape(self, location: str = "", category: str = "",
+               **kwargs) -> LeadBatch:
         """
         Scrape Google Maps for business leads.
+
+        Args:
+            location: Optional location override (e.g., "Miami, FL").
+                      If provided, only searches this location.
+            category: Optional business type override (e.g., "dentist").
+                      If provided, only searches this category.
 
         Returns:
             LeadBatch with found leads including pain analysis
@@ -50,37 +57,45 @@ class GoogleMapsScraper(BaseScraper):
             batch.errors.append(error_msg)
             return batch
 
+        # Use overrides if provided, otherwise fall back to settings
+        business_types = [category.strip()] if category and category.strip() else self.business_types
+        locations = [location.strip()] if location and location.strip() else self.locations
+
         self.logger.info(
-            f"Starting Google Maps scrape: {len(self.business_types)} business types, "
-            f"{len(self.locations)} locations"
+            f"Starting Google Maps scrape: {len(business_types)} business types, "
+            f"{len(locations)} locations"
         )
 
         # Search for each business type in each location
-        for business_type in self.business_types:
-            for location in self.locations:
+        for business_type in business_types:
+            for loc in locations:
                 try:
-                    leads = self._search_businesses(business_type, location)
+                    leads = self._search_businesses(business_type, loc)
                     all_leads.extend(leads)
                     self.logger.info(
-                        f"Found {len(leads)} businesses: {business_type} in {location}"
+                        f"Found {len(leads)} businesses: {business_type} in {loc}"
                     )
                     time.sleep(1)  # Rate limiting between searches
                 except Exception as e:
-                    error_msg = f"Error searching {business_type} in {location}: {str(e)}"
+                    error_msg = f"Error searching {business_type} in {loc}: {str(e)}"
                     self.logger.error(error_msg)
                     batch.errors.append(error_msg)
 
         # Deduplicate by place_id
         unique_leads = list({lead.place_id: lead for lead in all_leads if lead.place_id}.values())
 
+        # Enrich leads that have a website but no email
+        unique_leads = self._enrich_with_emails(unique_leads)
+
         batch.leads = unique_leads[:settings.max_leads_per_source]
         batch.total_found = len(unique_leads)
 
         # Count leads with pain detected
         pain_count = sum(1 for lead in batch.leads if lead.has_pain)
+        emails_found = sum(1 for lead in batch.leads if lead.email)
         self.logger.info(
             f"Google Maps scrape complete: {batch.total_found} businesses found, "
-            f"{pain_count} with communication pain detected"
+            f"{emails_found} with email, {pain_count} with communication pain detected"
         )
 
         return batch
@@ -300,6 +315,30 @@ class GoogleMapsScraper(BaseScraper):
                 matched.append(keyword)
         return matched
 
+    def _enrich_with_emails(self, leads: List[Lead]) -> List[Lead]:
+        """Find emails for leads that have a website but no email.
+
+        Crawls each business website and common sub-pages to extract
+        real business email addresses.
+
+        Args:
+            leads: List of leads to enrich.
+
+        Returns:
+            Same list with emails filled in where found.
+        """
+        for lead in leads:
+            if lead.website and not lead.email:
+                try:
+                    email = self._extract_email_from_website(lead.website)
+                    if email:
+                        lead.email = email
+                        self.logger.info(f"Found email for {lead.company}: {email}")
+                except Exception as e:
+                    self.logger.debug(f"Error finding email for {lead.company}: {e}")
+                time.sleep(1)  # Rate limiting between sites
+        return leads
+
     # Emails to ignore (generic, CMS-generated, or not real business emails)
     _JUNK_EMAIL_DOMAINS = {
         "example.com", "test.com", "sentry.io", "wixpress.com",
@@ -316,10 +355,16 @@ class GoogleMapsScraper(BaseScraper):
         "example", "test@", "null@",
     }
 
-    # Sub-pages likely to contain contact emails
+    # Sub-pages likely to contain contact emails (expanded for thorough crawling)
     _CONTACT_PATHS = [
         "", "/contact", "/contact-us", "/contacto",
         "/about", "/about-us", "/sobre-nosotros",
+        "/team", "/our-team", "/staff",
+        "/support", "/help", "/faq",
+        "/locations", "/location",
+        "/services", "/our-services",
+        "/get-in-touch", "/reach-us",
+        "/connect", "/info", "/company",
     ]
 
     def _is_real_email(self, email: str) -> bool:

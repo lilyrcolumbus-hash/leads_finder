@@ -10497,16 +10497,14 @@ def show_spreadsheet():
         progress = st.progress(0)
         status = st.empty()
 
-        # Step 1: Scrape Google Maps
+        # Step 1: Scrape Google Maps via Places API
         status.info("Searching businesses on Google Maps...")
         try:
-            with GoogleMapsWebScraper() as scraper:
-                kwargs = {}
-                if sp_location:
-                    kwargs["location"] = sp_location
-                if sp_business:
-                    kwargs["category"] = sp_business.strip()
-                batch = scraper.scrape(**kwargs)
+            with GoogleMapsScraper() as scraper:
+                batch = scraper.scrape(
+                    location=sp_location,
+                    category=sp_business.strip() if sp_business else "",
+                )
                 leads = batch.leads
         except Exception as e:
             st.error(f"Search error: {str(e)[:100]}")
@@ -10518,7 +10516,8 @@ def show_spreadsheet():
             st.warning("No businesses found. Try a different location or business type.")
             return
 
-        status.info(f"Found {len(leads)} businesses. Extracting emails...")
+        emails_found = sum(1 for l in leads if l.email)
+        status.info(f"Found {len(leads)} businesses, {emails_found} with email.")
         progress.progress(0.5)
 
         # Step 2: Gemini analysis
