@@ -222,7 +222,7 @@ class FacebookScraper:
             if created_time:
                 try:
                     posted_at = datetime.fromisoformat(created_time.replace("Z", "+00:00"))
-                except:
+                except (ValueError, TypeError):
                     posted_at = datetime.now()
 
             # Extract keywords
@@ -232,8 +232,9 @@ class FacebookScraper:
                 id=f"fb_post_{post_id}",
                 source=LeadSource.FACEBOOK,
                 username=author.get("name", "Unknown"),
+                title=message[:100] if message else "Facebook Post",
                 content=message[:500] if message else "",
-                keywords=keywords,
+                keywords_matched=keywords,
                 url=post.get("permalink_url", f"https://facebook.com/{post_id}"),
                 posted_at=posted_at,
                 found_at=datetime.now(),

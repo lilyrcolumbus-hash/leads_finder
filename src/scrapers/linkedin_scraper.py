@@ -15,9 +15,9 @@ from urllib.parse import quote_plus
 
 from ..config import settings
 from ..utils.models import Lead, LeadSource, LeadBatch
-from ..utils.logger import setup_logger
+from ..utils.logger import get_logger
 
-logger = setup_logger(__name__)
+logger = get_logger(__name__)
 
 
 class LinkedInScraper:

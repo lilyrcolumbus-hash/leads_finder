@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import settings
 from src.utils.logger import setup_logger
-from src.utils.models import Lead, LeadBatch
+from src.utils.models import Lead, LeadBatch, LeadSource
 from src.scrapers import (
     RedditScraper, HackerNewsScraper, GoogleScraper, ProductHuntScraper, GoogleMapsScraper,
     IndeedScraper, YelpScraper, LinkedInScraper, FacebookScraper,
@@ -85,7 +85,8 @@ def _run_single_scraper(name: str, ScraperClass) -> Tuple[str, LeadBatch, Option
             batch = scraper.scrape()
             return (name, batch, None)
     except Exception as e:
-        empty_batch = LeadBatch(source=ScraperClass.source)
+        source = getattr(ScraperClass, 'source', LeadSource.GOOGLE_SEARCH)
+        empty_batch = LeadBatch(source=source)
         return (name, empty_batch, str(e))
 
 

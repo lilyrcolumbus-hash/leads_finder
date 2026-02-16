@@ -17,7 +17,7 @@ from .base_scraper import BaseScraper
 class YellowPagesScraper(BaseScraper):
     """Scraper for Yellow Pages business directory."""
 
-    source = LeadSource.GOOGLE_MAPS  # Using same source type for local businesses
+    source = LeadSource.YELLOW_PAGES
 
     # Business categories to search
     BUSINESS_TYPES = [
@@ -236,7 +236,7 @@ class YellowPagesScraper(BaseScraper):
                 if rating:
                     try:
                         rating = float(rating)
-                    except:
+                    except (ValueError, TypeError):
                         rating = None
 
             # Try to extract email from business website

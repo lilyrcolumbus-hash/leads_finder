@@ -16,12 +16,12 @@ from bs4 import BeautifulSoup
 
 from ..config import settings
 from ..utils.models import Lead, LeadSource, LeadBatch
-from ..utils.logger import setup_logger
+from ..utils.logger import get_logger
 
-logger = setup_logger(__name__)
+logger = get_logger(__name__)
 
 
-class GoogleMapsScraper:
+class GoogleMapsWebScraper:
     """
     Scrapes Google Maps for local businesses.
 
@@ -210,7 +210,7 @@ class GoogleMapsScraper:
             if rating_elem:
                 try:
                     rating = float(rating_elem.get_text(strip=True))
-                except:
+                except (ValueError, TypeError):
                     pass
 
             # Extract website (if available in snippet)
@@ -298,7 +298,7 @@ class GoogleMapsScraper:
                             )
                             leads.append(lead)
 
-                except:
+                except Exception:
                     continue
 
         except Exception as e:

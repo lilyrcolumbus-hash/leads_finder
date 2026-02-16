@@ -20,6 +20,9 @@ class LeadSource(str, Enum):
     YELP = "yelp"
     LINKEDIN = "linkedin"
     FACEBOOK = "facebook"
+    YELLOW_PAGES = "yellow_pages"
+    BBB = "bbb"
+    CRAIGSLIST = "craigslist"
 
 
 class LeadUrgency(str, Enum):

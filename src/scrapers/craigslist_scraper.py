@@ -13,7 +13,7 @@ from .base_scraper import BaseScraper
 class CraigslistScraper(BaseScraper):
     """Scraper for Craigslist - finds businesses offering services (potential clients)."""
 
-    source = LeadSource.INDEED  # Using Indeed source type for service listings
+    source = LeadSource.CRAIGSLIST
 
     # Craigslist cities
     CITIES = [

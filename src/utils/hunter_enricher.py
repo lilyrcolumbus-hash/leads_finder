@@ -144,9 +144,10 @@ class HunterEnricher:
 
             if result and result.get("email"):
                 lead.email = result["email"]
-                # Store additional info if available
-                if hasattr(lead, 'hunter_data'):
-                    lead.hunter_data = result
+                # Store additional info in extra_data
+                if lead.extra_data is None:
+                    lead.extra_data = {}
+                lead.extra_data["hunter_data"] = result
                 enriched_count += 1
                 logger.info(f"Found email for {domain}: {result['email']}")
 

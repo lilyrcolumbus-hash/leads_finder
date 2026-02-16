@@ -8146,11 +8146,11 @@ Best regards'''
                         events_html = ""
 
                         for task in day_tasks[:2]:
-                            task_type = task.get('type', '📝').split()[0]
-                            events_html += f"<div class='calendar-event' style='background: #E85D04;'>{task_type} {task.get('title', '')[:15]}</div>"
+                            task_type = html.escape(task.get('type', '📝').split()[0])
+                            events_html += f"<div class='calendar-event' style='background: #E85D04;'>{task_type} {html.escape(task.get('title', '')[:15])}</div>"
 
                         for deal in day_deals[:1]:
-                            events_html += f"<div class='calendar-event' style='background: #10B981;'>💰 {deal.get('name', '')[:15]}</div>"
+                            events_html += f"<div class='calendar-event' style='background: #10B981;'>💰 {html.escape(deal.get('name', '')[:15])}</div>"
 
                         if len(day_tasks) > 2:
                             events_html += f"<div style='font-size: 10px; color: #64748B;'>+{len(day_tasks) - 2} more</div>"
@@ -9097,14 +9097,14 @@ def show_ai_assistant():
                     st.markdown(f"""
                     <div class="chat-message user-message">
                         <div class="message-header">👤 Tú</div>
-                        <div class="message-content">{msg["content"]}</div>
+                        <div class="message-content">{html.escape(msg.get("content", ""))}</div>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
                     <div class="chat-message assistant-message">
                         <div class="message-header">🤖 Asistente</div>
-                        <div class="message-content">{msg["content"]}</div>
+                        <div class="message-content">{html.escape(msg.get("content", ""))}</div>
                     </div>
                     """, unsafe_allow_html=True)
 

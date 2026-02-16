@@ -5,7 +5,7 @@ from .hackernews_scraper import HackerNewsScraper
 from .google_scraper import GoogleScraper
 from .producthunt_scraper import ProductHuntScraper
 from .google_maps_scraper import GoogleMapsScraper  # API version with pain detection
-from .googlemaps_scraper import GoogleMapsScraper as GoogleMapsWebScraper  # Web scraping version
+from .googlemaps_scraper import GoogleMapsWebScraper  # Web scraping version
 from .indeed_scraper import IndeedScraper
 from .yelp_scraper import YelpScraper
 from .linkedin_scraper import LinkedInScraper

@@ -147,7 +147,7 @@ class YelpScraper(BaseScraper):
                                 lead = self._json_to_lead(item, category, location)
                                 if lead:
                                     leads.append(lead)
-                except:
+                except Exception:
                     continue
 
             # Also try to find embedded search results data
@@ -171,7 +171,7 @@ class YelpScraper(BaseScraper):
                                 has_pain=True,
                             )
                             leads.append(lead)
-                except:
+                except Exception:
                     pass
 
         except Exception as e:
@@ -222,7 +222,7 @@ class YelpScraper(BaseScraper):
                 has_pain=True,
             )
             return lead
-        except:
+        except Exception:
             return None
 
     def _extract_from_html(self, soup: BeautifulSoup, category: str, location: str) -> List[Lead]:

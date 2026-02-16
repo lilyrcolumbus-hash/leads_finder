@@ -15,7 +15,7 @@ from .base_scraper import BaseScraper
 class BBBScraper(BaseScraper):
     """Scraper for Better Business Bureau - finds businesses with complaints (pain!)."""
 
-    source = LeadSource.YELP  # Using Yelp source type for review-based
+    source = LeadSource.BBB
     BASE_URL = "https://www.bbb.org/search"
 
     # Business categories
