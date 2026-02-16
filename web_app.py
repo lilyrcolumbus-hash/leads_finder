@@ -6688,10 +6688,42 @@ def show_crm():
     # Enhanced CRM-specific CSS
     st.markdown("""
     <style>
+        /* Force light theme for CRM HTML components */
+        [data-testid="stMarkdownContainer"] .lead-card,
+        [data-testid="stMarkdownContainer"] .contact-detail-card,
+        [data-testid="stMarkdownContainer"] .deal-card,
+        [data-testid="stMarkdownContainer"] .task-card,
+        [data-testid="stMarkdownContainer"] .crm-kpi-card,
+        [data-testid="stMarkdownContainer"] .pipeline-stage,
+        [data-testid="stMarkdownContainer"] .quick-action-btn {
+            background-color: #FFFFFF !important;
+            color: #1E293B !important;
+        }
+        [data-testid="stMarkdownContainer"] .lead-card *,
+        [data-testid="stMarkdownContainer"] .contact-detail-card *,
+        [data-testid="stMarkdownContainer"] .deal-card *,
+        [data-testid="stMarkdownContainer"] .task-card *,
+        [data-testid="stMarkdownContainer"] .crm-kpi-card *,
+        [data-testid="stMarkdownContainer"] .pipeline-stage * {
+            color: inherit !important;
+        }
+        [data-testid="stMarkdownContainer"] .lead-card-title { color: #1E293B !important; }
+        [data-testid="stMarkdownContainer"] .lead-card-company { color: #64748B !important; }
+        [data-testid="stMarkdownContainer"] .lead-card-score { color: #FFFFFF !important; }
+        [data-testid="stMarkdownContainer"] .lead-card-tag { color: #475569 !important; background: #F1F5F9 !important; }
+        [data-testid="stMarkdownContainer"] .crm-kpi-value { color: #1E293B !important; }
+        [data-testid="stMarkdownContainer"] .crm-kpi-label { color: #64748B !important; }
+        [data-testid="stMarkdownContainer"] .pipeline-stage-count { color: #64748B !important; }
+        [data-testid="stMarkdownContainer"] .deal-value { color: #10B981 !important; }
+        [data-testid="stMarkdownContainer"] .deal-name { color: #1E293B !important; }
+        [data-testid="stMarkdownContainer"] .deal-company { color: #64748B !important; }
+        [data-testid="stMarkdownContainer"] .revenue-card,
+        [data-testid="stMarkdownContainer"] .revenue-card * { color: #FFFFFF !important; }
+
         /* CRM Dashboard Cards */
         .crm-kpi-card {
-            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-            border: 1px solid #E2E8F0;
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 16px;
             padding: 20px;
             text-align: center;
@@ -6705,12 +6737,12 @@ def show_crm():
         .crm-kpi-value {
             font-size: 32px;
             font-weight: 700;
-            color: #1E293B;
+            color: #1E293B !important;
             margin: 8px 0;
         }
         .crm-kpi-label {
             font-size: 13px;
-            color: #64748B;
+            color: #64748B !important;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -6740,12 +6772,12 @@ def show_crm():
 
         /* Pipeline Stage Header */
         .pipeline-stage {
-            background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+            background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%) !important;
             border-radius: 12px;
             padding: 16px 12px;
             text-align: center;
             margin-bottom: 12px;
-            border: 1px solid #E2E8F0;
+            border: 1px solid #E2E8F0 !important;
         }
         .pipeline-stage-title {
             font-weight: 700;
@@ -6754,21 +6786,22 @@ def show_crm():
         }
         .pipeline-stage-count {
             font-size: 11px;
-            color: #64748B;
+            color: #64748B !important;
         }
 
         /* Lead Card */
         .lead-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 10px;
             transition: all 0.2s ease;
             cursor: pointer;
+            color: #1E293B !important;
         }
         .lead-card:hover {
-            border-color: #E85D04;
+            border-color: #E85D04 !important;
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
         .lead-card-header {
@@ -6780,18 +6813,18 @@ def show_crm():
         .lead-card-title {
             font-weight: 600;
             font-size: 13px;
-            color: #1E293B;
+            color: #1E293B !important;
             margin: 0;
             line-height: 1.3;
         }
         .lead-card-company {
             font-size: 11px;
-            color: #64748B;
+            color: #64748B !important;
             margin: 4px 0 0 0;
         }
         .lead-card-score {
-            background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%);
-            color: white;
+            background: linear-gradient(135deg, #E85D04 0%, #F48C06 100%) !important;
+            color: white !important;
             font-size: 10px;
             font-weight: 600;
             padding: 3px 8px;
@@ -6804,8 +6837,8 @@ def show_crm():
             margin-top: 10px;
         }
         .lead-card-tag {
-            background: #F1F5F9;
-            color: #475569;
+            background: #F1F5F9 !important;
+            color: #475569 !important;
             font-size: 10px;
             padding: 3px 8px;
             border-radius: 6px;
@@ -6819,28 +6852,30 @@ def show_crm():
         }
         .lead-action-btn {
             flex: 1;
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            background: #F8FAFC !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 6px;
             padding: 6px;
             font-size: 12px;
             cursor: pointer;
             text-align: center;
+            color: #1E293B !important;
             transition: all 0.2s ease;
         }
         .lead-action-btn:hover {
-            background: #E85D04;
-            color: white;
-            border-color: #E85D04;
+            background: #E85D04 !important;
+            color: white !important;
+            border-color: #E85D04 !important;
         }
 
         /* Contact Detail Card */
         .contact-detail-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 16px;
+            color: #1E293B !important;
         }
         .contact-header {
             display: flex;
@@ -6865,12 +6900,12 @@ def show_crm():
         .contact-name {
             font-size: 20px;
             font-weight: 700;
-            color: #1E293B;
+            color: #1E293B !important;
             margin: 0;
         }
         .contact-company {
             font-size: 14px;
-            color: #64748B;
+            color: #64748B !important;
             margin: 4px 0 0 0;
         }
 
@@ -6884,7 +6919,7 @@ def show_crm():
         .activity-icon {
             width: 32px;
             height: 32px;
-            background: #F1F5F9;
+            background: #F1F5F9 !important;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -6897,12 +6932,12 @@ def show_crm():
         }
         .activity-text {
             font-size: 13px;
-            color: #1E293B;
+            color: #1E293B !important;
             margin: 0;
         }
         .activity-time {
             font-size: 11px;
-            color: #94A3B8;
+            color: #94A3B8 !important;
             margin-top: 4px;
         }
 
@@ -6914,17 +6949,18 @@ def show_crm():
             margin-top: 16px;
         }
         .quick-action-btn {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 12px;
             padding: 16px;
             text-align: center;
             cursor: pointer;
+            color: #1E293B !important;
             transition: all 0.2s ease;
         }
         .quick-action-btn:hover {
-            border-color: #E85D04;
-            background: #2D2015;
+            border-color: #E85D04 !important;
+            background: #FFF7ED !important;
         }
         .quick-action-icon {
             font-size: 24px;
@@ -6933,16 +6969,17 @@ def show_crm():
         .quick-action-label {
             font-size: 12px;
             font-weight: 500;
-            color: #475569;
+            color: #475569 !important;
         }
 
         /* Deal Card */
         .deal-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
+            color: #1E293B !important;
             transition: all 0.2s ease;
         }
         .deal-card:hover {
@@ -6952,29 +6989,30 @@ def show_crm():
         .deal-value {
             font-size: 20px;
             font-weight: 700;
-            color: #10B981;
+            color: #10B981 !important;
         }
         .deal-name {
             font-size: 14px;
             font-weight: 600;
-            color: #1E293B;
+            color: #1E293B !important;
             margin: 4px 0;
         }
         .deal-company {
             font-size: 12px;
-            color: #64748B;
+            color: #64748B !important;
         }
 
         /* Task Card */
         .task-card {
-            background: white;
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
             border-radius: 10px;
             padding: 14px;
             margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 12px;
+            color: #1E293B !important;
         }
         .task-card.overdue {
             border-left: 3px solid #EF4444;
