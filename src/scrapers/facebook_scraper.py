@@ -196,6 +196,7 @@ class FacebookScraper:
             return Lead(
                 id=f"fb_page_{page_id}",
                 source=LeadSource.FACEBOOK,
+                title=name or page.get("name", "Facebook Page"),
                 company=name,
                 phone=page.get("phone"),
                 website=page.get("website"),
@@ -203,6 +204,7 @@ class FacebookScraper:
                 industry=page.get("category"),
                 content=page.get("about", ""),
                 url=f"https://facebook.com/{page_id}",
+                keywords_matched=[],
                 found_at=datetime.now()
             )
         except Exception as e:
