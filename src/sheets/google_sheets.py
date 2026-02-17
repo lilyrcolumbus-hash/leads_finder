@@ -102,44 +102,45 @@ class GoogleSheetsSync:
     def _lead_to_row(self, lead: Lead) -> Dict[str, Any]:
         """Convert a Lead to a flat dict matching spreadsheet columns.
 
-        Columns: Negocio, Telefono, Email, Website, Direccion, Ciudad,
-                 Rating, Reviews, Tipo de Negocio, Pain Score, Pain Summary,
-                 AI Score, Fuente, URL
+        Columns: Business, Phone, Email, Website, Address, City,
+                 Rating, Reviews, Business Type, Pain Score, Pain Summary,
+                 AI Score, Source, URL
         """
-        negocio = lead.company or lead.title or lead.name or lead.username or ""
+        business = lead.company or lead.title or lead.name or lead.username or ""
         email = lead.email or ""
         # Skip placeholder emails
         if email.endswith("@leadgen.placeholder"):
             email = ""
 
         # Extract city from address or location (e.g., "123 Main St, Miami FL" -> "Miami FL")
-        ciudad = lead.location or ""
-        if not ciudad and lead.address:
+        city = lead.location or ""
+        if not city and lead.address:
             parts = lead.address.split(",")
             if len(parts) >= 2:
-                ciudad = parts[-1].strip()
+                city = parts[-1].strip()
 
         return {
-            "negocio": negocio,
-            "telefono": lead.phone or "",
+            "business": business,
+            "phone": lead.phone or "",
             "email": email,
             "website": lead.website or "",
-            "direccion": lead.address or "",
-            "ciudad": ciudad,
+            "address": lead.address or "",
+            "city": city,
             "rating": lead.rating or "",
             "reviews": lead.review_count or "",
-            "tipo_negocio": lead.business_type or lead.industry or "",
+            "business_type": lead.business_type or lead.industry or "",
             "pain_score": lead.pain_score or "",
             "pain_summary": lead.pain_summary or "",
             "ai_score": round((lead.ai_score or 0) * 100) if lead.ai_score else "",
-            "fuente": lead.source.value,
+            "source": lead.source.value,
             "url": lead.url,
         }
 
     def _lead_to_contact_row(self, lead: Lead) -> Dict[str, Any]:
         """Convert a Lead to a simplified contact row with basic data only.
 
-        Columns: Negocio, Email, Telefono, Website, Direccion, Rating, Reviews, Industria
+        Columns: Name, Email, Phone, Company, Website, Address, Industry,
+                 Rating, Source, URL, Pain Score, AI Score
 
         Use with apps_script_contacts.js template.
         """
@@ -148,14 +149,18 @@ class GoogleSheetsSync:
             email = ""
 
         return {
-            "negocio": lead.company or lead.title or lead.name or "",
+            "name": lead.company or lead.title or lead.name or "",
             "email": email,
-            "telefono": lead.phone or "",
+            "phone": lead.phone or "",
+            "company": lead.company or "",
             "website": lead.website or "",
-            "direccion": lead.address or lead.location or "",
+            "address": lead.address or lead.location or "",
+            "industry": lead.industry or lead.business_type or "",
             "rating": lead.rating or "",
-            "reviews": lead.review_count or "",
-            "industria": lead.industry or lead.business_type or "",
+            "source": lead.source.value,
+            "url": lead.url,
+            "pain_score": lead.pain_score or "",
+            "ai_score": round((lead.ai_score or 0) * 100) if lead.ai_score else "",
         }
 
     def _has_contact_info(self, lead: Lead) -> bool:
@@ -235,7 +240,7 @@ class GoogleSheetsSync:
         """Send leads as simplified contact rows (basic data only).
 
         Uses _lead_to_contact_row() for a simpler format:
-        Negocio, Email, Telefono, Website, Direccion, Rating, Reviews, Industria
+        Name, Email, Phone, Company, Website, Address, Industry, Rating
 
         Args:
             leads: Leads to send.

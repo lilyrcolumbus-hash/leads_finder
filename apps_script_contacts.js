@@ -76,10 +76,10 @@ function isDuplicate(sheet, lead) {
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return false;
 
-  var phone = (lead.telefono || "").trim();
-  var empresa = (lead.empresa || lead.nombre || "").trim().toLowerCase();
+  var phone = (lead.phone || "").trim();
+  var company = (lead.company || lead.name || "").trim().toLowerCase();
 
-  if (!phone && !empresa) return false;
+  if (!phone && !company) return false;
 
   // Columns: Name(1), Email(2), Phone(3), Company(4)
   var data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
@@ -89,7 +89,7 @@ function isDuplicate(sheet, lead) {
     var existingCompany = (data[i][3] || data[i][0] || "").toString().trim().toLowerCase();
 
     if (phone && existingPhone && phone === existingPhone) return true;
-    if (empresa && existingCompany && empresa === existingCompany) return true;
+    if (company && existingCompany && company === existingCompany) return true;
   }
 
   return false;
@@ -98,8 +98,8 @@ function isDuplicate(sheet, lead) {
 /**
  * POST handler - receives leads/contacts from the Python app.
  *
- * Expects JSON body: { "leads": [ { nombre, email, telefono, empresa, ... }, ... ] }
- * Field names match Python _lead_to_row() output.
+ * Expects JSON body: { "leads": [ { name, email, phone, company, ... }, ... ] }
+ * Field names match Python _lead_to_contact_row() output.
  */
 function doPost(e) {
   try {
@@ -125,15 +125,15 @@ function doPost(e) {
       }
 
       sheet.appendRow([
-        lead.nombre || "",
+        lead.name || "",
         lead.email || "",
-        lead.telefono || "",
-        lead.empresa || "",
+        lead.phone || "",
+        lead.company || "",
         lead.website || "",
-        lead.direccion || "",
-        lead.industria || "",
+        lead.address || "",
+        lead.industry || "",
         lead.rating || "",
-        lead.fuente || "",
+        lead.source || "",
         lead.url || "",
         lead.pain_score || "",
         lead.ai_score || "",

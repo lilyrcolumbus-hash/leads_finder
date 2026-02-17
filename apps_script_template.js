@@ -8,7 +8,7 @@
  * Features:
  * - Auto-creates sheet tabs by industry (e.g., "Plumbers", "Dentists")
  * - Adds formatted column headers automatically
- * - Includes Ciudad (city) column for multi-location filtering
+ * - Includes City column for multi-location filtering
  * - Auto-filter enabled on all columns (dropdown arrows on headers)
  * - Falls back to "Leads" tab if no sheet_name provided
  *
@@ -26,9 +26,9 @@
 
 // Column headers (must match the data sent from the Python app)
 var HEADERS = [
-  "Negocio", "Telefono", "Email", "Website", "Direccion", "Ciudad",
-  "Rating", "Reviews", "Tipo de Negocio", "Pain Score", "Pain Summary",
-  "AI Score", "Fuente", "URL", "Fecha"
+  "Business", "Phone", "Email", "Website", "Address", "City",
+  "Rating", "Reviews", "Business Type", "Pain Score", "Pain Summary",
+  "AI Score", "Source", "URL", "Date"
 ];
 
 /**
@@ -50,21 +50,21 @@ function getOrCreateSheet(name) {
     headerRange.setFontColor("#ffffff");
     sheet.setFrozenRows(1);
     // Set column widths for readability
-    sheet.setColumnWidth(1, 200);  // Negocio
-    sheet.setColumnWidth(2, 130);  // Telefono
+    sheet.setColumnWidth(1, 200);  // Business
+    sheet.setColumnWidth(2, 130);  // Phone
     sheet.setColumnWidth(3, 200);  // Email
     sheet.setColumnWidth(4, 200);  // Website
-    sheet.setColumnWidth(5, 250);  // Direccion
-    sheet.setColumnWidth(6, 130);  // Ciudad
+    sheet.setColumnWidth(5, 250);  // Address
+    sheet.setColumnWidth(6, 130);  // City
     sheet.setColumnWidth(7, 70);   // Rating
     sheet.setColumnWidth(8, 70);   // Reviews
-    sheet.setColumnWidth(9, 130);  // Tipo de Negocio
+    sheet.setColumnWidth(9, 130);  // Business Type
     sheet.setColumnWidth(10, 90);  // Pain Score
     sheet.setColumnWidth(11, 250); // Pain Summary
     sheet.setColumnWidth(12, 80);  // AI Score
-    sheet.setColumnWidth(13, 110); // Fuente
+    sheet.setColumnWidth(13, 110); // Source
     sheet.setColumnWidth(14, 250); // URL
-    sheet.setColumnWidth(15, 150); // Fecha
+    sheet.setColumnWidth(15, 150); // Date
     // Enable filter dropdowns on all columns
     var filterRange = sheet.getRange(1, 1, 1, HEADERS.length);
     filterRange.createFilter();
@@ -96,19 +96,19 @@ function doPost(e) {
     for (var i = 0; i < leads.length; i++) {
       var lead = leads[i];
       sheet.appendRow([
-        lead.negocio || "",
-        lead.telefono || "",
+        lead.business || "",
+        lead.phone || "",
         lead.email || "",
         lead.website || "",
-        lead.direccion || "",
-        lead.ciudad || "",
+        lead.address || "",
+        lead.city || "",
         lead.rating || "",
         lead.reviews || "",
-        lead.tipo_negocio || "",
+        lead.business_type || "",
         lead.pain_score || "",
         lead.pain_summary || "",
         lead.ai_score || "",
-        lead.fuente || "",
+        lead.source || "",
         lead.url || "",
         new Date().toLocaleString()
       ]);
