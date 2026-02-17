@@ -127,19 +127,21 @@ function menuHighlightEmails() {
  * If the tab doesn't exist, creates it with formatted headers and filters.
  *
  * @param {string} name - The tab name.
+ * @param {string[]} [customHeaders] - Optional custom headers. Falls back to HEADERS.
  * @return {Sheet} The existing or newly created sheet.
  */
-function getOrCreateSheet(name) {
+function getOrCreateSheet(name, customHeaders) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(name);
+  var headers = customHeaders || HEADERS;
 
   if (!sheet) {
     sheet = ss.insertSheet(name);
     // Write headers in the first row
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    applyHeaderFormatting_(sheet);
-    applyColumnWidths_(sheet);
-    applyFilters_(sheet);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    applyHeaderFormatting_(sheet, headers.length);
+    applyColumnWidths_(sheet, headers.length);
+    applyFilters_(sheet, headers.length);
   }
 
   return sheet;
@@ -147,14 +149,19 @@ function getOrCreateSheet(name) {
 
 /**
  * Format the header row: bold, colored background, frozen.
+ *
+ * @param {Sheet} sheet - The sheet to format.
+ * @param {number} [numCols] - Number of columns. Defaults to HEADERS.length.
  */
-function applyHeaderFormatting_(sheet) {
+function applyHeaderFormatting_(sheet, numCols) {
+  numCols = numCols || HEADERS.length;
+
   // Ensure headers exist
   if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.getRange(1, 1, 1, numCols).setValues([HEADERS.slice(0, numCols)]);
   }
 
-  var headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
+  var headerRange = sheet.getRange(1, 1, 1, numCols);
   headerRange.setFontWeight("bold");
   headerRange.setBackground(HEADER_BG_COLOR);
   headerRange.setFontColor(HEADER_FONT_COLOR);
@@ -164,31 +171,33 @@ function applyHeaderFormatting_(sheet) {
 
 /**
  * Set column widths for readability.
+ *
+ * @param {Sheet} sheet - The sheet to format.
+ * @param {number} [numCols] - Number of columns. Defaults to HEADERS.length.
  */
-function applyColumnWidths_(sheet) {
-  sheet.setColumnWidth(1, 200);   // Business
-  sheet.setColumnWidth(2, 130);   // Phone
-  sheet.setColumnWidth(3, 200);   // Email
-  sheet.setColumnWidth(4, 200);   // Website
-  sheet.setColumnWidth(5, 250);   // Address
-  sheet.setColumnWidth(6, 130);   // City
-  sheet.setColumnWidth(7, 70);    // Rating
-  sheet.setColumnWidth(8, 70);    // Reviews
-  sheet.setColumnWidth(9, 130);   // Business Type
-  sheet.setColumnWidth(10, 90);   // Pain Score
-  sheet.setColumnWidth(11, 250);  // Pain Summary
-  sheet.setColumnWidth(12, 80);   // AI Score
-  sheet.setColumnWidth(13, 110);  // Source
-  sheet.setColumnWidth(14, 250);  // URL
-  sheet.setColumnWidth(15, 150);  // Date
+function applyColumnWidths_(sheet, numCols) {
+  numCols = numCols || HEADERS.length;
+
+  // Default widths per column index (for legacy HEADERS)
+  var defaultWidths = [200, 130, 200, 200, 250, 130, 70, 70, 130, 90, 250, 80, 110, 250, 150];
+
+  for (var i = 0; i < numCols; i++) {
+    var width = (i < defaultWidths.length) ? defaultWidths[i] : 150;
+    sheet.setColumnWidth(i + 1, width);
+  }
 }
 
 /**
  * Enable (or re-enable) dropdown filter arrows on the header row.
  * Removes existing filter first to avoid conflicts, then creates a new one
  * covering all data rows.
+ *
+ * @param {Sheet} sheet - The sheet to apply filters to.
+ * @param {number} [numCols] - Number of columns. Defaults to HEADERS.length.
  */
-function applyFilters_(sheet) {
+function applyFilters_(sheet, numCols) {
+  numCols = numCols || HEADERS.length;
+
   // Remove any existing filter
   var existingFilter = sheet.getFilter();
   if (existingFilter) {
@@ -196,7 +205,7 @@ function applyFilters_(sheet) {
   }
 
   var lastRow = Math.max(sheet.getLastRow(), 1);
-  var filterRange = sheet.getRange(1, 1, lastRow, HEADERS.length);
+  var filterRange = sheet.getRange(1, 1, lastRow, numCols);
   filterRange.createFilter();
 }
 
@@ -211,20 +220,28 @@ function applyFilters_(sheet) {
  * This allows fast O(1) lookups when inserting new leads.
  *
  * @param {Sheet} sheet - The sheet to scan.
+ * @param {number} [bizCol]   - 0-based column index for business name. Default 0.
+ * @param {number} [phoneCol] - 0-based column index for phone. Default 1.
+ * @param {number} [emailCol] - 0-based column index for email. Default 2.
  * @return {Object} A plain object used as a Set (keys = duplicate strings).
  */
-function buildDuplicateIndex_(sheet) {
+function buildDuplicateIndex_(sheet, bizCol, phoneCol, emailCol) {
+  bizCol   = (bizCol   != null) ? bizCol   : 0;
+  phoneCol = (phoneCol != null) ? phoneCol : 1;
+  emailCol = (emailCol != null) ? emailCol : 2;
+
   var index = {};
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return index; // Only headers or empty
 
-  // Read columns: Business (1), Phone (2), Email (3)
-  var data = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+  // Read all columns to support dynamic positions
+  var maxCol = Math.max(bizCol, phoneCol, emailCol) + 1;
+  var data = sheet.getRange(2, 1, lastRow - 1, maxCol).getValues();
 
   for (var i = 0; i < data.length; i++) {
-    var business = String(data[i][0]).toLowerCase().trim();
-    var phone    = String(data[i][1]).trim();
-    var email    = String(data[i][2]).toLowerCase().trim();
+    var business = String(data[i][bizCol]).toLowerCase().trim();
+    var phone    = String(data[i][phoneCol]).trim();
+    var email    = String(data[i][emailCol]).toLowerCase().trim();
 
     // Key by business+phone
     if (business && phone) {
@@ -303,21 +320,36 @@ function addToIndex_(index, business, phone, email) {
  * Highlight all data rows that have an email address with a green background.
  * Rows without email keep a white background.
  *
+ * Detects the email column dynamically by reading the header row.
+ *
  * @param {Sheet} sheet - The sheet to process.
  */
 function highlightRowsWithEmail_(sheet) {
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return; // No data rows
 
+  // Find the email column dynamically from the header row
+  var numCols = sheet.getLastColumn();
+  if (numCols === 0) return;
+  var headerValues = sheet.getRange(1, 1, 1, numCols).getValues()[0];
+  var emailColIdx = -1;
+  for (var h = 0; h < headerValues.length; h++) {
+    if (String(headerValues[h]).toLowerCase().trim() === "email") {
+      emailColIdx = h + 1; // 1-based
+      break;
+    }
+  }
+  if (emailColIdx < 0) return; // No Email column found
+
   var numRows = lastRow - 1;
-  var emailValues = sheet.getRange(2, COL_EMAIL, numRows, 1).getValues();
-  var fullRange   = sheet.getRange(2, 1, numRows, HEADERS.length);
+  var emailValues = sheet.getRange(2, emailColIdx, numRows, 1).getValues();
+  var fullRange   = sheet.getRange(2, 1, numRows, numCols);
   var backgrounds = fullRange.getBackgrounds();
 
   for (var i = 0; i < numRows; i++) {
     var email = String(emailValues[i][0]).trim();
     var color = (email && email !== "") ? EMAIL_HIGHLIGHT_COLOR : "#ffffff";
-    for (var j = 0; j < HEADERS.length; j++) {
+    for (var j = 0; j < numCols; j++) {
       backgrounds[i][j] = color;
     }
   }
@@ -345,25 +377,45 @@ function doPost(e) {
     var leads = data.leads || [];
     var sheetName = data.sheet_name || "Leads";
 
-    var sheet = getOrCreateSheet(sheetName);
+    // Support custom headers and column keys from Python
+    var customHeaders = data.headers || null;
+    var columnKeys    = data.column_keys || null;
+    var headers       = customHeaders || HEADERS;
+    var numCols       = headers.length;
+
+    var sheet = getOrCreateSheet(sheetName, customHeaders);
 
     // If sheet exists but has no rows (legacy empty), add headers
     if (sheet.getLastRow() === 0) {
-      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-      applyHeaderFormatting_(sheet);
+      sheet.getRange(1, 1, 1, numCols).setValues([headers]);
+      applyHeaderFormatting_(sheet, numCols);
+    }
+
+    // Determine which fields to use for duplicate detection
+    // For custom column_keys, find indices of business/name, phone, email
+    var bizKey   = "business";
+    var phoneKey = "phone";
+    var emailKey = "email";
+    if (columnKeys) {
+      // Spreadsheet format uses "business_name" instead of "business"
+      if (columnKeys.indexOf("business_name") >= 0) bizKey = "business_name";
     }
 
     // Build duplicate index from existing data
-    var dupIndex = buildDuplicateIndex_(sheet);
+    // Find the column positions for duplicate detection in the sheet
+    var bizCol   = columnKeys ? columnKeys.indexOf(bizKey) : 0;
+    var phoneCol = columnKeys ? columnKeys.indexOf(phoneKey) : 1;
+    var emailCol = columnKeys ? columnKeys.indexOf(emailKey) : 2;
+    var dupIndex = buildDuplicateIndex_(sheet, bizCol, phoneCol, emailCol);
 
     var added = 0;
     var skipped = 0;
 
     for (var i = 0; i < leads.length; i++) {
       var lead = leads[i];
-      var business = lead.business || "";
-      var phone    = lead.phone || "";
-      var email    = lead.email || "";
+      var business = lead[bizKey] || "";
+      var phone    = lead[phoneKey] || "";
+      var email    = lead[emailKey] || "";
 
       // Skip duplicates
       if (isDuplicate_(dupIndex, business, phone, email)) {
@@ -371,30 +423,40 @@ function doPost(e) {
         continue;
       }
 
-      var row = [
-        business,
-        phone,
-        email,
-        lead.website || "",
-        lead.address || "",
-        lead.city || "",
-        lead.rating || "",
-        lead.reviews || "",
-        lead.business_type || "",
-        lead.pain_score || "",
-        lead.pain_summary || "",
-        lead.ai_score || "",
-        lead.source || "",
-        lead.url || "",
-        new Date().toLocaleString()
-      ];
+      var row;
+      if (columnKeys) {
+        // Dynamic column mapping: build row from column_keys order
+        row = [];
+        for (var j = 0; j < columnKeys.length; j++) {
+          row.push(lead[columnKeys[j]] || "");
+        }
+      } else {
+        // Legacy format: fixed column order
+        row = [
+          business,
+          phone,
+          email,
+          lead.website || "",
+          lead.address || "",
+          lead.city || "",
+          lead.rating || "",
+          lead.reviews || "",
+          lead.business_type || "",
+          lead.pain_score || "",
+          lead.pain_summary || "",
+          lead.ai_score || "",
+          lead.source || "",
+          lead.url || "",
+          new Date().toLocaleString()
+        ];
+      }
 
       sheet.appendRow(row);
 
       // Highlight green if lead has email
       if (email) {
         var newRow = sheet.getLastRow();
-        sheet.getRange(newRow, 1, 1, HEADERS.length).setBackground(EMAIL_HIGHLIGHT_COLOR);
+        sheet.getRange(newRow, 1, 1, numCols).setBackground(EMAIL_HIGHLIGHT_COLOR);
       }
 
       // Update the duplicate index for subsequent leads in this batch
@@ -404,7 +466,7 @@ function doPost(e) {
 
     // Re-apply filters to include new rows
     if (added > 0) {
-      applyFilters_(sheet);
+      applyFilters_(sheet, numCols);
     }
 
     return ContentService

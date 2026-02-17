@@ -36,6 +36,18 @@ class GoogleSheetsSync:
 
     BATCH_SIZE = 10
 
+    # Spreadsheet page column config (matches web app display)
+    SPREADSHEET_HEADERS = [
+        "Date", "Business Name", "Industry", "Email", "Phone",
+        "Address", "Website", "Rating", "Software Needs",
+        "Gemini Analysis", "Has Website", "Has Social Media",
+    ]
+    SPREADSHEET_KEYS = [
+        "date", "business_name", "industry", "email", "phone",
+        "address", "website", "rating", "software_needs",
+        "gemini_analysis", "has_website", "has_social_media",
+    ]
+
     def __init__(self, webhook_url: Optional[str] = None, batch_size: int = 10):
         """Initialize Google Sheets sync.
 
@@ -163,6 +175,32 @@ class GoogleSheetsSync:
             "ai_score": round((lead.ai_score or 0) * 100) if lead.ai_score else "",
         }
 
+    def _lead_to_spreadsheet_row(self, lead: Lead) -> Dict[str, Any]:
+        """Convert a Lead to a row matching the Spreadsheet page column format.
+
+        Columns: Date, Business Name, Industry, Email, Phone, Address,
+                 Website, Rating, Software Needs, Gemini Analysis,
+                 Has Website, Has Social Media
+        """
+        email = lead.email or ""
+        if email.endswith("@leadgen.placeholder"):
+            email = ""
+
+        return {
+            "date": lead.found_at.strftime("%Y-%m-%d") if lead.found_at else "",
+            "business_name": lead.company or lead.title or lead.name or "",
+            "industry": lead.industry or lead.business_type or "",
+            "email": email,
+            "phone": lead.phone or "",
+            "address": lead.address or lead.location or "",
+            "website": lead.website or "",
+            "rating": lead.rating or "",
+            "software_needs": lead.software_needs or "",
+            "gemini_analysis": lead.gemini_analysis or "",
+            "has_website": "Yes" if lead.has_website else ("No" if lead.has_website is False else ""),
+            "has_social_media": "Yes" if lead.has_social_media else ("No" if lead.has_social_media is False else ""),
+        }
+
     def _has_contact_info(self, lead: Lead) -> bool:
         """Check if lead has any useful contact info (email, phone, or website)."""
         if lead.email and not lead.email.endswith("@leadgen.placeholder"):
@@ -259,14 +297,47 @@ class GoogleSheetsSync:
 
         return self._post_leads(valid_leads, contact_format=True, sheet_name=sheet_name)
 
+    def send_spreadsheet_leads(self, leads: List[Lead], sheet_name: Optional[str] = None) -> Dict[str, int]:
+        """Send leads using the Spreadsheet page column format.
+
+        Uses _lead_to_spreadsheet_row() for columns that match the web app:
+        Date, Business Name, Industry, Email, Phone, Address, Website,
+        Rating, Software Needs, Gemini Analysis, Has Website, Has Social Media
+
+        Also sends custom headers and column keys so the Apps Script creates
+        the tab with the correct column names.
+
+        Args:
+            leads: Leads to send.
+            sheet_name: Target sheet tab name (e.g., "Dentist"). Required.
+
+        Returns:
+            Dict with 'sent' and 'failed' counts.
+        """
+        valid_leads = [l for l in leads if self._has_contact_info(l)]
+        skipped = len(leads) - len(valid_leads)
+        if skipped:
+            logger.info(f"Skipped {skipped} leads without any contact info")
+
+        if not valid_leads:
+            return {"sent": 0, "failed": 0}
+
+        return self._post_leads(
+            valid_leads,
+            spreadsheet_format=True,
+            sheet_name=sheet_name,
+        )
+
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
-    def _post_leads(self, leads: List[Lead], contact_format: bool = False, sheet_name: Optional[str] = None) -> Dict[str, int]:
+    def _post_leads(self, leads: List[Lead], contact_format: bool = False, sheet_name: Optional[str] = None, spreadsheet_format: bool = False) -> Dict[str, int]:
         """POST leads to the Apps Script web app.
 
         Args:
             leads: Leads to send.
             contact_format: If True, use simplified contact row format.
             sheet_name: Target sheet tab name. Defaults to "Leads" on the Apps Script side.
+            spreadsheet_format: If True, use Spreadsheet page column format
+                with custom headers sent in payload.
 
         Returns:
             Dict with 'sent' and 'failed' counts.
@@ -275,13 +346,18 @@ class GoogleSheetsSync:
             logger.warning("Google Sheets webhook URL not configured")
             return {"sent": 0, "failed": len(leads)}
 
-        if contact_format:
+        if spreadsheet_format:
+            rows = [self._lead_to_spreadsheet_row(lead) for lead in leads]
+        elif contact_format:
             rows = [self._lead_to_contact_row(lead) for lead in leads]
         else:
             rows = [self._lead_to_row(lead) for lead in leads]
         payload = {"leads": rows}
         if sheet_name:
             payload["sheet_name"] = sheet_name
+        if spreadsheet_format:
+            payload["headers"] = self.SPREADSHEET_HEADERS
+            payload["column_keys"] = self.SPREADSHEET_KEYS
 
         try:
             response = self.client.post(

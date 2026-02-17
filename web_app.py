@@ -10467,16 +10467,16 @@ def show_spreadsheet():
 
         progress.progress(0.95)
 
-        # Step 3: Auto-sync to Google Sheets
+        # Step 3: Auto-sync to Google Sheets (new tab per business type)
         sheets_sync = GoogleSheetsSync()
         if sheets_sync.is_configured():
-            status.info("Sending leads to Google Sheets...")
+            tab_name = sp_business.strip().title() if sp_business else "Leads"
+            status.info(f"Sending leads to Google Sheets tab '{tab_name}'...")
             try:
-                with sheets_sync:
-                    sheets_sync.add_leads(leads)
-                stats = sheets_sync.get_stats()
-                if stats['total_sent'] > 0:
-                    st.success(f"Google Sheets: {stats['total_sent']} leads sent")
+                result = sheets_sync.send_spreadsheet_leads(leads, sheet_name=tab_name)
+                if result['sent'] > 0:
+                    st.success(f"Google Sheets: {result['sent']} leads sent to tab '{tab_name}'")
+                sheets_sync.client.close()
             except Exception as e:
                 st.warning(f"Sheets sync: {str(e)[:50]}")
 
