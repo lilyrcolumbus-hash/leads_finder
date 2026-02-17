@@ -9,6 +9,7 @@
  * - Auto-creates sheet tabs by industry (e.g., "Plumbers", "Dentists")
  * - Adds formatted column headers automatically
  * - Includes Ciudad (city) column for multi-location filtering
+ * - Auto-filter enabled on all columns (dropdown arrows on headers)
  * - Falls back to "Leads" tab if no sheet_name provided
  *
  * Setup:
@@ -64,6 +65,9 @@ function getOrCreateSheet(name) {
     sheet.setColumnWidth(13, 110); // Fuente
     sheet.setColumnWidth(14, 250); // URL
     sheet.setColumnWidth(15, 150); // Fecha
+    // Enable filter dropdowns on all columns
+    var filterRange = sheet.getRange(1, 1, 1, HEADERS.length);
+    filterRange.createFilter();
   }
 
   return sheet;
