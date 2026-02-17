@@ -240,6 +240,27 @@ def main():
     else:
         console.print("\n[dim]6. Google Sheets no configurado (omitido)[/dim]")
 
+    # ── Step 7: Export CSV (always works) ───────────────────
+    csv_path = f"leads_{business_type}_{city.replace(', ', '_').replace(' ', '_')}.csv"
+    console.print(f"\n[bold]7. Exportando CSV...[/bold]")
+    import csv
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Negocio", "Email", "Telefono", "Website", "Direccion", "Rating", "Reviews", "Industria", "Dolor"])
+        for lead in leads:
+            writer.writerow([
+                lead.company or lead.title or "",
+                lead.email or "",
+                lead.phone or "",
+                lead.website or "",
+                lead.address or lead.location or "",
+                lead.rating or "",
+                lead.review_count or "",
+                lead.industry or lead.business_type or "",
+                "SI" if lead.has_pain else "NO",
+            ])
+    console.print(f"  [bold green]CSV guardado: {csv_path}[/bold green]")
+
     # ── Summary ─────────────────────────────────────────────
     console.print(f"\n[bold cyan]{'═' * 50}[/bold cyan]")
     console.print(f"  Negocios encontrados:  [bold]{len(leads)}[/bold]")

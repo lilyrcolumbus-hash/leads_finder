@@ -86,8 +86,13 @@ class GoogleSheetsSync:
             if response.status_code == 200:
                 try:
                     data = response.json()
+                    if data.get("status") == "error":
+                        return {"ok": False, "message": f"Apps Script error: {data.get('message', 'unknown')}"}
                     return {"ok": True, "message": data.get("message", "Connected")}
                 except Exception:
+                    body_preview = response.text[:200]
+                    if "<html" in body_preview.lower() or "<!doctype" in body_preview.lower():
+                        return {"ok": False, "message": "Got HTML instead of JSON - proxy may be blocking script.google.com"}
                     return {"ok": True, "message": "Connected (status 200)"}
             else:
                 return {"ok": False, "message": f"HTTP {response.status_code}"}
@@ -269,6 +274,24 @@ class GoogleSheetsSync:
             )
 
             if response.status_code == 200:
+                # Apps Script always returns 200, check the actual response body
+                try:
+                    result_data = response.json()
+                    if result_data.get("status") == "error":
+                        self._total_failed += len(leads)
+                        error_msg = result_data.get("message", "Unknown Apps Script error")
+                        logger.error(f"Apps Script error: {error_msg}")
+                        return {"sent": 0, "failed": len(leads)}
+                except Exception:
+                    # Response isn't JSON - might be a proxy/redirect page
+                    body_preview = response.text[:200]
+                    if "<html" in body_preview.lower() or "<!doctype" in body_preview.lower():
+                        self._total_failed += len(leads)
+                        logger.error(f"Got HTML instead of JSON - proxy may be blocking script.google.com")
+                        return {"sent": 0, "failed": len(leads)}
+                    # Non-JSON 200 from Apps Script, assume OK
+                    pass
+
                 self._total_sent += len(leads)
                 logger.info(f"Sent {len(leads)} leads to Google Sheets (total: {self._total_sent})")
                 return {"sent": len(leads), "failed": 0}
