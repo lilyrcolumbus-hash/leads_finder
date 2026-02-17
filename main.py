@@ -48,21 +48,21 @@ console = Console()
 logger = setup_logger("main")
 db = LeadDatabase()  # SQLite database for local persistence
 
-# Spanish names for business types (API English name -> display / sheet tab name)
-BUSINESS_TYPE_SPANISH = {
-    "plumber": {"display": "Plomero", "tab": "Plomeros"},
-    "electrician": {"display": "Electricista", "tab": "Electricistas"},
-    "hvac": {"display": "HVAC / Climatizacion", "tab": "HVAC"},
-    "dentist": {"display": "Dentista", "tab": "Dentistas"},
-    "lawyer": {"display": "Abogado", "tab": "Abogados"},
-    "accountant": {"display": "Contador", "tab": "Contadores"},
-    "real_estate_agent": {"display": "Agente Inmobiliario", "tab": "Agentes Inmobiliarios"},
-    "contractor": {"display": "Contratista", "tab": "Contratistas"},
-    "auto_repair": {"display": "Taller Mecanico", "tab": "Talleres Mecanicos"},
-    "veterinarian": {"display": "Veterinario", "tab": "Veterinarios"},
-    "medical_clinic": {"display": "Clinica Medica", "tab": "Clinicas Medicas"},
-    "salon": {"display": "Salon de Belleza", "tab": "Salones de Belleza"},
-    "restaurant": {"display": "Restaurante", "tab": "Restaurantes"},
+# Business type display names and sheet tab names (English)
+BUSINESS_TYPE_NAMES = {
+    "plumber": {"display": "Plumber", "tab": "Plumbers"},
+    "electrician": {"display": "Electrician", "tab": "Electricians"},
+    "hvac": {"display": "HVAC", "tab": "HVAC"},
+    "dentist": {"display": "Dentist", "tab": "Dentists"},
+    "lawyer": {"display": "Lawyer", "tab": "Lawyers"},
+    "accountant": {"display": "Accountant", "tab": "Accountants"},
+    "real_estate_agent": {"display": "Real Estate Agent", "tab": "Real Estate Agents"},
+    "contractor": {"display": "Contractor", "tab": "Contractors"},
+    "auto_repair": {"display": "Auto Repair", "tab": "Auto Repair"},
+    "veterinarian": {"display": "Veterinarian", "tab": "Veterinarians"},
+    "medical_clinic": {"display": "Medical Clinic", "tab": "Medical Clinics"},
+    "salon": {"display": "Salon", "tab": "Salons"},
+    "restaurant": {"display": "Restaurant", "tab": "Restaurants"},
 }
 
 
@@ -1055,8 +1055,8 @@ def menu_contacts_to_sheet():
     console.print("[bold]Selecciona industria:[/bold]")
     business_types = settings.google_maps_business_types
     for i, bt in enumerate(business_types, 1):
-        spanish = BUSINESS_TYPE_SPANISH.get(bt, {})
-        display_name = spanish.get("display", bt.replace("_", " ").title())
+        info = BUSINESS_TYPE_NAMES.get(bt, {})
+        display_name = info.get("display", bt.replace("_", " ").title())
         console.print(f"  [{i}] {display_name}")
     console.print(f"  [{len(business_types) + 1}] Otro (escribir manualmente)")
 
@@ -1072,10 +1072,10 @@ def menu_contacts_to_sheet():
             console.print("[yellow]Tipo de negocio vacio, cancelando[/yellow]")
             return
 
-    # Resolve Spanish display name and sheet tab name
-    spanish_info = BUSINESS_TYPE_SPANISH.get(selected_type, {})
-    display_name = spanish_info.get("display", selected_type.replace("_", " ").title())
-    sheet_tab_name = spanish_info.get("tab", selected_type.replace("_", " ").title())
+    # Resolve display name and sheet tab name
+    type_info = BUSINESS_TYPE_NAMES.get(selected_type, {})
+    display_name = type_info.get("display", selected_type.replace("_", " ").title())
+    sheet_tab_name = type_info.get("tab", selected_type.replace("_", " ").title())
 
     # ── 2. Select areas (multiple) ──
     console.print(f"\n[bold]Selecciona areas para buscar:[/bold]")
