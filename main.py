@@ -70,10 +70,11 @@ def display_main_menu() -> str:
     console.print("  [5] Ver estadisticas")
     console.print("  [6] Buscar lead")
     console.print("  [7] Configuracion")
+    console.print("  [8] [bold green]Contactos por industria/ciudad → Google Sheets[/bold green]")
     console.print("  [0] Salir")
     console.print()
 
-    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7"], default="1")
+    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8"], default="1")
 
 
 # ==================== 1. SCRAPING ====================
@@ -769,6 +770,141 @@ def menu_configuration():
     console.print("\n[dim]Edita el archivo .env para cambiar la configuracion[/dim]")
 
 
+# ==================== 8. CONTACTS TO GOOGLE SHEETS ====================
+
+def menu_contacts_to_sheet():
+    """Main option 8: Search business contacts by industry + city and send to Google Sheets."""
+    # Check Google Sheets config first
+    sheets = GoogleSheetsSync()
+    if not sheets.is_configured():
+        console.print("[red]Google Sheets no configurado. Agrega GOOGLE_SHEETS_WEBHOOK_URL en .env[/red]")
+        console.print("[dim]Ver apps_script_contacts.js para instrucciones de configuracion[/dim]")
+        return
+
+    console.print("\n[bold cyan]═══ CONTACTOS → GOOGLE SHEETS ═══[/bold cyan]")
+    console.print("[dim]Busca negocios por industria y ciudad, y envialos a tu Google Sheet[/dim]\n")
+
+    # Select business type / industry
+    console.print("[bold]Selecciona industria:[/bold]")
+    business_types = settings.google_maps_business_types
+    for i, bt in enumerate(business_types, 1):
+        console.print(f"  [{i}] {bt.replace('_', ' ').title()}")
+    console.print(f"  [{len(business_types) + 1}] Otro (escribir manualmente)")
+
+    type_choices = [str(i) for i in range(1, len(business_types) + 2)]
+    type_choice = Prompt.ask("Industria", choices=type_choices, default="1")
+    type_idx = int(type_choice) - 1
+
+    if type_idx < len(business_types):
+        selected_type = business_types[type_idx]
+    else:
+        selected_type = Prompt.ask("Escribe el tipo de negocio (ej: florist, gym, bakery)")
+        if not selected_type.strip():
+            console.print("[yellow]Tipo de negocio vacio, cancelando[/yellow]")
+            return
+
+    # Get city
+    console.print(f"\n[bold]Ciudad:[/bold]")
+    console.print("[dim]Ejemplos: Miami FL, Houston TX, New York NY, Austin TX[/dim]")
+    city = Prompt.ask("Escribe la ciudad")
+    if not city.strip():
+        console.print("[yellow]Ciudad vacia, cancelando[/yellow]")
+        return
+
+    # Confirm search
+    console.print(f"\n[cyan]Buscando: [bold]{selected_type.replace('_', ' ').title()}[/bold] en [bold]{city}[/bold][/cyan]")
+
+    if not Confirm.ask("Continuar?", default=True):
+        return
+
+    # Run Google Maps scraper
+    console.print(f"\n[bold green]Buscando negocios...[/bold green]")
+
+    try:
+        with GoogleMapsScraper() as scraper:
+            batch = scraper.scrape(location=city, category=selected_type)
+    except Exception as e:
+        console.print(f"[red]Error en la busqueda: {e}[/red]")
+        return
+
+    if not batch.leads:
+        console.print("[yellow]No se encontraron negocios. Intenta otra industria o ciudad.[/yellow]")
+        if batch.errors:
+            for err in batch.errors[:3]:
+                console.print(f"  [red]{err}[/red]")
+        return
+
+    # Show preview
+    leads = batch.leads
+    console.print(f"\n[green]Encontrados: {len(leads)} negocios[/green]")
+
+    # Display preview table
+    table = Table(title=f"{selected_type.replace('_', ' ').title()} en {city}", show_lines=True)
+    table.add_column("#", style="dim", width=4)
+    table.add_column("Negocio", style="green", max_width=30)
+    table.add_column("Telefono", style="cyan", max_width=18)
+    table.add_column("Email", style="yellow", max_width=25)
+    table.add_column("Rating", justify="center", width=7)
+    table.add_column("Reviews", justify="center", width=8)
+    table.add_column("Dolor", justify="center", width=8)
+
+    for i, lead in enumerate(leads[:15], 1):
+        pain_str = "[red]SI[/red]" if lead.has_pain else "[green]NO[/green]"
+        rating_str = f"{lead.rating:.1f}" if lead.rating else "-"
+        table.add_row(
+            str(i),
+            (lead.company or lead.title or "")[:30],
+            lead.phone or "-",
+            lead.email or "-",
+            rating_str,
+            str(lead.review_count or "-"),
+            pain_str
+        )
+
+    console.print(table)
+
+    if len(leads) > 15:
+        console.print(f"[dim]... y {len(leads) - 15} mas[/dim]")
+
+    # Summary stats
+    with_phone = sum(1 for l in leads if l.phone)
+    with_email = sum(1 for l in leads if l.email)
+    with_pain = sum(1 for l in leads if l.has_pain)
+    with_website = sum(1 for l in leads if l.website)
+
+    console.print(f"\n[bold]Resumen:[/bold]")
+    console.print(f"  Con telefono: [cyan]{with_phone}[/cyan]")
+    console.print(f"  Con email:    [cyan]{with_email}[/cyan]")
+    console.print(f"  Con website:  [cyan]{with_website}[/cyan]")
+    console.print(f"  Con dolor:    [red]{with_pain}[/red]")
+
+    # Confirm send to Google Sheets
+    if not Confirm.ask(f"\nEnviar {len(leads)} contactos a Google Sheets?", default=True):
+        # Still save to local DB
+        if Confirm.ask("Guardar en base de datos local?", default=True):
+            result = db.save_leads(leads)
+            console.print(f"[green]Guardados: {result['saved']} nuevos[/green]")
+        return
+
+    # Save to local database first
+    result = db.save_leads(leads)
+    console.print(f"[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
+
+    # Send to Google Sheets
+    console.print(f"\n[cyan]Enviando a Google Sheets...[/cyan]")
+    try:
+        with sheets:
+            sheets.add_leads(leads)
+
+        stats = sheets.get_stats()
+        console.print(f"[bold green]Enviados a Google Sheets: {stats['total_sent']} contactos[/bold green]")
+        console.print(f"[dim]Revisa tu Google Sheet para ver los resultados[/dim]")
+
+    except Exception as e:
+        console.print(f"[red]Error enviando a Google Sheets: {e}[/red]")
+        logger.error(f"Google Sheets sync error: {e}")
+
+
 # ==================== MAIN ====================
 
 def main():
@@ -820,6 +956,8 @@ def main():
                 menu_search()
             elif choice == "7":
                 menu_configuration()
+            elif choice == "8":
+                menu_contacts_to_sheet()
 
         except KeyboardInterrupt:
             console.print("\n\n[yellow]Operacion cancelada[/yellow]")
