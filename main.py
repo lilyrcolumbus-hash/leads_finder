@@ -1273,9 +1273,20 @@ def menu_contacts_to_sheet():
     result = db.save_leads(leads)
     console.print(f"\n[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados[/green]")
 
-    # Auto-sync to Google Sheets (industry tab)
+    # Auto-sync to Google Sheets (new tab per industry with Google Maps columns)
     if sheets_configured:
-        sync_to_google_sheets(leads, sheet_name=sheet_tab_name)
+        tab_info = f" (pestana: [bold]{sheet_tab_name}[/bold])"
+        console.print(f"\n[cyan]Enviando {len(leads)} leads a Google Sheets{tab_info}...[/cyan]")
+        try:
+            result = sheets.send_google_maps_leads(leads, sheet_name=sheet_tab_name)
+            console.print(f"[green]Google Sheets: {result['sent']} leads enviados a '{sheet_tab_name}'[/green]")
+            if result['failed']:
+                console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
+        except Exception as e:
+            console.print(f"[red]Error sincronizando Google Sheets: {e}[/red]")
+            logger.error(f"Google Sheets sync error: {e}")
+        finally:
+            sheets.client.close()
 
     # Offer CSV export
     if Confirm.ask("\nExportar tambien a CSV?", default=False):

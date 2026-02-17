@@ -48,6 +48,18 @@ class GoogleSheetsSync:
         "gemini_analysis", "has_website", "has_social_media",
     ]
 
+    # Google Maps / Places API column config (for CLI option 8)
+    GOOGLE_MAPS_HEADERS = [
+        "Business Name", "Phone", "Email", "Website", "Address",
+        "City", "Rating", "Reviews", "Business Type",
+        "Pain Score", "Pain Summary", "Date",
+    ]
+    GOOGLE_MAPS_KEYS = [
+        "business_name", "phone", "email", "website", "address",
+        "city", "rating", "reviews", "business_type",
+        "pain_score", "pain_summary", "date",
+    ]
+
     def __init__(self, webhook_url: Optional[str] = None, batch_size: int = 10):
         """Initialize Google Sheets sync.
 
@@ -124,12 +136,15 @@ class GoogleSheetsSync:
         if email.endswith("@leadgen.placeholder"):
             email = ""
 
-        # Extract city from address or location (e.g., "123 Main St, Miami FL" -> "Miami FL")
+        # Extract city from location (search city) or address
         city = lead.location or ""
         if not city and lead.address:
             parts = lead.address.split(",")
-            if len(parts) >= 2:
-                city = parts[-1].strip()
+            if len(parts) >= 3:
+                # "123 Main St, Miami, FL 33135, USA" → "Miami"
+                city = parts[-3].strip()
+            elif len(parts) >= 2:
+                city = parts[-2].strip()
 
         return {
             "business": business,
@@ -199,6 +214,41 @@ class GoogleSheetsSync:
             "gemini_analysis": lead.gemini_analysis or "",
             "has_website": "Yes" if lead.has_website else ("No" if lead.has_website is False else ""),
             "has_social_media": "Yes" if lead.has_social_media else ("No" if lead.has_social_media is False else ""),
+        }
+
+    def _lead_to_google_maps_row(self, lead: Lead) -> Dict[str, Any]:
+        """Convert a Lead to a row for Google Maps / Places API data.
+
+        Columns: Business Name, Phone, Email, Website, Address, City,
+                 Rating, Reviews, Business Type, Pain Score, Pain Summary, Date
+        """
+        email = lead.email or ""
+        if email.endswith("@leadgen.placeholder"):
+            email = ""
+
+        # Extract city from location (search city) or address
+        city = lead.location or ""
+        if not city and lead.address:
+            parts = lead.address.split(",")
+            if len(parts) >= 3:
+                # "123 Main St, Miami, FL 33135, USA" → "Miami"
+                city = parts[-3].strip()
+            elif len(parts) >= 2:
+                city = parts[-2].strip()
+
+        return {
+            "business_name": lead.company or lead.title or lead.name or "",
+            "phone": lead.phone or "",
+            "email": email,
+            "website": lead.website or "",
+            "address": lead.address or "",
+            "city": city,
+            "rating": lead.rating or "",
+            "reviews": lead.review_count or "",
+            "business_type": lead.business_type or lead.industry or "",
+            "pain_score": lead.pain_score or "",
+            "pain_summary": lead.pain_summary or "",
+            "date": lead.found_at.strftime("%Y-%m-%d") if lead.found_at else "",
         }
 
     def _has_contact_info(self, lead: Lead) -> bool:
@@ -328,8 +378,38 @@ class GoogleSheetsSync:
             sheet_name=sheet_name,
         )
 
+    def send_google_maps_leads(self, leads: List[Lead], sheet_name: Optional[str] = None) -> Dict[str, int]:
+        """Send Google Maps / Places API leads with dedicated column format.
+
+        Columns: Business Name, Phone, Email, Website, Address, City,
+                 Rating, Reviews, Business Type, Pain Score, Pain Summary, Date
+
+        Sends custom headers and column keys so the Apps Script creates
+        the tab with the correct column names.
+
+        Args:
+            leads: Leads to send.
+            sheet_name: Target sheet tab name (e.g., "Plomeros"). Required.
+
+        Returns:
+            Dict with 'sent' and 'failed' counts.
+        """
+        valid_leads = [l for l in leads if self._has_contact_info(l)]
+        skipped = len(leads) - len(valid_leads)
+        if skipped:
+            logger.info(f"Skipped {skipped} leads without any contact info")
+
+        if not valid_leads:
+            return {"sent": 0, "failed": 0}
+
+        return self._post_leads(
+            valid_leads,
+            google_maps_format=True,
+            sheet_name=sheet_name,
+        )
+
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
-    def _post_leads(self, leads: List[Lead], contact_format: bool = False, sheet_name: Optional[str] = None, spreadsheet_format: bool = False) -> Dict[str, int]:
+    def _post_leads(self, leads: List[Lead], contact_format: bool = False, sheet_name: Optional[str] = None, spreadsheet_format: bool = False, google_maps_format: bool = False) -> Dict[str, int]:
         """POST leads to the Apps Script web app.
 
         Args:
@@ -346,7 +426,9 @@ class GoogleSheetsSync:
             logger.warning("Google Sheets webhook URL not configured")
             return {"sent": 0, "failed": len(leads)}
 
-        if spreadsheet_format:
+        if google_maps_format:
+            rows = [self._lead_to_google_maps_row(lead) for lead in leads]
+        elif spreadsheet_format:
             rows = [self._lead_to_spreadsheet_row(lead) for lead in leads]
         elif contact_format:
             rows = [self._lead_to_contact_row(lead) for lead in leads]
@@ -355,7 +437,10 @@ class GoogleSheetsSync:
         payload = {"leads": rows}
         if sheet_name:
             payload["sheet_name"] = sheet_name
-        if spreadsheet_format:
+        if google_maps_format:
+            payload["headers"] = self.GOOGLE_MAPS_HEADERS
+            payload["column_keys"] = self.GOOGLE_MAPS_KEYS
+        elif spreadsheet_format:
             payload["headers"] = self.SPREADSHEET_HEADERS
             payload["column_keys"] = self.SPREADSHEET_KEYS
 

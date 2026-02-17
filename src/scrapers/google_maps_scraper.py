@@ -372,6 +372,9 @@ class GoogleMapsScraper(BaseScraper):
                 address=address,
                 website=website,
                 email=self.extract_email_from_website(website) if website else None,
+                # Location and industry (for Sheets sync)
+                location=location,
+                industry=business_type,
                 # Google Maps specific
                 rating=rating,
                 review_count=review_count,
