@@ -102,33 +102,38 @@ class GoogleSheetsSync:
     def _lead_to_row(self, lead: Lead) -> Dict[str, Any]:
         """Convert a Lead to a flat dict matching spreadsheet columns.
 
-        Columns: Nombre, Email, Telefono, Empresa, Website, Direccion,
-                 Industria, Rating, Fuente, URL, Pain Score, AI Score,
-                 Software Needs, Gemini Analysis, Has Website, Has Social Media
+        Columns: Negocio, Telefono, Email, Website, Direccion, Ciudad,
+                 Rating, Reviews, Tipo de Negocio, Pain Score, Pain Summary,
+                 AI Score, Fuente, URL
         """
-        name = lead.name or lead.company or lead.title or lead.username or ""
+        negocio = lead.company or lead.title or lead.name or lead.username or ""
         email = lead.email or ""
         # Skip placeholder emails
         if email.endswith("@leadgen.placeholder"):
             email = ""
 
+        # Extract city from address or location (e.g., "123 Main St, Miami FL" -> "Miami FL")
+        ciudad = lead.location or ""
+        if not ciudad and lead.address:
+            parts = lead.address.split(",")
+            if len(parts) >= 2:
+                ciudad = parts[-1].strip()
+
         return {
-            "nombre": name,
-            "email": email,
+            "negocio": negocio,
             "telefono": lead.phone or "",
-            "empresa": lead.company or lead.title or "",
+            "email": email,
             "website": lead.website or "",
-            "direccion": lead.address or lead.location or "",
-            "industria": lead.industry or lead.business_type or "",
+            "direccion": lead.address or "",
+            "ciudad": ciudad,
             "rating": lead.rating or "",
+            "reviews": lead.review_count or "",
+            "tipo_negocio": lead.business_type or lead.industry or "",
+            "pain_score": lead.pain_score or "",
+            "pain_summary": lead.pain_summary or "",
+            "ai_score": round((lead.ai_score or 0) * 100) if lead.ai_score else "",
             "fuente": lead.source.value,
             "url": lead.url,
-            "pain_score": lead.pain_score or "",
-            "ai_score": round((lead.ai_score or 0) * 100),
-            "software_needs": lead.software_needs or "",
-            "gemini_analysis": lead.gemini_analysis or "",
-            "has_website": "Yes" if lead.has_website else ("No" if lead.has_website is False else ""),
-            "has_social_media": "Yes" if lead.has_social_media else ("No" if lead.has_social_media is False else ""),
         }
 
     def _lead_to_contact_row(self, lead: Lead) -> Dict[str, Any]:
@@ -204,11 +209,14 @@ class GoogleSheetsSync:
         self._buffer.clear()
         return result
 
-    def send_leads(self, leads: List[Lead]) -> Dict[str, int]:
+    def send_leads(self, leads: List[Lead], sheet_name: Optional[str] = None) -> Dict[str, int]:
         """Send a list of leads directly (no buffering).
 
         Args:
             leads: Leads to send immediately.
+            sheet_name: Target sheet tab name (e.g., "Plumbers", "Dentists").
+                       Auto-creates the tab with headers if it doesn't exist.
+                       Defaults to "Leads" if not provided.
 
         Returns:
             Dict with 'sent' and 'failed' counts.
@@ -221,9 +229,9 @@ class GoogleSheetsSync:
         if not valid_leads:
             return {"sent": 0, "failed": 0}
 
-        return self._post_leads(valid_leads)
+        return self._post_leads(valid_leads, sheet_name=sheet_name)
 
-    def send_contacts(self, leads: List[Lead]) -> Dict[str, int]:
+    def send_contacts(self, leads: List[Lead], sheet_name: Optional[str] = None) -> Dict[str, int]:
         """Send leads as simplified contact rows (basic data only).
 
         Uses _lead_to_contact_row() for a simpler format:
@@ -231,6 +239,7 @@ class GoogleSheetsSync:
 
         Args:
             leads: Leads to send.
+            sheet_name: Target sheet tab name. Defaults to "Leads".
 
         Returns:
             Dict with 'sent' and 'failed' counts.
@@ -243,15 +252,16 @@ class GoogleSheetsSync:
         if not valid_leads:
             return {"sent": 0, "failed": 0}
 
-        return self._post_leads(valid_leads, contact_format=True)
+        return self._post_leads(valid_leads, contact_format=True, sheet_name=sheet_name)
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
-    def _post_leads(self, leads: List[Lead], contact_format: bool = False) -> Dict[str, int]:
+    def _post_leads(self, leads: List[Lead], contact_format: bool = False, sheet_name: Optional[str] = None) -> Dict[str, int]:
         """POST leads to the Apps Script web app.
 
         Args:
             leads: Leads to send.
             contact_format: If True, use simplified contact row format.
+            sheet_name: Target sheet tab name. Defaults to "Leads" on the Apps Script side.
 
         Returns:
             Dict with 'sent' and 'failed' counts.
@@ -265,6 +275,8 @@ class GoogleSheetsSync:
         else:
             rows = [self._lead_to_row(lead) for lead in leads]
         payload = {"leads": rows}
+        if sheet_name:
+            payload["sheet_name"] = sheet_name
 
         try:
             response = self.client.post(
