@@ -239,27 +239,27 @@ def send_to_hubspot(leads: List[Lead]) -> None:
         console.print(f"[red]Fallidos: {results['failed']}[/red]")
 
 
-def sync_to_google_sheets(leads: List[Lead]) -> None:
-    """Send leads to Google Sheets via Apps Script webhook (only leads with real emails)."""
+def sync_to_google_sheets(leads: List[Lead], sheet_name: Optional[str] = None) -> None:
+    """Send leads to Google Sheets via Apps Script webhook.
+
+    Sends all leads that have any useful contact info (name, phone, email, or website).
+
+    Args:
+        leads: Leads to sync.
+        sheet_name: Target sheet tab name (e.g., "Plomeros"). Defaults to "Leads".
+    """
     sheets = GoogleSheetsSync()
     if not sheets.is_configured():
         return
 
-    # Count leads with real emails upfront
-    with_email = sum(1 for l in leads if l.email and not l.email.endswith("@leadgen.placeholder"))
-    without_email = len(leads) - with_email
-
-    console.print(f"\n[cyan]Sincronizando leads a Google Sheets (solo con email real)...[/cyan]")
-    if without_email:
-        console.print(f"[yellow]  Omitiendo {without_email} leads sin email real[/yellow]")
+    tab_info = f" (pestana: [bold]{sheet_name}[/bold])" if sheet_name else ""
+    console.print(f"\n[cyan]Sincronizando {len(leads)} leads a Google Sheets{tab_info}...[/cyan]")
 
     try:
-        with sheets:
-            sheets.add_leads(leads)
-            # flush() is called automatically on __exit__
-
-        stats = sheets.get_stats()
-        console.print(f"[green]Google Sheets: {stats['total_sent']} enviados con email real[/green]")
+        result = sheets.send_leads(leads, sheet_name=sheet_name)
+        console.print(f"[green]Google Sheets: {result['sent']} leads enviados[/green]")
+        if result['failed']:
+            console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
 
     except Exception as e:
         console.print(f"[red]Error sincronizando Google Sheets: {e}[/red]")
@@ -547,6 +547,14 @@ def run_single_source(source: str) -> List[Lead]:
         # Auto email enrichment
         if leads:
             leads = run_email_enrichment(leads)
+
+        # Save to local database and auto-sync to Google Sheets
+        if leads:
+            console.print("\n[cyan]Guardando leads en base de datos local...[/cyan]")
+            result = db.save_leads(leads)
+            console.print(f"[green]Guardados: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
+
+            sync_to_google_sheets(leads)
 
         return leads
     except Exception as e:
@@ -1259,43 +1267,20 @@ def menu_contacts_to_sheet():
     console.print(f"  Con website:          [blue]{with_website}[/blue]")
     console.print(f"  Con email + telefono: [bold green]{with_both}[/bold green]")
 
-    # ── 8. Save / Export ──
-    console.print(f"\n[bold]Que quieres hacer con los resultados?[/bold]")
-    console.print("  [1] Guardar localmente + exportar CSV")
+    # ── 8. Auto-save and sync ──
+
+    # Always save to local DB
+    result = db.save_leads(leads)
+    console.print(f"\n[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados[/green]")
+
+    # Auto-sync to Google Sheets (industry tab)
     if sheets_configured:
-        console.print(f"  [2] Enviar a Google Sheets (pestana '[bold]{sheet_tab_name}[/bold]') + guardar local")
-        console.print(f"  [3] Todo (Google Sheets '[bold]{sheet_tab_name}[/bold]' + CSV + base de datos)")
-    console.print("  [0] No guardar")
+        sync_to_google_sheets(leads, sheet_name=sheet_tab_name)
 
-    save_choices = ["0", "1", "2", "3"] if sheets_configured else ["0", "1"]
-    save_choice = Prompt.ask("Opcion", choices=save_choices, default="3" if sheets_configured else "1")
-
-    if save_choice == "0":
-        console.print("[yellow]Resultados no guardados[/yellow]")
-        return
-
-    # Save to local DB
-    if save_choice in ("1", "2", "3"):
-        result = db.save_leads(leads)
-        console.print(f"[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados[/green]")
-
-    # Export CSV
-    if save_choice in ("1", "3"):
+    # Offer CSV export
+    if Confirm.ask("\nExportar tambien a CSV?", default=False):
         csv_path = db.export_to_csv(qualified_only=False)
         console.print(f"[green]CSV exportado: {csv_path}[/green]")
-
-    # Send to Google Sheets (tab named by industry in Spanish)
-    if save_choice in ("2", "3") and sheets_configured:
-        console.print(f"\n[cyan]Enviando {len(leads)} contactos a Google Sheets (pestana: [bold]{sheet_tab_name}[/bold])...[/cyan]")
-        try:
-            result = sheets.send_leads(leads, sheet_name=sheet_tab_name)
-            console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos a pestana '{sheet_tab_name}'[/bold green]")
-            if result['failed']:
-                console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
-            console.print(f"[dim]Revisa tu Google Sheet → pestana '{sheet_tab_name}' para ver los resultados[/dim]")
-        except Exception as e:
-            console.print(f"[red]Error enviando a Google Sheets: {e}[/red]")
-            logger.error(f"Google Sheets sync error: {e}")
 
 
 # ==================== MAIN ====================
