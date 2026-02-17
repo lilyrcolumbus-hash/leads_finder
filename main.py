@@ -152,6 +152,10 @@ def run_scraping() -> List[Lead]:
     elapsed = time.time() - start_time
     console.print(f"\n[cyan]Tiempo total: {elapsed:.1f} segundos[/cyan]")
 
+    # Auto email enrichment pipeline (crawl websites + Hunter.io + verify)
+    if all_leads:
+        all_leads = run_email_enrichment(all_leads)
+
     # Save leads to local database
     if all_leads:
         console.print("\n[cyan]Guardando leads en base de datos local...[/cyan]")
@@ -245,6 +249,230 @@ def sync_to_google_sheets(leads: List[Lead]) -> None:
         logger.error(f"Google Sheets sync error: {e}")
 
 
+# ==================== AUTO ENRICHMENT ====================
+
+def auto_enrich_emails(leads: List[Lead]) -> List[Lead]:
+    """Automatically enrich leads with emails by crawling business websites.
+
+    For every lead that has a ``website`` but no ``email``, crawls the website
+    (homepage + common contact pages) to extract a real business email.
+
+    Args:
+        leads: Leads to enrich.
+
+    Returns:
+        Same list with emails populated where found.
+    """
+    needs_email = [l for l in leads if l.website and not l.email]
+    if not needs_email:
+        return leads
+
+    console.print(f"\n[bold cyan]Buscando emails en websites de negocios ({len(needs_email)} sitios)...[/bold cyan]")
+
+    from src.scrapers.base_scraper import BaseScraper
+
+    # Create a lightweight helper that inherits all email-extraction logic
+    class _EmailCrawler(BaseScraper):
+        source = LeadSource.GOOGLE_SEARCH  # unused, just satisfies ABC
+        def scrape(self):
+            pass  # not used
+
+    crawler = _EmailCrawler()
+    enriched = 0
+
+    try:
+        for i, lead in enumerate(needs_email, 1):
+            try:
+                email = crawler.extract_email_from_website(lead.website)
+                if email:
+                    lead.email = email
+                    enriched += 1
+                    console.print(
+                        f"  [{i}/{len(needs_email)}] [green]{(lead.company or lead.title or '')[:35]}[/green] "
+                        f"-> {email}"
+                    )
+                else:
+                    console.print(
+                        f"  [{i}/{len(needs_email)}] [dim]{(lead.company or lead.title or '')[:35]}[/dim] "
+                        f"-> no encontrado"
+                    )
+            except Exception:
+                console.print(
+                    f"  [{i}/{len(needs_email)}] [dim]{(lead.company or lead.title or '')[:35]}[/dim] "
+                    f"-> error"
+                )
+            time.sleep(0.3)
+    finally:
+        crawler.close()
+
+    console.print(f"[green]Emails encontrados via website: {enriched}/{len(needs_email)}[/green]")
+    return leads
+
+
+def auto_enrich_with_hunter(leads: List[Lead]) -> List[Lead]:
+    """Use Hunter.io to find emails for leads still missing them.
+
+    Only runs if HUNTER_API_KEY is configured.  For each lead without an email,
+    calls Hunter.io's domain search / email finder.
+
+    Args:
+        leads: Leads to enrich.
+
+    Returns:
+        Same list with emails populated where Hunter found them.
+    """
+    if not settings.hunter_api_key:
+        return leads
+
+    needs_email = [
+        l for l in leads
+        if not l.email or l.email.endswith("@leadgen.placeholder")
+    ]
+    if not needs_email:
+        return leads
+
+    console.print(
+        f"\n[bold cyan]Buscando emails con Hunter.io ({len(needs_email)} leads)...[/bold cyan]"
+    )
+
+    enriched = 0
+    with HunterClient() as hunter:
+        if not hunter.is_configured():
+            return leads
+
+        for i, lead in enumerate(needs_email, 1):
+            try:
+                result = hunter.find_email_for_lead(
+                    url=lead.website or lead.url,
+                    company=lead.company,
+                    name=lead.name or lead.username,
+                )
+                if result:
+                    lead.email = result.email
+                    if result.first_name and result.last_name and not lead.name:
+                        lead.name = f"{result.first_name} {result.last_name}"
+                    if result.position and not lead.position:
+                        lead.position = result.position
+                    enriched += 1
+                    console.print(
+                        f"  [{i}/{len(needs_email)}] [green]{(lead.company or lead.title or '')[:35]}[/green] "
+                        f"-> {result.email} ({result.confidence}%)"
+                    )
+                else:
+                    console.print(
+                        f"  [{i}/{len(needs_email)}] [dim]{(lead.company or lead.title or '')[:35]}[/dim] "
+                        f"-> no encontrado"
+                    )
+            except Exception as e:
+                console.print(
+                    f"  [{i}/{len(needs_email)}] [dim]{(lead.company or lead.title or '')[:35]}[/dim] "
+                    f"-> error: {e}"
+                )
+
+    console.print(f"[green]Emails encontrados via Hunter.io: {enriched}/{len(needs_email)}[/green]")
+    return leads
+
+
+def auto_verify_emails(leads: List[Lead]) -> List[Lead]:
+    """Verify discovered emails using Hunter.io email verifier.
+
+    Marks invalid/disposable emails as empty so they don't pollute the CRM.
+    Only runs if HUNTER_API_KEY is configured.
+
+    Args:
+        leads: Leads whose emails should be verified.
+
+    Returns:
+        Same list with invalid emails cleared.
+    """
+    if not settings.hunter_api_key:
+        return leads
+
+    with_email = [
+        l for l in leads
+        if l.email and not l.email.endswith("@leadgen.placeholder")
+    ]
+    if not with_email:
+        return leads
+
+    console.print(
+        f"\n[bold cyan]Verificando {len(with_email)} emails con Hunter.io...[/bold cyan]"
+    )
+
+    verified_count = 0
+    invalid_count = 0
+
+    with HunterClient() as hunter:
+        if not hunter.is_configured():
+            return leads
+
+        for lead in with_email:
+            try:
+                result = hunter.verify_email(lead.email)
+                status = result.get("status", "unknown")
+
+                if status == "valid":
+                    verified_count += 1
+                elif status in ("invalid", "disposable"):
+                    # Clear bad emails
+                    logger.info(f"Invalid email removed: {lead.email} ({status})")
+                    lead.email = None
+                    invalid_count += 1
+                # "unknown" or "accept_all" -> keep as-is
+            except Exception:
+                pass
+
+    console.print(
+        f"[green]Verificados: {verified_count}[/green] | "
+        f"[red]Invalidos removidos: {invalid_count}[/red]"
+    )
+    return leads
+
+
+def run_email_enrichment(leads: List[Lead]) -> List[Lead]:
+    """Run the full automatic email enrichment pipeline.
+
+    Steps:
+    1. Crawl business websites for emails (free, no API key needed)
+    2. Use Hunter.io for remaining leads (if configured)
+    3. Verify found emails (if Hunter.io configured)
+
+    Args:
+        leads: Leads to enrich.
+
+    Returns:
+        Enriched leads.
+    """
+    if not leads:
+        return leads
+
+    before_count = sum(1 for l in leads if l.email and not l.email.endswith("@leadgen.placeholder"))
+
+    # Step 1: Website crawling (always runs, free)
+    leads = auto_enrich_emails(leads)
+
+    # Step 2: Hunter.io enrichment (only if configured)
+    leads = auto_enrich_with_hunter(leads)
+
+    # Step 3: Email verification (only if Hunter configured)
+    leads = auto_verify_emails(leads)
+
+    after_count = sum(1 for l in leads if l.email and not l.email.endswith("@leadgen.placeholder"))
+    new_emails = after_count - before_count
+
+    if new_emails > 0:
+        console.print(
+            f"\n[bold green]Enriquecimiento completado: {new_emails} emails nuevos encontrados "
+            f"(total con email: {after_count}/{len(leads)})[/bold green]"
+        )
+    else:
+        console.print(
+            f"\n[dim]Enriquecimiento completado: {after_count}/{len(leads)} leads con email[/dim]"
+        )
+
+    return leads
+
+
 def menu_search_leads():
     """Main option 1: Search for new leads."""
     # Select sources
@@ -297,7 +525,13 @@ def run_single_source(source: str) -> List[Lead]:
     try:
         with ScraperClass() as scraper:
             batch = scraper.scrape()
-            return batch.leads
+            leads = batch.leads
+
+        # Auto email enrichment
+        if leads:
+            leads = run_email_enrichment(leads)
+
+        return leads
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         return []
@@ -870,8 +1104,8 @@ def menu_contacts_to_sheet():
                 console.print(f"  [red]{err}[/red]")
         return
 
-    # Show preview
-    leads = batch.leads
+    # Auto email enrichment for leads still missing emails
+    leads = run_email_enrichment(batch.leads)
     console.print(f"\n[green]Encontrados: {len(leads)} negocios[/green]")
 
     # Display preview table

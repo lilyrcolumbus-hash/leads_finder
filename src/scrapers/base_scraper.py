@@ -219,6 +219,40 @@ class BaseScraper(ABC):
 
         return self._pick_best_email(unique)
 
+    def enrich_leads_emails(self, leads: List[Lead]) -> List[Lead]:
+        """Crawl websites to find emails for leads that have a website but no email.
+
+        Iterates over leads, and for any that have a ``website`` field set
+        but are missing an ``email``, calls :meth:`extract_email_from_website`
+        to scrape the business site.
+
+        Args:
+            leads: List of leads to enrich.
+
+        Returns:
+            Same list with ``email`` populated where an address was found.
+        """
+        enriched = 0
+        for lead in leads:
+            if lead.website and not lead.email:
+                try:
+                    email = self.extract_email_from_website(lead.website)
+                    if email:
+                        lead.email = email
+                        enriched += 1
+                        self.logger.info(
+                            f"Email found for {lead.company or lead.title}: {email}"
+                        )
+                except Exception as e:
+                    self.logger.debug(
+                        f"Error crawling website for {lead.company or lead.title}: {e}"
+                    )
+                time.sleep(0.5)
+
+        if enriched:
+            self.logger.info(f"Website crawling enriched {enriched} leads with emails")
+        return leads
+
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10)
