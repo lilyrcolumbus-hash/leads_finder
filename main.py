@@ -773,7 +773,7 @@ def menu_configuration():
 # ==================== 8. CONTACTS TO GOOGLE SHEETS ====================
 
 def menu_contacts_to_sheet():
-    """Main option 8: Search business contacts by industry + city and send to Google Sheets."""
+    """Main option 8: Search business contacts by industry + city (+ radius) and send to Google Sheets."""
     # Check Google Sheets config first
     sheets = GoogleSheetsSync()
     if not sheets.is_configured():
@@ -782,7 +782,19 @@ def menu_contacts_to_sheet():
         return
 
     console.print("\n[bold cyan]═══ CONTACTOS → GOOGLE SHEETS ═══[/bold cyan]")
-    console.print("[dim]Busca negocios por industria y ciudad, y envialos a tu Google Sheet[/dim]\n")
+    console.print("[dim]Busca negocios por industria, ciudad y radio, y envialos a tu Google Sheet[/dim]\n")
+
+    # Verify Sheet connection
+    console.print("[cyan]Verificando conexion a Google Sheets...[/cyan]")
+    check = sheets.verify_connection()
+    if check["ok"]:
+        console.print(f"[green]Sheet conectada: {check['message']}[/green]\n")
+    else:
+        console.print(f"[red]No se pudo conectar a la Sheet: {check['message']}[/red]")
+        console.print("[dim]Verifica tu GOOGLE_SHEETS_WEBHOOK_URL en .env[/dim]")
+        if not Confirm.ask("Continuar de todas formas?", default=False):
+            return
+        console.print()
 
     # Select business type / industry
     console.print("[bold]Selecciona industria:[/bold]")
@@ -805,14 +817,34 @@ def menu_contacts_to_sheet():
 
     # Get city
     console.print(f"\n[bold]Ciudad:[/bold]")
-    console.print("[dim]Ejemplos: Miami FL, Houston TX, New York NY, Austin TX[/dim]")
+    console.print("[dim]Ejemplos: Lima OH, Miami FL, Houston TX, Austin TX[/dim]")
     city = Prompt.ask("Escribe la ciudad")
     if not city.strip():
         console.print("[yellow]Ciudad vacia, cancelando[/yellow]")
         return
 
+    # Get radius (optional)
+    console.print(f"\n[bold]Radio de busqueda (millas):[/bold]")
+    console.print("[dim]Deja vacio para busqueda normal sin radio. Max ~31 millas.[/dim]")
+    radius_input = Prompt.ask("Radio en millas (Enter para omitir)", default="")
+    radius_miles = None
+    if radius_input.strip():
+        try:
+            radius_miles = float(radius_input.strip())
+            if radius_miles <= 0:
+                console.print("[yellow]Radio debe ser positivo, usando busqueda sin radio[/yellow]")
+                radius_miles = None
+            elif radius_miles > 31:
+                console.print("[yellow]Radio maximo es ~31 millas (50km). Usando 31.[/yellow]")
+                radius_miles = 31.0
+        except ValueError:
+            console.print("[yellow]Radio invalido, usando busqueda sin radio[/yellow]")
+
     # Confirm search
-    console.print(f"\n[cyan]Buscando: [bold]{selected_type.replace('_', ' ').title()}[/bold] en [bold]{city}[/bold][/cyan]")
+    search_desc = f"[bold]{selected_type.replace('_', ' ').title()}[/bold] en [bold]{city}[/bold]"
+    if radius_miles:
+        search_desc += f" (radio: [bold]{radius_miles} millas[/bold])"
+    console.print(f"\n[cyan]Buscando: {search_desc}[/cyan]")
 
     if not Confirm.ask("Continuar?", default=True):
         return
@@ -822,7 +854,11 @@ def menu_contacts_to_sheet():
 
     try:
         with GoogleMapsScraper() as scraper:
-            batch = scraper.scrape(location=city, category=selected_type)
+            batch = scraper.scrape(
+                location=city,
+                category=selected_type,
+                radius_miles=radius_miles,
+            )
     except Exception as e:
         console.print(f"[red]Error en la busqueda: {e}[/red]")
         return
@@ -839,7 +875,10 @@ def menu_contacts_to_sheet():
     console.print(f"\n[green]Encontrados: {len(leads)} negocios[/green]")
 
     # Display preview table
-    table = Table(title=f"{selected_type.replace('_', ' ').title()} en {city}", show_lines=True)
+    title = f"{selected_type.replace('_', ' ').title()} en {city}"
+    if radius_miles:
+        title += f" ({radius_miles} mi)"
+    table = Table(title=title, show_lines=True)
     table.add_column("#", style="dim", width=4)
     table.add_column("Negocio", style="green", max_width=30)
     table.add_column("Telefono", style="cyan", max_width=18)
@@ -890,14 +929,13 @@ def menu_contacts_to_sheet():
     result = db.save_leads(leads)
     console.print(f"[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
 
-    # Send to Google Sheets
-    console.print(f"\n[cyan]Enviando a Google Sheets...[/cyan]")
+    # Send to Google Sheets (simplified contact format)
+    console.print(f"\n[cyan]Enviando contactos a Google Sheets...[/cyan]")
     try:
-        with sheets:
-            sheets.add_leads(leads)
-
-        stats = sheets.get_stats()
-        console.print(f"[bold green]Enviados a Google Sheets: {stats['total_sent']} contactos[/bold green]")
+        result = sheets.send_contacts(leads)
+        console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos[/bold green]")
+        if result['failed']:
+            console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
         console.print(f"[dim]Revisa tu Google Sheet para ver los resultados[/dim]")
 
     except Exception as e:

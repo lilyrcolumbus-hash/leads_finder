@@ -1,16 +1,17 @@
 /**
- * Google Apps Script - Business Contacts Receiver
+ * Google Apps Script - Business Contacts Receiver (Simplified)
  *
- * Template optimizado para recibir contactos de negocios buscados por industria
- * y ciudad desde la Lead Generation App.
+ * Template simplificado para recibir datos basicos de contacto de negocios.
+ * Optimizado para busquedas por industria + ciudad con datos de contacto esenciales.
+ *
+ * Columnas: Negocio | Email | Telefono | Website | Direccion | Rating | Reviews | Industria | Fecha
  *
  * Caracteristicas:
+ *   - Solo datos basicos de contacto (sin AI scores ni analisis)
  *   - Headers con formato profesional
- *   - Deduplicacion automatica por telefono/nombre de empresa
- *   - Formato condicional para Pain Score (rojo = dolor detectado)
- *   - Columnas con ancho automatico
+ *   - Deduplicacion automatica por telefono/nombre de negocio
+ *   - Columnas con ancho optimizado
  *   - Hoja "Contactos" creada automaticamente
- *   - Timestamps por cada entrada
  *
  * Configuracion:
  * 1. Crea o abre un Google Sheet
@@ -24,18 +25,17 @@
  * 9. Pega la URL en tu .env como GOOGLE_SHEETS_WEBHOOK_URL
  *
  * Uso desde la app:
- *   python main.py → Opcion [8] → Selecciona industria y ciudad
+ *   python main.py → Opcion [8] → Selecciona industria, ciudad y radio
  */
 
-// Column headers matching the Python app's _lead_to_row() output
+// Basic contact columns
 var HEADERS = [
-  "Nombre", "Email", "Telefono", "Empresa", "Website", "Direccion",
-  "Industria", "Rating", "Fuente", "URL", "Pain Score", "AI Score",
-  "Software Needs", "Gemini Analysis", "Has Website", "Has Social Media", "Fecha"
+  "Negocio", "Email", "Telefono", "Website",
+  "Direccion", "Rating", "Reviews", "Industria", "Fecha"
 ];
 
-// Column widths (pixels) for better readability
-var COLUMN_WIDTHS = [180, 220, 140, 200, 220, 250, 120, 70, 100, 200, 90, 80, 200, 300, 90, 110, 150];
+// Column widths (pixels)
+var COLUMN_WIDTHS = [200, 220, 140, 200, 250, 70, 80, 120, 150];
 
 /**
  * Get or create the "Contactos" sheet with headers and formatting.
@@ -61,32 +61,22 @@ function setupHeaders(sheet) {
   sheet.appendRow(HEADERS);
 
   var headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
-
-  // Bold white text on dark blue background
   headerRange.setFontWeight("bold");
   headerRange.setFontColor("#FFFFFF");
   headerRange.setBackground("#1a73e8");
   headerRange.setHorizontalAlignment("center");
-
-  // Freeze header row
   sheet.setFrozenRows(1);
 
-  // Set column widths
   for (var i = 0; i < COLUMN_WIDTHS.length; i++) {
     sheet.setColumnWidth(i + 1, COLUMN_WIDTHS[i]);
   }
 
-  // Add conditional formatting for Pain Score column (column 11)
-  var painScoreCol = 11;
-  var maxRows = 1000;
-  var painRange = sheet.getRange(2, painScoreCol, maxRows, 1);
-
-  // Red background when Pain Score > 0 (pain detected)
+  // Green highlight for rows with email (column 2)
+  var emailRange = sheet.getRange(2, 2, 1000, 1);
   var rule = SpreadsheetApp.newConditionalFormatRule()
-    .whenNumberGreaterThan(0)
-    .setBackground("#fce4ec")
-    .setFontColor("#c62828")
-    .setRanges([painRange])
+    .whenTextContains("@")
+    .setBackground("#e8f5e9")
+    .setRanges([emailRange])
     .build();
 
   var rules = sheet.getConditionalFormatRules();
@@ -95,42 +85,33 @@ function setupHeaders(sheet) {
 }
 
 /**
- * Check if a lead already exists in the sheet (by phone or company name).
- * Returns true if duplicate found.
+ * Check if a contact already exists (by phone or business name).
  */
 function isDuplicate(sheet, lead) {
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return false;
 
   var phone = (lead.telefono || "").trim();
-  var empresa = (lead.empresa || "").trim().toLowerCase();
+  var negocio = (lead.negocio || "").trim().toLowerCase();
 
-  // Skip check if both are empty
-  if (!phone && !empresa) return false;
+  if (!phone && !negocio) return false;
 
-  // Get existing phone numbers (col 3) and company names (col 4)
-  var data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
+  // Columns: Negocio(1), Email(2), Telefono(3)
+  var data = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
 
   for (var i = 0; i < data.length; i++) {
+    var existingNegocio = (data[i][0] || "").toString().trim().toLowerCase();
     var existingPhone = (data[i][2] || "").toString().trim();
-    var existingEmpresa = (data[i][3] || "").toString().trim().toLowerCase();
 
-    // Match by phone number (if both have phone)
-    if (phone && existingPhone && phone === existingPhone) {
-      return true;
-    }
-
-    // Match by company name (if both have company name and same industry/location)
-    if (empresa && existingEmpresa && empresa === existingEmpresa) {
-      return true;
-    }
+    if (phone && existingPhone && phone === existingPhone) return true;
+    if (negocio && existingNegocio && negocio === existingNegocio) return true;
   }
 
   return false;
 }
 
 /**
- * POST handler - receives leads from the Python app.
+ * POST handler - receives contacts from the Python app.
  */
 function doPost(e) {
   try {
@@ -143,29 +124,20 @@ function doPost(e) {
     for (var i = 0; i < leads.length; i++) {
       var lead = leads[i];
 
-      // Deduplication check
       if (isDuplicate(sheet, lead)) {
         skipped++;
         continue;
       }
 
       sheet.appendRow([
-        lead.nombre || "",
+        lead.negocio || "",
         lead.email || "",
         lead.telefono || "",
-        lead.empresa || "",
         lead.website || "",
         lead.direccion || "",
-        lead.industria || "",
         lead.rating || "",
-        lead.fuente || "",
-        lead.url || "",
-        lead.pain_score || "",
-        lead.ai_score || 0,
-        lead.software_needs || "",
-        lead.gemini_analysis || "",
-        lead.has_website || "",
-        lead.has_social_media || "",
+        lead.reviews || "",
+        lead.industria || "",
         new Date().toLocaleString()
       ]);
 
@@ -177,7 +149,7 @@ function doPost(e) {
         status: "ok",
         count: added,
         skipped: skipped,
-        message: added + " added, " + skipped + " duplicates skipped"
+        message: added + " contactos agregados, " + skipped + " duplicados omitidos"
       }))
       .setMimeType(ContentService.MimeType.JSON);
 
@@ -195,7 +167,7 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({
       status: "ok",
-      message: "Business contacts receiver is running"
+      message: "Contact sheet receiver is running"
     }))
     .setMimeType(ContentService.MimeType.JSON);
 }

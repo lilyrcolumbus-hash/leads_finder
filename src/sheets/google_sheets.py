@@ -66,6 +66,34 @@ class GoogleSheetsSync:
         """Check if the webhook URL is set."""
         return bool(self.webhook_url)
 
+    def verify_connection(self) -> dict:
+        """Verify that the Google Sheets webhook is reachable.
+
+        Sends a GET request to the Apps Script doGet() health check.
+
+        Returns:
+            Dict with 'ok' bool and 'message' string.
+        """
+        if not self.is_configured():
+            return {"ok": False, "message": "Webhook URL not configured"}
+
+        try:
+            response = self.client.get(
+                self.webhook_url,
+                follow_redirects=True,
+                timeout=15.0,
+            )
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    return {"ok": True, "message": data.get("message", "Connected")}
+                except Exception:
+                    return {"ok": True, "message": "Connected (status 200)"}
+            else:
+                return {"ok": False, "message": f"HTTP {response.status_code}"}
+        except Exception as e:
+            return {"ok": False, "message": str(e)}
+
     def _lead_to_row(self, lead: Lead) -> Dict[str, Any]:
         """Convert a Lead to a flat dict matching spreadsheet columns.
 
@@ -96,6 +124,28 @@ class GoogleSheetsSync:
             "gemini_analysis": lead.gemini_analysis or "",
             "has_website": "Yes" if lead.has_website else ("No" if lead.has_website is False else ""),
             "has_social_media": "Yes" if lead.has_social_media else ("No" if lead.has_social_media is False else ""),
+        }
+
+    def _lead_to_contact_row(self, lead: Lead) -> Dict[str, Any]:
+        """Convert a Lead to a simplified contact row with basic data only.
+
+        Columns: Negocio, Email, Telefono, Website, Direccion, Rating, Reviews, Industria
+
+        Use with apps_script_contacts.js template.
+        """
+        email = lead.email or ""
+        if email.endswith("@leadgen.placeholder"):
+            email = ""
+
+        return {
+            "negocio": lead.company or lead.title or lead.name or "",
+            "email": email,
+            "telefono": lead.phone or "",
+            "website": lead.website or "",
+            "direccion": lead.address or lead.location or "",
+            "rating": lead.rating or "",
+            "reviews": lead.review_count or "",
+            "industria": lead.industry or lead.business_type or "",
         }
 
     def _has_contact_info(self, lead: Lead) -> bool:
@@ -168,12 +218,35 @@ class GoogleSheetsSync:
 
         return self._post_leads(valid_leads)
 
+    def send_contacts(self, leads: List[Lead]) -> Dict[str, int]:
+        """Send leads as simplified contact rows (basic data only).
+
+        Uses _lead_to_contact_row() for a simpler format:
+        Negocio, Email, Telefono, Website, Direccion, Rating, Reviews, Industria
+
+        Args:
+            leads: Leads to send.
+
+        Returns:
+            Dict with 'sent' and 'failed' counts.
+        """
+        valid_leads = [l for l in leads if self._has_contact_info(l)]
+        skipped = len(leads) - len(valid_leads)
+        if skipped:
+            logger.info(f"Skipped {skipped} leads without any contact info")
+
+        if not valid_leads:
+            return {"sent": 0, "failed": 0}
+
+        return self._post_leads(valid_leads, contact_format=True)
+
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
-    def _post_leads(self, leads: List[Lead]) -> Dict[str, int]:
+    def _post_leads(self, leads: List[Lead], contact_format: bool = False) -> Dict[str, int]:
         """POST leads to the Apps Script web app.
 
         Args:
             leads: Leads to send.
+            contact_format: If True, use simplified contact row format.
 
         Returns:
             Dict with 'sent' and 'failed' counts.
@@ -182,7 +255,10 @@ class GoogleSheetsSync:
             logger.warning("Google Sheets webhook URL not configured")
             return {"sent": 0, "failed": len(leads)}
 
-        rows = [self._lead_to_row(lead) for lead in leads]
+        if contact_format:
+            rows = [self._lead_to_contact_row(lead) for lead in leads]
+        else:
+            rows = [self._lead_to_row(lead) for lead in leads]
         payload = {"leads": rows}
 
         try:

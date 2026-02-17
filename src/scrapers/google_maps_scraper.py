@@ -8,6 +8,9 @@ from src.config import settings
 from src.utils.models import Lead, LeadBatch, LeadSource
 from .base_scraper import BaseScraper
 
+# Conversion factor: 1 mile = 1609.34 meters
+MILES_TO_METERS = 1609.34
+
 
 class GoogleMapsScraper(BaseScraper):
     """
@@ -15,13 +18,18 @@ class GoogleMapsScraper(BaseScraper):
 
     Searches for businesses by type and location, extracts contact info,
     and analyzes reviews to detect communication pain points.
+
+    Supports radius-based searches via the Nearby Search API when a
+    radius_miles parameter is provided.
     """
 
     source = LeadSource.GOOGLE_MAPS
 
     # Google Places API endpoints
     PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+    PLACES_NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
     PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
+    GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
     def __init__(self):
         super().__init__()
@@ -35,15 +43,18 @@ class GoogleMapsScraper(BaseScraper):
         self.min_reviews = settings.google_maps_min_reviews
 
     def scrape(self, location: str = "", category: str = "",
-               **kwargs) -> LeadBatch:
+               radius_miles: Optional[float] = None, **kwargs) -> LeadBatch:
         """
         Scrape Google Maps for business leads.
 
         Args:
-            location: Optional location override (e.g., "Miami, FL").
+            location: Optional location override (e.g., "Lima, OH").
                       If provided, only searches this location.
-            category: Optional business type override (e.g., "dentist").
+            category: Optional business type override (e.g., "plumber").
                       If provided, only searches this category.
+            radius_miles: Optional search radius in miles (e.g., 25).
+                          When set, uses Nearby Search API with geocoding.
+                          Max ~31 miles (50km Google API limit).
 
         Returns:
             LeadBatch with found leads including pain analysis
@@ -64,13 +75,17 @@ class GoogleMapsScraper(BaseScraper):
         self.logger.info(
             f"Starting Google Maps scrape: {len(business_types)} business types, "
             f"{len(locations)} locations"
+            + (f", radius: {radius_miles} miles" if radius_miles else "")
         )
 
         # Search for each business type in each location
         for business_type in business_types:
             for loc in locations:
                 try:
-                    leads = self._search_businesses(business_type, loc)
+                    if radius_miles:
+                        leads = self._search_nearby(business_type, loc, radius_miles)
+                    else:
+                        leads = self._search_businesses(business_type, loc)
                     all_leads.extend(leads)
                     self.logger.info(
                         f"Found {len(leads)} businesses: {business_type} in {loc}"
@@ -99,6 +114,122 @@ class GoogleMapsScraper(BaseScraper):
         )
 
         return batch
+
+    def _geocode_location(self, location: str) -> Optional[Tuple[float, float]]:
+        """
+        Convert a location string to latitude/longitude using Google Geocoding API.
+
+        Args:
+            location: Human-readable location (e.g., "Lima, OH")
+
+        Returns:
+            Tuple of (latitude, longitude) or None if geocoding fails
+        """
+        url = (
+            f"{self.GEOCODING_URL}"
+            f"?address={quote(location)}"
+            f"&key={self.api_key}"
+        )
+
+        try:
+            response = self.fetch_url(url)
+            data = response.json()
+
+            if data.get("status") != "OK" or not data.get("results"):
+                self.logger.warning(f"Geocoding failed for '{location}': {data.get('status')}")
+                return None
+
+            geo = data["results"][0]["geometry"]["location"]
+            lat, lng = geo["lat"], geo["lng"]
+            self.logger.info(f"Geocoded '{location}' -> ({lat}, {lng})")
+            return (lat, lng)
+
+        except Exception as e:
+            self.logger.error(f"Geocoding error for '{location}': {e}")
+            return None
+
+    def _search_nearby(self, business_type: str, location: str,
+                       radius_miles: float) -> List[Lead]:
+        """
+        Search for businesses within a radius using Nearby Search API.
+
+        Uses geocoding to convert the location to coordinates, then
+        searches within the specified radius.
+
+        Args:
+            business_type: Type of business (e.g., "plumber")
+            location: Location center (e.g., "Lima, OH")
+            radius_miles: Search radius in miles (max ~31 miles / 50km)
+
+        Returns:
+            List of Lead objects with business info and pain analysis
+        """
+        coords = self._geocode_location(location)
+        if not coords:
+            self.logger.warning(f"Could not geocode '{location}', falling back to text search")
+            return self._search_businesses(business_type, location)
+
+        lat, lng = coords
+        radius_meters = int(min(radius_miles * MILES_TO_METERS, 50000))  # API max: 50km
+
+        leads = []
+        all_place_ids = set()
+
+        # Nearby Search supports pagination via next_page_token
+        url = (
+            f"{self.PLACES_NEARBY_URL}"
+            f"?location={lat},{lng}"
+            f"&radius={radius_meters}"
+            f"&keyword={quote(business_type)}"
+            f"&key={self.api_key}"
+        )
+
+        try:
+            # Fetch up to 3 pages (20 results each, max 60)
+            for page in range(3):
+                response = self.fetch_url(url)
+                data = response.json()
+
+                if data.get("status") not in ("OK", "ZERO_RESULTS"):
+                    error_message = data.get("error_message", "")
+                    self.logger.warning(
+                        f"Nearby Search error: {data.get('status')} - {error_message}"
+                    )
+                    break
+
+                results = data.get("results", [])
+                for place in results:
+                    place_id = place.get("place_id")
+                    if not place_id or place_id in all_place_ids:
+                        continue
+                    all_place_ids.add(place_id)
+
+                    if len(leads) >= self.max_results:
+                        break
+
+                    lead = self._get_place_details(place_id, business_type, location)
+                    if lead:
+                        leads.append(lead)
+                        time.sleep(0.5)
+
+                # Check for next page
+                next_token = data.get("next_page_token")
+                if not next_token or len(leads) >= self.max_results:
+                    break
+
+                # Google requires a short delay before using next_page_token
+                time.sleep(2)
+                url = (
+                    f"{self.PLACES_NEARBY_URL}"
+                    f"?pagetoken={next_token}"
+                    f"&key={self.api_key}"
+                )
+
+        except Exception as e:
+            self.logger.debug(f"Nearby search failed for '{business_type}' in '{location}': {e}")
+            raise
+
+        return leads
 
     def _search_businesses(self, business_type: str, location: str) -> List[Lead]:
         """
