@@ -929,10 +929,10 @@ def menu_contacts_to_sheet():
     result = db.save_leads(leads)
     console.print(f"[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
 
-    # Send to Google Sheets (simplified contact format)
+    # Send to Google Sheets
     console.print(f"\n[cyan]Enviando contactos a Google Sheets...[/cyan]")
     try:
-        result = sheets.send_contacts(leads)
+        result = sheets.send_leads(leads)
         console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos[/bold green]")
         if result['failed']:
             console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")

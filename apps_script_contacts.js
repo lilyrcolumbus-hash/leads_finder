@@ -1,61 +1,45 @@
 /**
- * Google Apps Script - Business Contacts Receiver (Simplified)
+ * Google Apps Script - Business Contacts Receiver
  *
- * Template simplificado para recibir datos basicos de contacto de negocios.
- * Optimizado para busquedas por industria + ciudad con datos de contacto esenciales.
+ * Receives business contact data from the Lead Generation App via POST.
+ * Compatible with both full lead data and basic contact searches.
  *
- * Columnas: Negocio | Email | Telefono | Website | Direccion | Rating | Reviews | Industria | Fecha
+ * Columns: Name | Email | Phone | Company | Website | Address |
+ *          Industry | Rating | Source | URL | Pain Score | AI Score | Date
  *
- * Caracteristicas:
- *   - Solo datos basicos de contacto (sin AI scores ni analisis)
- *   - Headers con formato profesional
- *   - Deduplicacion automatica por telefono/nombre de negocio
- *   - Columnas con ancho optimizado
- *   - Hoja "Contactos" creada automaticamente
+ * Features:
+ *   - Auto-creates headers with formatting on first POST
+ *   - Duplicate detection by phone number or company name
+ *   - Green highlight on rows with email
+ *   - doGet() health check for connection verification
+ *   - Error handling with JSON error responses
  *
- * Configuracion:
- * 1. Crea o abre un Google Sheet
- * 2. Ve a Extensions > Apps Script
- * 3. Borra el codigo existente y pega este archivo completo
- * 4. Click en Deploy > New deployment
- * 5. Selecciona tipo: "Web app"
- * 6. "Execute as": Me
- * 7. "Who has access": Anyone
- * 8. Click Deploy y copia la URL
- * 9. Pega la URL en tu .env como GOOGLE_SHEETS_WEBHOOK_URL
+ * Setup:
+ * 1. Open your Google Sheet
+ * 2. Go to Extensions > Apps Script
+ * 3. Delete existing code and paste this entire file
+ * 4. Click Deploy > New deployment
+ * 5. Select type: "Web app"
+ * 6. Set "Execute as": Me
+ * 7. Set "Who has access": Anyone
+ * 8. Click Deploy and copy the URL
+ * 9. Paste the URL in your .env as GOOGLE_SHEETS_WEBHOOK_URL
  *
- * Uso desde la app:
- *   python main.py → Opcion [8] → Selecciona industria, ciudad y radio
+ * Usage from the app:
+ *   python main.py → Option [8] → Select industry, city, and radius
  */
 
-// Basic contact columns
+// Column headers (English)
 var HEADERS = [
-  "Negocio", "Email", "Telefono", "Website",
-  "Direccion", "Rating", "Reviews", "Industria", "Fecha"
+  "Name", "Email", "Phone", "Company", "Website", "Address",
+  "Industry", "Rating", "Source", "URL", "Pain Score", "AI Score", "Date"
 ];
 
 // Column widths (pixels)
-var COLUMN_WIDTHS = [200, 220, 140, 200, 250, 70, 80, 120, 150];
+var COLUMN_WIDTHS = [180, 220, 140, 200, 220, 250, 120, 70, 100, 200, 90, 80, 150];
 
 /**
- * Get or create the "Contactos" sheet with headers and formatting.
- */
-function getContactsSheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Contactos");
-
-  if (!sheet) {
-    sheet = ss.insertSheet("Contactos");
-    setupHeaders(sheet);
-  } else if (sheet.getLastRow() === 0) {
-    setupHeaders(sheet);
-  }
-
-  return sheet;
-}
-
-/**
- * Set up header row with formatting.
+ * Set up header row with formatting on the active sheet.
  */
 function setupHeaders(sheet) {
   sheet.appendRow(HEADERS);
@@ -85,37 +69,47 @@ function setupHeaders(sheet) {
 }
 
 /**
- * Check if a contact already exists (by phone or business name).
+ * Check if a contact already exists (by phone or company name).
+ * Returns true if duplicate found.
  */
 function isDuplicate(sheet, lead) {
   var lastRow = sheet.getLastRow();
   if (lastRow <= 1) return false;
 
   var phone = (lead.telefono || "").trim();
-  var negocio = (lead.negocio || "").trim().toLowerCase();
+  var empresa = (lead.empresa || lead.nombre || "").trim().toLowerCase();
 
-  if (!phone && !negocio) return false;
+  if (!phone && !empresa) return false;
 
-  // Columns: Negocio(1), Email(2), Telefono(3)
-  var data = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+  // Columns: Name(1), Email(2), Phone(3), Company(4)
+  var data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
 
   for (var i = 0; i < data.length; i++) {
-    var existingNegocio = (data[i][0] || "").toString().trim().toLowerCase();
     var existingPhone = (data[i][2] || "").toString().trim();
+    var existingCompany = (data[i][3] || data[i][0] || "").toString().trim().toLowerCase();
 
     if (phone && existingPhone && phone === existingPhone) return true;
-    if (negocio && existingNegocio && negocio === existingNegocio) return true;
+    if (empresa && existingCompany && empresa === existingCompany) return true;
   }
 
   return false;
 }
 
 /**
- * POST handler - receives contacts from the Python app.
+ * POST handler - receives leads/contacts from the Python app.
+ *
+ * Expects JSON body: { "leads": [ { nombre, email, telefono, empresa, ... }, ... ] }
+ * Field names match Python _lead_to_row() output.
  */
 function doPost(e) {
   try {
-    var sheet = getContactsSheet();
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+    // Create headers if sheet is empty
+    if (sheet.getLastRow() === 0) {
+      setupHeaders(sheet);
+    }
+
     var data = JSON.parse(e.postData.contents);
     var leads = data.leads || [];
     var added = 0;
@@ -124,20 +118,25 @@ function doPost(e) {
     for (var i = 0; i < leads.length; i++) {
       var lead = leads[i];
 
+      // Duplicate check
       if (isDuplicate(sheet, lead)) {
         skipped++;
         continue;
       }
 
       sheet.appendRow([
-        lead.negocio || "",
+        lead.nombre || "",
         lead.email || "",
         lead.telefono || "",
+        lead.empresa || "",
         lead.website || "",
         lead.direccion || "",
-        lead.rating || "",
-        lead.reviews || "",
         lead.industria || "",
+        lead.rating || "",
+        lead.fuente || "",
+        lead.url || "",
+        lead.pain_score || "",
+        lead.ai_score || "",
         new Date().toLocaleString()
       ]);
 
@@ -149,7 +148,7 @@ function doPost(e) {
         status: "ok",
         count: added,
         skipped: skipped,
-        message: added + " contactos agregados, " + skipped + " duplicados omitidos"
+        message: added + " contacts added, " + skipped + " duplicates skipped"
       }))
       .setMimeType(ContentService.MimeType.JSON);
 
@@ -161,13 +160,13 @@ function doPost(e) {
 }
 
 /**
- * GET handler - health check.
+ * GET handler - health check for connection verification.
  */
 function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({
       status: "ok",
-      message: "Contact sheet receiver is running"
+      message: "Lead receiver is running"
     }))
     .setMimeType(ContentService.MimeType.JSON);
 }
