@@ -43,7 +43,8 @@ class GoogleMapsScraper(BaseScraper):
         self.min_reviews = settings.google_maps_min_reviews
 
     def scrape(self, location: str = "", category: str = "",
-               radius_miles: Optional[float] = None, **kwargs) -> LeadBatch:
+               radius_miles: Optional[float] = None,
+               skip_review_filter: bool = False, **kwargs) -> LeadBatch:
         """
         Scrape Google Maps for business leads.
 
@@ -55,6 +56,8 @@ class GoogleMapsScraper(BaseScraper):
             radius_miles: Optional search radius in miles (e.g., 25).
                           When set, uses Nearby Search API with geocoding.
                           Max ~31 miles (50km Google API limit).
+            skip_review_filter: If True, include businesses regardless of
+                                review count (don't skip low-review ones).
 
         Returns:
             LeadBatch with found leads including pain analysis
@@ -77,6 +80,9 @@ class GoogleMapsScraper(BaseScraper):
             f"{len(locations)} locations"
             + (f", radius: {radius_miles} miles" if radius_miles else "")
         )
+
+        # Store flag for use in _get_place_details
+        self._skip_review_filter = skip_review_filter
 
         # Search for each business type in each location
         for business_type in business_types:
@@ -327,9 +333,9 @@ class GoogleMapsScraper(BaseScraper):
             if result.get("business_status") != "OPERATIONAL":
                 return None
 
-            # Skip if too few reviews
+            # Skip if too few reviews (unless skip_review_filter is set)
             review_count = result.get("user_ratings_total", 0)
-            if review_count < self.min_reviews:
+            if not getattr(self, '_skip_review_filter', False) and review_count < self.min_reviews:
                 return None
 
             # Analyze reviews for pain points

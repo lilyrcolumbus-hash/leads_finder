@@ -70,7 +70,7 @@ def display_main_menu() -> str:
     console.print("  [5] Ver estadisticas")
     console.print("  [6] Buscar lead")
     console.print("  [7] Configuracion")
-    console.print("  [8] [bold green]Contactos por industria/ciudad → Google Sheets[/bold green]")
+    console.print("  [8] [bold green]Buscar negocios (multi-ciudad) → Emails + Google Sheets[/bold green]")
     console.print("  [0] Salir")
     console.print()
 
@@ -1007,30 +1007,26 @@ def menu_configuration():
 # ==================== 8. CONTACTS TO GOOGLE SHEETS ====================
 
 def menu_contacts_to_sheet():
-    """Main option 8: Search business contacts by industry + city (+ radius) and send to Google Sheets."""
+    """Main option 8: Search business contacts by industry + multiple cities and send to Google Sheets."""
     # Check Google Sheets config first
     sheets = GoogleSheetsSync()
-    if not sheets.is_configured():
-        console.print("[red]Google Sheets no configurado. Agrega GOOGLE_SHEETS_WEBHOOK_URL en .env[/red]")
-        console.print("[dim]Ver apps_script_contacts.js para instrucciones de configuracion[/dim]")
-        return
+    sheets_configured = sheets.is_configured()
 
-    console.print("\n[bold cyan]═══ CONTACTOS → GOOGLE SHEETS ═══[/bold cyan]")
-    console.print("[dim]Busca negocios por industria, ciudad y radio, y envialos a tu Google Sheet[/dim]\n")
+    console.print("\n[bold cyan]═══ BUSCAR NEGOCIOS → GOOGLE SHEETS ═══[/bold cyan]")
+    console.print("[dim]Busca negocios por industria en varias ciudades. Prioridad: encontrar emails.[/dim]\n")
 
-    # Verify Sheet connection
-    console.print("[cyan]Verificando conexion a Google Sheets...[/cyan]")
-    check = sheets.verify_connection()
-    if check["ok"]:
-        console.print(f"[green]Sheet conectada: {check['message']}[/green]\n")
+    if sheets_configured:
+        console.print("[cyan]Verificando conexion a Google Sheets...[/cyan]")
+        check = sheets.verify_connection()
+        if check["ok"]:
+            console.print(f"[green]Sheet conectada: {check['message']}[/green]\n")
+        else:
+            console.print(f"[yellow]No se pudo conectar a la Sheet: {check['message']}[/yellow]")
+            console.print("[dim]Los resultados se guardaran localmente y en CSV.[/dim]\n")
     else:
-        console.print(f"[red]No se pudo conectar a la Sheet: {check['message']}[/red]")
-        console.print("[dim]Verifica tu GOOGLE_SHEETS_WEBHOOK_URL en .env[/dim]")
-        if not Confirm.ask("Continuar de todas formas?", default=False):
-            return
-        console.print()
+        console.print("[yellow]Google Sheets no configurado. Los resultados se guardaran localmente y en CSV.[/yellow]\n")
 
-    # Select business type / industry
+    # ── 1. Select business type / industry ──
     console.print("[bold]Selecciona industria:[/bold]")
     business_types = settings.google_maps_business_types
     for i, bt in enumerate(business_types, 1):
@@ -1049,15 +1045,61 @@ def menu_contacts_to_sheet():
             console.print("[yellow]Tipo de negocio vacio, cancelando[/yellow]")
             return
 
-    # Get city
-    console.print(f"\n[bold]Ciudad:[/bold]")
-    console.print("[dim]Ejemplos: Lima OH, Miami FL, Houston TX, Austin TX[/dim]")
-    city = Prompt.ask("Escribe la ciudad")
-    if not city.strip():
-        console.print("[yellow]Ciudad vacia, cancelando[/yellow]")
+    # ── 2. Select areas (multiple) ──
+    console.print(f"\n[bold]Selecciona areas para buscar:[/bold]")
+    console.print("  [1] Escribir ciudades manualmente (puedes poner varias)")
+    console.print("  [2] Usar ciudades predeterminadas")
+    console.print("  [3] Ambas (predeterminadas + agregar mas)")
+
+    area_mode = Prompt.ask("Opcion", choices=["1", "2", "3"], default="1")
+
+    cities: List[str] = []
+
+    if area_mode in ("2", "3"):
+        # Show predefined locations and let user pick several
+        console.print("\n[bold]Ciudades predeterminadas:[/bold]")
+        default_locations = settings.google_maps_locations
+        for i, loc in enumerate(default_locations, 1):
+            console.print(f"  [{i}] {loc}")
+        console.print(f"  [A] Todas")
+
+        console.print("\n[dim]Escribe los numeros separados por coma (ej: 1,3,5) o 'A' para todas[/dim]")
+        loc_input = Prompt.ask("Ciudades", default="A")
+
+        if loc_input.strip().upper() == "A":
+            cities.extend(default_locations)
+        else:
+            for part in loc_input.split(","):
+                part = part.strip()
+                if part.isdigit():
+                    idx = int(part) - 1
+                    if 0 <= idx < len(default_locations):
+                        cities.append(default_locations[idx])
+
+    if area_mode in ("1", "3"):
+        console.print("\n[bold]Escribe ciudades separadas por coma:[/bold]")
+        console.print("[dim]Ej: Austin TX, Dallas TX, San Antonio TX, Denver CO[/dim]")
+        manual_input = Prompt.ask("Ciudades")
+        for city in manual_input.split(","):
+            city = city.strip()
+            if city:
+                cities.append(city)
+
+    # Deduplicate while preserving order
+    seen_cities = set()
+    unique_cities = []
+    for c in cities:
+        key = c.lower().strip()
+        if key not in seen_cities:
+            seen_cities.add(key)
+            unique_cities.append(c)
+    cities = unique_cities
+
+    if not cities:
+        console.print("[yellow]No se seleccionaron ciudades, cancelando[/yellow]")
         return
 
-    # Get radius (optional)
+    # ── 3. Optional radius ──
     console.print(f"\n[bold]Radio de busqueda (millas):[/bold]")
     console.print("[dim]Deja vacio para busqueda normal sin radio. Max ~31 millas.[/dim]")
     radius_input = Prompt.ask("Radio en millas (Enter para omitir)", default="")
@@ -1074,107 +1116,162 @@ def menu_contacts_to_sheet():
         except ValueError:
             console.print("[yellow]Radio invalido, usando busqueda sin radio[/yellow]")
 
-    # Confirm search
-    search_desc = f"[bold]{selected_type.replace('_', ' ').title()}[/bold] en [bold]{city}[/bold]"
+    # ── 4. Confirm search ──
+    console.print(f"\n[bold]Resumen de busqueda:[/bold]")
+    console.print(f"  Industria: [bold]{selected_type.replace('_', ' ').title()}[/bold]")
+    console.print(f"  Ciudades:  [bold]{', '.join(cities)}[/bold]")
     if radius_miles:
-        search_desc += f" (radio: [bold]{radius_miles} millas[/bold])"
-    console.print(f"\n[cyan]Buscando: {search_desc}[/cyan]")
+        console.print(f"  Radio:     [bold]{radius_miles} millas[/bold]")
+    console.print(f"  Total busquedas: [bold]{len(cities)}[/bold]")
 
-    if not Confirm.ask("Continuar?", default=True):
+    if not Confirm.ask("\nContinuar?", default=True):
         return
 
-    # Run Google Maps scraper
-    console.print(f"\n[bold green]Buscando negocios...[/bold green]")
+    # ── 5. Run scraper for each city ──
+    console.print(f"\n[bold green]Buscando negocios en {len(cities)} areas...[/bold green]\n")
+
+    all_leads: List[Lead] = []
+    all_errors: List[str] = []
 
     try:
         with GoogleMapsScraper() as scraper:
-            batch = scraper.scrape(
-                location=city,
-                category=selected_type,
-                radius_miles=radius_miles,
-            )
+            for i, city in enumerate(cities, 1):
+                console.print(f"[cyan][{i}/{len(cities)}] Buscando {selected_type} en {city}...[/cyan]")
+                try:
+                    batch = scraper.scrape(
+                        location=city,
+                        category=selected_type,
+                        radius_miles=radius_miles,
+                        skip_review_filter=True,
+                    )
+                    all_leads.extend(batch.leads)
+                    all_errors.extend(batch.errors)
+                    console.print(f"  [green]{len(batch.leads)} negocios encontrados[/green]")
+                except Exception as e:
+                    console.print(f"  [red]Error: {e}[/red]")
+                    all_errors.append(f"{city}: {e}")
+
+                if i < len(cities):
+                    time.sleep(1)
     except Exception as e:
-        console.print(f"[red]Error en la busqueda: {e}[/red]")
+        console.print(f"[red]Error inicializando scraper: {e}[/red]")
         return
 
-    if not batch.leads:
-        console.print("[yellow]No se encontraron negocios. Intenta otra industria o ciudad.[/yellow]")
-        if batch.errors:
-            for err in batch.errors[:3]:
+    if not all_leads:
+        console.print("\n[yellow]No se encontraron negocios. Intenta otra industria o ciudades.[/yellow]")
+        if all_errors:
+            for err in all_errors[:5]:
                 console.print(f"  [red]{err}[/red]")
         return
 
-    # Auto email enrichment for leads still missing emails
-    leads = run_email_enrichment(batch.leads)
-    console.print(f"\n[green]Encontrados: {len(leads)} negocios[/green]")
+    # Deduplicate by place_id across all cities
+    seen_places = set()
+    unique_leads = []
+    for lead in all_leads:
+        key = lead.place_id or lead.id
+        if key not in seen_places:
+            seen_places.add(key)
+            unique_leads.append(lead)
+    all_leads = unique_leads
 
-    # Display preview table
-    title = f"{selected_type.replace('_', ' ').title()} en {city}"
+    # ── 6. Auto email enrichment (the priority) ──
+    leads = run_email_enrichment(all_leads)
+
+    # ── 7. Display results ──
+    console.print(f"\n[bold green]Total encontrados: {len(leads)} negocios[/bold green]")
+
+    title = f"{selected_type.replace('_', ' ').title()} - {', '.join(cities[:3])}"
+    if len(cities) > 3:
+        title += f" +{len(cities) - 3} mas"
     if radius_miles:
         title += f" ({radius_miles} mi)"
+
     table = Table(title=title, show_lines=True)
     table.add_column("#", style="dim", width=4)
-    table.add_column("Negocio", style="green", max_width=30)
+    table.add_column("Negocio", style="green", max_width=28)
+    table.add_column("Email", style="bold yellow", max_width=30)
     table.add_column("Telefono", style="cyan", max_width=18)
-    table.add_column("Email", style="yellow", max_width=25)
+    table.add_column("Website", style="blue", max_width=25)
+    table.add_column("Ciudad", style="magenta", max_width=20)
     table.add_column("Rating", justify="center", width=7)
-    table.add_column("Reviews", justify="center", width=8)
-    table.add_column("Dolor", justify="center", width=8)
 
-    for i, lead in enumerate(leads[:15], 1):
-        pain_str = "[red]SI[/red]" if lead.has_pain else "[green]NO[/green]"
+    for i, lead in enumerate(leads[:20], 1):
         rating_str = f"{lead.rating:.1f}" if lead.rating else "-"
+        email_str = lead.email or "[dim]-[/dim]"
+        # Extract city from address
+        ciudad = lead.location or ""
+        if not ciudad and lead.address:
+            parts = lead.address.split(",")
+            if len(parts) >= 2:
+                ciudad = parts[-2].strip() if len(parts) >= 3 else parts[-1].strip()
+        ciudad = ciudad[:20]
+
         table.add_row(
             str(i),
-            (lead.company or lead.title or "")[:30],
+            (lead.company or lead.title or "")[:28],
+            email_str,
             lead.phone or "-",
-            lead.email or "-",
-            rating_str,
-            str(lead.review_count or "-"),
-            pain_str
+            (lead.website or "-")[:25],
+            ciudad,
+            rating_str
         )
 
     console.print(table)
 
-    if len(leads) > 15:
-        console.print(f"[dim]... y {len(leads) - 15} mas[/dim]")
+    if len(leads) > 20:
+        console.print(f"[dim]... y {len(leads) - 20} mas[/dim]")
 
-    # Summary stats
+    # Summary stats (email-focused)
+    with_email = sum(1 for l in leads if l.email and not l.email.endswith("@leadgen.placeholder"))
     with_phone = sum(1 for l in leads if l.phone)
-    with_email = sum(1 for l in leads if l.email)
-    with_pain = sum(1 for l in leads if l.has_pain)
     with_website = sum(1 for l in leads if l.website)
+    with_both = sum(1 for l in leads if l.email and l.phone and not l.email.endswith("@leadgen.placeholder"))
 
-    console.print(f"\n[bold]Resumen:[/bold]")
-    console.print(f"  Con telefono: [cyan]{with_phone}[/cyan]")
-    console.print(f"  Con email:    [cyan]{with_email}[/cyan]")
-    console.print(f"  Con website:  [cyan]{with_website}[/cyan]")
-    console.print(f"  Con dolor:    [red]{with_pain}[/red]")
+    console.print(f"\n[bold]Resumen de contactos:[/bold]")
+    console.print(f"  Total negocios:       [bold]{len(leads)}[/bold]")
+    console.print(f"  Con email:            [bold green]{with_email}[/bold green]")
+    console.print(f"  Con telefono:         [cyan]{with_phone}[/cyan]")
+    console.print(f"  Con website:          [blue]{with_website}[/blue]")
+    console.print(f"  Con email + telefono: [bold green]{with_both}[/bold green]")
 
-    # Confirm send to Google Sheets
-    if not Confirm.ask(f"\nEnviar {len(leads)} contactos a Google Sheets?", default=True):
-        # Still save to local DB
-        if Confirm.ask("Guardar en base de datos local?", default=True):
-            result = db.save_leads(leads)
-            console.print(f"[green]Guardados: {result['saved']} nuevos[/green]")
+    # ── 8. Save / Export ──
+    console.print(f"\n[bold]Que quieres hacer con los resultados?[/bold]")
+    console.print("  [1] Guardar localmente + exportar CSV")
+    if sheets_configured:
+        console.print("  [2] Enviar a Google Sheets + guardar local")
+        console.print("  [3] Todo (Google Sheets + CSV + base de datos)")
+    console.print("  [0] No guardar")
+
+    save_choices = ["0", "1", "2", "3"] if sheets_configured else ["0", "1"]
+    save_choice = Prompt.ask("Opcion", choices=save_choices, default="3" if sheets_configured else "1")
+
+    if save_choice == "0":
+        console.print("[yellow]Resultados no guardados[/yellow]")
         return
 
-    # Save to local database first
-    result = db.save_leads(leads)
-    console.print(f"[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados omitidos[/green]")
+    # Save to local DB
+    if save_choice in ("1", "2", "3"):
+        result = db.save_leads(leads)
+        console.print(f"[green]Guardados localmente: {result['saved']} nuevos, {result['duplicates']} duplicados[/green]")
+
+    # Export CSV
+    if save_choice in ("1", "3"):
+        csv_path = db.export_to_csv(qualified_only=False)
+        console.print(f"[green]CSV exportado: {csv_path}[/green]")
 
     # Send to Google Sheets
-    console.print(f"\n[cyan]Enviando contactos a Google Sheets...[/cyan]")
-    try:
-        result = sheets.send_leads(leads)
-        console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos[/bold green]")
-        if result['failed']:
-            console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
-        console.print(f"[dim]Revisa tu Google Sheet para ver los resultados[/dim]")
-
-    except Exception as e:
-        console.print(f"[red]Error enviando a Google Sheets: {e}[/red]")
-        logger.error(f"Google Sheets sync error: {e}")
+    if save_choice in ("2", "3") and sheets_configured:
+        sheet_name = selected_type.replace("_", " ").title()
+        console.print(f"\n[cyan]Enviando {len(leads)} contactos a Google Sheets (tab: {sheet_name})...[/cyan]")
+        try:
+            result = sheets.send_leads(leads, sheet_name=sheet_name)
+            console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos[/bold green]")
+            if result['failed']:
+                console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
+            console.print(f"[dim]Revisa tu Google Sheet para ver los resultados[/dim]")
+        except Exception as e:
+            console.print(f"[red]Error enviando a Google Sheets: {e}[/red]")
+            logger.error(f"Google Sheets sync error: {e}")
 
 
 # ==================== MAIN ====================
