@@ -48,6 +48,23 @@ console = Console()
 logger = setup_logger("main")
 db = LeadDatabase()  # SQLite database for local persistence
 
+# Spanish names for business types (API English name -> display / sheet tab name)
+BUSINESS_TYPE_SPANISH = {
+    "plumber": {"display": "Plomero", "tab": "Plomeros"},
+    "electrician": {"display": "Electricista", "tab": "Electricistas"},
+    "hvac": {"display": "HVAC / Climatizacion", "tab": "HVAC"},
+    "dentist": {"display": "Dentista", "tab": "Dentistas"},
+    "lawyer": {"display": "Abogado", "tab": "Abogados"},
+    "accountant": {"display": "Contador", "tab": "Contadores"},
+    "real_estate_agent": {"display": "Agente Inmobiliario", "tab": "Agentes Inmobiliarios"},
+    "contractor": {"display": "Contratista", "tab": "Contratistas"},
+    "auto_repair": {"display": "Taller Mecanico", "tab": "Talleres Mecanicos"},
+    "veterinarian": {"display": "Veterinario", "tab": "Veterinarios"},
+    "medical_clinic": {"display": "Clinica Medica", "tab": "Clinicas Medicas"},
+    "salon": {"display": "Salon de Belleza", "tab": "Salones de Belleza"},
+    "restaurant": {"display": "Restaurante", "tab": "Restaurantes"},
+}
+
 
 def display_banner():
     """Display application banner."""
@@ -1030,7 +1047,9 @@ def menu_contacts_to_sheet():
     console.print("[bold]Selecciona industria:[/bold]")
     business_types = settings.google_maps_business_types
     for i, bt in enumerate(business_types, 1):
-        console.print(f"  [{i}] {bt.replace('_', ' ').title()}")
+        spanish = BUSINESS_TYPE_SPANISH.get(bt, {})
+        display_name = spanish.get("display", bt.replace("_", " ").title())
+        console.print(f"  [{i}] {display_name}")
     console.print(f"  [{len(business_types) + 1}] Otro (escribir manualmente)")
 
     type_choices = [str(i) for i in range(1, len(business_types) + 2)]
@@ -1040,10 +1059,15 @@ def menu_contacts_to_sheet():
     if type_idx < len(business_types):
         selected_type = business_types[type_idx]
     else:
-        selected_type = Prompt.ask("Escribe el tipo de negocio (ej: florist, gym, bakery)")
+        selected_type = Prompt.ask("Escribe el tipo de negocio en ingles para la API (ej: florist, gym, bakery)")
         if not selected_type.strip():
             console.print("[yellow]Tipo de negocio vacio, cancelando[/yellow]")
             return
+
+    # Resolve Spanish display name and sheet tab name
+    spanish_info = BUSINESS_TYPE_SPANISH.get(selected_type, {})
+    display_name = spanish_info.get("display", selected_type.replace("_", " ").title())
+    sheet_tab_name = spanish_info.get("tab", selected_type.replace("_", " ").title())
 
     # ── 2. Select areas (multiple) ──
     console.print(f"\n[bold]Selecciona areas para buscar:[/bold]")
@@ -1118,17 +1142,18 @@ def menu_contacts_to_sheet():
 
     # ── 4. Confirm search ──
     console.print(f"\n[bold]Resumen de busqueda:[/bold]")
-    console.print(f"  Industria: [bold]{selected_type.replace('_', ' ').title()}[/bold]")
-    console.print(f"  Ciudades:  [bold]{', '.join(cities)}[/bold]")
+    console.print(f"  Industria:       [bold]{display_name}[/bold] (API: {selected_type})")
+    console.print(f"  Pestana Sheet:   [bold]{sheet_tab_name}[/bold]")
+    console.print(f"  Ciudades:        [bold]{', '.join(cities)}[/bold]")
     if radius_miles:
-        console.print(f"  Radio:     [bold]{radius_miles} millas[/bold]")
+        console.print(f"  Radio:           [bold]{radius_miles} millas[/bold]")
     console.print(f"  Total busquedas: [bold]{len(cities)}[/bold]")
 
     if not Confirm.ask("\nContinuar?", default=True):
         return
 
     # ── 5. Run scraper for each city ──
-    console.print(f"\n[bold green]Buscando negocios en {len(cities)} areas...[/bold green]\n")
+    console.print(f"\n[bold green]Buscando {display_name}s en {len(cities)} areas...[/bold green]\n")
 
     all_leads: List[Lead] = []
     all_errors: List[str] = []
@@ -1136,7 +1161,7 @@ def menu_contacts_to_sheet():
     try:
         with GoogleMapsScraper() as scraper:
             for i, city in enumerate(cities, 1):
-                console.print(f"[cyan][{i}/{len(cities)}] Buscando {selected_type} en {city}...[/cyan]")
+                console.print(f"[cyan][{i}/{len(cities)}] Buscando {display_name}s en {city}...[/cyan]")
                 try:
                     batch = scraper.scrape(
                         location=city,
@@ -1180,7 +1205,7 @@ def menu_contacts_to_sheet():
     # ── 7. Display results ──
     console.print(f"\n[bold green]Total encontrados: {len(leads)} negocios[/bold green]")
 
-    title = f"{selected_type.replace('_', ' ').title()} - {', '.join(cities[:3])}"
+    title = f"{display_name} - {', '.join(cities[:3])}"
     if len(cities) > 3:
         title += f" +{len(cities) - 3} mas"
     if radius_miles:
@@ -1238,8 +1263,8 @@ def menu_contacts_to_sheet():
     console.print(f"\n[bold]Que quieres hacer con los resultados?[/bold]")
     console.print("  [1] Guardar localmente + exportar CSV")
     if sheets_configured:
-        console.print("  [2] Enviar a Google Sheets + guardar local")
-        console.print("  [3] Todo (Google Sheets + CSV + base de datos)")
+        console.print(f"  [2] Enviar a Google Sheets (pestana '[bold]{sheet_tab_name}[/bold]') + guardar local")
+        console.print(f"  [3] Todo (Google Sheets '[bold]{sheet_tab_name}[/bold]' + CSV + base de datos)")
     console.print("  [0] No guardar")
 
     save_choices = ["0", "1", "2", "3"] if sheets_configured else ["0", "1"]
@@ -1259,16 +1284,15 @@ def menu_contacts_to_sheet():
         csv_path = db.export_to_csv(qualified_only=False)
         console.print(f"[green]CSV exportado: {csv_path}[/green]")
 
-    # Send to Google Sheets
+    # Send to Google Sheets (tab named by industry in Spanish)
     if save_choice in ("2", "3") and sheets_configured:
-        sheet_name = selected_type.replace("_", " ").title()
-        console.print(f"\n[cyan]Enviando {len(leads)} contactos a Google Sheets (tab: {sheet_name})...[/cyan]")
+        console.print(f"\n[cyan]Enviando {len(leads)} contactos a Google Sheets (pestana: [bold]{sheet_tab_name}[/bold])...[/cyan]")
         try:
-            result = sheets.send_leads(leads, sheet_name=sheet_name)
-            console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos[/bold green]")
+            result = sheets.send_leads(leads, sheet_name=sheet_tab_name)
+            console.print(f"[bold green]Enviados a Google Sheets: {result['sent']} contactos a pestana '{sheet_tab_name}'[/bold green]")
             if result['failed']:
                 console.print(f"[yellow]Fallidos: {result['failed']}[/yellow]")
-            console.print(f"[dim]Revisa tu Google Sheet para ver los resultados[/dim]")
+            console.print(f"[dim]Revisa tu Google Sheet → pestana '{sheet_tab_name}' para ver los resultados[/dim]")
         except Exception as e:
             console.print(f"[red]Error enviando a Google Sheets: {e}[/red]")
             logger.error(f"Google Sheets sync error: {e}")
