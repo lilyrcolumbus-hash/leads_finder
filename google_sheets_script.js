@@ -1,8 +1,20 @@
 /**
- * Google Apps Script - Business Leads Finder
+ * Google Apps Script - Business Leads Finder (v2 - All Issues Fixed)
  *
  * Busca negocios usando Google Places API directamente desde tu Google Sheet.
  * Crea una pestana nueva por cada busqueda (industria + ciudad).
+ *
+ * FIXES en v2:
+ *   - Escritura incremental (no pierdes datos si se corta el script)
+ *   - Control de tiempo (se detiene antes del limite de 6 min)
+ *   - SpreadsheetApp.flush() periodico para guardar datos en caso de crash
+ *   - Busca emails en /contact y /contact-us ademas de homepage
+ *   - Filtra emails basura (noreply, hosting providers, etc.)
+ *   - Busca mailto: links primero (mas confiable que regex general)
+ *   - Reintento automatico en llamadas API fallidas
+ *   - Pain score ajustado para la limitacion de 5 reviews de Google
+ *   - Manejo de OVER_QUERY_LIMIT con backoff
+ *   - Resumen final indica muestra limitada de reviews
  *
  * SETUP:
  *   1. En tu Google Sheet: Extensiones -> Apps Script
@@ -23,6 +35,15 @@ const API_KEY = "TU_GOOGLE_PLACES_API_KEY_AQUI";
 // Maximo de negocios a buscar por busqueda (max 60, va de 20 en 20)
 const MAX_RESULTS = 60;
 
+// Limite de tiempo: 5 min (deja 1 min de buffer antes del limite duro de 6 min)
+const MAX_RUNTIME_MS = 5 * 60 * 1000;
+
+// Si queda menos de este tiempo, salta la extraccion de email (que es lo mas lento)
+const MIN_TIME_FOR_EMAIL_MS = 90 * 1000;
+
+// Cada cuantas filas hacer flush() para guardar datos parciales
+const FLUSH_EVERY_N_ROWS = 5;
+
 // Palabras clave de dolor en reviews (comunicacion, telefono, servicio)
 const PAIN_KEYWORDS = [
   "never answers", "no one picks up", "can't get through",
@@ -38,6 +59,30 @@ const PAIN_KEYWORDS = [
   "no contestan", "no responden", "mala atencion",
   "pesimo servicio", "no devuelven llamada", "imposible comunicarse"
 ];
+
+// Dominios de email a ignorar (hosting, plataformas, etc.)
+const EMAIL_BLACKLIST_DOMAINS = [
+  "wixpress.com", "wix.com", "wordpress.com", "wordpress.org",
+  "squarespace.com", "godaddy.com", "googleapis.com",
+  "google.com", "facebook.com", "twitter.com", "instagram.com",
+  "sentry.io", "example.com", "email.com", "domain.com",
+  "shopify.com", "mailchimp.com", "hubspot.com", "weebly.com",
+  "jimdo.com", "website.com", "test.com", "localhost",
+  "yourdomain.com", "company.com", "yourcompany.com"
+];
+
+// Prefijos de email a ignorar (no-reply, system accounts, etc.)
+const EMAIL_BLACKLIST_PREFIXES = [
+  "noreply", "no-reply", "no.reply",
+  "donotreply", "do-not-reply", "do.not.reply",
+  "mailer-daemon", "postmaster", "webmaster", "hostmaster",
+  "abuse", "root", "daemon", "nobody",
+  "billing@squarespace", "support@godaddy", "support@shopify",
+  "support@wix", "admin@wix"
+];
+
+// Rutas de paginas de contacto a intentar si no se encuentra email en homepage
+const CONTACT_PATHS = ["/contact", "/contact-us"];
 
 // Headers de la tabla
 const HEADERS = [
@@ -147,7 +192,9 @@ function searchHvacPhoenix() { searchAndWrite("hvac", "Phoenix, AZ", true); }
 // ============================================================
 
 /**
- * Busca negocios y los escribe en una pestana nueva
+ * Busca negocios y los escribe INCREMENTALMENTE en una pestana nueva.
+ * Cada lead se escribe en la sheet inmediatamente despues de procesarse.
+ * Se detiene antes del limite de 6 minutos para no perder datos.
  *
  * @param {string} industry - Tipo de negocio
  * @param {string} location - Ciudad, Estado
@@ -156,6 +203,7 @@ function searchHvacPhoenix() { searchAndWrite("hvac", "Phoenix, AZ", true); }
 function searchAndWrite(industry, location, analyzeReviews) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var ui = SpreadsheetApp.getUi();
+  var startTime = new Date().getTime();
 
   // Verificar API Key
   if (API_KEY === "TU_GOOGLE_PLACES_API_KEY_AQUI" || !API_KEY) {
@@ -173,62 +221,100 @@ function searchAndWrite(industry, location, analyzeReviews) {
     return;
   }
 
-  ss.toast("Encontrados " + places.length + " negocios. Obteniendo detalles...", "📋 Procesando", -1);
+  ss.toast("Encontrados " + places.length + " negocios. Preparando hoja...", "📋 Procesando", -1);
 
-  // Paso 2: Obtener detalles de cada negocio
-  var leads = [];
-  for (var i = 0; i < places.length; i++) {
-    ss.toast("Procesando " + (i + 1) + " de " + places.length + "...", "📋 Detalles", -1);
-
-    var details = getPlaceDetails(places[i].place_id, analyzeReviews);
-    if (details) {
-      leads.push(details);
-    }
-
-    // Pausa para no exceder rate limits
-    if (i % 10 === 9) {
-      Utilities.sleep(1000);
-    }
-  }
-
-  if (leads.length === 0) {
-    ui.alert("No se pudieron obtener detalles de los negocios");
-    return;
-  }
-
-  // Paso 3: Ordenar - los que tienen email primero, luego por rating
-  leads.sort(function(a, b) {
-    if (a.email && !b.email) return -1;
-    if (!a.email && b.email) return 1;
-    return (b.rating || 0) - (a.rating || 0);
-  });
-
-  // Paso 4: Escribir en nueva pestana
+  // Paso 2: Crear pestana y escribir headers ANTES de procesar
   var tabName = capitalizeFirst(industry) + " - " + location;
   tabName = sanitizeTabName(tabName);
-
   var sheet = getOrCreateTab(ss, tabName);
-  writeLeadsToSheet(sheet, leads);
-
-  // Activar la pestana nueva
+  writeHeaders(sheet);
   ss.setActiveSheet(sheet);
+  SpreadsheetApp.flush();
 
-  // Resumen
-  var emailCount = leads.filter(function(l) { return l.email; }).length;
-  var phoneCount = leads.filter(function(l) { return l.phone; }).length;
-  var painCount = leads.filter(function(l) { return l.painScore > 0; }).length;
+  // Paso 3: Procesar cada negocio y escribir INMEDIATAMENTE
+  var currentRow = 2;
+  var emailCount = 0;
+  var phoneCount = 0;
+  var painCount = 0;
+  var skippedEmails = 0;
+  var stoppedEarly = false;
 
+  for (var i = 0; i < places.length; i++) {
+    var elapsed = new Date().getTime() - startTime;
+
+    // Si queda menos de 30 segundos, parar para no perder datos
+    if (elapsed > MAX_RUNTIME_MS) {
+      stoppedEarly = true;
+      Logger.log("Detenido por limite de tiempo en negocio " + (i + 1) + " de " + places.length);
+      break;
+    }
+
+    // Decidir si intentar extraer email (consume mucho tiempo)
+    var timeRemaining = MAX_RUNTIME_MS - elapsed;
+    var skipEmail = timeRemaining < MIN_TIME_FOR_EMAIL_MS;
+    if (skipEmail) skippedEmails++;
+
+    ss.toast(
+      "Procesando " + (i + 1) + " de " + places.length +
+      (skipEmail ? " (sin email - poco tiempo)" : "") +
+      " | " + Math.round(elapsed / 1000) + "s",
+      "📋 Detalles", -1
+    );
+
+    var details = getPlaceDetails(places[i].place_id, analyzeReviews, skipEmail);
+    if (details) {
+      // Escribir inmediatamente a la sheet
+      writeLeadRow(sheet, currentRow, details);
+
+      if (details.email) emailCount++;
+      if (details.phone) phoneCount++;
+      if (details.painScore > 0) painCount++;
+      currentRow++;
+
+      // Flush periodicamente para garantizar que los datos se guardan
+      if ((currentRow - 2) % FLUSH_EVERY_N_ROWS === 0) {
+        SpreadsheetApp.flush();
+      }
+    }
+
+    // Pausa para rate limits
+    if (i % 5 === 4) {
+      Utilities.sleep(500);
+    }
+  }
+
+  // Paso 4: Formato final
+  var totalLeads = currentRow - 2;
+  if (totalLeads > 0) {
+    formatSheet(sheet, totalLeads);
+  }
+  SpreadsheetApp.flush();
+
+  // Paso 5: Resumen
   ss.toast("", "✅ Completado", 1);
-  ui.alert(
-    "✅ Busqueda Completada",
+
+  var summaryMsg =
     "Pestana: " + tabName + "\n" +
-    "Negocios: " + leads.length + "\n" +
+    "Negocios procesados: " + totalLeads + " de " + places.length + "\n" +
     "Con email: " + emailCount + "\n" +
-    "Con telefono: " + phoneCount + "\n" +
-    (analyzeReviews ? "Con pain points: " + painCount + "\n" : "") +
-    "\nLos resultados estan en la pestana '" + tabName + "'",
-    ui.ButtonSet.OK
-  );
+    "Con telefono: " + phoneCount + "\n";
+
+  if (analyzeReviews) {
+    summaryMsg += "Con pain points: " + painCount + "\n";
+    summaryMsg += "\n⚠️ Nota: Google solo da 5 reviews por negocio.\nLos pain scores son aproximados.\n";
+  }
+
+  if (stoppedEarly) {
+    summaryMsg += "\n⏱️ Se detuvo antes del limite de tiempo.\n" +
+      "Los " + totalLeads + " negocios procesados ya estan guardados.\n" +
+      "Puedes volver a buscar para obtener los restantes.";
+  }
+
+  if (skippedEmails > 0) {
+    summaryMsg += "\n📧 " + skippedEmails + " negocios sin buscar email (por tiempo).";
+  }
+
+  ui.alert("✅ Busqueda Completada", summaryMsg, ui.ButtonSet.OK);
 }
 
 // ============================================================
@@ -236,8 +322,9 @@ function searchAndWrite(industry, location, analyzeReviews) {
 // ============================================================
 
 /**
- * Busca negocios usando Places Text Search API
- * Devuelve hasta MAX_RESULTS resultados (paginado de 20 en 20)
+ * Busca negocios usando Places Text Search API.
+ * Devuelve hasta MAX_RESULTS resultados (paginado de 20 en 20).
+ * Incluye reintentos y manejo de OVER_QUERY_LIMIT.
  */
 function searchPlaces(industry, location) {
   var allResults = [];
@@ -248,7 +335,9 @@ function searchPlaces(industry, location) {
 
   try {
     // Primera pagina (hasta 20 resultados)
-    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    var response = fetchWithRetry(url);
+    if (!response) return [];
+
     var data = JSON.parse(response.getContentText());
 
     if (data.status !== "OK") {
@@ -258,6 +347,14 @@ function searchPlaces(industry, location) {
           "⚠️ API Error",
           "Tu API Key no tiene acceso a Places API.\n\n" +
           "Ve a Google Cloud Console -> APIs & Services -> Enable 'Places API'",
+          SpreadsheetApp.getUi().ButtonSet.OK
+        );
+      }
+      if (data.status === "OVER_QUERY_LIMIT") {
+        SpreadsheetApp.getUi().alert(
+          "⚠️ Rate Limit",
+          "Excediste el limite de requests de Google.\n" +
+          "Espera unos minutos e intenta de nuevo.",
           SpreadsheetApp.getUi().ButtonSet.OK
         );
       }
@@ -278,12 +375,30 @@ function searchPlaces(industry, location) {
         + "?pagetoken=" + nextPageToken
         + "&key=" + API_KEY;
 
-      var nextResponse = UrlFetchApp.fetch(nextUrl, { muteHttpExceptions: true });
+      var nextResponse = fetchWithRetry(nextUrl);
+      if (!nextResponse) break;
+
       var nextData = JSON.parse(nextResponse.getContentText());
 
       if (nextData.status === "OK") {
         allResults = allResults.concat(nextData.results);
         nextPageToken = nextData.next_page_token;
+      } else if (nextData.status === "OVER_QUERY_LIMIT") {
+        // Esperar mas y reintentar una vez
+        Logger.log("Rate limit en pagina " + (page + 1) + ", esperando 5 segundos...");
+        Utilities.sleep(5000);
+        nextResponse = fetchWithRetry(nextUrl);
+        if (nextResponse) {
+          nextData = JSON.parse(nextResponse.getContentText());
+          if (nextData.status === "OK") {
+            allResults = allResults.concat(nextData.results);
+            nextPageToken = nextData.next_page_token;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
       } else {
         break;
       }
@@ -298,10 +413,14 @@ function searchPlaces(industry, location) {
 }
 
 /**
- * Obtiene detalles completos de un negocio por Place ID
- * Incluye: telefono, website, email (del website), reviews
+ * Obtiene detalles completos de un negocio por Place ID.
+ * Incluye reintentos y manejo de OVER_QUERY_LIMIT.
+ *
+ * @param {string} placeId - Google Place ID
+ * @param {boolean} analyzeReviews - Si pedir reviews
+ * @param {boolean} skipEmail - Si saltar extraccion de email (por tiempo)
  */
-function getPlaceDetails(placeId, analyzeReviews) {
+function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
   var fields = "name,formatted_address,formatted_phone_number,website,rating,user_ratings_total,url,types,business_status";
   if (analyzeReviews) {
     fields += ",reviews";
@@ -313,8 +432,19 @@ function getPlaceDetails(placeId, analyzeReviews) {
     + "&key=" + API_KEY;
 
   try {
-    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    var response = fetchWithRetry(url);
+    if (!response) return null;
+
     var data = JSON.parse(response.getContentText());
+
+    // Manejo de rate limit
+    if (data.status === "OVER_QUERY_LIMIT") {
+      Logger.log("Rate limit en Place Details para " + placeId + ", esperando 5s...");
+      Utilities.sleep(5000);
+      response = fetchWithRetry(url);
+      if (!response) return null;
+      data = JSON.parse(response.getContentText());
+    }
 
     if (data.status !== "OK" || !data.result) {
       return null;
@@ -327,9 +457,9 @@ function getPlaceDetails(placeId, analyzeReviews) {
       return null;
     }
 
-    // Intentar extraer email del website
+    // Extraer email del website (si hay tiempo)
     var email = "";
-    if (place.website) {
+    if (!skipEmail && place.website) {
       email = extractEmailFromWebsite(place.website);
     }
 
@@ -365,69 +495,146 @@ function getPlaceDetails(placeId, analyzeReviews) {
     };
 
   } catch (e) {
-    Logger.log("Error getting place details: " + e.message);
+    Logger.log("Error getting place details for " + placeId + ": " + e.message);
     return null;
   }
 }
 
+// ============================================================
+// EXTRACCION DE EMAIL (MEJORADA)
+// ============================================================
+
 /**
- * Intenta extraer email de un website
- * Hace fetch de la pagina y busca patrones de email
+ * Intenta extraer email de un website.
+ * 1. Busca en la homepage
+ * 2. Si no encuentra, busca en /contact y /contact-us
  */
 function extractEmailFromWebsite(websiteUrl) {
+  // Intentar homepage primero
+  var email = extractEmailFromPage(websiteUrl);
+  if (email) return email;
+
+  // Si no encontro, intentar paginas de contacto
+  var baseUrl = getBaseUrl(websiteUrl);
+  for (var i = 0; i < CONTACT_PATHS.length; i++) {
+    email = extractEmailFromPage(baseUrl + CONTACT_PATHS[i]);
+    if (email) return email;
+  }
+
+  return "";
+}
+
+/**
+ * Extrae email de una URL especifica.
+ * Busca primero en mailto: links (mas confiable), luego regex general.
+ * Filtra emails basura y prioriza emails de contacto.
+ */
+function extractEmailFromPage(pageUrl) {
   try {
-    var response = UrlFetchApp.fetch(websiteUrl, {
+    var response = UrlFetchApp.fetch(pageUrl, {
       muteHttpExceptions: true,
       followRedirects: true,
       validateHttpsCertificates: false,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; LeadFinder/1.0)"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
       }
     });
 
-    if (response.getResponseCode() !== 200) return "";
+    var code = response.getResponseCode();
+    if (code !== 200) return "";
 
     var html = response.getContentText();
 
-    // Buscar emails con regex
+    // Limitar a 500KB para no perder tiempo con paginas enormes
+    if (html.length > 500000) {
+      html = html.substring(0, 500000);
+    }
+
+    // Paso 1: Buscar en mailto: links (mas confiable que regex general)
+    var mailtoRegex = /mailto:([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/gi;
+    var mailtoMatches = html.match(mailtoRegex);
+    if (mailtoMatches) {
+      for (var i = 0; i < mailtoMatches.length; i++) {
+        var mailtoEmail = mailtoMatches[i].replace(/^mailto:/i, "").toLowerCase();
+        if (isValidLeadEmail(mailtoEmail)) return mailtoEmail;
+      }
+    }
+
+    // Paso 2: Regex general
     var emailRegex = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
     var matches = html.match(emailRegex);
-
     if (!matches || matches.length === 0) return "";
 
-    // Filtrar emails genericos/spam y devolver el mejor
-    var validEmails = matches.filter(function(email) {
-      var lower = email.toLowerCase();
-      // Ignorar emails de imagenes, scripts, etc
-      if (lower.match(/\.(png|jpg|gif|svg|css|js)$/)) return false;
-      // Ignorar emails placeholder
-      if (lower.indexOf("example.com") >= 0) return false;
-      if (lower.indexOf("email.com") >= 0) return false;
-      if (lower.indexOf("domain.com") >= 0) return false;
-      if (lower.indexOf("sentry.io") >= 0) return false;
-      if (lower.indexOf("wixpress.com") >= 0) return false;
-      if (lower.indexOf("wordpress") >= 0) return false;
-      return true;
-    });
+    // Filtrar y recoger emails validos
+    var validEmails = [];
+    for (var i = 0; i < matches.length; i++) {
+      var em = matches[i].toLowerCase();
+      if (isValidLeadEmail(em) && validEmails.indexOf(em) === -1) {
+        validEmails.push(em);
+      }
+    }
 
     if (validEmails.length === 0) return "";
 
-    // Priorizar: info@, contact@, hello@ sobre otros
-    var priority = ["info@", "contact@", "hello@", "office@", "admin@"];
+    // Priorizar emails de contacto sobre genericos
+    var priority = [
+      "info@", "contact@", "hello@", "office@",
+      "appointments@", "scheduling@", "front@", "reception@",
+      "inquiries@", "sales@"
+    ];
     for (var i = 0; i < priority.length; i++) {
       for (var j = 0; j < validEmails.length; j++) {
-        if (validEmails[j].toLowerCase().indexOf(priority[i]) === 0) {
-          return validEmails[j].toLowerCase();
+        if (validEmails[j].indexOf(priority[i]) === 0) {
+          return validEmails[j];
         }
       }
     }
 
-    return validEmails[0].toLowerCase();
+    return validEmails[0];
 
   } catch (e) {
-    // Timeout o error de red - no pasa nada
+    // Timeout o error de red - no pasa nada, seguir con el siguiente
     return "";
   }
+}
+
+/**
+ * Valida que un email sea util para un lead (no basura/sistema/hosting)
+ */
+function isValidLeadEmail(email) {
+  email = email.toLowerCase();
+
+  // Ignorar extensiones de archivo que regex confunde con emails
+  if (email.match(/\.(png|jpg|jpeg|gif|svg|css|js|webp|ico|woff|woff2|ttf|eot|pdf|zip)$/)) return false;
+
+  // Ignorar dominios blacklisted
+  for (var i = 0; i < EMAIL_BLACKLIST_DOMAINS.length; i++) {
+    if (email.indexOf("@" + EMAIL_BLACKLIST_DOMAINS[i]) >= 0) return false;
+    if (email.indexOf("." + EMAIL_BLACKLIST_DOMAINS[i]) >= 0) return false;
+  }
+
+  // Ignorar prefijos blacklisted
+  for (var i = 0; i < EMAIL_BLACKLIST_PREFIXES.length; i++) {
+    if (email.indexOf(EMAIL_BLACKLIST_PREFIXES[i]) === 0) return false;
+  }
+
+  // Ignorar emails auto-generados (5+ digitos antes del @)
+  if (email.match(/^[0-9a-f]{5,}@/)) return false;
+
+  // Ignorar emails que son claramente de pixeles de tracking
+  if (email.match(/@.*tracking/)) return false;
+  if (email.match(/@.*pixel/)) return false;
+
+  return true;
+}
+
+/**
+ * Obtiene la URL base de un website (protocolo + dominio, sin path)
+ */
+function getBaseUrl(url) {
+  url = url.replace(/\/+$/, "");
+  var match = url.match(/^(https?:\/\/[^\/]+)/);
+  return match ? match[1] : url;
 }
 
 // ============================================================
@@ -435,12 +642,17 @@ function extractEmailFromWebsite(websiteUrl) {
 // ============================================================
 
 /**
- * Analiza reviews buscando keywords de dolor/mala comunicacion
- * Devuelve pain score (0-1), resumen y lista de reviews con dolor
+ * Analiza reviews buscando keywords de dolor/mala comunicacion.
+ *
+ * IMPORTANTE: Google Places API solo devuelve MAX 5 reviews por negocio.
+ * El pain score se ajusta para esta limitacion con un penalty de muestra pequena.
+ *
+ * Devuelve: { score: 0-1, summary: string, painReviews: string[] }
  */
 function analyzeReviewsForPain(reviews) {
   var painReviews = [];
   var keywordCounts = {};
+  var totalNegativeReviews = 0;
 
   for (var i = 0; i < reviews.length; i++) {
     var reviewText = (reviews[i].text || "").toLowerCase();
@@ -448,6 +660,7 @@ function analyzeReviewsForPain(reviews) {
 
     // Solo analizar reviews negativas (1-3 estrellas)
     if (reviewRating > 3) continue;
+    totalNegativeReviews++;
 
     var foundKeywords = [];
     for (var j = 0; j < PAIN_KEYWORDS.length; j++) {
@@ -458,57 +671,71 @@ function analyzeReviewsForPain(reviews) {
     }
 
     if (foundKeywords.length > 0) {
-      // Tomar primeros 100 chars de la review
-      var snippet = reviews[i].text.substring(0, 100);
-      if (reviews[i].text.length > 100) snippet += "...";
+      var rawText = reviews[i].text || "";
+      var snippet = rawText.substring(0, 100);
+      if (rawText.length > 100) snippet += "...";
       painReviews.push("⭐" + reviewRating + ": " + snippet);
     }
   }
 
-  // Calcular pain score
+  // Calcular pain score AJUSTADO para muestra de 5 reviews
+  //
+  // Problema: Google solo da 5 reviews, asi que 1 pain review de 5
+  // no es lo mismo que 100 pain reviews de 500.
+  //
+  // Formula ajustada:
+  //   - Base: proporcion de pain reviews entre las NEGATIVAS (no el total)
+  //   - Bonus: por variedad de keywords (mas tipos de queja = problema real)
+  //   - Penalty: muestra < 10 reviews = menos confianza (x0.8)
   var totalReviews = reviews.length;
   var painCount = painReviews.length;
   var score = 0;
 
   if (totalReviews > 0 && painCount > 0) {
-    score = Math.min(1, painCount / totalReviews + (painCount * 0.1));
+    var uniqueKeywords = Object.keys(keywordCounts).length;
+
+    // Base: que % de reviews negativas tienen quejas de comunicacion
+    var baseScore = totalNegativeReviews > 0 ? painCount / totalNegativeReviews : 0;
+
+    // Bonus por variedad de keywords (cada keyword distinta suma 0.05, max 0.2)
+    var diversityBonus = Math.min(0.2, uniqueKeywords * 0.05);
+
+    // Penalty por muestra pequena (5 reviews es muy poco para estar seguro)
+    var samplePenalty = totalReviews < 10 ? 0.8 : 1.0;
+
+    score = Math.min(1, (baseScore * 0.6 + diversityBonus + painCount * 0.05) * samplePenalty);
     score = Math.round(score * 100) / 100;
   }
 
-  // Generar resumen
+  // Resumen con nota sobre muestra limitada
   var summary = "";
   if (painCount > 0) {
     var topKeywords = Object.keys(keywordCounts)
       .sort(function(a, b) { return keywordCounts[b] - keywordCounts[a]; })
       .slice(0, 3);
-    summary = painCount + " reviews con quejas: " + topKeywords.join(", ");
+    summary = painCount + "/" + totalReviews + " reviews con quejas: " + topKeywords.join(", ");
+    summary += " (muestra: " + totalReviews + " de " + "max 5 reviews)";
   }
 
   return {
     score: score,
     summary: summary,
-    painReviews: painReviews.slice(0, 5) // Max 5 reviews
+    painReviews: painReviews.slice(0, 5)
   };
 }
 
 // ============================================================
-// ESCRIBIR EN LA SHEET
+// ESCRITURA EN SHEET (INCREMENTAL)
 // ============================================================
 
 /**
- * Obtiene una pestana existente o crea una nueva
+ * Obtiene una pestana existente o crea una nueva.
+ * getSheetByName devuelve null si no existe (no tira error).
  */
 function getOrCreateTab(spreadsheet, tabName) {
-  var sheet = null;
-
-  try {
-    sheet = spreadsheet.getSheetByName(tabName);
-  } catch (e) {
-    // No existe
-  }
+  var sheet = spreadsheet.getSheetByName(tabName);
 
   if (sheet) {
-    // Si ya existe, limpiarla
     sheet.clear();
   } else {
     sheet = spreadsheet.insertSheet(tabName);
@@ -518,72 +745,110 @@ function getOrCreateTab(spreadsheet, tabName) {
 }
 
 /**
- * Escribe los leads en la pestana con formato
+ * Escribe los headers con formato en la primera fila
  */
-function writeLeadsToSheet(sheet, leads) {
-  // Headers
+function writeHeaders(sheet) {
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
 
-  // Formato de headers
   var headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
   headerRange.setFontWeight("bold");
   headerRange.setBackground("#1a73e8");
   headerRange.setFontColor("#ffffff");
   headerRange.setHorizontalAlignment("center");
-
-  // Datos
-  if (leads.length === 0) return;
-
-  var rows = leads.map(function(lead) {
-    return [
-      lead.name,
-      lead.email,
-      lead.phone,
-      lead.address,
-      lead.website,
-      lead.rating ? lead.rating.toFixed(1) : "",
-      lead.reviewCount || "",
-      lead.businessType,
-      lead.painScore ? lead.painScore.toFixed(2) : "",
-      lead.painSummary,
-      lead.painReviews,
-      lead.mapsUrl,
-      lead.placeId
-    ];
-  });
-
-  sheet.getRange(2, 1, rows.length, HEADERS.length).setValues(rows);
-
-  // Formato condicional: resaltar filas con email en verde claro
-  for (var i = 0; i < leads.length; i++) {
-    if (leads[i].email) {
-      sheet.getRange(i + 2, 1, 1, HEADERS.length).setBackground("#e6f4ea");
-    }
-  }
-
-  // Formato condicional: resaltar pain score alto en amarillo
-  for (var i = 0; i < leads.length; i++) {
-    if (leads[i].painScore >= 0.3) {
-      sheet.getRange(i + 2, 9).setBackground("#fef7e0");
-      sheet.getRange(i + 2, 9).setFontWeight("bold");
-    }
-  }
-
-  // Auto-resize columnas principales
-  sheet.autoResizeColumns(1, 8);
-
-  // Congelar header
   sheet.setFrozenRows(1);
+}
 
-  // Ajustar ancho de columnas de texto largo
-  sheet.setColumnWidth(10, 250); // Pain summary
-  sheet.setColumnWidth(11, 200); // Pain reviews
-  sheet.setColumnWidth(12, 200); // Maps URL
+/**
+ * Escribe UN lead en una fila especifica (escritura incremental).
+ * Aplica colores inmediatamente: verde si tiene email, amarillo si pain alto.
+ */
+function writeLeadRow(sheet, row, lead) {
+  var rowData = [
+    lead.name,
+    lead.email,
+    lead.phone,
+    lead.address,
+    lead.website,
+    lead.rating ? lead.rating.toFixed(1) : "",
+    lead.reviewCount || "",
+    lead.businessType,
+    lead.painScore ? lead.painScore.toFixed(2) : "",
+    lead.painSummary,
+    lead.painReviews,
+    lead.mapsUrl,
+    lead.placeId
+  ];
+
+  sheet.getRange(row, 1, 1, HEADERS.length).setValues([rowData]);
+
+  // Verde claro si tiene email
+  if (lead.email) {
+    sheet.getRange(row, 1, 1, HEADERS.length).setBackground("#e6f4ea");
+  }
+
+  // Amarillo si pain score alto
+  if (lead.painScore >= 0.3) {
+    sheet.getRange(row, 9).setBackground("#fef7e0");
+    sheet.getRange(row, 9).setFontWeight("bold");
+  }
+}
+
+/**
+ * Aplica formato final a la hoja (columnas, anchos)
+ */
+function formatSheet(sheet, totalRows) {
+  try {
+    sheet.autoResizeColumns(1, 8);
+    sheet.setColumnWidth(10, 250); // Pain summary
+    sheet.setColumnWidth(11, 200); // Pain reviews
+    sheet.setColumnWidth(12, 200); // Maps URL
+  } catch (e) {
+    Logger.log("Error formatting sheet: " + e.message);
+  }
 }
 
 // ============================================================
 // UTILIDADES
 // ============================================================
+
+/**
+ * HTTP fetch con reintentos automaticos.
+ * Reintenta hasta 2 veces con backoff exponencial en errores de servidor (5xx).
+ * No reintenta en errores de cliente (4xx) porque esos no se arreglan solos.
+ *
+ * @param {string} url - URL a fetch
+ * @param {number} maxRetries - Numero de reintentos (default: 2)
+ * @returns {HTTPResponse|null} - Respuesta o null si todos los intentos fallaron
+ */
+function fetchWithRetry(url, maxRetries) {
+  maxRetries = maxRetries || 2;
+
+  for (var attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      var code = response.getResponseCode();
+
+      // Exito o error de API (no de red/servidor) -> devolver
+      if (code < 500) {
+        return response;
+      }
+
+      // Error de servidor (5xx) -> reintentar
+      Logger.log("HTTP " + code + " en intento " + (attempt + 1) + " para: " + url.substring(0, 80));
+
+    } catch (e) {
+      Logger.log("Error de red en intento " + (attempt + 1) + ": " + e.message);
+    }
+
+    // Esperar antes de reintentar (backoff: 2s, 4s)
+    if (attempt < maxRetries) {
+      Utilities.sleep(2000 * (attempt + 1));
+    }
+  }
+
+  Logger.log("Todos los " + (maxRetries + 1) + " intentos fallaron para: " + url.substring(0, 80));
+  return null;
+}
 
 /**
  * Limpia nombre de pestana (Google Sheets no permite ciertos caracteres)
