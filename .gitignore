@@ -49,6 +49,6 @@ htmlcov/
 data/
 *.db
 
-# Local data
-data/
-*.db
+# Credentials (NEVER commit these)
+credentials/*.json
+credentials/*.p12

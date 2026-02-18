@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
     facebook_access_token: str = Field(default="", alias="FACEBOOK_ACCESS_TOKEN")
 
+    # Google Apps Script Deployment
+    apps_script_deployment_url: str = Field(default="", alias="APPS_SCRIPT_DEPLOYMENT_URL")
+    apps_script_deployment_id: str = Field(default="", alias="APPS_SCRIPT_DEPLOYMENT_ID")
+
     # Google Sheets
     google_sheets_credentials_path: str = Field(default="credentials/google_sheets_sa.json", alias="GOOGLE_SHEETS_CREDENTIALS_PATH")
     google_sheets_spreadsheet_id: str = Field(default="", alias="GOOGLE_SHEETS_SPREADSHEET_ID")

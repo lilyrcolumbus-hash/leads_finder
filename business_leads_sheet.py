@@ -2,18 +2,14 @@
 """
 Business Leads to Google Sheet
 
-Busca negocios por industria y ciudad usando Google Maps/Places API
-y los inserta automaticamente en tu Google Sheet existente,
-creando una pestana nueva por cada industria.
+Busca negocios por industria y ciudad y los inserta automaticamente
+en tu Google Sheet. Soporta dos metodos:
 
-Datos exportados:
-- Nombre del negocio
-- Email (prioridad)
-- Telefono
-- Direccion
-- Website
-- Rating y cantidad de reviews
-- Pain score y resumen
+  1. Apps Script (recomendado): Llama al deployment URL que busca en
+     Google Places y escribe directo en la Sheet. Solo necesitas el URL.
+
+  2. Python directo: Usa el scraper de Google Maps + gspread para
+     buscar y escribir. Necesita Places API Key + Service Account JSON.
 
 Uso:
     # Modo interactivo
@@ -25,13 +21,17 @@ Uso:
 
     # Multiples industrias de una vez (una pestana por cada una)
     python business_leads_sheet.py --industry "dentist,plumber,hvac" --location "Miami, FL"
+
+    # Forzar metodo especifico
+    python business_leads_sheet.py --method apps-script --industry "dentist" --location "Miami, FL"
+    python business_leads_sheet.py --method python --industry "dentist" --location "Miami, FL"
 """
 
 import argparse
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -45,8 +45,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from src.config import settings
 from src.utils.logger import setup_logger
 from src.utils.models import Lead
-from src.scrapers.google_maps_scraper import GoogleMapsScraper
-from src.sheets.google_sheets import GoogleSheetsClient
+from src.sheets.apps_script_client import AppsScriptClient
 
 console = Console()
 logger = setup_logger("business_leads_sheet")
@@ -63,9 +62,167 @@ def display_banner():
     console.print(Panel(banner, style="bold blue"))
 
 
+def get_available_method() -> str:
+    """Determine which method is available for searching.
+
+    Returns:
+        "apps-script" if deployment URL is configured,
+        "python" if Places API key + Sheet credentials are available,
+        "none" if nothing is configured.
+    """
+    # Check Apps Script first (simpler setup)
+    if settings.apps_script_deployment_url:
+        return "apps-script"
+
+    # Check Python path (needs API key + credentials + spreadsheet ID)
+    has_api_key = bool(
+        settings.google_places_api_key
+        and settings.google_places_api_key != "TU_GOOGLE_PLACES_API_KEY_AQUI"
+    )
+    has_credentials = Path(settings.google_sheets_credentials_path).exists()
+    has_spreadsheet = bool(settings.google_sheets_spreadsheet_id)
+
+    if has_api_key and has_credentials and has_spreadsheet:
+        return "python"
+
+    return "none"
+
+
+def show_config_status():
+    """Display the current configuration status."""
+    console.print("\n[bold]Estado de configuracion:[/bold]")
+
+    # Apps Script
+    has_apps_script = bool(settings.apps_script_deployment_url)
+    status = "[green]Configurado[/green]" if has_apps_script else "[red]No configurado[/red]"
+    console.print(f"  Apps Script URL: {status}")
+
+    # Places API Key
+    has_api_key = bool(
+        settings.google_places_api_key
+        and settings.google_places_api_key != "TU_GOOGLE_PLACES_API_KEY_AQUI"
+    )
+    status = "[green]Configurada[/green]" if has_api_key else "[red]No configurada[/red]"
+    console.print(f"  Google Places API Key: {status}")
+
+    # Service Account
+    has_credentials = Path(settings.google_sheets_credentials_path).exists()
+    status = "[green]Encontrado[/green]" if has_credentials else "[red]No encontrado[/red]"
+    console.print(f"  Service Account JSON: {status}")
+
+    # Spreadsheet ID
+    has_spreadsheet = bool(settings.google_sheets_spreadsheet_id)
+    status = "[green]Configurado[/green]" if has_spreadsheet else "[yellow]No configurado (Apps Script no lo necesita)[/yellow]"
+    console.print(f"  Spreadsheet ID: {status}")
+
+    console.print()
+
+
+# ============================================================
+# METODO 1: Apps Script (recomendado)
+# ============================================================
+
+def search_via_apps_script(
+    industry: str,
+    location: str,
+    max_results: int = 60,
+) -> Dict[str, Any]:
+    """
+    Search businesses via Apps Script deployment URL.
+
+    The Apps Script handles everything: searches Places API, extracts
+    details, writes to Sheet, and returns a summary.
+
+    Args:
+        industry: Type of business (e.g., "dentist", "plumber")
+        location: City/state to search (e.g., "Miami, FL")
+        max_results: Maximum businesses to process
+
+    Returns:
+        Dict with results from Apps Script
+    """
+    console.print(f"\n[cyan]Buscando [bold]{industry}[/bold] en [bold]{location}[/bold] via Apps Script...[/cyan]")
+
+    with AppsScriptClient() as client:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task(
+                f"Buscando {industry} en {location} (puede tardar unos minutos)...",
+                total=None,
+            )
+
+            result = client.search_businesses(
+                industry=industry,
+                location=location,
+                max_results=max_results,
+            )
+
+            progress.update(task, completed=True)
+
+    if result.get("status") == "error":
+        console.print(f"[red]Error: {result.get('message', 'Unknown error')}[/red]")
+        return result
+
+    total = result.get("total_leads", 0)
+    emails = result.get("with_email", 0)
+    phones = result.get("with_phone", 0)
+    pain = result.get("with_pain", 0)
+
+    console.print(f"\n[bold green]Busqueda completada![/bold green]")
+    console.print(f"  Negocios encontrados: [cyan]{total}[/cyan]")
+    console.print(f"  Con email: [cyan]{emails}[/cyan]")
+    console.print(f"  Con telefono: [cyan]{phones}[/cyan]")
+    console.print(f"  Con pain points: [cyan]{pain}[/cyan]")
+
+    if result.get("tab"):
+        console.print(f"  Pestana: [cyan]{result['tab']}[/cyan]")
+
+    if result.get("spreadsheet"):
+        url = result["spreadsheet"]
+        console.print(f"\n  [bold]Sheet:[/bold] [link={url}]{url}[/link]")
+
+    # Show lead preview if available
+    leads_data = result.get("leads", [])
+    if leads_data:
+        preview_leads_data(leads_data)
+
+    return result
+
+
+def preview_leads_data(leads_data: List[Dict], max_rows: int = 10):
+    """Show a preview table of leads from Apps Script response."""
+    table = Table(title="Preview de Negocios", show_lines=True)
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Negocio", style="green", max_width=30)
+    table.add_column("Email", style="cyan", max_width=30)
+    table.add_column("Telefono", style="yellow", max_width=15)
+    table.add_column("Rating", justify="center", width=7)
+
+    for i, lead in enumerate(leads_data[:max_rows], 1):
+        table.add_row(
+            str(i),
+            str(lead.get("name", ""))[:30],
+            lead.get("email") or "[dim]-[/dim]",
+            lead.get("phone") or "[dim]-[/dim]",
+            str(lead.get("rating", "-")),
+        )
+
+    console.print(table)
+
+    if len(leads_data) > max_rows:
+        console.print(f"[dim]... y {len(leads_data) - max_rows} negocios mas[/dim]")
+
+
+# ============================================================
+# METODO 2: Python scraper + gspread (fallback)
+# ============================================================
+
 def search_businesses(industry: str, location: str) -> List[Lead]:
     """
-    Search for businesses of a given industry in a location.
+    Search for businesses using the Python Google Maps scraper.
 
     Args:
         industry: Type of business (e.g., "dentist", "plumber")
@@ -74,7 +231,9 @@ def search_businesses(industry: str, location: str) -> List[Lead]:
     Returns:
         List of Lead objects with business data
     """
-    console.print(f"\n[cyan]Buscando [bold]{industry}[/bold] en [bold]{location}[/bold]...[/cyan]")
+    from src.scrapers.google_maps_scraper import GoogleMapsScraper
+
+    console.print(f"\n[cyan]Buscando [bold]{industry}[/bold] en [bold]{location}[/bold] via Python scraper...[/cyan]")
 
     with GoogleMapsScraper() as scraper:
         leads = scraper._search_businesses(industry, location)
@@ -127,7 +286,7 @@ def write_to_sheet(
     spreadsheet_id: str,
 ) -> Optional[str]:
     """
-    Write leads to an existing Google Sheet in a new tab.
+    Write leads to an existing Google Sheet in a new tab (Python path).
 
     Args:
         leads: List of leads to write
@@ -137,6 +296,8 @@ def write_to_sheet(
     Returns:
         URL of the spreadsheet, or None on failure
     """
+    from src.sheets.google_sheets import GoogleSheetsClient
+
     credentials_path = settings.google_sheets_credentials_path
 
     if not Path(credentials_path).exists():
@@ -193,18 +354,34 @@ def write_to_sheet(
         return None
 
 
-def interactive_mode():
+# ============================================================
+# MODOS DE EJECUCION
+# ============================================================
+
+def interactive_mode(force_method: Optional[str] = None):
     """Run in interactive mode, asking the user for input."""
     display_banner()
 
-    spreadsheet_id = settings.google_sheets_spreadsheet_id
-    if spreadsheet_id:
-        console.print(f"[dim]Sheet destino ID: {spreadsheet_id[:20]}...[/dim]\n")
-    else:
-        console.print("[red]Falta GOOGLE_SHEETS_SPREADSHEET_ID en .env[/red]")
-        console.print("[yellow]Copia el ID de tu sheet desde la URL:[/yellow]")
-        console.print("[dim]https://docs.google.com/spreadsheets/d/[bold]ESTE_ES_EL_ID[/bold]/edit[/dim]")
+    method = force_method or get_available_method()
+
+    if method == "none":
+        show_config_status()
+        console.print("[red]No hay metodo configurado para buscar negocios.[/red]")
+        console.print(
+            "\n[yellow]Opcion 1 (recomendada): Configura APPS_SCRIPT_DEPLOYMENT_URL en .env[/yellow]"
+            "\n[yellow]Opcion 2: Configura GOOGLE_PLACES_API_KEY + Service Account JSON[/yellow]"
+        )
         return
+
+    if method == "apps-script":
+        console.print("[dim]Metodo: Apps Script (busca y escribe directo en la Sheet)[/dim]")
+    else:
+        console.print("[dim]Metodo: Python scraper + gspread[/dim]")
+        spreadsheet_id = settings.google_sheets_spreadsheet_id
+        if not spreadsheet_id:
+            console.print("[red]Falta GOOGLE_SHEETS_SPREADSHEET_ID en .env[/red]")
+            return
+        console.print(f"[dim]Sheet destino ID: {spreadsheet_id[:20]}...[/dim]")
 
     while True:
         console.print("\n[bold cyan]--- Nueva Busqueda ---[/bold cyan]")
@@ -249,18 +426,17 @@ def interactive_mode():
             console.print("[yellow]Ubicacion no puede estar vacia[/yellow]")
             continue
 
-        # Search businesses and write to sheet automatically
-        leads = search_businesses(industry, location)
-
-        if not leads:
-            console.print("[yellow]No se encontraron negocios. Intenta otra busqueda.[/yellow]")
-            continue
-
-        preview_leads(leads)
-
-        # Write to sheet automatically - no confirmation needed
-        tab_name = f"{industry.title()} - {location}"
-        write_to_sheet(leads, tab_name, spreadsheet_id)
+        # Execute search based on method
+        if method == "apps-script":
+            search_via_apps_script(industry, location)
+        else:
+            leads = search_businesses(industry, location)
+            if not leads:
+                console.print("[yellow]No se encontraron negocios. Intenta otra busqueda.[/yellow]")
+                continue
+            preview_leads(leads)
+            tab_name = f"{industry.title()} - {location}"
+            write_to_sheet(leads, tab_name, settings.google_sheets_spreadsheet_id)
 
         # Continue?
         if not Confirm.ask("\nBuscar otra industria/ubicacion?", default=True):
@@ -273,12 +449,14 @@ def cli_mode(args):
     """Run with CLI arguments - fully automatic."""
     display_banner()
 
-    spreadsheet_id = args.sheet or settings.google_sheets_spreadsheet_id
+    method = args.method or get_available_method()
 
-    if not spreadsheet_id:
-        console.print("[red]Error: Falta el ID de la sheet[/red]")
-        console.print("[yellow]Usa --sheet ID o configura GOOGLE_SHEETS_SPREADSHEET_ID en .env[/yellow]")
+    if method == "none":
+        show_config_status()
+        console.print("[red]Error: No hay metodo configurado.[/red]")
         return
+
+    console.print(f"[dim]Metodo: {method}[/dim]")
 
     # Parse industries (comma-separated)
     industries = [i.strip() for i in args.industry.split(",")]
@@ -288,17 +466,24 @@ def cli_mode(args):
         console.print(f"[bold cyan]Industria: {industry} | Ubicacion: {args.location}[/bold cyan]")
         console.print(f"[bold]{'=' * 50}[/bold]")
 
-        leads = search_businesses(industry, args.location)
+        if method == "apps-script":
+            result = search_via_apps_script(industry, args.location)
+            if result.get("status") == "error":
+                console.print(f"[yellow]Error buscando '{industry}': {result.get('message')}[/yellow]")
+        else:
+            spreadsheet_id = args.sheet or settings.google_sheets_spreadsheet_id
+            if not spreadsheet_id:
+                console.print("[red]Error: Falta el ID de la sheet para el metodo Python[/red]")
+                return
 
-        if not leads:
-            console.print(f"[yellow]No se encontraron negocios para '{industry}' en '{args.location}'[/yellow]")
-            continue
+            leads = search_businesses(industry, args.location)
+            if not leads:
+                console.print(f"[yellow]No se encontraron negocios para '{industry}' en '{args.location}'[/yellow]")
+                continue
 
-        preview_leads(leads, max_rows=5)
-
-        # Write to sheet automatically
-        tab_name = f"{industry.title()} - {args.location}"
-        write_to_sheet(leads, tab_name, spreadsheet_id)
+            preview_leads(leads, max_rows=5)
+            tab_name = f"{industry.title()} - {args.location}"
+            write_to_sheet(leads, tab_name, spreadsheet_id)
 
         # Small delay between industries
         if len(industries) > 1:
@@ -324,6 +509,11 @@ def main():
         "--sheet", "-s",
         help="ID de la Google Sheet (o URL completa)"
     )
+    parser.add_argument(
+        "--method", "-m",
+        choices=["apps-script", "python"],
+        help="Metodo de busqueda: 'apps-script' (recomendado) o 'python' (local)"
+    )
 
     args = parser.parse_args()
 
@@ -334,7 +524,7 @@ def main():
     if args.industry and args.location:
         cli_mode(args)
     else:
-        interactive_mode()
+        interactive_mode(force_method=args.method)
 
 
 if __name__ == "__main__":
