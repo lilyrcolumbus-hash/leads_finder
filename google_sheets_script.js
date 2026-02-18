@@ -1,10 +1,17 @@
 /**
- * Google Apps Script - Business Leads Finder (v2 - All Issues Fixed)
+ * Google Apps Script - Business Leads Finder (v3)
  *
  * Busca negocios usando Google Places API directamente desde tu Google Sheet.
  * Crea una pestana nueva por cada busqueda (industria + ciudad).
  *
- * FIXES en v2:
+ * v3 FIXES:
+ *   - Sort post-escritura: emails primero, luego por rating (con colores correctos)
+ *   - Detecta URLs de Social Media (Facebook, Instagram, Yelp) y no pierde tiempo
+ *   - Detecta Cloudflare/bot protection y lo reporta
+ *   - Nueva columna "Email Status" que explica POR QUE falta un email
+ *   - Mejor mensaje de error para API Key con restriccion de HTTP referrer
+ *
+ * v2 FIXES (incluidos):
  *   - Escritura incremental (no pierdes datos si se corta el script)
  *   - Control de tiempo (se detiene antes del limite de 6 min)
  *   - SpreadsheetApp.flush() periodico para guardar datos en caso de crash
@@ -14,7 +21,6 @@
  *   - Reintento automatico en llamadas API fallidas
  *   - Pain score ajustado para la limitacion de 5 reviews de Google
  *   - Manejo de OVER_QUERY_LIMIT con backoff
- *   - Resumen final indica muestra limitada de reviews
  *
  * SETUP:
  *   1. En tu Google Sheet: Extensiones -> Apps Script
@@ -24,7 +30,9 @@
  *   5. Regresa a la Sheet -> veras el menu "Lead Finder" arriba
  *   6. La primera vez te pedira permisos - acepta todo
  *
- * IMPORTANTE: Tu API Key debe tener habilitado "Places API" en Google Cloud Console
+ * IMPORTANTE:
+ *   - Tu API Key debe tener habilitado "Places API" en Google Cloud Console
+ *   - La API Key NO debe tener restriccion de "HTTP referrers" (usa "None" o "IP addresses")
  */
 
 // ============================================================
@@ -84,21 +92,37 @@ const EMAIL_BLACKLIST_PREFIXES = [
 // Rutas de paginas de contacto a intentar si no se encuentra email en homepage
 const CONTACT_PATHS = ["/contact", "/contact-us"];
 
-// Headers de la tabla
+// Dominios de redes sociales / directorios (no son websites reales del negocio)
+const SOCIAL_MEDIA_DOMAINS = [
+  "facebook.com", "fb.com", "fb.me",
+  "instagram.com",
+  "twitter.com", "x.com",
+  "linkedin.com",
+  "youtube.com", "youtu.be",
+  "tiktok.com",
+  "yelp.com",
+  "nextdoor.com",
+  "pinterest.com",
+  "tripadvisor.com",
+  "bbb.org"
+];
+
+// Headers de la tabla (14 columnas)
 const HEADERS = [
-  "Negocio",
-  "Email",
-  "Telefono",
-  "Direccion",
-  "Website",
-  "Rating",
-  "Reviews",
-  "Tipo de Negocio",
-  "Pain Score",
-  "Resumen de Pain Points",
-  "Reviews con Dolor",
-  "Google Maps URL",
-  "Place ID"
+  "Negocio",                // col 1
+  "Email",                  // col 2
+  "Email Status",           // col 3 (NEW)
+  "Telefono",               // col 4
+  "Direccion",              // col 5
+  "Website",                // col 6
+  "Rating",                 // col 7
+  "Reviews",                // col 8
+  "Tipo de Negocio",        // col 9
+  "Pain Score",             // col 10
+  "Resumen de Pain Points", // col 11
+  "Reviews con Dolor",      // col 12
+  "Google Maps URL",        // col 13
+  "Place ID"                // col 14
 ];
 
 // ============================================================
@@ -193,8 +217,7 @@ function searchHvacPhoenix() { searchAndWrite("hvac", "Phoenix, AZ", true); }
 
 /**
  * Busca negocios y los escribe INCREMENTALMENTE en una pestana nueva.
- * Cada lead se escribe en la sheet inmediatamente despues de procesarse.
- * Se detiene antes del limite de 6 minutos para no perder datos.
+ * Al final, ordena: emails primero, luego por rating.
  *
  * @param {string} industry - Tipo de negocio
  * @param {string} location - Ciudad, Estado
@@ -237,6 +260,8 @@ function searchAndWrite(industry, location, analyzeReviews) {
   var phoneCount = 0;
   var painCount = 0;
   var skippedEmails = 0;
+  var socialMediaCount = 0;
+  var blockedCount = 0;
   var stoppedEarly = false;
 
   for (var i = 0; i < places.length; i++) {
@@ -269,6 +294,8 @@ function searchAndWrite(industry, location, analyzeReviews) {
       if (details.email) emailCount++;
       if (details.phone) phoneCount++;
       if (details.painScore > 0) painCount++;
+      if (details.emailStatus === "Social Media") socialMediaCount++;
+      if (details.emailStatus === "Bloqueado") blockedCount++;
       currentRow++;
 
       // Flush periodicamente para garantizar que los datos se guardan
@@ -283,9 +310,17 @@ function searchAndWrite(industry, location, analyzeReviews) {
     }
   }
 
-  // Paso 4: Formato final
+  // Paso 4: Sort y formato final (si hay tiempo y mas de 1 lead)
   var totalLeads = currentRow - 2;
-  if (totalLeads > 0) {
+  if (totalLeads > 1) {
+    var elapsed = new Date().getTime() - startTime;
+    if (elapsed < MAX_RUNTIME_MS - 10000) {
+      ss.toast("Ordenando resultados...", "📊 Ordenando", -1);
+      sortAndFormatSheet(sheet, totalLeads);
+    } else {
+      formatSheet(sheet, totalLeads);
+    }
+  } else if (totalLeads === 1) {
     formatSheet(sheet, totalLeads);
   }
   SpreadsheetApp.flush();
@@ -301,18 +336,29 @@ function searchAndWrite(industry, location, analyzeReviews) {
 
   if (analyzeReviews) {
     summaryMsg += "Con pain points: " + painCount + "\n";
-    summaryMsg += "\n⚠️ Nota: Google solo da 5 reviews por negocio.\nLos pain scores son aproximados.\n";
+  }
+
+  if (socialMediaCount > 0) {
+    summaryMsg += "\n📱 " + socialMediaCount + " negocios con Facebook/Instagram como web (sin email).";
+  }
+  if (blockedCount > 0) {
+    summaryMsg += "\n🛡️ " + blockedCount + " websites bloqueados por Cloudflare/bot protection.";
+  }
+
+  if (analyzeReviews) {
+    summaryMsg += "\n\n⚠️ Nota: Google solo da 5 reviews por negocio. Pain scores son aproximados.";
   }
 
   if (stoppedEarly) {
-    summaryMsg += "\n⏱️ Se detuvo antes del limite de tiempo.\n" +
-      "Los " + totalLeads + " negocios procesados ya estan guardados.\n" +
-      "Puedes volver a buscar para obtener los restantes.";
+    summaryMsg += "\n\n⏱️ Se detuvo antes del limite de tiempo.\n" +
+      "Los " + totalLeads + " negocios procesados ya estan guardados.";
   }
 
   if (skippedEmails > 0) {
     summaryMsg += "\n📧 " + skippedEmails + " negocios sin buscar email (por tiempo).";
   }
+
+  summaryMsg += "\n\nMira la columna 'Email Status' para saber por que falta cada email.";
 
   ui.alert("✅ Busqueda Completada", summaryMsg, ui.ButtonSet.OK);
 }
@@ -334,7 +380,6 @@ function searchPlaces(industry, location) {
     + "&key=" + API_KEY;
 
   try {
-    // Primera pagina (hasta 20 resultados)
     var response = fetchWithRetry(url);
     if (!response) return [];
 
@@ -344,9 +389,15 @@ function searchPlaces(industry, location) {
       Logger.log("Places API error: " + data.status + " - " + (data.error_message || ""));
       if (data.status === "REQUEST_DENIED") {
         SpreadsheetApp.getUi().alert(
-          "⚠️ API Error",
-          "Tu API Key no tiene acceso a Places API.\n\n" +
-          "Ve a Google Cloud Console -> APIs & Services -> Enable 'Places API'",
+          "⚠️ API Key Rechazada",
+          "Tu API Key fue rechazada. Posibles causas:\n\n" +
+          "1. 'Places API' no esta habilitada\n" +
+          "   → Google Cloud Console → APIs & Services → Enable 'Places API'\n\n" +
+          "2. Tu API Key tiene restriccion de 'HTTP referrers'\n" +
+          "   → Apps Script hace llamadas de SERVIDOR, no de navegador\n" +
+          "   → Ve a Credentials → tu Key → Application restrictions\n" +
+          "   → Cambia a 'None' o 'IP addresses'\n\n" +
+          "3. La API Key es incorrecta o esta desactivada",
           SpreadsheetApp.getUi().ButtonSet.OK
         );
       }
@@ -368,7 +419,6 @@ function searchPlaces(industry, location) {
     var page = 1;
 
     while (nextPageToken && allResults.length < MAX_RESULTS && page < 3) {
-      // Google requiere ~2 segundos entre paginas
       Utilities.sleep(2000);
 
       var nextUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json"
@@ -384,7 +434,6 @@ function searchPlaces(industry, location) {
         allResults = allResults.concat(nextData.results);
         nextPageToken = nextData.next_page_token;
       } else if (nextData.status === "OVER_QUERY_LIMIT") {
-        // Esperar mas y reintentar una vez
         Logger.log("Rate limit en pagina " + (page + 1) + ", esperando 5 segundos...");
         Utilities.sleep(5000);
         nextResponse = fetchWithRetry(nextUrl);
@@ -414,7 +463,7 @@ function searchPlaces(industry, location) {
 
 /**
  * Obtiene detalles completos de un negocio por Place ID.
- * Incluye reintentos y manejo de OVER_QUERY_LIMIT.
+ * Determina el emailStatus segun el resultado de cada paso.
  *
  * @param {string} placeId - Google Place ID
  * @param {boolean} analyzeReviews - Si pedir reviews
@@ -437,7 +486,6 @@ function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
 
     var data = JSON.parse(response.getContentText());
 
-    // Manejo de rate limit
     if (data.status === "OVER_QUERY_LIMIT") {
       Logger.log("Rate limit en Place Details para " + placeId + ", esperando 5s...");
       Utilities.sleep(5000);
@@ -452,15 +500,24 @@ function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
 
     var place = data.result;
 
-    // Saltar negocios cerrados permanentemente
     if (place.business_status === "CLOSED_PERMANENTLY") {
       return null;
     }
 
-    // Extraer email del website (si hay tiempo)
+    // Determinar email y emailStatus
     var email = "";
-    if (!skipEmail && place.website) {
-      email = extractEmailFromWebsite(place.website);
+    var emailStatus = "";
+
+    if (skipEmail) {
+      emailStatus = "Saltado (tiempo)";
+    } else if (!place.website) {
+      emailStatus = "Sin website";
+    } else if (isSocialMediaUrl(place.website)) {
+      emailStatus = "Social Media";
+    } else {
+      var emailResult = extractEmailFromWebsite(place.website);
+      email = emailResult.email;
+      emailStatus = emailResult.status;
     }
 
     // Analizar reviews para pain points
@@ -475,12 +532,12 @@ function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
       painReviews = painResult.painReviews;
     }
 
-    // Detectar tipo de negocio desde types
     var businessType = detectBusinessType(place.types || []);
 
     return {
       name: place.name || "",
       email: email,
+      emailStatus: emailStatus,
       phone: place.formatted_phone_number || "",
       address: place.formatted_address || "",
       website: place.website || "",
@@ -508,26 +565,37 @@ function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
  * Intenta extraer email de un website.
  * 1. Busca en la homepage
  * 2. Si no encuentra, busca en /contact y /contact-us
+ *
+ * @returns {{ email: string, status: string }}
  */
 function extractEmailFromWebsite(websiteUrl) {
-  // Intentar homepage primero
-  var email = extractEmailFromPage(websiteUrl);
-  if (email) return email;
+  var result = extractEmailFromPage(websiteUrl);
+  if (result.email) return result;
 
-  // Si no encontro, intentar paginas de contacto
+  // Recordar si la homepage fue bloqueada
+  var blockedOnHomepage = result.status === "Bloqueado";
+
+  // Intentar paginas de contacto
   var baseUrl = getBaseUrl(websiteUrl);
   for (var i = 0; i < CONTACT_PATHS.length; i++) {
-    email = extractEmailFromPage(baseUrl + CONTACT_PATHS[i]);
-    if (email) return email;
+    result = extractEmailFromPage(baseUrl + CONTACT_PATHS[i]);
+    if (result.email) return result;
   }
 
-  return "";
+  // Si la homepage fue bloqueada, reportar eso (aunque /contact haya dado 404)
+  if (blockedOnHomepage) {
+    return { email: "", status: "Bloqueado" };
+  }
+
+  return { email: "", status: result.status || "No encontrado" };
 }
 
 /**
  * Extrae email de una URL especifica.
- * Busca primero en mailto: links (mas confiable), luego regex general.
- * Filtra emails basura y prioriza emails de contacto.
+ * Busca mailto: links primero, luego regex general.
+ * Detecta bot protection (Cloudflare, Captcha, etc.)
+ *
+ * @returns {{ email: string, status: string }}
  */
 function extractEmailFromPage(pageUrl) {
   try {
@@ -541,29 +609,39 @@ function extractEmailFromPage(pageUrl) {
     });
 
     var code = response.getResponseCode();
-    if (code !== 200) return "";
+    if (code === 403) return { email: "", status: "Bloqueado" };
+    if (code !== 200) return { email: "", status: "No encontrado" };
 
     var html = response.getContentText();
 
-    // Limitar a 500KB para no perder tiempo con paginas enormes
+    // Limitar a 500KB
     if (html.length > 500000) {
       html = html.substring(0, 500000);
     }
 
-    // Paso 1: Buscar en mailto: links (mas confiable que regex general)
+    // Detectar bot protection
+    if (isBotProtected(html)) {
+      return { email: "", status: "Bloqueado" };
+    }
+
+    // Paso 1: Buscar en mailto: links (mas confiable)
     var mailtoRegex = /mailto:([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/gi;
     var mailtoMatches = html.match(mailtoRegex);
     if (mailtoMatches) {
       for (var i = 0; i < mailtoMatches.length; i++) {
         var mailtoEmail = mailtoMatches[i].replace(/^mailto:/i, "").toLowerCase();
-        if (isValidLeadEmail(mailtoEmail)) return mailtoEmail;
+        if (isValidLeadEmail(mailtoEmail)) {
+          return { email: mailtoEmail, status: "Encontrado" };
+        }
       }
     }
 
     // Paso 2: Regex general
     var emailRegex = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
     var matches = html.match(emailRegex);
-    if (!matches || matches.length === 0) return "";
+    if (!matches || matches.length === 0) {
+      return { email: "", status: "No encontrado" };
+    }
 
     // Filtrar y recoger emails validos
     var validEmails = [];
@@ -574,9 +652,11 @@ function extractEmailFromPage(pageUrl) {
       }
     }
 
-    if (validEmails.length === 0) return "";
+    if (validEmails.length === 0) {
+      return { email: "", status: "No encontrado" };
+    }
 
-    // Priorizar emails de contacto sobre genericos
+    // Priorizar emails de contacto
     var priority = [
       "info@", "contact@", "hello@", "office@",
       "appointments@", "scheduling@", "front@", "reception@",
@@ -585,16 +665,15 @@ function extractEmailFromPage(pageUrl) {
     for (var i = 0; i < priority.length; i++) {
       for (var j = 0; j < validEmails.length; j++) {
         if (validEmails[j].indexOf(priority[i]) === 0) {
-          return validEmails[j];
+          return { email: validEmails[j], status: "Encontrado" };
         }
       }
     }
 
-    return validEmails[0];
+    return { email: validEmails[0], status: "Encontrado" };
 
   } catch (e) {
-    // Timeout o error de red - no pasa nada, seguir con el siguiente
-    return "";
+    return { email: "", status: "Error de red" };
   }
 }
 
@@ -604,24 +683,18 @@ function extractEmailFromPage(pageUrl) {
 function isValidLeadEmail(email) {
   email = email.toLowerCase();
 
-  // Ignorar extensiones de archivo que regex confunde con emails
   if (email.match(/\.(png|jpg|jpeg|gif|svg|css|js|webp|ico|woff|woff2|ttf|eot|pdf|zip)$/)) return false;
 
-  // Ignorar dominios blacklisted
   for (var i = 0; i < EMAIL_BLACKLIST_DOMAINS.length; i++) {
     if (email.indexOf("@" + EMAIL_BLACKLIST_DOMAINS[i]) >= 0) return false;
     if (email.indexOf("." + EMAIL_BLACKLIST_DOMAINS[i]) >= 0) return false;
   }
 
-  // Ignorar prefijos blacklisted
   for (var i = 0; i < EMAIL_BLACKLIST_PREFIXES.length; i++) {
     if (email.indexOf(EMAIL_BLACKLIST_PREFIXES[i]) === 0) return false;
   }
 
-  // Ignorar emails auto-generados (5+ digitos antes del @)
   if (email.match(/^[0-9a-f]{5,}@/)) return false;
-
-  // Ignorar emails que son claramente de pixeles de tracking
   if (email.match(/@.*tracking/)) return false;
   if (email.match(/@.*pixel/)) return false;
 
@@ -637,6 +710,60 @@ function getBaseUrl(url) {
   return match ? match[1] : url;
 }
 
+/**
+ * Detecta si una URL es de redes sociales o directorios (no website real)
+ */
+function isSocialMediaUrl(url) {
+  var lower = url.toLowerCase();
+  for (var i = 0; i < SOCIAL_MEDIA_DOMAINS.length; i++) {
+    if (lower.indexOf(SOCIAL_MEDIA_DOMAINS[i]) >= 0) return true;
+  }
+  return false;
+}
+
+/**
+ * Detecta si el HTML es una pagina de bot protection (Cloudflare, Captcha, etc.)
+ * en vez de contenido real del negocio.
+ */
+function isBotProtected(html) {
+  var lower = html.toLowerCase();
+
+  // Senales fuertes: cualquiera de estas = bot protection seguro
+  var strongSignals = [
+    "cf-browser-verification",
+    "challenge-platform",
+    "checking your browser",
+    "just a moment</title>",
+    "_cf_chl_opt",
+    "ddos-guard",
+    "sucuri-cloudproxy"
+  ];
+
+  for (var i = 0; i < strongSignals.length; i++) {
+    if (lower.indexOf(strongSignals[i]) >= 0) return true;
+  }
+
+  // Combinacion: nombre de proteccion + challenge/captcha
+  var hasProtectionName = lower.indexOf("cloudflare") >= 0 ||
+                          lower.indexOf("sucuri") >= 0 ||
+                          lower.indexOf("incapsula") >= 0;
+  var hasChallenge = lower.indexOf("challenge") >= 0 ||
+                     lower.indexOf("captcha") >= 0;
+
+  if (hasProtectionName && hasChallenge) return true;
+
+  // Pagina muy corta con "enable javascript" = proteccion
+  if (html.length < 10000) {
+    if (lower.indexOf("enable javascript") >= 0 ||
+        lower.indexOf("javascript is required") >= 0 ||
+        lower.indexOf("please turn javascript on") >= 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // ============================================================
 // ANALISIS DE PAIN POINTS EN REVIEWS
 // ============================================================
@@ -646,8 +773,6 @@ function getBaseUrl(url) {
  *
  * IMPORTANTE: Google Places API solo devuelve MAX 5 reviews por negocio.
  * El pain score se ajusta para esta limitacion con un penalty de muestra pequena.
- *
- * Devuelve: { score: 0-1, summary: string, painReviews: string[] }
  */
 function analyzeReviewsForPain(reviews) {
   var painReviews = [];
@@ -658,7 +783,6 @@ function analyzeReviewsForPain(reviews) {
     var reviewText = (reviews[i].text || "").toLowerCase();
     var reviewRating = reviews[i].rating || 5;
 
-    // Solo analizar reviews negativas (1-3 estrellas)
     if (reviewRating > 3) continue;
     totalNegativeReviews++;
 
@@ -678,43 +802,27 @@ function analyzeReviewsForPain(reviews) {
     }
   }
 
-  // Calcular pain score AJUSTADO para muestra de 5 reviews
-  //
-  // Problema: Google solo da 5 reviews, asi que 1 pain review de 5
-  // no es lo mismo que 100 pain reviews de 500.
-  //
-  // Formula ajustada:
-  //   - Base: proporcion de pain reviews entre las NEGATIVAS (no el total)
-  //   - Bonus: por variedad de keywords (mas tipos de queja = problema real)
-  //   - Penalty: muestra < 10 reviews = menos confianza (x0.8)
   var totalReviews = reviews.length;
   var painCount = painReviews.length;
   var score = 0;
 
   if (totalReviews > 0 && painCount > 0) {
     var uniqueKeywords = Object.keys(keywordCounts).length;
-
-    // Base: que % de reviews negativas tienen quejas de comunicacion
     var baseScore = totalNegativeReviews > 0 ? painCount / totalNegativeReviews : 0;
-
-    // Bonus por variedad de keywords (cada keyword distinta suma 0.05, max 0.2)
     var diversityBonus = Math.min(0.2, uniqueKeywords * 0.05);
-
-    // Penalty por muestra pequena (5 reviews es muy poco para estar seguro)
     var samplePenalty = totalReviews < 10 ? 0.8 : 1.0;
 
     score = Math.min(1, (baseScore * 0.6 + diversityBonus + painCount * 0.05) * samplePenalty);
     score = Math.round(score * 100) / 100;
   }
 
-  // Resumen con nota sobre muestra limitada
   var summary = "";
   if (painCount > 0) {
     var topKeywords = Object.keys(keywordCounts)
       .sort(function(a, b) { return keywordCounts[b] - keywordCounts[a]; })
       .slice(0, 3);
     summary = painCount + "/" + totalReviews + " reviews con quejas: " + topKeywords.join(", ");
-    summary += " (muestra: " + totalReviews + " de " + "max 5 reviews)";
+    summary += " (muestra: " + totalReviews + " de max 5 reviews)";
   }
 
   return {
@@ -725,12 +833,11 @@ function analyzeReviewsForPain(reviews) {
 }
 
 // ============================================================
-// ESCRITURA EN SHEET (INCREMENTAL)
+// ESCRITURA EN SHEET (INCREMENTAL + SORT)
 // ============================================================
 
 /**
  * Obtiene una pestana existente o crea una nueva.
- * getSheetByName devuelve null si no existe (no tira error).
  */
 function getOrCreateTab(spreadsheet, tabName) {
   var sheet = spreadsheet.getSheetByName(tabName);
@@ -759,13 +866,15 @@ function writeHeaders(sheet) {
 }
 
 /**
- * Escribe UN lead en una fila especifica (escritura incremental).
- * Aplica colores inmediatamente: verde si tiene email, amarillo si pain alto.
+ * Escribe UN lead en una fila (escritura incremental).
+ * Aplica colores: verde si tiene email, amarillo si pain alto,
+ * naranja/rojo en Email Status segun el motivo.
  */
 function writeLeadRow(sheet, row, lead) {
   var rowData = [
     lead.name,
     lead.email,
+    lead.emailStatus,
     lead.phone,
     lead.address,
     lead.website,
@@ -781,27 +890,111 @@ function writeLeadRow(sheet, row, lead) {
 
   sheet.getRange(row, 1, 1, HEADERS.length).setValues([rowData]);
 
-  // Verde claro si tiene email
+  // Verde claro toda la fila si tiene email
   if (lead.email) {
     sheet.getRange(row, 1, 1, HEADERS.length).setBackground("#e6f4ea");
   }
 
-  // Amarillo si pain score alto
+  // Color en Email Status segun motivo
+  var statusCol = 3;
+  if (lead.emailStatus === "Social Media") {
+    sheet.getRange(row, statusCol).setBackground("#fff3e0");
+  } else if (lead.emailStatus === "Bloqueado" || lead.emailStatus === "Error de red") {
+    sheet.getRange(row, statusCol).setBackground("#fce4ec");
+  }
+
+  // Amarillo en Pain Score si es alto (columna 10 ahora)
   if (lead.painScore >= 0.3) {
-    sheet.getRange(row, 9).setBackground("#fef7e0");
-    sheet.getRange(row, 9).setFontWeight("bold");
+    sheet.getRange(row, 10).setBackground("#fef7e0");
+    sheet.getRange(row, 10).setFontWeight("bold");
   }
 }
 
 /**
- * Aplica formato final a la hoja (columnas, anchos)
+ * Ordena los datos: emails primero, luego por rating.
+ * Recalcula todos los colores despues del sort.
+ */
+function sortAndFormatSheet(sheet, totalLeads) {
+  var numCols = HEADERS.length;
+  var dataRange = sheet.getRange(2, 1, totalLeads, numCols);
+
+  // Sort: Email (col 2) no-vacio primero, luego Rating (col 7) mas alto primero
+  dataRange.sort([
+    {column: 2, ascending: false},
+    {column: 7, ascending: false}
+  ]);
+
+  // Leer datos ya ordenados
+  var values = dataRange.getValues();
+
+  // Construir arrays de backgrounds y font weights
+  var backgrounds = [];
+  var painWeights = [];
+
+  for (var i = 0; i < values.length; i++) {
+    var rowBg = [];
+    for (var j = 0; j < numCols; j++) {
+      rowBg.push("#ffffff");
+    }
+
+    var email = values[i][1];         // index 1 = Email
+    var emailStatus = values[i][2];   // index 2 = Email Status
+    var painScoreStr = values[i][9];  // index 9 = Pain Score
+
+    // Fila verde si tiene email
+    if (email) {
+      for (var j = 0; j < numCols; j++) {
+        rowBg[j] = "#e6f4ea";
+      }
+    }
+
+    // Email Status colores
+    if (emailStatus === "Social Media") {
+      rowBg[2] = "#fff3e0";
+    } else if (emailStatus === "Bloqueado" || emailStatus === "Error de red") {
+      rowBg[2] = "#fce4ec";
+    }
+
+    // Pain Score amarillo
+    if (painScoreStr) {
+      var pv = parseFloat(painScoreStr);
+      if (pv >= 0.3) {
+        rowBg[9] = "#fef7e0";
+      }
+    }
+
+    backgrounds.push(rowBg);
+
+    // Bold para pain score
+    if (painScoreStr && parseFloat(painScoreStr) >= 0.3) {
+      painWeights.push(["bold"]);
+    } else {
+      painWeights.push(["normal"]);
+    }
+  }
+
+  // Aplicar backgrounds en batch (1 API call en vez de 60+)
+  dataRange.setBackgrounds(backgrounds);
+
+  // Aplicar font weights para pain score en batch
+  sheet.getRange(2, 10, totalLeads, 1).setFontWeights(painWeights);
+
+  // Auto-resize columnas
+  sheet.autoResizeColumns(1, 9);
+  sheet.setColumnWidth(11, 250); // Pain summary
+  sheet.setColumnWidth(12, 200); // Pain reviews
+  sheet.setColumnWidth(13, 200); // Maps URL
+}
+
+/**
+ * Formato basico sin sort (cuando no hay tiempo para sort)
  */
 function formatSheet(sheet, totalRows) {
   try {
-    sheet.autoResizeColumns(1, 8);
-    sheet.setColumnWidth(10, 250); // Pain summary
-    sheet.setColumnWidth(11, 200); // Pain reviews
-    sheet.setColumnWidth(12, 200); // Maps URL
+    sheet.autoResizeColumns(1, 9);
+    sheet.setColumnWidth(11, 250);
+    sheet.setColumnWidth(12, 200);
+    sheet.setColumnWidth(13, 200);
   } catch (e) {
     Logger.log("Error formatting sheet: " + e.message);
   }
@@ -813,12 +1006,7 @@ function formatSheet(sheet, totalRows) {
 
 /**
  * HTTP fetch con reintentos automaticos.
- * Reintenta hasta 2 veces con backoff exponencial en errores de servidor (5xx).
- * No reintenta en errores de cliente (4xx) porque esos no se arreglan solos.
- *
- * @param {string} url - URL a fetch
- * @param {number} maxRetries - Numero de reintentos (default: 2)
- * @returns {HTTPResponse|null} - Respuesta o null si todos los intentos fallaron
+ * Reintenta hasta 2 veces con backoff en errores 5xx o de red.
  */
 function fetchWithRetry(url, maxRetries) {
   maxRetries = maxRetries || 2;
@@ -828,19 +1016,16 @@ function fetchWithRetry(url, maxRetries) {
       var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
       var code = response.getResponseCode();
 
-      // Exito o error de API (no de red/servidor) -> devolver
       if (code < 500) {
         return response;
       }
 
-      // Error de servidor (5xx) -> reintentar
       Logger.log("HTTP " + code + " en intento " + (attempt + 1) + " para: " + url.substring(0, 80));
 
     } catch (e) {
       Logger.log("Error de red en intento " + (attempt + 1) + ": " + e.message);
     }
 
-    // Esperar antes de reintentar (backoff: 2s, 4s)
     if (attempt < maxRetries) {
       Utilities.sleep(2000 * (attempt + 1));
     }
