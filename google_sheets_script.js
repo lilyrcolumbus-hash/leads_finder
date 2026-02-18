@@ -4,12 +4,12 @@
  * Busca negocios usando Google Places API directamente desde tu Google Sheet.
  * Crea una pestana nueva por cada busqueda (industria + ciudad).
  *
- * v3 FIXES:
- *   - Sort post-escritura: emails primero, luego por rating (con colores correctos)
- *   - Detecta URLs de Social Media (Facebook, Instagram, Yelp) y no pierde tiempo
- *   - Detecta Cloudflare/bot protection y lo reporta
- *   - Nueva columna "Email Status" que explica POR QUE falta un email
- *   - Mejor mensaje de error para API Key con restriccion de HTTP referrer
+ * v3 - Datos limpios:
+ *   - Sort post-escritura: emails primero, luego por rating
+ *   - Salta URLs de Social Media internamente (no pierde tiempo)
+ *   - Detecta Cloudflare/bot protection internamente (no pierde tiempo)
+ *   - Email en blanco si no se encuentra (sin columna de status)
+ *   - Mejor mensaje de error para API Key
  *
  * v2 FIXES (incluidos):
  *   - Escritura incremental (no pierdes datos si se corta el script)
@@ -107,22 +107,21 @@ const SOCIAL_MEDIA_DOMAINS = [
   "bbb.org"
 ];
 
-// Headers de la tabla (14 columnas)
+// Headers de la tabla (13 columnas)
 const HEADERS = [
   "Negocio",                // col 1
   "Email",                  // col 2
-  "Email Status",           // col 3 (NEW)
-  "Telefono",               // col 4
-  "Direccion",              // col 5
-  "Website",                // col 6
-  "Rating",                 // col 7
-  "Reviews",                // col 8
-  "Tipo de Negocio",        // col 9
-  "Pain Score",             // col 10
-  "Resumen de Pain Points", // col 11
-  "Reviews con Dolor",      // col 12
-  "Google Maps URL",        // col 13
-  "Place ID"                // col 14
+  "Telefono",               // col 3
+  "Direccion",              // col 4
+  "Website",                // col 5
+  "Rating",                 // col 6
+  "Reviews",                // col 7
+  "Tipo de Negocio",        // col 8
+  "Pain Score",             // col 9
+  "Resumen de Pain Points", // col 10
+  "Reviews con Dolor",      // col 11
+  "Google Maps URL",        // col 12
+  "Place ID"                // col 13
 ];
 
 // ============================================================
@@ -260,8 +259,6 @@ function searchAndWrite(industry, location, analyzeReviews) {
   var phoneCount = 0;
   var painCount = 0;
   var skippedEmails = 0;
-  var socialMediaCount = 0;
-  var blockedCount = 0;
   var stoppedEarly = false;
 
   for (var i = 0; i < places.length; i++) {
@@ -294,8 +291,6 @@ function searchAndWrite(industry, location, analyzeReviews) {
       if (details.email) emailCount++;
       if (details.phone) phoneCount++;
       if (details.painScore > 0) painCount++;
-      if (details.emailStatus === "Social Media") socialMediaCount++;
-      if (details.emailStatus === "Bloqueado") blockedCount++;
       currentRow++;
 
       // Flush periodicamente para garantizar que los datos se guardan
@@ -338,15 +333,8 @@ function searchAndWrite(industry, location, analyzeReviews) {
     summaryMsg += "Con pain points: " + painCount + "\n";
   }
 
-  if (socialMediaCount > 0) {
-    summaryMsg += "\n📱 " + socialMediaCount + " negocios con Facebook/Instagram como web (sin email).";
-  }
-  if (blockedCount > 0) {
-    summaryMsg += "\n🛡️ " + blockedCount + " websites bloqueados por Cloudflare/bot protection.";
-  }
-
   if (analyzeReviews) {
-    summaryMsg += "\n\n⚠️ Nota: Google solo da 5 reviews por negocio. Pain scores son aproximados.";
+    summaryMsg += "\n⚠️ Nota: Google solo da 5 reviews por negocio. Pain scores son aproximados.";
   }
 
   if (stoppedEarly) {
@@ -357,8 +345,6 @@ function searchAndWrite(industry, location, analyzeReviews) {
   if (skippedEmails > 0) {
     summaryMsg += "\n📧 " + skippedEmails + " negocios sin buscar email (por tiempo).";
   }
-
-  summaryMsg += "\n\nMira la columna 'Email Status' para saber por que falta cada email.";
 
   ui.alert("✅ Busqueda Completada", summaryMsg, ui.ButtonSet.OK);
 }
@@ -463,7 +449,7 @@ function searchPlaces(industry, location) {
 
 /**
  * Obtiene detalles completos de un negocio por Place ID.
- * Determina el emailStatus segun el resultado de cada paso.
+ * Salta extraccion de email para social media y bot protection.
  *
  * @param {string} placeId - Google Place ID
  * @param {boolean} analyzeReviews - Si pedir reviews
@@ -504,20 +490,12 @@ function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
       return null;
     }
 
-    // Determinar email y emailStatus
+    // Extraer email (salta social media y bot protection internamente)
     var email = "";
-    var emailStatus = "";
 
-    if (skipEmail) {
-      emailStatus = "Saltado (tiempo)";
-    } else if (!place.website) {
-      emailStatus = "Sin website";
-    } else if (isSocialMediaUrl(place.website)) {
-      emailStatus = "Social Media";
-    } else {
+    if (!skipEmail && place.website && !isSocialMediaUrl(place.website)) {
       var emailResult = extractEmailFromWebsite(place.website);
       email = emailResult.email;
-      emailStatus = emailResult.status;
     }
 
     // Analizar reviews para pain points
@@ -537,7 +515,6 @@ function getPlaceDetails(placeId, analyzeReviews, skipEmail) {
     return {
       name: place.name || "",
       email: email,
-      emailStatus: emailStatus,
       phone: place.formatted_phone_number || "",
       address: place.formatted_address || "",
       website: place.website || "",
@@ -867,14 +844,12 @@ function writeHeaders(sheet) {
 
 /**
  * Escribe UN lead en una fila (escritura incremental).
- * Aplica colores: verde si tiene email, amarillo si pain alto,
- * naranja/rojo en Email Status segun el motivo.
+ * Verde si tiene email, amarillo si pain alto.
  */
 function writeLeadRow(sheet, row, lead) {
   var rowData = [
     lead.name,
     lead.email,
-    lead.emailStatus,
     lead.phone,
     lead.address,
     lead.website,
@@ -895,18 +870,10 @@ function writeLeadRow(sheet, row, lead) {
     sheet.getRange(row, 1, 1, HEADERS.length).setBackground("#e6f4ea");
   }
 
-  // Color en Email Status segun motivo
-  var statusCol = 3;
-  if (lead.emailStatus === "Social Media") {
-    sheet.getRange(row, statusCol).setBackground("#fff3e0");
-  } else if (lead.emailStatus === "Bloqueado" || lead.emailStatus === "Error de red") {
-    sheet.getRange(row, statusCol).setBackground("#fce4ec");
-  }
-
-  // Amarillo en Pain Score si es alto (columna 10 ahora)
+  // Amarillo en Pain Score si es alto (columna 9)
   if (lead.painScore >= 0.3) {
-    sheet.getRange(row, 10).setBackground("#fef7e0");
-    sheet.getRange(row, 10).setFontWeight("bold");
+    sheet.getRange(row, 9).setBackground("#fef7e0");
+    sheet.getRange(row, 9).setFontWeight("bold");
   }
 }
 
@@ -918,10 +885,10 @@ function sortAndFormatSheet(sheet, totalLeads) {
   var numCols = HEADERS.length;
   var dataRange = sheet.getRange(2, 1, totalLeads, numCols);
 
-  // Sort: Email (col 2) no-vacio primero, luego Rating (col 7) mas alto primero
+  // Sort: Email (col 2) no-vacio primero, luego Rating (col 6) mas alto primero
   dataRange.sort([
     {column: 2, ascending: false},
-    {column: 7, ascending: false}
+    {column: 6, ascending: false}
   ]);
 
   // Leer datos ya ordenados
@@ -938,8 +905,7 @@ function sortAndFormatSheet(sheet, totalLeads) {
     }
 
     var email = values[i][1];         // index 1 = Email
-    var emailStatus = values[i][2];   // index 2 = Email Status
-    var painScoreStr = values[i][9];  // index 9 = Pain Score
+    var painScoreStr = values[i][8];  // index 8 = Pain Score
 
     // Fila verde si tiene email
     if (email) {
@@ -948,18 +914,11 @@ function sortAndFormatSheet(sheet, totalLeads) {
       }
     }
 
-    // Email Status colores
-    if (emailStatus === "Social Media") {
-      rowBg[2] = "#fff3e0";
-    } else if (emailStatus === "Bloqueado" || emailStatus === "Error de red") {
-      rowBg[2] = "#fce4ec";
-    }
-
     // Pain Score amarillo
     if (painScoreStr) {
       var pv = parseFloat(painScoreStr);
       if (pv >= 0.3) {
-        rowBg[9] = "#fef7e0";
+        rowBg[8] = "#fef7e0";
       }
     }
 
@@ -973,17 +932,17 @@ function sortAndFormatSheet(sheet, totalLeads) {
     }
   }
 
-  // Aplicar backgrounds en batch (1 API call en vez de 60+)
+  // Aplicar backgrounds en batch
   dataRange.setBackgrounds(backgrounds);
 
   // Aplicar font weights para pain score en batch
-  sheet.getRange(2, 10, totalLeads, 1).setFontWeights(painWeights);
+  sheet.getRange(2, 9, totalLeads, 1).setFontWeights(painWeights);
 
   // Auto-resize columnas
-  sheet.autoResizeColumns(1, 9);
-  sheet.setColumnWidth(11, 250); // Pain summary
-  sheet.setColumnWidth(12, 200); // Pain reviews
-  sheet.setColumnWidth(13, 200); // Maps URL
+  sheet.autoResizeColumns(1, 8);
+  sheet.setColumnWidth(10, 250); // Pain summary
+  sheet.setColumnWidth(11, 200); // Pain reviews
+  sheet.setColumnWidth(12, 200); // Maps URL
 }
 
 /**
@@ -991,10 +950,10 @@ function sortAndFormatSheet(sheet, totalLeads) {
  */
 function formatSheet(sheet, totalRows) {
   try {
-    sheet.autoResizeColumns(1, 9);
-    sheet.setColumnWidth(11, 250);
+    sheet.autoResizeColumns(1, 8);
+    sheet.setColumnWidth(10, 250);
+    sheet.setColumnWidth(11, 200);
     sheet.setColumnWidth(12, 200);
-    sheet.setColumnWidth(13, 200);
   } catch (e) {
     Logger.log("Error formatting sheet: " + e.message);
   }
