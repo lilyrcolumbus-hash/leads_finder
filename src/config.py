@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     apollo_api_key: str = Field(default="", alias="APOLLO_API_KEY")
     facebook_access_token: str = Field(default="", alias="FACEBOOK_ACCESS_TOKEN")
 
+    # Google Sheets
+    google_sheets_credentials_path: str = Field(default="credentials/google_sheets_sa.json", alias="GOOGLE_SHEETS_CREDENTIALS_PATH")
+    google_sheets_spreadsheet_name: str = Field(default="Business Leads", alias="GOOGLE_SHEETS_SPREADSHEET_NAME")
+    google_sheets_share_email: str = Field(default="", alias="GOOGLE_SHEETS_SHARE_EMAIL")
+
     # Reddit subreddits to search - Active business communities
     subreddits: List[str] = [
         "smallbusiness",

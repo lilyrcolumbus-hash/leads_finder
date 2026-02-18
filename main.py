@@ -37,6 +37,7 @@ from src.filters import AILeadFilter
 from src.crm import HubSpotCRM, LeadStage
 from src.database import LeadDatabase
 from src.enrichment import HunterClient
+from business_leads_sheet import interactive_mode as sheet_interactive_mode
 
 # Initialize
 console = Console()
@@ -65,10 +66,11 @@ def display_main_menu() -> str:
     console.print("  [5] Ver estadisticas")
     console.print("  [6] Buscar lead")
     console.print("  [7] Configuracion")
+    console.print("  [8] Buscar negocios -> Google Sheet")
     console.print("  [0] Salir")
     console.print()
 
-    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7"], default="1")
+    return Prompt.ask("Selecciona una opcion", choices=["0", "1", "2", "3", "4", "5", "6", "7", "8"], default="1")
 
 
 # ==================== 1. SCRAPING ====================
@@ -751,6 +753,8 @@ def main():
                 menu_search()
             elif choice == "7":
                 menu_configuration()
+            elif choice == "8":
+                sheet_interactive_mode()
 
         except KeyboardInterrupt:
             console.print("\n\n[yellow]Operacion cancelada[/yellow]")
