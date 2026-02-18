@@ -49,7 +49,7 @@
 // ============================================================
 // CONFIGURACION - Cambia esto
 // ============================================================
-const API_KEY = "TU_GOOGLE_PLACES_API_KEY_AQUI";
+const API_KEY = "AIzaSyDkdISixRzbgHPy5Ocfx10_lglLzHZyrOM";
 
 // Maximo de negocios a buscar por busqueda (max 60, va de 20 en 20)
 const MAX_RESULTS = 60;
