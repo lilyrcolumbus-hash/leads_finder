@@ -1,8 +1,16 @@
 /**
- * Google Apps Script - Business Leads Finder (v3)
+ * Google Apps Script - Business Leads Finder (v4)
  *
  * Busca negocios usando Google Places API directamente desde tu Google Sheet.
  * Crea una pestana nueva por cada busqueda (industria + ciudad).
+ *
+ * NUEVO en v4:
+ *   - doGet() para llamar desde terminal via curl
+ *   - Parametro ?max=N para limitar resultados
+ *   - Funciona tanto desde la Sheet (menu) como desde terminal (curl)
+ *
+ * Uso desde terminal:
+ *   curl "TU_DEPLOYMENT_URL?industry=plumber&location=Lima,OH&max=3"
  *
  * v3 - Datos limpios:
  *   - Sort post-escritura: emails primero, luego por rating
@@ -27,8 +35,11 @@
  *   2. Pega todo este codigo
  *   3. En la linea de API_KEY abajo, pon tu Google Places API Key
  *   4. Guarda (Ctrl+S)
- *   5. Regresa a la Sheet -> veras el menu "Lead Finder" arriba
- *   6. La primera vez te pedira permisos - acepta todo
+ *   5. Implementar -> Nueva implementacion -> Aplicacion web
+ *      - Ejecutar como: Tu cuenta
+ *      - Quien tiene acceso: Cualquier persona
+ *   6. Copia la URL del deployment
+ *   7. Desde terminal: curl "URL?industry=plumber&location=Lima,OH&max=3"
  *
  * IMPORTANTE:
  *   - Tu API Key debe tener habilitado "Places API" en Google Cloud Console
@@ -145,6 +156,170 @@ function onOpen() {
 }
 
 // ============================================================
+// WEB APP ENDPOINT (para llamar desde terminal con curl)
+// ============================================================
+
+/**
+ * Maneja requests GET desde terminal/curl.
+ *
+ * Parametros URL:
+ *   ?industry=plumber       (requerido) Tipo de negocio
+ *   &location=Lima,OH       (requerido) Ciudad, Estado
+ *   &max=3                  (opcional)  Maximo de resultados (default: 60)
+ *   &reviews=true           (opcional)  Analizar reviews (default: true)
+ *
+ * Ejemplo:
+ *   curl "https://script.google.com/macros/s/.../exec?industry=plumber&location=Lima,OH&max=3"
+ *
+ * @param {Object} e - Event object con parametros
+ * @returns {TextOutput} JSON con resultados
+ */
+function doGet(e) {
+  try {
+    var params = e ? e.parameter : {};
+    var industry = params.industry || "";
+    var location = params.location || "";
+    var maxResults = parseInt(params.max) || MAX_RESULTS;
+    var analyzeReviews = params.reviews !== "false";
+
+    // Validar parametros
+    if (!industry || !location) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Faltan parametros. Uso: ?industry=plumber&location=Lima,OH&max=3",
+        example: "?industry=plumber&location=Lima,OH&max=3&reviews=true"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Verificar API Key
+    if (API_KEY === "TU_GOOGLE_PLACES_API_KEY_AQUI" || !API_KEY) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "API_KEY no configurada. Edita el script y pon tu Google Places API Key en la linea de API_KEY."
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Ejecutar busqueda y escritura (version sin UI)
+    var result = searchAndWriteHeadless(industry, location, analyzeReviews, maxResults);
+
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Version headless (sin UI) de searchAndWrite para llamadas via curl/web.
+ * No usa SpreadsheetApp.getUi() - funciona en contexto web app.
+ *
+ * @param {string} industry - Tipo de negocio
+ * @param {string} location - Ciudad, Estado
+ * @param {boolean} analyzeReviews - Si analizar reviews
+ * @param {number} maxPlaces - Maximo de resultados a procesar
+ * @returns {Object} Resultado con estadisticas
+ */
+function searchAndWriteHeadless(industry, location, analyzeReviews, maxPlaces) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var startTime = new Date().getTime();
+
+  // Paso 1: Buscar negocios
+  var places = searchPlaces(industry, location);
+
+  if (places.length === 0) {
+    return {
+      status: "ok",
+      message: "No se encontraron negocios para '" + industry + "' en '" + location + "'",
+      leads: 0
+    };
+  }
+
+  // Limitar resultados si se especifico max
+  if (maxPlaces && maxPlaces < places.length) {
+    places = places.slice(0, maxPlaces);
+  }
+
+  // Paso 2: Crear pestana
+  var tabName = capitalizeFirst(industry) + " - " + location;
+  tabName = sanitizeTabName(tabName);
+  var sheet = getOrCreateTab(ss, tabName);
+  writeHeaders(sheet);
+  SpreadsheetApp.flush();
+
+  // Paso 3: Procesar cada negocio
+  var currentRow = 2;
+  var emailCount = 0;
+  var phoneCount = 0;
+  var painCount = 0;
+  var leadsData = [];
+
+  for (var i = 0; i < places.length; i++) {
+    var elapsed = new Date().getTime() - startTime;
+    if (elapsed > MAX_RUNTIME_MS) break;
+
+    var timeRemaining = MAX_RUNTIME_MS - elapsed;
+    var skipEmail = timeRemaining < MIN_TIME_FOR_EMAIL_MS;
+
+    var details = getPlaceDetails(places[i].place_id, analyzeReviews, skipEmail);
+    if (details) {
+      writeLeadRow(sheet, currentRow, details);
+
+      if (details.email) emailCount++;
+      if (details.phone) phoneCount++;
+      if (details.painScore > 0) painCount++;
+
+      leadsData.push({
+        name: details.name,
+        email: details.email,
+        phone: details.phone,
+        address: details.address,
+        website: details.website,
+        rating: details.rating,
+        reviews: details.reviewCount
+      });
+
+      currentRow++;
+
+      if ((currentRow - 2) % FLUSH_EVERY_N_ROWS === 0) {
+        SpreadsheetApp.flush();
+      }
+    }
+
+    if (i % 5 === 4) Utilities.sleep(500);
+  }
+
+  // Paso 4: Sort y formato
+  var totalLeads = currentRow - 2;
+  if (totalLeads > 1) {
+    var elapsed = new Date().getTime() - startTime;
+    if (elapsed < MAX_RUNTIME_MS - 10000) {
+      sortAndFormatSheet(sheet, totalLeads);
+    } else {
+      formatSheet(sheet, totalLeads);
+    }
+  } else if (totalLeads === 1) {
+    formatSheet(sheet, totalLeads);
+  }
+  SpreadsheetApp.flush();
+
+  return {
+    status: "ok",
+    message: "Busqueda completada",
+    tab: tabName,
+    spreadsheet: ss.getUrl(),
+    total_leads: totalLeads,
+    with_email: emailCount,
+    with_phone: phoneCount,
+    with_pain: painCount,
+    leads: leadsData
+  };
+}
+
+// ============================================================
 // DIALOGOS DE BUSQUEDA
 // ============================================================
 
@@ -224,8 +399,16 @@ function searchHvacPhoenix() { searchAndWrite("hvac", "Phoenix, AZ", true); }
  */
 function searchAndWrite(industry, location, analyzeReviews) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ui = SpreadsheetApp.getUi();
   var startTime = new Date().getTime();
+
+  // Intentar obtener UI (falla en contexto web app)
+  var ui = null;
+  try {
+    ui = SpreadsheetApp.getUi();
+  } catch (e) {
+    // Sin UI - estamos en contexto web app, usar version headless
+    return searchAndWriteHeadless(industry, location, analyzeReviews, MAX_RESULTS);
+  }
 
   // Verificar API Key
   if (API_KEY === "TU_GOOGLE_PLACES_API_KEY_AQUI" || !API_KEY) {
@@ -374,26 +557,32 @@ function searchPlaces(industry, location) {
     if (data.status !== "OK") {
       Logger.log("Places API error: " + data.status + " - " + (data.error_message || ""));
       if (data.status === "REQUEST_DENIED") {
-        SpreadsheetApp.getUi().alert(
-          "⚠️ API Key Rechazada",
-          "Tu API Key fue rechazada. Posibles causas:\n\n" +
-          "1. 'Places API' no esta habilitada\n" +
-          "   → Google Cloud Console → APIs & Services → Enable 'Places API'\n\n" +
-          "2. Tu API Key tiene restriccion de 'HTTP referrers'\n" +
-          "   → Apps Script hace llamadas de SERVIDOR, no de navegador\n" +
-          "   → Ve a Credentials → tu Key → Application restrictions\n" +
-          "   → Cambia a 'None' o 'IP addresses'\n\n" +
-          "3. La API Key es incorrecta o esta desactivada",
-          SpreadsheetApp.getUi().ButtonSet.OK
-        );
+        Logger.log("API Key rechazada: " + (data.error_message || ""));
+        try {
+          SpreadsheetApp.getUi().alert(
+            "⚠️ API Key Rechazada",
+            "Tu API Key fue rechazada. Posibles causas:\n\n" +
+            "1. 'Places API' no esta habilitada\n" +
+            "   → Google Cloud Console → APIs & Services → Enable 'Places API'\n\n" +
+            "2. Tu API Key tiene restriccion de 'HTTP referrers'\n" +
+            "   → Apps Script hace llamadas de SERVIDOR, no de navegador\n" +
+            "   → Ve a Credentials → tu Key → Application restrictions\n" +
+            "   → Cambia a 'None' o 'IP addresses'\n\n" +
+            "3. La API Key es incorrecta o esta desactivada",
+            SpreadsheetApp.getUi().ButtonSet.OK
+          );
+        } catch (uiErr) { /* no UI en contexto web */ }
       }
       if (data.status === "OVER_QUERY_LIMIT") {
-        SpreadsheetApp.getUi().alert(
-          "⚠️ Rate Limit",
-          "Excediste el limite de requests de Google.\n" +
-          "Espera unos minutos e intenta de nuevo.",
-          SpreadsheetApp.getUi().ButtonSet.OK
-        );
+        Logger.log("Rate limit excedido");
+        try {
+          SpreadsheetApp.getUi().alert(
+            "⚠️ Rate Limit",
+            "Excediste el limite de requests de Google.\n" +
+            "Espera unos minutos e intenta de nuevo.",
+            SpreadsheetApp.getUi().ButtonSet.OK
+          );
+        } catch (uiErr) { /* no UI en contexto web */ }
       }
       return [];
     }
