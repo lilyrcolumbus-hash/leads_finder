@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # Google Sheets
     google_sheets_credentials_path: str = Field(default="credentials/google_sheets_sa.json", alias="GOOGLE_SHEETS_CREDENTIALS_PATH")
-    google_sheets_spreadsheet_name: str = Field(default="Business Leads", alias="GOOGLE_SHEETS_SPREADSHEET_NAME")
+    google_sheets_spreadsheet_id: str = Field(default="", alias="GOOGLE_SHEETS_SPREADSHEET_ID")
     google_sheets_share_email: str = Field(default="", alias="GOOGLE_SHEETS_SHARE_EMAIL")
 
     # Reddit subreddits to search - Active business communities

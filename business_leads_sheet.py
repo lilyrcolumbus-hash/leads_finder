@@ -3,7 +3,8 @@
 Business Leads to Google Sheet
 
 Busca negocios por industria y ciudad usando Google Maps/Places API
-y los exporta a una Google Sheet con una pestana por cada industria.
+y los inserta automaticamente en tu Google Sheet existente,
+creando una pestana nueva por cada industria.
 
 Datos exportados:
 - Nombre del negocio
@@ -18,12 +19,11 @@ Uso:
     # Modo interactivo
     python business_leads_sheet.py
 
-    # Con argumentos
+    # Con argumentos (automatico)
     python business_leads_sheet.py --industry "dentist" --location "Miami, FL"
-    python business_leads_sheet.py --industry "plumber" --location "Houston, TX" --radius 10
-    python business_leads_sheet.py --industry "lawyer" --location "Los Angeles, CA" --sheet "My Leads Sheet"
+    python business_leads_sheet.py --industry "plumber" --location "Houston, TX"
 
-    # Multiples industrias de una vez
+    # Multiples industrias de una vez (una pestana por cada una)
     python business_leads_sheet.py --industry "dentist,plumber,hvac" --location "Miami, FL"
 """
 
@@ -37,7 +37,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt, Confirm
 from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -63,15 +63,13 @@ def display_banner():
     console.print(Panel(banner, style="bold blue"))
 
 
-def search_businesses(industry: str, location: str, radius: Optional[int] = None) -> List[Lead]:
+def search_businesses(industry: str, location: str) -> List[Lead]:
     """
     Search for businesses of a given industry in a location.
 
     Args:
         industry: Type of business (e.g., "dentist", "plumber")
         location: City/state to search (e.g., "Miami, FL")
-        radius: Optional search radius in miles (not directly supported by Places text search,
-                but included in query for better targeting)
 
     Returns:
         List of Lead objects with business data
@@ -125,18 +123,16 @@ def preview_leads(leads: List[Lead], max_rows: int = 10):
 
 def write_to_sheet(
     leads: List[Lead],
-    industry: str,
-    spreadsheet_name: str,
-    share_email: Optional[str] = None,
+    tab_name: str,
+    spreadsheet_id: str,
 ) -> Optional[str]:
     """
-    Write leads to Google Sheet.
+    Write leads to an existing Google Sheet in a new tab.
 
     Args:
         leads: List of leads to write
-        industry: Industry name (used as tab name)
-        spreadsheet_name: Name of the Google Spreadsheet
-        share_email: Optional email to share the sheet with
+        tab_name: Tab name for the worksheet (e.g., "Dentist - Miami, FL")
+        spreadsheet_id: Google Sheets spreadsheet ID
 
     Returns:
         URL of the spreadsheet, or None on failure
@@ -144,16 +140,23 @@ def write_to_sheet(
     credentials_path = settings.google_sheets_credentials_path
 
     if not Path(credentials_path).exists():
-        console.print(f"[red]Error: No se encontro el archivo de credenciales[/red]")
+        console.print(f"[red]Error: No se encontro el archivo de credenciales de Google[/red]")
         console.print(f"[yellow]Ruta esperada: {credentials_path}[/yellow]")
         console.print(
-            "\n[dim]Para configurar Google Sheets:\n"
-            "1. Crea un Service Account en Google Cloud Console\n"
-            "2. Habilita Google Sheets API y Google Drive API\n"
-            "3. Descarga el JSON de credenciales\n"
-            "4. Guardalo en: credentials/google_sheets_sa.json\n"
-            "5. O configura GOOGLE_SHEETS_CREDENTIALS_PATH en .env[/dim]"
+            "\n[dim]Para configurar:\n"
+            "1. Google Cloud Console -> Crea proyecto (o usa uno existente)\n"
+            "2. Habilita: Google Sheets API + Google Drive API\n"
+            "3. Crea un Service Account -> Descarga el JSON\n"
+            "4. Guarda el JSON en: credentials/google_sheets_sa.json\n"
+            "5. En tu Google Sheet -> Compartir con el email del service account\n"
+            "6. Pon el ID de la sheet en .env: GOOGLE_SHEETS_SPREADSHEET_ID=...[/dim]"
         )
+        return None
+
+    if not spreadsheet_id:
+        console.print("[red]Error: No se configuro GOOGLE_SHEETS_SPREADSHEET_ID en .env[/red]")
+        console.print("[yellow]Copia el ID de tu sheet desde la URL:[/yellow]")
+        console.print("[dim]https://docs.google.com/spreadsheets/d/[bold]ESTE_ES_EL_ID[/bold]/edit[/dim]")
         return None
 
     try:
@@ -165,29 +168,20 @@ def write_to_sheet(
             ) as progress:
                 task = progress.add_task(f"Escribiendo {len(leads)} negocios en la sheet...", total=None)
 
-                result = sheets.write_leads_to_sheet(
-                    spreadsheet_name=spreadsheet_name,
-                    industry=industry,
+                result = sheets.write_leads_to_tab(
+                    spreadsheet_id=spreadsheet_id,
+                    tab_name=tab_name,
                     leads=leads,
                 )
 
                 progress.update(task, completed=True)
 
             if result["rows_written"] > 0:
-                console.print(f"\n[bold green]Sheet actualizada exitosamente![/bold green]")
+                console.print(f"\n[bold green]Sheet actualizada![/bold green]")
                 console.print(f"  Pestana: [cyan]{result['tab']}[/cyan]")
                 console.print(f"  Filas escritas: [cyan]{result['rows_written']}[/cyan]")
                 console.print(f"  Total en pestana: [cyan]{result['total_rows']}[/cyan]")
                 console.print(f"\n  [bold]URL:[/bold] [link={result['spreadsheet_url']}]{result['spreadsheet_url']}[/link]")
-
-                # Share if email provided
-                if share_email:
-                    try:
-                        sheets.share_spreadsheet(spreadsheet_name, share_email)
-                        console.print(f"  [green]Compartida con: {share_email}[/green]")
-                    except Exception as e:
-                        console.print(f"  [yellow]No se pudo compartir: {e}[/yellow]")
-
                 return result["spreadsheet_url"]
             else:
                 console.print("[yellow]No se escribieron filas[/yellow]")
@@ -203,9 +197,14 @@ def interactive_mode():
     """Run in interactive mode, asking the user for input."""
     display_banner()
 
-    spreadsheet_name = settings.google_sheets_spreadsheet_name
-    console.print(f"[dim]Sheet destino: {spreadsheet_name}[/dim]")
-    console.print(f"[dim](Configura GOOGLE_SHEETS_SPREADSHEET_NAME en .env para cambiar)[/dim]\n")
+    spreadsheet_id = settings.google_sheets_spreadsheet_id
+    if spreadsheet_id:
+        console.print(f"[dim]Sheet destino ID: {spreadsheet_id[:20]}...[/dim]\n")
+    else:
+        console.print("[red]Falta GOOGLE_SHEETS_SPREADSHEET_ID en .env[/red]")
+        console.print("[yellow]Copia el ID de tu sheet desde la URL:[/yellow]")
+        console.print("[dim]https://docs.google.com/spreadsheets/d/[bold]ESTE_ES_EL_ID[/bold]/edit[/dim]")
+        return
 
     while True:
         console.print("\n[bold cyan]--- Nueva Busqueda ---[/bold cyan]")
@@ -250,19 +249,18 @@ def interactive_mode():
             console.print("[yellow]Ubicacion no puede estar vacia[/yellow]")
             continue
 
-        # Search businesses
+        # Search businesses and write to sheet automatically
         leads = search_businesses(industry, location)
 
         if not leads:
             console.print("[yellow]No se encontraron negocios. Intenta otra busqueda.[/yellow]")
             continue
 
-        # Preview
         preview_leads(leads)
 
-        # Write to sheet automatically
+        # Write to sheet automatically - no confirmation needed
         tab_name = f"{industry.title()} - {location}"
-        url = write_to_sheet(leads, tab_name, spreadsheet_name)
+        write_to_sheet(leads, tab_name, spreadsheet_id)
 
         # Continue?
         if not Confirm.ask("\nBuscar otra industria/ubicacion?", default=True):
@@ -272,11 +270,15 @@ def interactive_mode():
 
 
 def cli_mode(args):
-    """Run with CLI arguments."""
+    """Run with CLI arguments - fully automatic."""
     display_banner()
 
-    spreadsheet_name = args.sheet or settings.google_sheets_spreadsheet_name
-    share_email = args.share or settings.google_sheets_share_email
+    spreadsheet_id = args.sheet or settings.google_sheets_spreadsheet_id
+
+    if not spreadsheet_id:
+        console.print("[red]Error: Falta el ID de la sheet[/red]")
+        console.print("[yellow]Usa --sheet ID o configura GOOGLE_SHEETS_SPREADSHEET_ID en .env[/yellow]")
+        return
 
     # Parse industries (comma-separated)
     industries = [i.strip() for i in args.industry.split(",")]
@@ -294,9 +296,9 @@ def cli_mode(args):
 
         preview_leads(leads, max_rows=5)
 
-        # Tab name
+        # Write to sheet automatically
         tab_name = f"{industry.title()} - {args.location}"
-        write_to_sheet(leads, tab_name, spreadsheet_name, share_email or None)
+        write_to_sheet(leads, tab_name, spreadsheet_id)
 
         # Small delay between industries
         if len(industries) > 1:
@@ -308,7 +310,7 @@ def cli_mode(args):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Busca negocios por industria y los exporta a Google Sheets"
+        description="Busca negocios por industria y los inserta en tu Google Sheet"
     )
     parser.add_argument(
         "--industry", "-i",
@@ -320,11 +322,7 @@ def main():
     )
     parser.add_argument(
         "--sheet", "-s",
-        help=f"Nombre de la Google Sheet (default: {settings.google_sheets_spreadsheet_name})"
-    )
-    parser.add_argument(
-        "--share",
-        help="Email para compartir la sheet"
+        help="ID de la Google Sheet (o URL completa)"
     )
 
     args = parser.parse_args()
