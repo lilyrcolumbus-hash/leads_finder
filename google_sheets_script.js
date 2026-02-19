@@ -228,12 +228,22 @@ function searchAndWriteHeadless(industry, location, analyzeReviews, maxPlaces) {
   var startTime = new Date().getTime();
 
   // Paso 1: Buscar negocios
-  var places = searchPlaces(industry, location);
+  var searchResult = searchPlaces(industry, location);
+  var places = searchResult.results;
 
   if (places.length === 0) {
+    var msg = "No se encontraron negocios para '" + industry + "' en '" + location + "'";
+    if (searchResult.error) {
+      return {
+        status: "error",
+        message: msg,
+        api_error: searchResult.error,
+        leads: 0
+      };
+    }
     return {
       status: "ok",
-      message: "No se encontraron negocios para '" + industry + "' en '" + location + "'",
+      message: msg,
       leads: 0
     };
   }
@@ -419,10 +429,15 @@ function searchAndWrite(industry, location, analyzeReviews) {
   ss.toast("Buscando " + industry + " en " + location + "...", "🔍 Buscando", -1);
 
   // Paso 1: Buscar negocios
-  var places = searchPlaces(industry, location);
+  var searchResult = searchPlaces(industry, location);
+  var places = searchResult.results;
 
   if (places.length === 0) {
-    ui.alert("No se encontraron negocios para '" + industry + "' en '" + location + "'");
+    var msg = "No se encontraron negocios para '" + industry + "' en '" + location + "'";
+    if (searchResult.error) {
+      msg += "\n\nError de API: " + searchResult.error;
+    }
+    ui.alert(msg);
     return;
   }
 
@@ -550,41 +565,34 @@ function searchPlaces(industry, location) {
 
   try {
     var response = fetchWithRetry(url);
-    if (!response) return [];
+    if (!response) {
+      return { results: [], error: "No se pudo conectar con Google Places API (sin respuesta)" };
+    }
 
+    var httpCode = response.getResponseCode();
     var data = JSON.parse(response.getContentText());
 
     if (data.status !== "OK") {
-      Logger.log("Places API error: " + data.status + " - " + (data.error_message || ""));
+      var errorMsg = "Places API devolvio: " + data.status;
+      if (data.error_message) errorMsg += " - " + data.error_message;
+      Logger.log(errorMsg);
+
       if (data.status === "REQUEST_DENIED") {
-        Logger.log("API Key rechazada: " + (data.error_message || ""));
+        errorMsg = "API Key RECHAZADA por Google. " +
+          "Ve a Google Cloud Console → APIs & Services → habilita 'Places API'. " +
+          "Tambien revisa que tu Key no tenga restriccion de 'HTTP referrers'. " +
+          "Detalle: " + (data.error_message || "sin detalle");
         try {
-          SpreadsheetApp.getUi().alert(
-            "⚠️ API Key Rechazada",
-            "Tu API Key fue rechazada. Posibles causas:\n\n" +
-            "1. 'Places API' no esta habilitada\n" +
-            "   → Google Cloud Console → APIs & Services → Enable 'Places API'\n\n" +
-            "2. Tu API Key tiene restriccion de 'HTTP referrers'\n" +
-            "   → Apps Script hace llamadas de SERVIDOR, no de navegador\n" +
-            "   → Ve a Credentials → tu Key → Application restrictions\n" +
-            "   → Cambia a 'None' o 'IP addresses'\n\n" +
-            "3. La API Key es incorrecta o esta desactivada",
-            SpreadsheetApp.getUi().ButtonSet.OK
-          );
+          SpreadsheetApp.getUi().alert("⚠️ API Key Rechazada", errorMsg, SpreadsheetApp.getUi().ButtonSet.OK);
         } catch (uiErr) { /* no UI en contexto web */ }
       }
       if (data.status === "OVER_QUERY_LIMIT") {
-        Logger.log("Rate limit excedido");
+        errorMsg = "Rate limit excedido. Espera unos minutos e intenta de nuevo.";
         try {
-          SpreadsheetApp.getUi().alert(
-            "⚠️ Rate Limit",
-            "Excediste el limite de requests de Google.\n" +
-            "Espera unos minutos e intenta de nuevo.",
-            SpreadsheetApp.getUi().ButtonSet.OK
-          );
+          SpreadsheetApp.getUi().alert("⚠️ Rate Limit", errorMsg, SpreadsheetApp.getUi().ButtonSet.OK);
         } catch (uiErr) { /* no UI en contexto web */ }
       }
-      return [];
+      return { results: [], error: errorMsg };
     }
 
     allResults = allResults.concat(data.results);
@@ -631,9 +639,10 @@ function searchPlaces(industry, location) {
 
   } catch (e) {
     Logger.log("Error searching places: " + e.message);
+    return { results: [], error: "Error de conexion: " + e.message };
   }
 
-  return allResults;
+  return { results: allResults, error: null };
 }
 
 /**
